@@ -33,6 +33,12 @@ SECTIONS = [
     ("05_explain_bits.py", "Step 6 (advanced) - What do the top bits mean?",
      "Map the most important fingerprint bits back to the molecular "
      "substructures that set them (RDKit bitInfo + PathToSubmol)."),
+    ("07_qc_checks.py", "QC - distributions, outliers, honest importance",
+     "Three sanity checks: (1) test-set pIC50 distributions of both splits "
+     "(RMSE is scale-dependent), (2) audit of ultra-potent records "
+     "(pIC50 > 9) by assay/source, (3) permutation importance as an "
+     "unbiased cross-check of MDI, which is inflated for correlated "
+     "fingerprint bits."),
 ]
 
 INTRO = """# QSAR: machine-learning prediction of compound activity
