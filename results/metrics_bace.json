@@ -1,0 +1,36 @@
+{
+  "target": "Beta-secretase 1 (BACE-1)",
+  "tag": "bace",
+  "random": {
+    "split": "random",
+    "r2": 0.6460189891555352,
+    "rmse": 0.7921657417429102,
+    "mae": 0.5719671401288224
+  },
+  "scaffold": {
+    "split": "scaffold",
+    "r2": 0.6402395524833362,
+    "rmse": 0.6155302149909481,
+    "mae": 0.48092117660639744
+  },
+  "best_params_random": {
+    "bootstrap": true,
+    "ccp_alpha": 0.0,
+    "criterion": "squared_error",
+    "max_depth": null,
+    "max_features": 1.0,
+    "max_leaf_nodes": null,
+    "max_samples": null,
+    "min_impurity_decrease": 0.0,
+    "min_samples_leaf": 1,
+    "min_samples_split": 2,
+    "min_weight_fraction_leaf": 0.0,
+    "monotonic_cst": null,
+    "n_estimators": 300,
+    "n_jobs": -1,
+    "oob_score": false,
+    "random_state": 42,
+    "verbose": 0,
+    "warm_start": false
+  }
+}
