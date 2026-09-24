@@ -6,3 +6,5 @@ __pycache__/
 models/*.joblib
 data/raw/*.csv
 data/processed/*.npz
+# split indices are regenerable in seconds via gnn_01_make_splits.py (verified against saved RF models)
+data/processed/splits/

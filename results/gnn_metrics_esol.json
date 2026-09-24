@@ -1,0 +1,40 @@
+{
+  "scaffold": {
+    "r2": 0.5964906215667725,
+    "rmse": 1.157535148070483,
+    "mae": 0.8888731002807617,
+    "best_epoch": 49,
+    "best_valid_rmse_std": 0.3278873860836029,
+    "params": {
+      "tag": "esol",
+      "hidden": 128,
+      "num_layers": 4,
+      "dropout": 0.2,
+      "lr": 0.001,
+      "batch_size": 128,
+      "epochs": 100,
+      "patience": 20,
+      "seed": 42,
+      "suffix": ""
+    }
+  },
+  "random": {
+    "r2": 0.9127640128135681,
+    "rmse": 0.6421428702037851,
+    "mae": 0.4803975820541382,
+    "best_epoch": 85,
+    "best_valid_rmse_std": 0.314961314201355,
+    "params": {
+      "tag": "esol",
+      "hidden": 128,
+      "num_layers": 4,
+      "dropout": 0.2,
+      "lr": 0.001,
+      "batch_size": 128,
+      "epochs": 100,
+      "patience": 20,
+      "seed": 42,
+      "suffix": ""
+    }
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "scaffold": {
+    "r2": 0.5250548124313354,
+    "rmse": 0.9895380946744395,
+    "mae": 0.7336598038673401,
+    "best_epoch": 161,
+    "best_valid_rmse_std": 0.5173779129981995,
+    "params": {
+      "tag": "egfr",
+      "hidden": 128,
+      "num_layers": 4,
+      "dropout": 0.2,
+      "lr": 0.001,
+      "batch_size": 128,
+      "epochs": 300,
+      "patience": 40,
+      "seed": 42,
+      "suffix": "_tuneA"
+    }
+  }
+}

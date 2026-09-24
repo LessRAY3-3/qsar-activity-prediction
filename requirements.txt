@@ -6,3 +6,5 @@ rdkit
 chembl-webresource-client
 joblib
 nbformat
+torch
+torch_geometric
