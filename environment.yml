@@ -1,0 +1,17 @@
+name: qsar
+channels:
+  - conda-forge
+dependencies:
+  - python=3.12
+  - pip
+  - pip:
+      - pandas==3.0.6
+      - numpy==2.5.3
+      - scikit-learn==1.9.1
+      - matplotlib==3.11.2
+      - rdkit==2026.3.6
+      - chembl-webresource-client
+      - joblib==1.6.0
+      - nbformat==5.11.1
+      - torch==2.14.0
+      - torch_geometric==2.8.0.post1

@@ -1,10 +1,20 @@
+# Python
 .venv/
 __pycache__/
 *.pyc
-.DS_Store
 .ipynb_checkpoints/
+
+# 大文件不进 Git（原始数据可重新下载/生成）
+data/raw/
+*.sdf
+*.zip
+
+# 训练中间产物
+checkpoints/
 models/*.joblib
-data/raw/*.csv
+
+# 特征文件可用 03_featurize.py / gnn_02_build_graphs.py 重新生成
 data/processed/*.npz
-# split indices are regenerable in seconds via gnn_01_make_splits.py (verified against saved RF models)
-data/processed/splits/
+
+# 系统垃圾
+.DS_Store
