@@ -1,0 +1,44 @@
+{
+  "tag": "egfr",
+  "seeds": [
+    42,
+    1,
+    2
+  ],
+  "xgb_params": {
+    "n_estimators": 500,
+    "learning_rate": 0.05,
+    "max_depth": 6,
+    "tree_method": "hist",
+    "device": "cpu"
+  },
+  "xgboost_version": "3.4.1",
+  "rf_control": {
+    "random": {
+      "r2_mean": 0.7410867930070225,
+      "r2_std": 4.344401825889358e-05,
+      "source": "learning_curve rf n=4400 (same pool)"
+    },
+    "scaffold": {
+      "r2_mean": 0.5616007645326966,
+      "r2_std": 0.0020272205564946474,
+      "source": "learning_curve rf n=4400 (same pool)"
+    }
+  },
+  "by_split": {
+    "random": {
+      "r2_mean": 0.7315521240234375,
+      "r2_std": 0.0,
+      "rmse_mean": 0.7126733318105799,
+      "delta_vs_rf_control": -0.009534668983585015,
+      "runs": 3
+    },
+    "scaffold": {
+      "r2_mean": 0.5172460079193115,
+      "r2_std": 0.0,
+      "rmse_mean": 0.9976396121651888,
+      "delta_vs_rf_control": -0.04435475661338506,
+      "runs": 3
+    }
+  }
+}
