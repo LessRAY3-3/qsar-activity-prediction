@@ -6,6 +6,42 @@ artifacts. Newest first. Maintained by M4 Air; results produced on M3 Max.
 
 ## 2026-09-25
 
+### Fingerprint ablation (m4-006) — DELIVERED
+- Commit: 862b3f4 (`results: fingerprint ablation r={2,3} bits={1024,2048}`)
+- Question: how sensitive is the RF conclusion to the Morgan fingerprint
+  parameters? Anchor r=2/2048 (the headline featurization) reproduced
+  headline to 0.001 (random) / 0.004 (scaffold), well within 0.01.
+- Results (test R2, 3-seed mean +/- std, delta vs anchor):
+  - random:   r2/1024 0.7448 (-0.0008) | r2/2048 0.7456 (anchor)
+              | r3/1024 0.7454 (-0.0002) | r3/2048 0.7489 (+0.0033)
+  - scaffold: r2/1024 0.5468 (-0.0114) | r2/2048 0.5582 (anchor)
+              | r3/1024 0.5264 (-0.0318) | r3/2048 0.5567 (-0.0015)
+- Conclusions: random split is insensitive to fingerprint config (spread
+  0.004). Scaffold exposes 1024-bit as the weak point (r3/1024 -0.032);
+  with 2048 bits radius 2 and 3 are equivalent. The headline r=2/2048
+  default is sound - and 2048 bits cannot be trimmed away.
+
+### XGBoost baseline (m4-005) — DELIVERED
+- Commit: a044dea (`results: xgboost baseline vs RF, 3 seeds`)
+- Question: does a stronger gradient-boosted tree beat the RF ceiling on
+  the same features (2048-bit Morgan r=2) and same 4438 paired pool?
+- Results (test R2, 3 seeds): random XGB 0.7316 vs RF 0.7411 (delta -0.010);
+  scaffold XGB 0.5172 vs RF 0.5616 (delta -0.044). XGBoost 3.4.1 hist/CPU
+  was bit-identical across seeds (std=0).
+- Conclusion: XGBoost with fixed generic hypers does NOT beat the tuned RF;
+  it lags clearly on scaffold (novel chemotypes). The RF-vs-GIN story is
+  not an artifact of a weak tree baseline.
+
+### Y-randomization (m4-004) — DELIVERED
+- Commit: be6d532 (`results: y-randomization, RF + GIN, 3 seeds`)
+- Sanity test: train/valid labels permuted (3 seeds), test labels real.
+  Controls (real labels, seed 42) must land on known baselines.
+- Results (test R2): controls RF 0.7414/0.5598 (random/scaffold),
+  GIN 0.7034/0.5244 - all in band. Shuffled: RF -0.177+/-0.028 / -0.152+/-0.012,
+  GIN -0.006+/-0.017 / -0.023+/-0.007 - every shuffled mean is NEGATIVE
+  (shuffled GIN early-stops by epoch 9).
+- Conclusion: the reported signal is real; no leakage. Both models agree.
+
 ### Learning curve (m4-002) — DELIVERED
 - Commit: 6ea16a6 (`results: learning curve n=500-4400, RF vs GIN, 3 seeds`)
 - Question: how do RF / GIN scale with training-set size; is either saturated?
