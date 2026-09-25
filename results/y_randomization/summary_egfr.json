@@ -1,0 +1,88 @@
+{
+  "tag": "egfr",
+  "seeds": [
+    42,
+    1,
+    2
+  ],
+  "rf_params": {
+    "n_estimators": 500,
+    "max_depth": null,
+    "min_samples_split": 2
+  },
+  "groups": {
+    "random/gin/real": {
+      "r2_values": [
+        0.7034
+      ],
+      "r2_mean": 0.7033613920211792,
+      "r2_std": 0.0,
+      "runs": 1
+    },
+    "random/gin/shuffled": {
+      "r2_values": [
+        -0.0288,
+        0.0015,
+        0.0108
+      ],
+      "r2_mean": -0.005489925543467204,
+      "r2_std": 0.01689350695204218,
+      "runs": 3
+    },
+    "random/rf/real": {
+      "r2_values": [
+        0.7414
+      ],
+      "r2_mean": 0.7414001307673014,
+      "r2_std": 0.0,
+      "runs": 1
+    },
+    "random/rf/shuffled": {
+      "r2_values": [
+        -0.1778,
+        -0.2111,
+        -0.1429
+      ],
+      "r2_mean": -0.1772498896588388,
+      "r2_std": 0.02784561849907944,
+      "runs": 3
+    },
+    "scaffold/gin/real": {
+      "r2_values": [
+        0.5244
+      ],
+      "r2_mean": 0.5243611335754395,
+      "r2_std": 0.0,
+      "runs": 1
+    },
+    "scaffold/gin/shuffled": {
+      "r2_values": [
+        -0.0323,
+        -0.0147,
+        -0.0207
+      ],
+      "r2_mean": -0.022584279378255207,
+      "r2_std": 0.007310877920328016,
+      "runs": 3
+    },
+    "scaffold/rf/real": {
+      "r2_values": [
+        0.5598
+      ],
+      "r2_mean": 0.559841088375189,
+      "r2_std": 0.0,
+      "runs": 1
+    },
+    "scaffold/rf/shuffled": {
+      "r2_values": [
+        -0.1643,
+        -0.157,
+        -0.1355
+      ],
+      "r2_mean": -0.15226371303423672,
+      "r2_std": 0.012200190352930535,
+      "runs": 3
+    }
+  },
+  "verdict": "ok: all shuffled-label means < 0.2"
+}
