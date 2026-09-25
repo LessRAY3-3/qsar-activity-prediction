@@ -1,0 +1,76 @@
+{
+  "tag": "egfr",
+  "radii": [
+    2,
+    3
+  ],
+  "bits": [
+    1024,
+    2048
+  ],
+  "seeds": [
+    42,
+    1,
+    2
+  ],
+  "rf_params": {
+    "n_estimators": 500,
+    "max_depth": null,
+    "min_samples_split": 2
+  },
+  "headline_r2": {
+    "random": 0.7466362476524925,
+    "scaffold": 0.5623997366302019
+  },
+  "anchor_failures": [],
+  "by_cell": {
+    "random/r=2/bits=1024": {
+      "r2_mean": 0.7447968932784587,
+      "r2_std": 0.0004578823118411644,
+      "delta_vs_anchor": -0.0008050172855977866,
+      "runs": 3
+    },
+    "random/r=2/bits=2048": {
+      "r2_mean": 0.7456019105640564,
+      "r2_std": 0.0005976315625241022,
+      "delta_vs_anchor": 0.0,
+      "runs": 3
+    },
+    "random/r=3/bits=1024": {
+      "r2_mean": 0.7453683006234645,
+      "r2_std": 0.0006968220640323212,
+      "delta_vs_anchor": -0.00023360994059196116,
+      "runs": 3
+    },
+    "random/r=3/bits=2048": {
+      "r2_mean": 0.748943255428027,
+      "r2_std": 0.0003450799522689,
+      "delta_vs_anchor": 0.00334134486397053,
+      "runs": 3
+    },
+    "scaffold/r=2/bits=1024": {
+      "r2_mean": 0.5468043927226144,
+      "r2_std": 0.0017999726669895829,
+      "delta_vs_anchor": -0.011387921821432556,
+      "runs": 3
+    },
+    "scaffold/r=2/bits=2048": {
+      "r2_mean": 0.5581923145440469,
+      "r2_std": 0.000992606615033995,
+      "delta_vs_anchor": 0.0,
+      "runs": 3
+    },
+    "scaffold/r=3/bits=1024": {
+      "r2_mean": 0.5263989338530256,
+      "r2_std": 0.002353595622854262,
+      "delta_vs_anchor": -0.03179338069102133,
+      "runs": 3
+    },
+    "scaffold/r=3/bits=2048": {
+      "r2_mean": 0.5566657994720962,
+      "r2_std": 0.001882438806832422,
+      "delta_vs_anchor": -0.0015265150719507847,
+      "runs": 3
+    }
+  }
+}
