@@ -4,6 +4,29 @@ Running log of the deep-dive experiments. Each entry: what ran, headline
 numbers (3-seed mean +/- std unless noted), and the commit holding the
 artifacts. Newest first. Maintained by M4 Air; results produced on M3 Max.
 
+## 2026-10-03
+
+### Interpretability alignment (m4-008) — DELIVERED
+- Commit: f9d62de (`results: interpretability alignment (GNNExplainer + SHAP)`)
+- Question: on the chemotypes where RF and GIN fail asymmetrically
+  (chromone n=37 hurts the GIN; thienopyrimidine n=47 hurts the RF),
+  do the two models look at the same parts of the molecule?
+- Method: 5 disagreement-maximal molecules per family; GNNExplainer
+  (edge-mask aggregated to atoms; node masks cannot backprop through
+  integer categorical embeddings) vs SHAP interventional bit values
+  (path-dependent mode returns garbage on current sklearn) decoded to
+  atom sets via Morgan bitInfo spheres.
+- Results: cross-model atom overlap mean 0.47 (chromone 0.40 /
+  thienopyrimidine 0.54); GNN attention 66% on the scaffold core;
+  bit 1367 (aminopyrimidine hinge-binding motif) in the RF top-5 for
+  10/10 molecules across BOTH families; recurring bits 1645/1452/329.
+- Conclusion: the two architectures attend differently in exact
+  proportion to how differently they fail - fingerprints lean on the
+  recurring hinge-binding substructure, the GIN spreads attention over
+  the scaffold core. A mechanism-level corroboration of README 7.5.
+  Caveat: GNNExplainer is post-hoc/approximate; low overlap means
+  "attends differently", not "one is wrong".
+
 ## 2026-09-25
 
 ### Fingerprint ablation (m4-006) — DELIVERED
