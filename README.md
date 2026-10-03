@@ -272,6 +272,41 @@ Raw IC50 spans several orders of magnitude. The heavy tail dominates
 least-squares training; pIC50 is roughly normal and is the standard QSAR
 target transform.
 
+## Conclusions
+
+Six experiments, one page. Every number below is 3-seed mean +/- std and
+recomputable from `results/` (run ledger: `experiments/LOG.md`).
+
+1. **The GIN does not beat Morgan fingerprints + RF on ~6.2k EGFR
+   compounds.** Headline test R2: RF 0.747 random / 0.562 scaffold;
+   GIN 3-seed 0.690±0.001 / 0.526±0.016. A negative result, reported
+   as such.
+2. **Data scaling: RF saturates early; the GIN still climbs at
+   n=4400.** On the paired learning curve (n=500-4400), RF is nearly
+   flat from small n (0.541 -> 0.741 random, seed-std ~0) while the
+   GIN rises steeply (0.400 -> 0.701) without catching up; the
+   scaffold gap narrows to 0.036 at the largest n.
+3. **The signal is real: Y-randomization kills it.** Training on
+   permuted labels scores <= 0 on every run (shuffled-label means
+   -0.18 RF / -0.01 GIN, all < 0.2) while real-label controls land
+   exactly on the baselines - no train/test leakage.
+4. **XGBoost does not beat the tuned RF either** (-0.010 random /
+   -0.044 scaffold vs the same-pool RF control, deterministic across
+   seeds). Second negative result: on this featurization, boosting
+   machinery buys nothing over bagging.
+5. **Fingerprint length matters; radius mostly does not.** The
+   ablation (r={2,3} x bits={1024,2048}) is flat on random splits
+   (spread 0.004) but on scaffold splits the 1024-bit cells drop up
+   to 0.032 (r=3/1024); 2048 bits is not dispensable. The headline
+   r=2/2048 configuration is confirmed as the anchor (reproduction
+   delta <= 0.004 against the headline metrics).
+6. **The two architectures attend to different parts of the molecule.**
+   On the chemotypes where failures are asymmetric, cross-model
+   attention overlap is 0.47 and tracks the asymmetry (chromone 0.40 <
+   thienopyrimidine 0.54); bit 1367 - the aminopyrimidine hinge-binding
+   motif - sits in the RF top-5 for 10/10 molecules across both
+   families; the GIN places 66% of its top atoms on the scaffold core.
+
 ## Interview talking points
 
 1. **Why pIC50** - order-of-magnitude target standardisation.
