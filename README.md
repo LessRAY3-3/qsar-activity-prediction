@@ -254,6 +254,9 @@ python scripts/07_qc_checks.py
 
 # phase 2 - GNN on molecular graphs, compared against the same splits
 python scripts/gnn_01_make_splits.py           # regenerate + VERIFY splits
+                                               # (needs models/*.joblib from step 04 -
+                                               # RF models are gitignored, 30-180 MB each,
+                                               # over GitHub's file limit; run step 04 first)
 python scripts/gnn_02_build_graphs.py          # SMILES -> graph cache
 python scripts/gnn_03_train_gin.py --split random
 python scripts/gnn_03_train_gin.py --split scaffold
@@ -331,7 +334,8 @@ recomputable from `results/` (run ledger: `experiments/LOG.md`).
    the simplest recipe was kept. GIN scaffold-split R2 varies +-0.02
    across seeds - single-seed GNN comparisons are meaningless.
 7. **Failure-mode analysis** - the two models' 50 worst molecules overlap
-   21-25x more than chance (Spearman ~0.52): many failures are
+   ~10-12x more than chance (25 random / 21 scaffold shared, vs ~2 expected;
+   Spearman ~0.52): many failures are
    molecule-intrinsic (assay censoring/noise), yet specific chemotypes
    fail asymmetrically (chromones hurt the GIN more, thienopyrimidines
    hurt RF more) - fingerprints and graphs extrapolate differently.

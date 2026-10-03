@@ -438,14 +438,21 @@ def write_findings(records, path, args):
                 continue
             best = max(sub, key=lambda r: r["overlap_fraction"])
             worst = min(sub, key=lambda r: r["overlap_fraction"])
+            if best["overlap_fraction"] == worst["overlap_fraction"]:
+                detail = (f"All {len(sub)} molecules have identical overlap "
+                          f"{best['overlap_fraction']:.2f} (homogeneous "
+                          f"top-atom pattern); highest/lowest distinction "
+                          f"is meaningless here.")
+            else:
+                detail = (f"Highest: {best['id']} "
+                          f"(overlap {best['overlap_fraction']:.2f}, "
+                          f"`{best['smiles'][:50]}`); lowest: {worst['id']} "
+                          f"(overlap {worst['overlap_fraction']:.2f}, "
+                          f"`{worst['smiles'][:50]}`).")
             lines.append(
                 f"1. **{fam}**: cross-model alignment mean "
                 f"{np.mean([r['overlap_fraction'] for r in sub]):.2f} "
-                f"(n={len(sub)}). Highest: {best['id']} "
-                f"(overlap {best['overlap_fraction']:.2f}, "
-                f"`{best['smiles'][:50]}`); lowest: {worst['id']} "
-                f"(overlap {worst['overlap_fraction']:.2f}, "
-                f"`{worst['smiles'][:50]}`).")
+                f"(n={len(sub)}). {detail}")
         fam_bits = {}
         for r in records:
             for b in r.get("rf_top_bits", []):

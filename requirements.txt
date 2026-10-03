@@ -1,10 +1,14 @@
-pandas
-numpy
-scikit-learn
-matplotlib
-rdkit
+# Canonical environment spec is environment.yml (conda, fully pinned).
+# These pins mirror it for pip-only setups.
+pandas==3.0.6
+numpy==2.5.3
+scikit-learn==1.9.1
+matplotlib==3.11.2
+rdkit==2026.3.6
 chembl-webresource-client
-joblib
-nbformat
-torch
-torch_geometric
+joblib==1.6.0
+nbformat==5.11.1
+torch==2.14.0
+torch_geometric==2.8.0.post1
+xgboost==3.4.1
+shap==0.52.0
