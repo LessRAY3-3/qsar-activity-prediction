@@ -6,6 +6,20 @@ artifacts. Newest first. Maintained by M4 Air; results produced on M3 Max.
 
 ## 2026-10-03
 
+### README Conclusions (m4-010) — DELIVERED — campaign complete
+- Commit: 767f75b (`docs: README conclusions from deep-dive experiments`,
+  README.md only, +35 lines)
+- Six numbered conclusions in README: (1) GIN does not beat fingerprint+RF;
+  (2) RF saturates early, GIN still climbing at n=4400; (3) signal is real
+  (Y-randomization); (4) XGBoost does not beat the tuned RF either;
+  (5) 2048 bits not dispensable on scaffold splits; (6) the two
+  architectures attend to different molecular parts, in proportion to how
+  differently they fail.
+- All three batches verified end-to-end. deep-dive is now a complete
+  story arc; merging into main is the user's decision.
+
+## 2026-10-03
+
 ### Interpretability alignment (m4-008) — DELIVERED
 - Commit: f9d62de (`results: interpretability alignment (GNNExplainer + SHAP)`)
 - Question: on the chemotypes where RF and GIN fail asymmetrically
