@@ -16,5 +16,10 @@ models/*.joblib
 # 特征文件可用 03_featurize.py / gnn_02_build_graphs.py 重新生成
 data/processed/*.npz
 
+# split 索引同样可再生：gnn_01_make_splits.py 秒级重建并校验，
+# 且 npz 内是全宽 SMILES 数组（1.4-42 MB/个，7 个新靶点合计 ~212 MB）。
+# 已 tracked 的 egfr/esol 旧副本不受影响。
+data/processed/splits/*.npz
+
 # 系统垃圾
 .DS_Store
