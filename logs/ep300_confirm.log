@@ -1,0 +1,360 @@
+=== EP300 CONFIRM JOB LAUNCH 2026-10-04 14:25:08 pid=37723 ===
+=== START 2026-10-04 14:25:08 split=random seed42 ===
+=== START 2026-10-04 14:25:08 split=scaffold seed42 ===
+/Users/leisirui/miniforge3/envs/qsar/lib/python3.12/site-packages/torch/jit/_script.py:1491: FutureWarning: `torch.jit.script` is deprecated. Please switch to `torch.compile` or `torch.export`.
+  warnings.warn(
+/Users/leisirui/miniforge3/envs/qsar/lib/python3.12/site-packages/torch/jit/_script.py:1491: FutureWarning: `torch.jit.script` is deprecated. Please switch to `torch.compile` or `torch.export`.
+  warnings.warn(
+/Users/leisirui/qsar-activity-prediction/scripts/gnn_03_train_gin.py:114: UserWarning: Converting a tensor with requires_grad=True to a scalar may lead to unexpected behavior.
+Consider using tensor.detach() first. (Triggered internally at /Users/runner/work/pytorch/pytorch/torch/csrc/autograd/generated/python_variable_methods.cpp:821.)
+  total += float(loss) * len(batch.y)
+/Users/leisirui/qsar-activity-prediction/scripts/gnn_03_train_gin.py:114: UserWarning: Converting a tensor with requires_grad=True to a scalar may lead to unexpected behavior.
+Consider using tensor.detach() first. (Triggered internally at /Users/runner/work/pytorch/pytorch/torch/csrc/autograd/generated/python_variable_methods.cpp:821.)
+  total += float(loss) * len(batch.y)
+[egfr_full/scaffold] device=mps  y_mean=6.599 y_std=1.438
+  epoch   1  train_mse=0.7720  valid_rmse=0.9778  lr=1.0e-03 *
+  epoch   2  train_mse=0.6679  valid_rmse=0.8356  lr=1.0e-03 *
+  epoch   7  train_mse=0.5547  valid_rmse=0.8312  lr=1.0e-03 *
+  epoch   8  train_mse=0.5415  valid_rmse=0.7903  lr=1.0e-03 *
+  epoch  10  train_mse=0.5107  valid_rmse=0.7742  lr=1.0e-03 *
+  epoch  12  train_mse=0.4977  valid_rmse=0.7575  lr=1.0e-03 *
+  epoch  13  train_mse=0.4799  valid_rmse=0.7501  lr=1.0e-03 *
+  epoch  14  train_mse=0.4722  valid_rmse=0.7229  lr=1.0e-03 *
+  epoch  15  train_mse=0.4621  valid_rmse=0.7032  lr=1.0e-03 *
+  epoch  16  train_mse=0.4529  valid_rmse=0.6980  lr=1.0e-03 *
+  epoch  20  train_mse=0.4268  valid_rmse=0.7415  lr=1.0e-03
+  epoch  22  train_mse=0.4240  valid_rmse=0.6849  lr=1.0e-03 *
+  epoch  24  train_mse=0.4064  valid_rmse=0.6707  lr=1.0e-03 *
+  epoch  25  train_mse=0.4072  valid_rmse=0.6681  lr=1.0e-03 *
+  epoch  27  train_mse=0.3963  valid_rmse=0.6597  lr=1.0e-03 *
+  epoch  29  train_mse=0.3868  valid_rmse=0.6579  lr=1.0e-03 *
+  epoch  30  train_mse=0.3811  valid_rmse=0.6738  lr=1.0e-03
+  epoch  31  train_mse=0.3746  valid_rmse=0.6549  lr=1.0e-03 *
+  epoch  32  train_mse=0.3657  valid_rmse=0.6392  lr=1.0e-03 *
+  epoch  33  train_mse=0.3542  valid_rmse=0.6300  lr=1.0e-03 *
+  epoch  36  train_mse=0.3503  valid_rmse=0.6231  lr=1.0e-03 *
+  epoch  40  train_mse=0.3430  valid_rmse=0.6531  lr=1.0e-03
+  epoch  41  train_mse=0.3360  valid_rmse=0.6146  lr=1.0e-03 *
+  epoch  42  train_mse=0.3304  valid_rmse=0.6140  lr=1.0e-03 *
+  epoch  45  train_mse=0.3229  valid_rmse=0.5995  lr=1.0e-03 *
+  epoch  49  train_mse=0.3157  valid_rmse=0.5988  lr=1.0e-03 *
+  epoch  50  train_mse=0.3076  valid_rmse=0.6017  lr=1.0e-03
+  epoch  51  train_mse=0.3081  valid_rmse=0.5829  lr=1.0e-03 *
+  epoch  55  train_mse=0.2995  valid_rmse=0.5803  lr=1.0e-03 *
+  epoch  60  train_mse=0.2883  valid_rmse=0.5658  lr=1.0e-03 *
+  epoch  69  train_mse=0.2559  valid_rmse=0.5424  lr=5.0e-04 *
+  epoch  70  train_mse=0.2459  valid_rmse=0.5512  lr=5.0e-04
+  epoch  79  train_mse=0.2269  valid_rmse=0.5424  lr=2.5e-04 *
+  epoch  80  train_mse=0.2239  valid_rmse=0.5360  lr=2.5e-04 *
+  epoch  89  train_mse=0.2111  valid_rmse=0.5343  lr=1.3e-04 *
+  epoch  90  train_mse=0.2128  valid_rmse=0.5332  lr=1.3e-04 *
+  epoch  91  train_mse=0.2123  valid_rmse=0.5300  lr=1.3e-04 *
+  epoch  94  train_mse=0.2105  valid_rmse=0.5298  lr=1.3e-04 *
+  epoch  95  train_mse=0.2102  valid_rmse=0.5295  lr=1.3e-04 *
+  epoch  96  train_mse=0.2087  valid_rmse=0.5291  lr=1.3e-04 *
+  epoch  99  train_mse=0.2054  valid_rmse=0.5244  lr=1.3e-04 *
+  epoch 100  train_mse=0.2063  valid_rmse=0.5296  lr=1.3e-04
+  epoch 110  train_mse=0.2034  valid_rmse=0.5262  lr=6.3e-05
+  epoch 119  train_mse=0.1982  valid_rmse=0.5231  lr=3.1e-05 *
+  epoch 120  train_mse=0.1998  valid_rmse=0.5245  lr=3.1e-05
+  epoch 123  train_mse=0.2003  valid_rmse=0.5231  lr=3.1e-05 *
+  epoch 130  train_mse=0.2003  valid_rmse=0.5255  lr=3.1e-05
+  epoch 140  train_mse=0.1932  valid_rmse=0.5240  lr=1.0e-05
+  early stop at epoch 143 (best epoch 123)
+  TEST  R2=0.5473  RMSE=0.9382  MAE=0.6947  (286s)
+  saved -> results/gnn_models/egfr_full_gin_scaffold_ep300.pt, results/gnn_preds_egfr_full_scaffold_ep300.npz, results/gnn_metrics_egfr_full_ep300.json
+=== END 2026-10-04 14:29:56 split=scaffold seed42 rc=0 duration=288s ===
+=== START 2026-10-04 14:29:56 split=scaffold seed1 ===
+/Users/leisirui/miniforge3/envs/qsar/lib/python3.12/site-packages/torch/jit/_script.py:1491: FutureWarning: `torch.jit.script` is deprecated. Please switch to `torch.compile` or `torch.export`.
+  warnings.warn(
+/Users/leisirui/qsar-activity-prediction/scripts/gnn_03_train_gin.py:114: UserWarning: Converting a tensor with requires_grad=True to a scalar may lead to unexpected behavior.
+Consider using tensor.detach() first. (Triggered internally at /Users/runner/work/pytorch/pytorch/torch/csrc/autograd/generated/python_variable_methods.cpp:821.)
+  total += float(loss) * len(batch.y)
+[egfr_full/random] device=mps  y_mean=6.662 y_std=1.436
+  epoch   1  train_mse=0.7479  valid_rmse=0.9591  lr=1.0e-03 *
+  epoch   4  train_mse=0.6070  valid_rmse=0.8575  lr=1.0e-03 *
+  epoch   5  train_mse=0.5830  valid_rmse=0.7741  lr=1.0e-03 *
+  epoch   7  train_mse=0.5501  valid_rmse=0.7396  lr=1.0e-03 *
+  epoch  10  train_mse=0.5183  valid_rmse=0.7333  lr=1.0e-03 *
+  epoch  11  train_mse=0.5037  valid_rmse=0.7151  lr=1.0e-03 *
+  epoch  14  train_mse=0.4752  valid_rmse=0.6980  lr=1.0e-03 *
+  epoch  17  train_mse=0.4533  valid_rmse=0.6844  lr=1.0e-03 *
+  epoch  18  train_mse=0.4488  valid_rmse=0.6753  lr=1.0e-03 *
+  epoch  20  train_mse=0.4316  valid_rmse=0.6824  lr=1.0e-03
+  epoch  21  train_mse=0.4389  valid_rmse=0.6709  lr=1.0e-03 *
+  epoch  22  train_mse=0.4271  valid_rmse=0.6681  lr=1.0e-03 *
+  epoch  24  train_mse=0.4060  valid_rmse=0.6547  lr=1.0e-03 *
+  epoch  26  train_mse=0.4068  valid_rmse=0.6497  lr=1.0e-03 *
+  epoch  30  train_mse=0.3884  valid_rmse=0.6705  lr=1.0e-03
+  epoch  33  train_mse=0.3653  valid_rmse=0.6474  lr=1.0e-03 *
+  epoch  35  train_mse=0.3610  valid_rmse=0.6204  lr=1.0e-03 *
+  epoch  40  train_mse=0.3503  valid_rmse=0.6257  lr=1.0e-03
+  epoch  41  train_mse=0.3458  valid_rmse=0.6188  lr=1.0e-03 *
+  epoch  48  train_mse=0.3192  valid_rmse=0.6161  lr=1.0e-03 *
+  epoch  50  train_mse=0.3164  valid_rmse=0.6298  lr=1.0e-03
+  epoch  51  train_mse=0.3154  valid_rmse=0.6080  lr=1.0e-03 *
+  epoch  52  train_mse=0.3169  valid_rmse=0.6032  lr=1.0e-03 *
+  epoch  60  train_mse=0.2979  valid_rmse=0.6050  lr=5.0e-04
+  epoch  61  train_mse=0.2765  valid_rmse=0.5890  lr=5.0e-04 *
+  epoch  62  train_mse=0.2708  valid_rmse=0.5873  lr=5.0e-04 *
+  epoch  63  train_mse=0.2652  valid_rmse=0.5808  lr=5.0e-04 *
+  epoch  64  train_mse=0.2662  valid_rmse=0.5730  lr=5.0e-04 *
+  epoch  70  train_mse=0.2628  valid_rmse=0.5762  lr=5.0e-04
+  epoch  73  train_mse=0.2422  valid_rmse=0.5729  lr=2.5e-04 *
+  epoch  75  train_mse=0.2396  valid_rmse=0.5661  lr=2.5e-04 *
+  epoch  80  train_mse=0.2380  valid_rmse=0.5711  lr=2.5e-04
+  epoch  87  train_mse=0.2257  valid_rmse=0.5659  lr=1.3e-04 *
+  epoch  90  train_mse=0.2222  valid_rmse=0.5658  lr=1.3e-04 *
+  epoch  93  train_mse=0.2262  valid_rmse=0.5656  lr=1.3e-04 *
+  epoch  94  train_mse=0.2244  valid_rmse=0.5655  lr=1.3e-04 *
+  epoch  95  train_mse=0.2192  valid_rmse=0.5637  lr=1.3e-04 *
+  epoch 100  train_mse=0.2202  valid_rmse=0.5654  lr=1.3e-04
+  epoch 108  train_mse=0.2157  valid_rmse=0.5622  lr=6.3e-05 *
+  epoch 109  train_mse=0.2123  valid_rmse=0.5619  lr=6.3e-05 *
+  epoch 110  train_mse=0.2130  valid_rmse=0.5621  lr=6.3e-05
+  epoch 120  train_mse=0.2120  valid_rmse=0.5623  lr=3.1e-05
+  epoch 122  train_mse=0.2053  valid_rmse=0.5615  lr=3.1e-05 *
+  epoch 125  train_mse=0.2079  valid_rmse=0.5611  lr=3.1e-05 *
+  epoch 130  train_mse=0.2104  valid_rmse=0.5624  lr=3.1e-05
+  epoch 140  train_mse=0.2096  valid_rmse=0.5623  lr=1.6e-05
+  early stop at epoch 145 (best epoch 125)
+  TEST  R2=0.7123  RMSE=0.7753  MAE=0.5684  (313s)
+  saved -> results/gnn_models/egfr_full_gin_random_ep300.pt, results/gnn_preds_egfr_full_random_ep300.npz, results/gnn_metrics_egfr_full_ep300.json
+=== END 2026-10-04 14:30:24 split=random seed42 rc=0 duration=316s ===
+=== START 2026-10-04 14:30:24 split=random seed1 ===
+/Users/leisirui/miniforge3/envs/qsar/lib/python3.12/site-packages/torch/jit/_script.py:1491: FutureWarning: `torch.jit.script` is deprecated. Please switch to `torch.compile` or `torch.export`.
+  warnings.warn(
+/Users/leisirui/qsar-activity-prediction/scripts/gnn_03_train_gin.py:114: UserWarning: Converting a tensor with requires_grad=True to a scalar may lead to unexpected behavior.
+Consider using tensor.detach() first. (Triggered internally at /Users/runner/work/pytorch/pytorch/torch/csrc/autograd/generated/python_variable_methods.cpp:821.)
+  total += float(loss) * len(batch.y)
+[egfr_full/random] device=mps  y_mean=6.662 y_std=1.436
+  epoch   1  train_mse=0.7378  valid_rmse=0.8299  lr=1.0e-03 *
+  epoch   5  train_mse=0.5943  valid_rmse=0.7766  lr=1.0e-03 *
+  epoch   8  train_mse=0.5358  valid_rmse=0.7339  lr=1.0e-03 *
+  epoch  10  train_mse=0.5129  valid_rmse=0.7428  lr=1.0e-03
+  epoch  12  train_mse=0.4939  valid_rmse=0.7272  lr=1.0e-03 *
+  epoch  13  train_mse=0.4862  valid_rmse=0.7150  lr=1.0e-03 *
+  epoch  16  train_mse=0.4588  valid_rmse=0.6984  lr=1.0e-03 *
+  epoch  19  train_mse=0.4486  valid_rmse=0.6933  lr=1.0e-03 *
+  epoch  20  train_mse=0.4397  valid_rmse=0.6791  lr=1.0e-03 *
+  epoch  23  train_mse=0.4333  valid_rmse=0.6786  lr=1.0e-03 *
+  epoch  26  train_mse=0.4056  valid_rmse=0.6685  lr=1.0e-03 *
+  epoch  27  train_mse=0.4088  valid_rmse=0.6562  lr=1.0e-03 *
+  epoch  29  train_mse=0.3941  valid_rmse=0.6497  lr=1.0e-03 *
+  epoch  30  train_mse=0.3940  valid_rmse=0.6638  lr=1.0e-03
+  epoch  31  train_mse=0.3862  valid_rmse=0.6435  lr=1.0e-03 *
+  epoch  32  train_mse=0.3812  valid_rmse=0.6356  lr=1.0e-03 *
+  epoch  36  train_mse=0.3684  valid_rmse=0.6346  lr=1.0e-03 *
+  epoch  40  train_mse=0.3555  valid_rmse=0.6392  lr=1.0e-03
+  epoch  41  train_mse=0.3474  valid_rmse=0.6204  lr=1.0e-03 *
+  epoch  46  train_mse=0.3349  valid_rmse=0.6089  lr=1.0e-03 *
+  epoch  48  train_mse=0.3289  valid_rmse=0.5982  lr=1.0e-03 *
+  epoch  50  train_mse=0.3199  valid_rmse=0.6132  lr=1.0e-03
+  epoch  57  train_mse=0.2896  valid_rmse=0.5825  lr=5.0e-04 *
+  epoch  58  train_mse=0.2845  valid_rmse=0.5766  lr=5.0e-04 *
+  epoch  60  train_mse=0.2787  valid_rmse=0.5969  lr=5.0e-04
+  epoch  63  train_mse=0.2813  valid_rmse=0.5735  lr=5.0e-04 *
+  epoch  66  train_mse=0.2723  valid_rmse=0.5682  lr=5.0e-04 *
+  epoch  69  train_mse=0.2646  valid_rmse=0.5666  lr=5.0e-04 *
+  epoch  70  train_mse=0.2642  valid_rmse=0.5761  lr=5.0e-04
+  epoch  74  train_mse=0.2596  valid_rmse=0.5652  lr=5.0e-04 *
+  epoch  78  train_mse=0.2544  valid_rmse=0.5625  lr=5.0e-04 *
+  epoch  80  train_mse=0.2534  valid_rmse=0.5677  lr=5.0e-04
+  epoch  84  train_mse=0.2511  valid_rmse=0.5621  lr=5.0e-04 *
+  epoch  88  train_mse=0.2422  valid_rmse=0.5613  lr=5.0e-04 *
+  epoch  90  train_mse=0.2477  valid_rmse=0.5639  lr=5.0e-04
+  epoch  92  train_mse=0.2373  valid_rmse=0.5608  lr=5.0e-04 *
+  epoch  95  train_mse=0.2377  valid_rmse=0.5575  lr=5.0e-04 *
+  epoch  99  train_mse=0.2398  valid_rmse=0.5523  lr=5.0e-04 *
+  epoch 100  train_mse=0.2398  valid_rmse=0.5677  lr=5.0e-04
+  epoch 103  train_mse=0.2336  valid_rmse=0.5465  lr=5.0e-04 *
+  epoch 110  train_mse=0.2312  valid_rmse=0.5612  lr=5.0e-04
+  epoch 114  train_mse=0.2127  valid_rmse=0.5448  lr=2.5e-04 *
+  epoch 116  train_mse=0.2118  valid_rmse=0.5446  lr=2.5e-04 *
+  epoch 120  train_mse=0.2073  valid_rmse=0.5442  lr=2.5e-04 *
+  epoch 130  train_mse=0.2005  valid_rmse=0.5452  lr=1.3e-04
+  epoch 131  train_mse=0.1950  valid_rmse=0.5394  lr=1.3e-04 *
+  epoch 140  train_mse=0.1912  valid_rmse=0.5435  lr=6.3e-05
+  epoch 150  train_mse=0.1898  valid_rmse=0.5394  lr=3.1e-05
+  early stop at epoch 151 (best epoch 131)
+  TEST  R2=0.7201  RMSE=0.7648  MAE=0.5546  (307s)
+  saved -> results/gnn_models/egfr_full_gin_random_ep300.pt, results/gnn_preds_egfr_full_random_ep300.npz, results/gnn_metrics_egfr_full_ep300.json
+=== END 2026-10-04 14:35:32 split=random seed1 rc=0 duration=308s ===
+=== START 2026-10-04 14:35:32 split=random seed2 ===
+/Users/leisirui/miniforge3/envs/qsar/lib/python3.12/site-packages/torch/jit/_script.py:1491: FutureWarning: `torch.jit.script` is deprecated. Please switch to `torch.compile` or `torch.export`.
+  warnings.warn(
+/Users/leisirui/qsar-activity-prediction/scripts/gnn_03_train_gin.py:114: UserWarning: Converting a tensor with requires_grad=True to a scalar may lead to unexpected behavior.
+Consider using tensor.detach() first. (Triggered internally at /Users/runner/work/pytorch/pytorch/torch/csrc/autograd/generated/python_variable_methods.cpp:821.)
+  total += float(loss) * len(batch.y)
+[egfr_full/scaffold] device=mps  y_mean=6.599 y_std=1.438
+  epoch   1  train_mse=0.7681  valid_rmse=0.8581  lr=1.0e-03 *
+  epoch   2  train_mse=0.6675  valid_rmse=0.8398  lr=1.0e-03 *
+  epoch   4  train_mse=0.6159  valid_rmse=0.8094  lr=1.0e-03 *
+  epoch   6  train_mse=0.5735  valid_rmse=0.7959  lr=1.0e-03 *
+  epoch   7  train_mse=0.5641  valid_rmse=0.7571  lr=1.0e-03 *
+  epoch  10  train_mse=0.5257  valid_rmse=1.0328  lr=1.0e-03
+  epoch  11  train_mse=0.5118  valid_rmse=0.7287  lr=1.0e-03 *
+  epoch  13  train_mse=0.4893  valid_rmse=0.7253  lr=1.0e-03 *
+  epoch  17  train_mse=0.4572  valid_rmse=0.7120  lr=1.0e-03 *
+  epoch  18  train_mse=0.4589  valid_rmse=0.6907  lr=1.0e-03 *
+  epoch  20  train_mse=0.4400  valid_rmse=0.6880  lr=1.0e-03 *
+  epoch  23  train_mse=0.4207  valid_rmse=0.6710  lr=1.0e-03 *
+  epoch  24  train_mse=0.4161  valid_rmse=0.6688  lr=1.0e-03 *
+  epoch  26  train_mse=0.4029  valid_rmse=0.6560  lr=1.0e-03 *
+  epoch  29  train_mse=0.3959  valid_rmse=0.6413  lr=1.0e-03 *
+  epoch  30  train_mse=0.3836  valid_rmse=0.6620  lr=1.0e-03
+  epoch  35  train_mse=0.3677  valid_rmse=0.6141  lr=1.0e-03 *
+  epoch  38  train_mse=0.3541  valid_rmse=0.6079  lr=1.0e-03 *
+  epoch  40  train_mse=0.3509  valid_rmse=0.6221  lr=1.0e-03
+  epoch  44  train_mse=0.3408  valid_rmse=0.6034  lr=1.0e-03 *
+  epoch  48  train_mse=0.3289  valid_rmse=0.5918  lr=1.0e-03 *
+  epoch  50  train_mse=0.3281  valid_rmse=0.6086  lr=1.0e-03
+  epoch  57  train_mse=0.2870  valid_rmse=0.5692  lr=5.0e-04 *
+  epoch  60  train_mse=0.2787  valid_rmse=0.5770  lr=5.0e-04
+  epoch  64  train_mse=0.2710  valid_rmse=0.5635  lr=5.0e-04 *
+  epoch  67  train_mse=0.2719  valid_rmse=0.5627  lr=5.0e-04 *
+  epoch  70  train_mse=0.2662  valid_rmse=0.5865  lr=5.0e-04
+  epoch  75  train_mse=0.2594  valid_rmse=0.5620  lr=5.0e-04 *
+  epoch  80  train_mse=0.2533  valid_rmse=0.5495  lr=5.0e-04 *
+  epoch  84  train_mse=0.2502  valid_rmse=0.5487  lr=5.0e-04 *
+  epoch  86  train_mse=0.2493  valid_rmse=0.5470  lr=5.0e-04 *
+  epoch  87  train_mse=0.2442  valid_rmse=0.5452  lr=5.0e-04 *
+  epoch  90  train_mse=0.2500  valid_rmse=0.5508  lr=5.0e-04
+  epoch  96  train_mse=0.2280  valid_rmse=0.5422  lr=2.5e-04 *
+  epoch  97  train_mse=0.2237  valid_rmse=0.5373  lr=2.5e-04 *
+  epoch 100  train_mse=0.2220  valid_rmse=0.5426  lr=2.5e-04
+  epoch 102  train_mse=0.2177  valid_rmse=0.5362  lr=2.5e-04 *
+  epoch 103  train_mse=0.2155  valid_rmse=0.5360  lr=2.5e-04 *
+  epoch 104  train_mse=0.2182  valid_rmse=0.5328  lr=2.5e-04 *
+  epoch 106  train_mse=0.2163  valid_rmse=0.5321  lr=2.5e-04 *
+  epoch 107  train_mse=0.2176  valid_rmse=0.5316  lr=2.5e-04 *
+  epoch 110  train_mse=0.2201  valid_rmse=0.5368  lr=2.5e-04
+  epoch 113  train_mse=0.2149  valid_rmse=0.5263  lr=2.5e-04 *
+  epoch 119  train_mse=0.2085  valid_rmse=0.5256  lr=2.5e-04 *
+  epoch 120  train_mse=0.2048  valid_rmse=0.5338  lr=2.5e-04
+  epoch 121  train_mse=0.2116  valid_rmse=0.5245  lr=2.5e-04 *
+  epoch 130  train_mse=0.1998  valid_rmse=0.5230  lr=1.3e-04 *
+  epoch 132  train_mse=0.1975  valid_rmse=0.5216  lr=1.3e-04 *
+  epoch 133  train_mse=0.2030  valid_rmse=0.5212  lr=1.3e-04 *
+  epoch 134  train_mse=0.1977  valid_rmse=0.5194  lr=1.3e-04 *
+  epoch 140  train_mse=0.1950  valid_rmse=0.5207  lr=1.3e-04
+  epoch 150  train_mse=0.1938  valid_rmse=0.5213  lr=3.1e-05
+  epoch 152  train_mse=0.1892  valid_rmse=0.5193  lr=3.1e-05 *
+  epoch 160  train_mse=0.1885  valid_rmse=0.5194  lr=1.6e-05
+  epoch 162  train_mse=0.1906  valid_rmse=0.5191  lr=1.6e-05 *
+  epoch 167  train_mse=0.1846  valid_rmse=0.5187  lr=1.6e-05 *
+  epoch 170  train_mse=0.1890  valid_rmse=0.5190  lr=1.6e-05
+  epoch 174  train_mse=0.1862  valid_rmse=0.5186  lr=1.6e-05 *
+  epoch 180  train_mse=0.1859  valid_rmse=0.5190  lr=1.6e-05
+  epoch 182  train_mse=0.1832  valid_rmse=0.5183  lr=1.6e-05 *
+  epoch 190  train_mse=0.1854  valid_rmse=0.5203  lr=1.0e-05
+  epoch 200  train_mse=0.1839  valid_rmse=0.5194  lr=1.0e-05
+  early stop at epoch 202 (best epoch 182)
+  TEST  R2=0.5463  RMSE=0.9393  MAE=0.6979  (397s)
+  saved -> results/gnn_models/egfr_full_gin_scaffold_ep300.pt, results/gnn_preds_egfr_full_scaffold_ep300.npz, results/gnn_metrics_egfr_full_ep300.json
+=== END 2026-10-04 14:36:35 split=scaffold seed1 rc=0 duration=399s ===
+=== START 2026-10-04 14:36:35 split=scaffold seed2 ===
+/Users/leisirui/miniforge3/envs/qsar/lib/python3.12/site-packages/torch/jit/_script.py:1491: FutureWarning: `torch.jit.script` is deprecated. Please switch to `torch.compile` or `torch.export`.
+  warnings.warn(
+/Users/leisirui/qsar-activity-prediction/scripts/gnn_03_train_gin.py:114: UserWarning: Converting a tensor with requires_grad=True to a scalar may lead to unexpected behavior.
+Consider using tensor.detach() first. (Triggered internally at /Users/runner/work/pytorch/pytorch/torch/csrc/autograd/generated/python_variable_methods.cpp:821.)
+  total += float(loss) * len(batch.y)
+[egfr_full/random] device=mps  y_mean=6.662 y_std=1.436
+  epoch   1  train_mse=0.7330  valid_rmse=0.8621  lr=1.0e-03 *
+  epoch   3  train_mse=0.6253  valid_rmse=0.7794  lr=1.0e-03 *
+  epoch   6  train_mse=0.5614  valid_rmse=0.7500  lr=1.0e-03 *
+  epoch  10  train_mse=0.5081  valid_rmse=0.8152  lr=1.0e-03
+  epoch  11  train_mse=0.5032  valid_rmse=0.7019  lr=1.0e-03 *
+  epoch  19  train_mse=0.4400  valid_rmse=0.6644  lr=1.0e-03 *
+  epoch  20  train_mse=0.4332  valid_rmse=0.7457  lr=1.0e-03
+  epoch  22  train_mse=0.4198  valid_rmse=0.6618  lr=1.0e-03 *
+  epoch  24  train_mse=0.4211  valid_rmse=0.6594  lr=1.0e-03 *
+  epoch  27  train_mse=0.4044  valid_rmse=0.6415  lr=1.0e-03 *
+  epoch  30  train_mse=0.3753  valid_rmse=0.6348  lr=1.0e-03 *
+  epoch  34  train_mse=0.3700  valid_rmse=0.6313  lr=1.0e-03 *
+  epoch  37  train_mse=0.3476  valid_rmse=0.6259  lr=1.0e-03 *
+  epoch  40  train_mse=0.3503  valid_rmse=0.6141  lr=1.0e-03 *
+  epoch  41  train_mse=0.3512  valid_rmse=0.6082  lr=1.0e-03 *
+  epoch  44  train_mse=0.3396  valid_rmse=0.6013  lr=1.0e-03 *
+  epoch  48  train_mse=0.3228  valid_rmse=0.5958  lr=1.0e-03 *
+  epoch  50  train_mse=0.3218  valid_rmse=0.5912  lr=1.0e-03 *
+  epoch  58  train_mse=0.3045  valid_rmse=0.5840  lr=1.0e-03 *
+  epoch  60  train_mse=0.3023  valid_rmse=0.5845  lr=1.0e-03
+  epoch  67  train_mse=0.2670  valid_rmse=0.5734  lr=5.0e-04 *
+  epoch  69  train_mse=0.2590  valid_rmse=0.5688  lr=5.0e-04 *
+  epoch  70  train_mse=0.2544  valid_rmse=0.5784  lr=5.0e-04
+  epoch  77  train_mse=0.2528  valid_rmse=0.5681  lr=5.0e-04 *
+  epoch  80  train_mse=0.2436  valid_rmse=0.5708  lr=5.0e-04
+  epoch  81  train_mse=0.2425  valid_rmse=0.5644  lr=5.0e-04 *
+  epoch  87  train_mse=0.2433  valid_rmse=0.5581  lr=5.0e-04 *
+  epoch  90  train_mse=0.2361  valid_rmse=0.5704  lr=5.0e-04
+  epoch  96  train_mse=0.2257  valid_rmse=0.5562  lr=2.5e-04 *
+  epoch 100  train_mse=0.2173  valid_rmse=0.5601  lr=2.5e-04
+  epoch 103  train_mse=0.2233  valid_rmse=0.5552  lr=2.5e-04 *
+  epoch 104  train_mse=0.2206  valid_rmse=0.5527  lr=2.5e-04 *
+  epoch 105  train_mse=0.2122  valid_rmse=0.5495  lr=2.5e-04 *
+  epoch 110  train_mse=0.2092  valid_rmse=0.5532  lr=2.5e-04
+  epoch 120  train_mse=0.2003  valid_rmse=0.5499  lr=1.3e-04
+  early stop at epoch 125 (best epoch 105)
+  TEST  R2=0.7113  RMSE=0.7767  MAE=0.5655  (221s)
+  saved -> results/gnn_models/egfr_full_gin_random_ep300.pt, results/gnn_preds_egfr_full_random_ep300.npz, results/gnn_metrics_egfr_full_ep300.json
+=== END 2026-10-04 14:39:15 split=random seed2 rc=0 duration=223s ===
+[egfr_full/scaffold] device=mps  y_mean=6.599 y_std=1.438
+  epoch   1  train_mse=0.7834  valid_rmse=0.9578  lr=1.0e-03 *
+  epoch   2  train_mse=0.6699  valid_rmse=0.8693  lr=1.0e-03 *
+  epoch   6  train_mse=0.5556  valid_rmse=0.7945  lr=1.0e-03 *
+  epoch   8  train_mse=0.5418  valid_rmse=0.7594  lr=1.0e-03 *
+  epoch   9  train_mse=0.5261  valid_rmse=0.7457  lr=1.0e-03 *
+  epoch  10  train_mse=0.5088  valid_rmse=0.8179  lr=1.0e-03
+  epoch  14  train_mse=0.4780  valid_rmse=0.7140  lr=1.0e-03 *
+  epoch  15  train_mse=0.4692  valid_rmse=0.7070  lr=1.0e-03 *
+  epoch  18  train_mse=0.4433  valid_rmse=0.6866  lr=1.0e-03 *
+  epoch  20  train_mse=0.4348  valid_rmse=0.6873  lr=1.0e-03
+  epoch  21  train_mse=0.4301  valid_rmse=0.6819  lr=1.0e-03 *
+  epoch  22  train_mse=0.4289  valid_rmse=0.6755  lr=1.0e-03 *
+  epoch  25  train_mse=0.3956  valid_rmse=0.6585  lr=1.0e-03 *
+  epoch  28  train_mse=0.3865  valid_rmse=0.6498  lr=1.0e-03 *
+  epoch  29  train_mse=0.3860  valid_rmse=0.6434  lr=1.0e-03 *
+  epoch  30  train_mse=0.3772  valid_rmse=0.6722  lr=1.0e-03
+  epoch  32  train_mse=0.3697  valid_rmse=0.6256  lr=1.0e-03 *
+  epoch  34  train_mse=0.3689  valid_rmse=0.6197  lr=1.0e-03 *
+  epoch  37  train_mse=0.3549  valid_rmse=0.6139  lr=1.0e-03 *
+  epoch  40  train_mse=0.3421  valid_rmse=0.6044  lr=1.0e-03 *
+  epoch  42  train_mse=0.3381  valid_rmse=0.6032  lr=1.0e-03 *
+  epoch  47  train_mse=0.3235  valid_rmse=0.5919  lr=1.0e-03 *
+  epoch  50  train_mse=0.3079  valid_rmse=0.6200  lr=1.0e-03
+  epoch  52  train_mse=0.3126  valid_rmse=0.5812  lr=1.0e-03 *
+  epoch  55  train_mse=0.3039  valid_rmse=0.5782  lr=1.0e-03 *
+  epoch  58  train_mse=0.2941  valid_rmse=0.5708  lr=1.0e-03 *
+  epoch  60  train_mse=0.2919  valid_rmse=0.5728  lr=1.0e-03
+  epoch  64  train_mse=0.2830  valid_rmse=0.5640  lr=1.0e-03 *
+  epoch  65  train_mse=0.2906  valid_rmse=0.5604  lr=1.0e-03 *
+  epoch  68  train_mse=0.2722  valid_rmse=0.5453  lr=1.0e-03 *
+  epoch  70  train_mse=0.2758  valid_rmse=0.5649  lr=1.0e-03
+  epoch  77  train_mse=0.2491  valid_rmse=0.5339  lr=5.0e-04 *
+  epoch  78  train_mse=0.2413  valid_rmse=0.5326  lr=5.0e-04 *
+  epoch  79  train_mse=0.2366  valid_rmse=0.5300  lr=5.0e-04 *
+  epoch  80  train_mse=0.2394  valid_rmse=0.5266  lr=5.0e-04 *
+  epoch  89  train_mse=0.2202  valid_rmse=0.5228  lr=2.5e-04 *
+  epoch  90  train_mse=0.2178  valid_rmse=0.5275  lr=2.5e-04
+  epoch  91  train_mse=0.2185  valid_rmse=0.5206  lr=2.5e-04 *
+  epoch  93  train_mse=0.2112  valid_rmse=0.5185  lr=2.5e-04 *
+  epoch  94  train_mse=0.2094  valid_rmse=0.5169  lr=2.5e-04 *
+  epoch  98  train_mse=0.2120  valid_rmse=0.5148  lr=2.5e-04 *
+  epoch 100  train_mse=0.2074  valid_rmse=0.5214  lr=2.5e-04
+  epoch 110  train_mse=0.2008  valid_rmse=0.5165  lr=1.3e-04
+  epoch 112  train_mse=0.1999  valid_rmse=0.5131  lr=1.3e-04 *
+  epoch 115  train_mse=0.1980  valid_rmse=0.5121  lr=1.3e-04 *
+  epoch 116  train_mse=0.1993  valid_rmse=0.5109  lr=1.3e-04 *
+  epoch 119  train_mse=0.1952  valid_rmse=0.5109  lr=1.3e-04 *
+  epoch 120  train_mse=0.1961  valid_rmse=0.5125  lr=1.3e-04
+  epoch 123  train_mse=0.1978  valid_rmse=0.5105  lr=1.3e-04 *
+  epoch 126  train_mse=0.1988  valid_rmse=0.5104  lr=1.3e-04 *
+  epoch 127  train_mse=0.1941  valid_rmse=0.5064  lr=1.3e-04 *
+  epoch 130  train_mse=0.1953  valid_rmse=0.5079  lr=1.3e-04
+  epoch 140  train_mse=0.1898  valid_rmse=0.5086  lr=6.3e-05
+  early stop at epoch 147 (best epoch 127)
+  TEST  R2=0.5748  RMSE=0.9092  MAE=0.6735  (237s)
+  saved -> results/gnn_models/egfr_full_gin_scaffold_ep300.pt, results/gnn_preds_egfr_full_scaffold_ep300.npz, results/gnn_metrics_egfr_full_ep300.json
+=== END 2026-10-04 14:40:34 split=scaffold seed2 rc=0 duration=239s ===
+=== EP300 CONFIRM JOB ALL DONE 2026-10-04 14:40:34 ===

@@ -1,0 +1,40 @@
+{
+  "random": {
+    "r2": 0.7146714925765991,
+    "rmse": 0.7721404171417752,
+    "mae": 0.5636016726493835,
+    "best_epoch": 115,
+    "best_valid_rmse_std": 0.5550604462623596,
+    "params": {
+      "tag": "egfr_full",
+      "hidden": 128,
+      "num_layers": 4,
+      "dropout": 0.2,
+      "lr": 0.001,
+      "batch_size": 128,
+      "epochs": 300,
+      "patience": 20,
+      "seed": 42,
+      "suffix": "_ep300"
+    }
+  },
+  "scaffold": {
+    "r2": 0.5276825428009033,
+    "rmse": 0.9583109493682185,
+    "mae": 0.7095876336097717,
+    "best_epoch": 197,
+    "best_valid_rmse_std": 0.521970272064209,
+    "params": {
+      "tag": "egfr_full",
+      "hidden": 128,
+      "num_layers": 4,
+      "dropout": 0.2,
+      "lr": 0.001,
+      "batch_size": 128,
+      "epochs": 300,
+      "patience": 20,
+      "seed": 42,
+      "suffix": "_ep300"
+    }
+  }
+}
