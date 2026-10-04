@@ -1,0 +1,33 @@
+color_label,scaffold_smiles,n_molecules
+S1 (n=702),c1ccc(Nc2ncnc3ccccc23)cc1,702
+S2 (n=159),c1ccc(Nc2ccnc(Nc3ccccc3)n2)cc1,159
+S3 (n=131),c1ccc(Nc2nccc(-c3c[nH]c4ccccc34)n2)cc1,131
+S4 (n=122),c1ccc(CNc2ncnc3[nH]c(-c4ccccc4)cc23)cc1,122
+S5 (n=117),C1=C(C(Nc2ccc3ncccc3c2)c2cccnc2)NNN1C1CC1,117
+S6 (n=109),c1ccccc1,109
+S7 (n=102),c1ccc(Nc2ncnc3cc(OCC4CNCCO4)ccc23)cc1,102
+S8 (n=100),c1ccc(Nc2ccnc3ccccc23)cc1,100
+other,c1ccc(Nc2ncnc3ccncc23)cc1,95
+other,c1ccc(Nc2ncnc3cc(OC4COC5CCOC54)ccc23)cc1,86
+other,c1ccc(Nc2ncnc3cnccc23)cc1,66
+other,c1ccc(-c2n[nH]c3ncncc23)cc1,65
+other,c1ccc(Oc2ccnc(Nc3ccc(N4CCNCC4)cc3)n2)cc1,57
+other,c1ccc(CNc2ncnc3ccccc23)cc1,48
+other,O=C1N(c2ccccc2)Cc2cnc(Nc3ccc(N4CCNCC4)cc3)nc2N1C1CCNC1,48
+other,c1ccc(Nc2ncnc3ccc4c(c23)OCCO4)cc1,47
+other,c1ccc(Nc2ccnc(Nc3ccc(N4CCNCC4)cc3)n2)cc1,47
+other,c1ccc(CNc2ncnc3sc(-c4ccccc4)cc23)cc1,47
+other,c1ccc(C2=NNC(c3ccccc3)C2)cc1,46
+other,O=C(Nc1ccccc1)c1cccc(-c2nc3ccccn3c2-c2ccnc(Nc3ccc(N4CCC(N5CCNCC5)CC4)cc3)n2)c1,45
+other,O=C(Nc1ccccc1)c1cccc(-c2nc3ccccn3c2-c2ccnc(Nc3ccc(N4CCC(N5CCCCC5)CC4)cc3)n2)c1,44
+other,c1ccc(Nc2ncnc3ccc(OC4CCNCC4)cc23)cc1,43
+other,c1ccc(C2=NN(c3nc(-c4ccccc4)cs3)C(c3ccccc3)C2)cc1,42
+other,O=C(Nc1ccccc1)c1cccc(-c2nc3ccccn3c2-c2ccnc(Nc3ccc(N4CCNCC4)cc3)n2)c1,42
+other,c1ccc(COc2ccc(Nc3ncnc4ccc(-c5ccco5)cc34)cc2)cc1,40
+other,C1=C(C(Nc2ccc3ncccc3c2)c2cccc3cnccc23)NNN1C1CC1,40
+other,c1ccc(Nc2ncnc3c2NCc2ccccc2O3)cc1,39
+other,O=c1cc(-c2ccccc2)oc2ccccc12,38
+other,C1=C(C(Nc2ccc3ncccc3c2)c2cccnc2)NNN1,38
+other,O=C1CSC(N2N=C(c3ccccc3)CC2c2ccccc2)=N1,36
+other,C1=C(C(Nc2ccc3ncccc3c2)c2cccc3ncccc23)NNN1C1CC1,36
+other,c1ccc2c(-c3ccnc(Nc4ccc5[nH]ncc5c4)n3)c[nH]c2c1,35

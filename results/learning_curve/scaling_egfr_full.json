@@ -1,0 +1,173 @@
+{
+  "tag": "egfr_full",
+  "csv": "results/learning_curve/learning_curve_egfr_full.csv",
+  "model": "R2(n) = R2_inf - a * n^(-b), a>0, b>0 (curve_fit, multi-start p0)",
+  "crossover_scan": "[max observed n, 10x max observed n], brentq",
+  "splits": {
+    "random": {
+      "n_observed": [
+        500,
+        1000,
+        2000,
+        4000,
+        8000,
+        9717
+      ],
+      "n_max_observed": 9717,
+      "seeds": [
+        1,
+        2,
+        42
+      ],
+      "fits": {
+        "rf": {
+          "r2_inf": 1.190202859141366,
+          "a": 2.389495029826731,
+          "b": 0.1843863701868506,
+          "se_r2_inf": 0.06587856604035418,
+          "se_a": 0.11139225021867002,
+          "se_b": 0.02100838098741561,
+          "fit_r2": 0.9997748651266474,
+          "fit_rmse": 0.0017201446529642086,
+          "ss_res": 1.7753385762728145e-05,
+          "notes": [
+            "R2_inf>1: fitted asymptote exceeds perfect R2"
+          ]
+        },
+        "gin": {
+          "r2_inf": 2.3704187188621937,
+          "a": 3.1366108171638767,
+          "b": 0.06933543864186167,
+          "se_r2_inf": 3.4742826723392297,
+          "se_a": 2.775148999136492,
+          "se_b": 0.13124396421527817,
+          "fit_r2": 0.9913254602178487,
+          "fit_rmse": 0.01276057773464855,
+          "ss_res": 0.00097699406473205,
+          "notes": [
+            "R2_inf>1: fitted asymptote exceeds perfect R2"
+          ]
+        }
+      },
+      "gap_at_n_max": {
+        "n": 9717,
+        "gap_mean": -0.049230133494552485,
+        "gap_std": 0.003766470793227858,
+        "n_pairs": 3
+      },
+      "extrapolated_gap": {
+        "2x": -0.014577551507087727,
+        "4x": 0.013224318029909643
+      },
+      "crossover": {
+        "scan_interval": [
+          9717,
+          97170.0
+        ],
+        "n_star": 28156.419867142573,
+        "no_crossover_projected": false,
+        "note": null,
+        "per_seed": {
+          "total": 3,
+          "success": 3,
+          "success_rate": 1.0,
+          "n_star_values": [
+            45702.1,
+            35949.6,
+            18913.2
+          ],
+          "skipped": [],
+          "n_star_mean": 33521.66049587998,
+          "n_star_std": 13558.478941522093,
+          "ci95_percentile": [
+            19765.0656106556,
+            45214.5157089194
+          ]
+        }
+      }
+    },
+    "scaffold": {
+      "n_observed": [
+        500,
+        1000,
+        2000,
+        4000,
+        8000
+      ],
+      "n_max_observed": 8000,
+      "seeds": [
+        1,
+        2,
+        42
+      ],
+      "fits": {
+        "rf": {
+          "r2_inf": 0.7046045771556639,
+          "a": 3.5048437142645987,
+          "b": 0.3646170951510674,
+          "se_r2_inf": 0.020778566532824304,
+          "se_a": 0.5359732512656536,
+          "se_b": 0.03309441765409626,
+          "fit_r2": 0.9996632965885517,
+          "fit_rmse": 0.001507566070484296,
+          "ss_res": 1.1363777284377307e-05,
+          "notes": []
+        },
+        "gin": {
+          "r2_inf": 1.8826400729121446,
+          "a": 2.3136484027850908,
+          "b": 0.05957758778322256,
+          "se_r2_inf": 12.260256438837626,
+          "se_a": 10.597908845034885,
+          "se_b": 0.49598053251192803,
+          "fit_r2": 0.9237604857515546,
+          "fit_rmse": 0.024712281082013836,
+          "ss_res": 0.003053484181382295,
+          "notes": [
+            "R2_inf>1: fitted asymptote exceeds perfect R2"
+          ]
+        }
+      },
+      "gap_at_n_max": {
+        "n": 8000,
+        "gap_mean": -0.05537591128505781,
+        "gap_std": 0.014720560673740665,
+        "n_pairs": 3
+      },
+      "extrapolated_gap": {
+        "2x": -0.01886507679320193,
+        "4x": 0.010765917642429734
+      },
+      "crossover": {
+        "scan_interval": [
+          8000,
+          80000.0
+        ],
+        "n_star": 25111.887153607044,
+        "no_crossover_projected": false,
+        "note": null,
+        "per_seed": {
+          "total": 3,
+          "success": 1,
+          "success_rate": 0.3333333333333333,
+          "n_star_values": [
+            15786.0
+          ],
+          "skipped": [
+            {
+              "seed": 1,
+              "reason": "no root in [8000, 80000]"
+            },
+            {
+              "seed": 2,
+              "reason": "no root in [8000, 80000]"
+            }
+          ],
+          "n_star_mean": 15785.990298341227,
+          "n_star_std": null,
+          "ci95_percentile": null
+        }
+      }
+    }
+  }
+}

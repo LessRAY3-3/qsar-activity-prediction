@@ -1,0 +1,188 @@
+{
+  "tag": "egfr",
+  "csv": "results/learning_curve/learning_curve_egfr.csv",
+  "model": "R2(n) = R2_inf - a * n^(-b), a>0, b>0 (curve_fit, multi-start p0)",
+  "crossover_scan": "[max observed n, 10x max observed n], brentq",
+  "splits": {
+    "random": {
+      "n_observed": [
+        500,
+        1000,
+        1500,
+        2000,
+        2500,
+        3000,
+        3500,
+        4000,
+        4400
+      ],
+      "n_max_observed": 4400,
+      "seeds": [
+        1,
+        2,
+        42
+      ],
+      "fits": {
+        "rf": {
+          "r2_inf": 1.2039532978813332,
+          "a": 1.9557379884481214,
+          "b": 0.17305851811431477,
+          "se_r2_inf": 0.36795859967843886,
+          "se_a": 0.34526845251686034,
+          "se_b": 0.11542463474809675,
+          "fit_r2": 0.9915742818679986,
+          "fit_rmse": 0.005946158324318633,
+          "ss_res": 0.0003182111893607739,
+          "notes": [
+            "R2_inf>1: fitted asymptote exceeds perfect R2"
+          ]
+        },
+        "gin": {
+          "r2_inf": 0.8723953380787968,
+          "a": 7.7194018628306775,
+          "b": 0.4506760722438562,
+          "se_r2_inf": 0.07404565964504538,
+          "se_a": 4.360598188592753,
+          "se_b": 0.11423366030805611,
+          "fit_r2": 0.9921459556867495,
+          "fit_rmse": 0.007964264115719445,
+          "ss_res": 0.000570865526144428,
+          "notes": []
+        }
+      },
+      "gap_at_n_max": {
+        "n": 4400,
+        "gap_mean": -0.04018029775377755,
+        "gap_std": 0.009107229335671952,
+        "n_pairs": 3
+      },
+      "extrapolated_gap": {
+        "2x": -0.05420513924823289,
+        "4x": -0.065560210070569
+      },
+      "crossover": {
+        "scan_interval": [
+          4400,
+          44000.0
+        ],
+        "n_star": null,
+        "no_crossover_projected": true,
+        "note": null,
+        "per_seed": {
+          "total": 3,
+          "success": 0,
+          "success_rate": 0.0,
+          "n_star_values": [],
+          "skipped": [
+            {
+              "seed": 1,
+              "reason": "no root in [4400, 44000]"
+            },
+            {
+              "seed": 2,
+              "reason": "no root in [4400, 44000]"
+            },
+            {
+              "seed": 42,
+              "reason": "no root in [4400, 44000]"
+            }
+          ],
+          "n_star_mean": null,
+          "n_star_std": null,
+          "ci95_percentile": null
+        }
+      }
+    },
+    "scaffold": {
+      "n_observed": [
+        500,
+        1000,
+        1500,
+        2000,
+        2500,
+        3000,
+        3500,
+        4000,
+        4400
+      ],
+      "n_max_observed": 4400,
+      "seeds": [
+        1,
+        2,
+        42
+      ],
+      "fits": {
+        "rf": {
+          "r2_inf": 77.86547108555652,
+          "a": 77.84487527965108,
+          "b": 0.0008394299487760715,
+          "se_r2_inf": 22968.82638368722,
+          "se_a": 22968.392167634596,
+          "se_b": 0.24921354209126556,
+          "fit_r2": 0.9620566873224783,
+          "fit_rmse": 0.00871001148893802,
+          "ss_res": 0.0006827787012368908,
+          "notes": [
+            "b<0.05: no visible saturation in the observed range, R2_inf/a/b lie on a near-degenerate ridge (R2_inf >> 1); asymptote not identified",
+            "R2_inf>1: fitted asymptote exceeds perfect R2"
+          ]
+        },
+        "gin": {
+          "r2_inf": 122.6184853865045,
+          "a": 122.66674903827479,
+          "b": 0.0005519081730211512,
+          "se_r2_inf": 68986.54030307458,
+          "se_a": 68985.97731792857,
+          "se_b": 0.31164871728609206,
+          "fit_r2": 0.9419083912554773,
+          "fit_rmse": 0.011308440381143904,
+          "ss_res": 0.0011509274146849747,
+          "notes": [
+            "b<0.05: no visible saturation in the observed range, R2_inf/a/b lie on a near-degenerate ridge (R2_inf >> 1); asymptote not identified",
+            "R2_inf>1: fitted asymptote exceeds perfect R2"
+          ]
+        }
+      },
+      "gap_at_n_max": {
+        "n": 4400,
+        "gap_mean": -0.03555893892031048,
+        "gap_std": 0.0150343278603974,
+        "n_pairs": 3
+      },
+      "extrapolated_gap": {
+        "2x": -0.04674780951445712,
+        "4x": -0.04500161060693131
+      },
+      "crossover": {
+        "scan_interval": [
+          4400,
+          44000.0
+        ],
+        "n_star": null,
+        "no_crossover_projected": true,
+        "note": null,
+        "per_seed": {
+          "total": 3,
+          "success": 1,
+          "success_rate": 0.3333333333333333,
+          "n_star_values": [
+            6522.1
+          ],
+          "skipped": [
+            {
+              "seed": 1,
+              "reason": "no root in [4400, 44000]"
+            },
+            {
+              "seed": 2,
+              "reason": "no root in [4400, 44000]"
+            }
+          ],
+          "n_star_mean": 6522.1415086576135,
+          "n_star_std": null,
+          "ci95_percentile": null
+        }
+      }
+    }
+  }
+}
