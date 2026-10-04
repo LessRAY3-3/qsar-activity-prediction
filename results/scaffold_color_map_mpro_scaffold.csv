@@ -1,0 +1,27 @@
+color_label,scaffold_smiles,n_molecules
+S1 (n=101),O=C(NCC(=O)N1CCC2(C1)C(=O)Nc1ccccc12)c1cc2ccccc2[nH]1,101
+S2 (n=63),O=C(NCc1cccc2ccccc12)c1ccccc1,63
+S3 (n=52),c1ccccc1,52
+S4 (n=47),O=C(Oc1cccnc1)c1ccccc1,47
+S5 (n=45),O=C(NCc1ccccc1)C(Nc1ccc(-c2ccccc2)cc1)c1cccnc1,45
+S6 (n=41),O=S(=O)(NCC1CCC(n2cnc3cncnc32)O1)c1ccccc1,41
+S7 (n=37),O=C(c1ccccc1)n1cnc2ccccc21,37
+S8 (n=36),O=C(NCc1ccccc1)c1ncnc2[nH]ccc12,36
+other,c1ccc(CNCc2cccc3ccccc23)cc1,34
+other,O=C1NCCC1CCNC(=O)C1NCC2CC21,34
+other,O=C(C=Cc1ccccc1)NCC(=O)NCCc1ccccc1,33
+other,c1nc(NCc2ccc3c(c2)OCCO3)c2cc[nH]c2n1,33
+other,c1nc(NCc2ccc3c(c2)OCCO3)c2cc(-c3cn[nH]c3)[nH]c2n1,32
+other,O=c1[nH]c(-c2ccccc2)nc2ccccc12,31
+other,O=c1c2ccccc2[se]n1-c1ccccc1,31
+other,O=C(Cn1sc2ccccc2c1=O)Nc1ccccc1,27
+other,O=C1NCCC1CCNC(=O)C1C2CC2CN1C(=O)c1cc2ccccc2[nH]1,26
+other,O=C(NCC(=O)N1CCC2(C1)C(=O)Nc1ccccc12)OCc1ccccc1,23
+other,O=C(NC(Cc1ccccc1)C(=O)NNCc1ccccc1)OCc1ccccc1,23
+other,c1ccc(-c2cccc3c2CCc2c(-c4ccccn4)cccc2-3)cc1,22
+other,O=C(NCc1cc(-c2cn[nH]c2)cc(-c2cc[nH]n2)c1)c1ccccc1,22
+other,O=C(CSc1c[nH]c2ccccc12)NCc1ccccc1,21
+other,O=C1CCCC2=C1C(c1ccccc1)Nc1ccccc1N2,20
+other,O=S1(=O)CCCc2ccc(CNc3ccncn3)cc21,19
+other,O=c1[nH]sc2ccccc12,19
+other,O=C(C=Cc1ccccc1)c1ccccc1,19

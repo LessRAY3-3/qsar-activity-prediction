@@ -1,0 +1,5 @@
+color_label,scaffold_smiles,n_molecules
+S1 (n=128),O=C(c1nc(NCc2cccnc2)nc2ccsc12)N1CCCC1,128
+S2 (n=106),O=C(c1nc(NCc2cccnc2)nc2ccsc12)N1CCC1,106
+S3 (n=105),c1ccc2c(c1)ncn1nc(C3CCCN(c4cn[nH]c4)C3)nc21,105
+S4 (n=45),O=C(c1nc(NCc2ccccn2)nc2ccsc12)N1CCCC1,45

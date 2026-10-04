@@ -1,0 +1,36 @@
+{
+  "target": "Human immunodeficiency virus type 1 protease",
+  "tag": "hivpr",
+  "random": {
+    "split": "random",
+    "r2": 0.737228755910103,
+    "rmse": 0.8673827853749644,
+    "mae": 0.6144095090888128
+  },
+  "scaffold": {
+    "split": "scaffold",
+    "r2": 0.5542085824811576,
+    "rmse": 0.9326059143830067,
+    "mae": 0.7272637588805673
+  },
+  "best_params_random": {
+    "bootstrap": true,
+    "ccp_alpha": 0.0,
+    "criterion": "squared_error",
+    "max_depth": null,
+    "max_features": 1.0,
+    "max_leaf_nodes": null,
+    "max_samples": null,
+    "min_impurity_decrease": 0.0,
+    "min_samples_leaf": 1,
+    "min_samples_split": 5,
+    "min_weight_fraction_leaf": 0.0,
+    "monotonic_cst": null,
+    "n_estimators": 500,
+    "n_jobs": -1,
+    "oob_score": false,
+    "random_state": 42,
+    "verbose": 0,
+    "warm_start": false
+  }
+}

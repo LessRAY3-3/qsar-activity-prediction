@@ -1,0 +1,40 @@
+{
+  "random": {
+    "r2": 0.689907431602478,
+    "rmse": 0.6721195840331811,
+    "mae": 0.4875870645046234,
+    "best_epoch": 72,
+    "best_valid_rmse_std": 0.5979976654052734,
+    "params": {
+      "tag": "a2a",
+      "hidden": 128,
+      "num_layers": 4,
+      "dropout": 0.2,
+      "lr": 0.001,
+      "batch_size": 128,
+      "epochs": 100,
+      "patience": 20,
+      "seed": 42,
+      "suffix": ""
+    }
+  },
+  "scaffold": {
+    "r2": 0.6648669838905334,
+    "rmse": 0.5413967126223697,
+    "mae": 0.40367603302001953,
+    "best_epoch": 34,
+    "best_valid_rmse_std": 0.5919337868690491,
+    "params": {
+      "tag": "a2a",
+      "hidden": 128,
+      "num_layers": 4,
+      "dropout": 0.2,
+      "lr": 0.001,
+      "batch_size": 128,
+      "epochs": 100,
+      "patience": 20,
+      "seed": 42,
+      "suffix": ""
+    }
+  }
+}

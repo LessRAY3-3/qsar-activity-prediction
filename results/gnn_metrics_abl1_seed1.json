@@ -1,0 +1,40 @@
+{
+  "random": {
+    "r2": 0.7456468343734741,
+    "rmse": 0.793226491448109,
+    "mae": 0.5832958817481995,
+    "best_epoch": 84,
+    "best_valid_rmse_std": 0.48122894763946533,
+    "params": {
+      "tag": "abl1",
+      "hidden": 128,
+      "num_layers": 4,
+      "dropout": 0.2,
+      "lr": 0.001,
+      "batch_size": 128,
+      "epochs": 100,
+      "patience": 20,
+      "seed": 1,
+      "suffix": "_seed1"
+    }
+  },
+  "scaffold": {
+    "r2": 0.713092029094696,
+    "rmse": 0.6560610317458369,
+    "mae": 0.5086796879768372,
+    "best_epoch": 48,
+    "best_valid_rmse_std": 0.540813148021698,
+    "params": {
+      "tag": "abl1",
+      "hidden": 128,
+      "num_layers": 4,
+      "dropout": 0.2,
+      "lr": 0.001,
+      "batch_size": 128,
+      "epochs": 100,
+      "patience": 20,
+      "seed": 1,
+      "suffix": "_seed1"
+    }
+  }
+}

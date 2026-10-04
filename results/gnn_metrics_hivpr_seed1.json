@@ -1,0 +1,40 @@
+{
+  "random": {
+    "r2": 0.7230475544929504,
+    "rmse": 0.8904806321237082,
+    "mae": 0.6638109087944031,
+    "best_epoch": 65,
+    "best_valid_rmse_std": 0.5898252725601196,
+    "params": {
+      "tag": "hivpr",
+      "hidden": 128,
+      "num_layers": 4,
+      "dropout": 0.2,
+      "lr": 0.001,
+      "batch_size": 128,
+      "epochs": 100,
+      "patience": 20,
+      "seed": 1,
+      "suffix": "_seed1"
+    }
+  },
+  "scaffold": {
+    "r2": 0.5397570729255676,
+    "rmse": 0.94760179355326,
+    "mae": 0.731177568435669,
+    "best_epoch": 76,
+    "best_valid_rmse_std": 0.4988858699798584,
+    "params": {
+      "tag": "hivpr",
+      "hidden": 128,
+      "num_layers": 4,
+      "dropout": 0.2,
+      "lr": 0.001,
+      "batch_size": 128,
+      "epochs": 100,
+      "patience": 20,
+      "seed": 1,
+      "suffix": "_seed1"
+    }
+  }
+}

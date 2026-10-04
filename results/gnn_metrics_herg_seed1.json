@@ -1,0 +1,40 @@
+{
+  "random": {
+    "r2": 0.6353813409805298,
+    "rmse": 0.5593517469122933,
+    "mae": 0.3947032690048218,
+    "best_epoch": 95,
+    "best_valid_rmse_std": 0.6673883199691772,
+    "params": {
+      "tag": "herg",
+      "hidden": 128,
+      "num_layers": 4,
+      "dropout": 0.2,
+      "lr": 0.001,
+      "batch_size": 128,
+      "epochs": 100,
+      "patience": 20,
+      "seed": 1,
+      "suffix": "_seed1"
+    }
+  },
+  "scaffold": {
+    "r2": 0.4089668393135071,
+    "rmse": 0.828672875603084,
+    "mae": 0.5328419804573059,
+    "best_epoch": 81,
+    "best_valid_rmse_std": 0.5870445966720581,
+    "params": {
+      "tag": "herg",
+      "hidden": 128,
+      "num_layers": 4,
+      "dropout": 0.2,
+      "lr": 0.001,
+      "batch_size": 128,
+      "epochs": 100,
+      "patience": 20,
+      "seed": 1,
+      "suffix": "_seed1"
+    }
+  }
+}

@@ -1,0 +1,40 @@
+{
+  "scaffold": {
+    "r2": 0.644662618637085,
+    "rmse": 0.7415880291929386,
+    "mae": 0.5480290651321411,
+    "best_epoch": 99,
+    "best_valid_rmse_std": 0.5937671065330505,
+    "params": {
+      "tag": "mapk14",
+      "hidden": 128,
+      "num_layers": 4,
+      "dropout": 0.2,
+      "lr": 0.001,
+      "batch_size": 128,
+      "epochs": 100,
+      "patience": 20,
+      "seed": 42,
+      "suffix": ""
+    }
+  },
+  "random": {
+    "r2": 0.6683865189552307,
+    "rmse": 0.7156389326713269,
+    "mae": 0.527987003326416,
+    "best_epoch": 100,
+    "best_valid_rmse_std": 0.5947158932685852,
+    "params": {
+      "tag": "mapk14",
+      "hidden": 128,
+      "num_layers": 4,
+      "dropout": 0.2,
+      "lr": 0.001,
+      "batch_size": 128,
+      "epochs": 100,
+      "patience": 20,
+      "seed": 42,
+      "suffix": ""
+    }
+  }
+}
