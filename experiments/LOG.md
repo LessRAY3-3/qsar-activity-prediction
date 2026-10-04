@@ -11,9 +11,11 @@ artifacts. Newest first. Maintained by M4 Air; results produced on M3 Max.
 - Commits: `c462607` (`feat: generic ChEMBL downloader (01e) + chain
   runner docs`), `a950e1d` (`results: 6-target panel (a2a/abl1/mpro/hivpr/
   herg/mapk14) + error analyses`), `39ab879` (`results: egfr_full expansion
-  (13,497 cpds) + learning curve to n=9717 + scaling verdict`); the three
-  docs (this entry, README section 8, data provenance) are the follow-up
-  `docs: LOG + README cross-target section + data provenance` commit.
+  (13,497 cpds) + learning curve to n=9717 + scaling verdict`), `3aca834`
+  (`docs: LOG + README cross-target section + data provenance`); the Δ
+  convention was then corrected to the 3-seed mean in the follow-up
+  `docs: delta convention - 3-seed mean as primary effect size` commit
+  (see the delta-convention bullet below).
 - Question: sections 2-7 settled RF-vs-GIN on EGFR only. Is "the GIN does
   not beat fingerprint+RF" a property of EGFR, and how much data would it
   take for the GIN to catch up?
@@ -44,14 +46,25 @@ artifacts. Newest first. Maintained by M4 Air; results produced on M3 Max.
   `target_pref_name = "Vascular endothelial growth factor receptor 2"`
   (verified against the ChEMBL target API). Treat the row as VEGFR2
   everywhere (README section 8, `results/multi_target/summary.csv`).
-- Headline: random split GIN loses 6/6 (and 8/8 including egfr/egfr_full);
-  scaffold is mixed - abl1 +0.030 and (VEGFR2) +0.028 for the GIN, hivpr a
-  tie -0.001, mpro a large -0.130. Delta convention: `d_r2_gin_minus_rf`
-  from `results/comparison_*.csv` = **seed-42 GIN − RF** (positive = GIN
-  wins); the RF/GIN pairs above are RF vs 3-seed GIN mean. Where seed
-  noise is large the two disagree in sign (abl1 scaffold +0.030 seed-42 vs
-  -0.013 on the mean; herg random -0.021 vs +0.000) - the two scaffold
-  wins are within seed noise.
+- Headline (**3-seed mean convention**): across the 8 panel targets x 2
+  splits the GIN **never clearly leads** - 15 of 16 cells are negative and
+  the 16th (herg random, +0.0003) is a tie. Random: 7 negative + herg tie,
+  range +0.000 to -0.058 (worst mapk14/VEGFR2). Scaffold: all 8 negative,
+  closest mapk14/VEGFR2 **-0.006**, worst mpro **-0.102**. Magnitude is
+  target-dependent but sign is not: abl1 (2,698 cpds) and herg (12,019)
+  both land at -0.013, so Δ does not follow n.
+- Delta convention (**corrected 2026-10-04, docs follow-up commit**): every
+  verdict above is **Δ = 3-seed mean GIN − RF**, taken from the mean
+  columns of `results/multi_target/summary.csv` at full precision before
+  rounding. The `d_r2_gin_minus_rf` column inside `results/comparison_*.csv`
+  is **not** that number - it is the **seed-42** GIN run minus RF, and it is
+  reference-only from here on: it reports scaffold "wins" for abl1 (+0.030)
+  and mapk14/VEGFR2 (+0.028) that both **flip sign** under the mean
+  (-0.013 / -0.006), and a herg random -0.021 where the mean is +0.000.
+  Quoting single-seed deltas contradicts README interview point 6 (GIN
+  scaffold R2 varies +-0.02 across seeds), so the campaign headline is
+  "no clear GIN lead on any target" - which the scaling verdict below
+  (no measured crossover to n=9,717) independently corroborates.
 
 **egfr_full expansion (CHEMBL203, full B/F pull)**
 - `01e --target-chembl-id CHEMBL203 --tag egfr_full --max-rows 0` ->
