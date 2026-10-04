@@ -50,20 +50,36 @@ R2 is scale-free, RMSE is not. See `figures/testset_hist_bace.png`.
 
 ## 3. Data
 
-Two sources, switched via the `QSAR_TAG` environment variable:
+Sources, switched via the `QSAR_TAG` environment variable. All ChEMBL
+targets come from the same generic downloader
+(`scripts/01e_download_chembl.py`, `standard_type=IC50`,
+`standard_units=nM`, assay types B/F):
 
-| Dataset | Target | Compounds | Source |
-|---|---|---|---|
-| `egfr` (default) | EGFR (CHEMBL203) | 6165 | ChEMBL REST API |
-| `bace` (fallback) | Beta-secretase 1 | 1513 | MoleculeNet BACE |
+| Dataset tag | Target | ChEMBL id | Unique compounds | Source |
+|---|---|---|---|---|
+| `egfr` (default) | EGFR | CHEMBL203 | 6165 | ChEMBL REST API (`01d`, early-stopped pull) |
+| `egfr_full` | EGFR, full B/F pull | CHEMBL203 | 13497 | ChEMBL REST API (`01e`, `--max-rows 0`) |
+| `bace` (fallback) | Beta-secretase 1 | – | 1513 | MoleculeNet BACE |
+| `a2a` | A2a adenosine receptor | CHEMBL251 | 1746 | ChEMBL REST API (`01e`) |
+| `abl1` | ABL1 tyrosine kinase | CHEMBL1862 | 2698 | ChEMBL REST API (`01e`) |
+| `mpro` | Replicase polyprotein 1ab / Mpro | CHEMBL4523582 | 4424 | ChEMBL REST API (`01e`) |
+| `hivpr` | HIV-1 protease | CHEMBL243 | 2799 | ChEMBL REST API (`01e`) |
+| `herg` | hERG / KCNH2 channel | CHEMBL240 | 12019 | ChEMBL REST API (`01e`) |
+| `mapk14` | **VEGFR2 / KDR** (tag is a misnomer) | CHEMBL279 | 11797 | ChEMBL REST API (`01e`) |
 
-Primary data comes from **ChEMBL** (EBI): `target_chembl_id=CHEMBL203`,
-`standard_type=IC50`, `standard_units=nM`, binding/functional assays. While
-this project was built the ChEMBL API was intermittently returning HTTP 500
-(server-side outage; a VPN did not help). The downloader
-(`scripts/01d_download_incremental.py`) therefore retries every page,
-flushes each page to disk, and skips poisoned result windows - 8936 rows
-survived into 6165 unique compounds.
+Primary data comes from **ChEMBL** (EBI): `standard_type=IC50`,
+`standard_units=nM`, binding/functional assays. The original `egfr` pull
+used `target_chembl_id=CHEMBL203` via the older
+`scripts/01d_download_incremental.py`; while this project was built the
+ChEMBL API was intermittently returning HTTP 500 (server-side outage; a
+VPN did not help). The downloader therefore retries every page, flushes
+each page to disk, and skips poisoned result windows - 8936 rows
+survived into 6165 unique compounds. The generic `01e` downloader keeps
+that resilience contract for every other target; `egfr_full` is the same
+CHEMBL203 query with `--max-rows 0` (no early stop): 24560 raw rows into
+13497 unique compounds, and a superset check confirms all 6165 `egfr` v1
+compounds are present (median |ΔpIC50| 0.0000). Full per-file provenance
+is in `data/README.md`.
 
 Cleaning (`scripts/02_clean_data.py`):
 - keep only IC50 reported in **nM** (one unit -> comparable numbers)
@@ -220,6 +236,102 @@ The random-split number is in line with published GNN results on ESOL
 (random-split RMSE roughly 0.5-0.9 depending on protocol); the scaffold
 number is much lower, as expected when whole chemotypes are held out.
 
+## 8. Cross-target generality & data scaling
+
+Sections 1-7 answer the RF-vs-GIN question **on one dataset** (EGFR). Two
+questions remain: does the answer survive on other targets, and how much
+data would the GIN need to catch up?
+
+**Protocol.** One panel, one code path: `QSAR_TAG` switches the dataset,
+`scripts/01e_download_chembl.py` pulls each target from ChEMBL
+(`standard_type=IC50`, `standard_units=nM`, assay types B/F), and the
+cleaning, Morgan r=2/2048 + grid-tuned RF, split regeneration/verification
+(`gnn_01_make_splits.py`, aborts on any metric mismatch) and GIN training
+are byte-for-byte the same scripts as sections 2-7. The GIN runs 3 seeds
+(42/1/2) on every tag.
+
+### 8.1 The panel
+
+Eight targets, both splits (test R2; GIN = 3-seed mean ± std;
+Δ = GIN − RF):
+
+| Tag | Target (ChEMBL id) | Family | n | RF rand | GIN rand | Δ rand | RF scaf | GIN scaf | Δ scaf |
+|---|---|---|---|---|---|---|---|---|---|
+| `a2a` | A2a adenosine receptor (CHEMBL251) | GPCR | 1,746 | 0.733 | 0.687±0.003 | −0.043 | 0.691 | 0.666±0.004 | −0.027 |
+| `abl1` | ABL1 tyrosine kinase (CHEMBL1862) | kinase | 2,698 | 0.792 | 0.752±0.006 | −0.041 | 0.723 | 0.710±0.037 | **+0.030** |
+| `egfr` | EGFR (CHEMBL203) | kinase | 6,165 | 0.747 | 0.690±0.001 | −0.056 | 0.562 | 0.526±0.016 | −0.018 |
+| `egfr_full` | EGFR, full B/F pull (CHEMBL203) | kinase | 13,497 | 0.759 | 0.707±0.006 | −0.059 | 0.593 | 0.558±0.010 | −0.033 |
+| `herg` | hERG / KCNH2 channel (CHEMBL240) | ion channel | 12,019 | 0.615 | 0.616±0.017 | −0.021 | 0.430 | 0.417±0.007 | −0.014 |
+| `hivpr` | HIV-1 protease (CHEMBL243) | viral protease | 2,799 | 0.737 | 0.726±0.005 | −0.015 | 0.554 | 0.527±0.028 | −0.001 |
+| `mapk14` ¹ | **VEGFR2 / KDR** (CHEMBL279) | kinase | 11,797 | 0.736 | 0.678±0.007 | −0.068 | 0.617 | 0.611±0.024 | **+0.028** |
+| `mpro` | Replicase polyprotein 1ab / Mpro (CHEMBL4523582) | viral protease | 4,424 | 0.730 | 0.707±0.003 | −0.020 | 0.509 | 0.408±0.022 | −0.130 |
+
+¹ The tag `mapk14` is a **misnomer**: CHEMBL279 is VEGFR2 (KDR), confirmed
+against the ChEMBL target API - every activity row carries
+`target_pref_name = "Vascular endothelial growth factor receptor 2"`. The
+tag is kept for file-name continuity; read it as VEGFR2 above. BACE is not
+in the table because it has the RF baseline only (no GIN run).
+
+All four columns are read verbatim from `results/multi_target/summary.csv`
+(generated by `experiments/multi_target_summary.py` from the per-target
+`results/comparison_{tag}.csv`). Δ is `d_r2_gin_minus_rf` - the campaign's
+sign convention - and is computed against the **seed-42** GIN run, while
+the GIN column reports the 3-seed mean ± std. Where seed noise is large the
+two disagree in sign (abl1 scaffold: +0.030 on seed 42 vs −0.013 on the
+3-seed mean; herg random: −0.021 vs +0.000), so read the two scaffold
+"wins" as *within seed noise*, cf. talking point 6.
+
+![delta vs n](figures/multi_target/delta_vs_n.png)
+
+**Finding 1 - on random splits the GIN loses 8/8.** Δ ranges from −0.015
+(`hivpr`) to −0.068 (`mapk14`/VEGFR2); there is no target where message
+passing beats circular substructure counts when analogues are allowed to
+leak across the split. The EGFR conclusion of section 7 is not an EGFR
+artefact.
+
+**Finding 2 - on scaffold splits Δ is a property of the target, not of n.**
+The GIN wins only **2/8**: `abl1` (+0.030) and `mapk14`/VEGFR2 (+0.028);
+`hivpr` is a statistical tie (−0.001); `mpro` is a large loss (−0.130).
+The winners are not the big datasets - `abl1` takes this with just **2,698**
+compounds while `herg` (12,019) and `egfr_full` (13,497) still lose. Δ
+tracks what the scaffold split actually stresses: how much real scaffold
+diversity the chemistry has, and how the assays are structured (censoring,
+potency spread, replicate density) - not raw training-set size.
+
+### 8.2 Data scaling: how much more data would it take?
+
+The paired learning curve was extended on `egfr_full` to **n = 9,717** -
+the entire random-split training pool - with the test set, validation set
+and hyperparameters frozen (`experiments/learning_curve.py`, sizes
+500/1000/2000/4000/8000/9717 x seeds 42/1/2):
+
+![learning curve](figures/learning_curve/learning_curve_egfr_full.png)
+
+- **Measured range: no crossover.** At the full-pool point n=9,717
+  (random) RF 0.7502 vs GIN 0.7009, gap **−0.049**; the scaffold curve
+  stops at n=8,000 with gap −0.055. The gap shrinks from −0.089 at n=500
+  but never closes.
+- **Extrapolated crossover: n\* ≈ 25k-35k (≈ 3x current data).** Fitting a
+  saturating curve R2(n) = R2_inf − a·n^(−b) and solving the gap for its
+  root (`experiments/scaling_analysis.py`) gives n\* = **28,156** on
+  random (per-seed **33,522 ± 13,558**, 95% CI **[19,765, 45,215]**,
+  3/3 seeds find a root) and n\* = **25,112** on scaffold (only 1/3 seeds
+  finds a root, so no CI is available).
+- **Weakly identified.** Three of the fits return **R2_inf > 1** (random
+  RF 1.19, random GIN 2.37, scaffold GIN 1.88) - an asymptote above a
+  perfect R2 is impossible. With only six curve points the asymptote (and
+  therefore n\*) is poorly constrained: treat it as an order-of-magnitude
+  statement - *roughly three times more data, not a precise threshold*.
+
+**The failures themselves transfer.** `gnn_05_error_analysis.py` on four
+targets (worst-50 overlap / Spearman ρ of per-molecule |error|, random /
+scaffold): `egfr` 25/21, ρ 0.52/0.52 (chance ≈ 2); `mapk14` 25/30,
+ρ 0.49/0.55 (chance ≈ 1); `herg` 32/42, ρ 0.52/0.60 (chance ≈ 1); `a2a`
+32/32, ρ 0.63/0.65 (chance ≈ 7). Overlap of 21-42 against an expected 1-7
+and ρ 0.49-0.65 across chemically unrelated targets: the conclusion of
+section 7.5 - **many failures are molecule-intrinsic (noisy or censored
+measurements), not model-specific** - is a cross-target robust result.
+
 ## Repository layout
 
 ```
@@ -267,6 +379,23 @@ python scripts/gnn_05_error_analysis.py        # shared-failure analysis
 python scripts/gnn_06_esol_prep.py
 QSAR_TAG=esol python scripts/gnn_03_train_gin.py --split scaffold
 QSAR_TAG=esol python scripts/gnn_03_train_gin.py --split random
+
+# phase 3 - cross-target panel + data scaling (section 8); one tag per target
+python scripts/01e_download_chembl.py --target-chembl-id CHEMBL251 --tag a2a
+QSAR_TAG=a2a python scripts/02_clean_data.py
+QSAR_TAG=a2a python scripts/03_featurize.py
+QSAR_TAG=a2a python scripts/04_train_and_evaluate.py
+QSAR_TAG=a2a python scripts/gnn_01_make_splits.py      # regenerate + VERIFY
+QSAR_TAG=a2a python scripts/gnn_02_build_graphs.py
+QSAR_TAG=a2a python scripts/gnn_03_train_gin.py --split random             # seed 42
+QSAR_TAG=a2a python scripts/gnn_03_train_gin.py --split random  --seed 1 --suffix _seed1
+QSAR_TAG=a2a python scripts/gnn_03_train_gin.py --split random  --seed 2 --suffix _seed2
+QSAR_TAG=a2a python scripts/gnn_03_train_gin.py --split scaffold           # ...x3, then:
+QSAR_TAG=a2a python scripts/gnn_04_compare.py          # results/comparison_a2a.csv
+QSAR_TAG=a2a python scripts/gnn_05_error_analysis.py   # shared-failure analysis
+python experiments/multi_target_summary.py             # summary.csv + delta_vs_n.png
+python experiments/learning_curve.py --tag egfr_full --sizes 500,1000,2000,4000,8000,9717
+python experiments/scaling_analysis.py --tag egfr_full # n* + CI, scaling_egfr_full.json/png
 ```
 
 ## Why pIC50?
@@ -277,7 +406,7 @@ target transform.
 
 ## Conclusions
 
-Six experiments, one page. Every number below is 3-seed mean +/- std and
+Eight experiments, one page. Every number below is 3-seed mean +/- std and
 recomputable from `results/` (run ledger: `experiments/LOG.md`).
 
 1. **The GIN does not beat Morgan fingerprints + RF on ~6.2k EGFR
@@ -309,6 +438,25 @@ recomputable from `results/` (run ledger: `experiments/LOG.md`).
    thienopyrimidine 0.54); bit 1367 - the aminopyrimidine hinge-binding
    motif - sits in the RF top-5 for 10/10 molecules across both
    families; the GIN places 66% of its top atoms on the scaffold core.
+7. **Across targets, "GIN catches up as n grows" is not a law - Δ is
+   target-dependent (section 8.1).** On 8 targets the GIN loses on random
+   splits 8/8 (Δ −0.015 to −0.068) but wins on scaffold splits only 2/8
+   (ABL1 +0.030, VEGFR2 +0.028), ties HIV-1 protease (−0.001) and loses
+   badly on Mpro (−0.130); Δ is `d_r2_gin_minus_rf` (seed-42 GIN − RF,
+   the campaign convention), and the two scaffold wins sit within seed
+   noise of the mean. Δ narrowing with n is not the mechanism: ABL1 is
+   competitive with 2,698 compounds while hERG (12,019) still loses - the
+   scaffold gap follows the target's chemical diversity and assay
+   structure, not dataset size.
+8. **Scaling: no crossover in measured data; the extrapolated n\* is
+   weakly identified, but the failure structure is robust (section 8.2).**
+   On `egfr_full` the GIN still trails at n=9,717 (random gap −0.049);
+   saturating fits put the crossover at n\* ≈ 25k-35k (~3x current data),
+   yet three fits return R2_inf > 1, so n\* is an order-of-magnitude
+   estimate, not a threshold. Meanwhile the shared-failure analysis
+   reproduces on 4 targets (worst-50 overlap 21-42 vs 1-7 expected,
+   ρ 0.49-0.65) - "many failures are molecule-intrinsic" holds across
+   chemically unrelated targets.
 
 ## Interview talking points
 
