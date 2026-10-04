@@ -339,6 +339,17 @@ and hyperparameters frozen (`experiments/learning_curve.py`, sizes
   therefore n\*) is poorly constrained: treat it as an order-of-magnitude
   statement - *roughly three times more data, not a precise threshold*.
 
+**Training-budget caveat.** All six baseline full-pool runs sit against
+the 100-epoch cap (`best_epoch` 93-100), so the same six were re-run at
+`--epochs 300` on identical data, splits and seeds: every run then
+early-stopped later (epochs 100-217; 5/6 now past the old cap), yet the
+3-seed means moved by only **|Δ| ≤ 0.0173** - 7% of the random gap, 31% of
+the scaffold gap, and *smaller than the 0.0277 drift between two runs of
+the same seed*. Budget effect and run noise are therefore not separable in
+a single pass, and either stays well under the RF−GIN gap: the conclusions
+above are robust to training budget. Full record:
+`results/learning_curve/ep300_confirmation.md`.
+
 **The failures themselves transfer.** `gnn_05_error_analysis.py` on four
 targets (worst-50 overlap / Spearman ρ of per-molecule |error|, random /
 scaffold): `egfr` 25/21, ρ 0.52/0.52 (chance ≈ 2); `mapk14` 25/30,

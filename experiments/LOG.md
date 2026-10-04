@@ -6,6 +6,54 @@ artifacts. Newest first. Maintained by M4 Air; results produced on M3 Max.
 
 ## 2026-10-04
 
+### ep300 training-budget confirmation (egfr_full) — DELIVERED — verdict unchanged
+
+- Commits: `ad70ce4` (`results: epoch-300 training-budget confirmation
+  (mean shift << RF-GIN gap)`), `774c550` (`chore: ignore regenerable
+  split npz`); this entry and the README 8.2 caveat land in the follow-up
+  `docs: LOG/README training-budget note` commit. Authoritative record:
+  `results/learning_curve/ep300_confirmation.md`.
+- **Why**: the extended learning curve showed large-n runs pinned against
+  the 100-epoch cap - all 6 `egfr_full` full-pool baseline runs (2 splits x
+  3 seeds) landed at `best_epoch` **93-100** - which made the n=9717 GIN
+  numbers look like they might be budget-truncated.
+- **Experiment**: same data, same splits, same seeds, same hyperparameters
+  (patience 20); only `--epochs 300`. `scripts/gnn_03_train_gin.py` was not
+  touched. 6 runs = 2 splits x 3 seeds on the M3:
+  `logs/ep300.sh` -> `logs/ep300_confirm.log` (round 1) and
+  `logs/ep300_repair.sh` -> `logs/ep300_repair.log` (repair round).
+- **Truncation confirmed**: every run early-stopped between epochs
+  **100 and 217** (repair log's last epoch is 217), none reached 300;
+  `best_epoch` moved to **80-197 with 5/6 now past the old 100 cap**. The
+  100-epoch budget really was binding on large-n runs.
+- **But a single pass cannot separate the budget effect from run noise**:
+  - per-seed ΔR2 straddles zero: **−0.0503 … +0.0308**, **4/6** past the
+    0.01 materiality threshold, no consistent direction (random/42 up,
+    scaffold/42 and scaffold/1 down, scaffold/2 up; random/1 and random/2
+    essentially flat);
+  - **two same-seed, same-config ep300 runs differ by up to 0.0277**
+    (PyG scatter/atomics non-determinism amplified by early-stop epoch
+    selection) - the epoch-budget effect is the same order as run noise,
+    so one paired run cannot resolve it; quantifying it needs repeated
+    runs per seed.
+- **3-seed mean shift (round 1 from the log / round 2 from the files)**:
+  random **+0.0080 / +0.0035**, scaffold **−0.0015 / −0.0173**. The larger
+  magnitude, 0.0173, is ~31% of the same-split RF−GIN gap (−0.049 random /
+  −0.055 scaffold) and the random shift is ~7% of its gap - both far below
+  the gap. **The "no measured crossover" verdict is unchanged**, and it is
+  now known to be robust to the training budget.
+- **Artifact-naming lesson**: `gnn_03_train_gin.py` writes metrics to
+  `results/gnn_metrics_{TAG}{suffix}.json` and preds to
+  `gnn_preds_{TAG}_{split}{suffix}.npz` - **neither filename carries the
+  seed**. Round 1 ran all 6 jobs with the shared `--suffix _ep300`, so the
+  three seeds overwrote each other: only seed 2's outputs survived on disk
+  (preserved under `_seed2_ep300` names - that metrics file still carries
+  `params.suffix = "_ep300"` inside), while seed 42 and seed 1 survived
+  only in the log. The repair round re-ran those two under per-seed
+  suffixes (`_ep300` = seed 42, `_seed1_ep300`) and the artifact set is
+  whole again (15 files). **Every multi-seed run must now get a per-seed
+  suffix.**
+
 ### Cross-target panel + egfr_full data scaling — DELIVERED — campaign complete
 
 - Commits: `c462607` (`feat: generic ChEMBL downloader (01e) + chain
