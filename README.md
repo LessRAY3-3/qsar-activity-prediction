@@ -359,6 +359,132 @@ and ρ 0.49-0.65 across chemically unrelated targets: the conclusion of
 section 7.5 - **many failures are molecule-intrinsic (noisy or censored
 measurements), not model-specific** - is a cross-target robust result.
 
+## 9. Giving the GNN a fair chance (bounded tuning + GINE)
+
+Sections 7 and 8 deliberately froze the GIN recipe so the comparison stayed
+paired. That is the right default, but it also means every Δ in section 8
+is a **frozen-recipe** Δ: it answers "does this one architecture at one
+hand-picked capacity beat a tuned RF?", not "can a GNN beat this RF at
+all?". This section gives the GIN a bounded, honest chance to answer the
+second question.
+
+**Protocol** (`experiments/gnn_fairness.py`; 36 runs per target, all exit
+0). On the three targets section 8 puts closest to parity -
+`mapk14`/VEGFR2 (−0.006), `herg` (−0.013) and `abl1` (−0.013) - a bounded
+grid of 8 configs (hidden {128, 256} x layers {4, 5} x dropout {0.2, 0.3})
+is trained **only on the scaffold split**, and the config is selected by
+the **3-seed mean validation RMSE**, never a single seed - the section 7.4
+lesson, where best-epoch selection on a few hundred validation molecules
+was fitting noise. The winner is then re-run from scratch on both splits
+x 3 seeds, and a **GINE** variant that feeds the cached 3-dim bond
+features through a `BondEncoder` (`BOND_FEATURE_DIMS = [13, 7, 2]`) runs at
+one fixed config on both splits x 3 seeds. Everything else - optimizer,
+schedule, early stopping, epochs, batch size, pooling - is `gnn_03`'s.
+
+Winners: `mapk14` 256/4L/0.2 (mean valid RMSE 0.7056), `herg` 256/5L/0.2
+(0.5145), `abl1` 256/4L/0.2 (0.8427) - hidden 256 wins on all three.
+
+Test R2, 3-seed mean ± std; Δ = GIN − RF (the section 8 mean convention):
+
+| Target | Model | random R2 | Δ rand | scaffold R2 | Δ scaf |
+|---|---|---|---|---|---|
+| `mapk14` (VEGFR2) | RF | 0.736 | — | 0.617 | — |
+| | baseline GIN | 0.678±0.007 | −0.058 | 0.611±0.024 | −0.006 |
+| | tuned GIN | 0.697±0.006 | −0.039 | 0.622±0.012 | **+0.005** |
+| | GINE | 0.674±0.003 | −0.062 | 0.594±0.013 | −0.023 |
+| `herg` | RF | 0.615 | — | 0.430 | — |
+| | baseline GIN | 0.616±0.017 | +0.000 | 0.417±0.007 | −0.013 |
+| | tuned GIN | 0.612±0.016 | −0.003 | 0.455±0.009 | **+0.025** |
+| | GINE | 0.593±0.025 | −0.023 | 0.454±0.007 | **+0.024** |
+| `abl1` | RF | 0.792 | — | 0.723 | — |
+| | baseline GIN | 0.752±0.006 | −0.039 | 0.710±0.037 | −0.013 |
+| | tuned GIN | 0.756±0.014 | −0.035 | 0.693±0.063 | −0.030 |
+| | GINE | 0.753±0.007 | −0.039 | 0.638±0.083 | −0.085 |
+
+![fairness mapk14](figures/fairness/mapk14.png)
+![fairness herg](figures/fairness/herg.png)
+![fairness abl1](figures/fairness/abl1.png)
+
+**(i) The frozen recipe really does understate the GIN - but only a
+little, and only on scaffold.** After bounded tuning, **2 of the 3 nearest
+targets flip positive on the mean convention**: `mapk14`/VEGFR2
+(−0.006 → **+0.005**) and `herg` (−0.013 → **+0.025**), and hidden 256
+wins on every target, so the section 8 recipe was capacity-starved. The
+effect is small and fragile to validation-set noise: `abl1` is the
+counter-example - choosing a config on its **216** validation molecules
+overfits, the winner's test R2 *falls* to 0.693 and the seed std blows up
+to **0.063** (vs 0.037 at baseline). On the random split **none of the
+three flips** (−0.039 / −0.003 / −0.035).
+
+**(ii) GINE bond features are not a general gain.** They help only on
+`herg` scaffold (**+0.024**) and hurt on `mapk14` (−0.062 / −0.023) and
+`abl1` scaffold (**−0.085**, std 0.083). Edge features are not the missing
+ingredient.
+
+**(iii) What this means for section 8.** Section 8's "no clear lead on any
+of 16 cells" is a statement about the *frozen recipe*, and this section is
+its boundary: a bounded tuning pass can push a minority of near-parity
+targets over zero on scaffold - and nowhere else. It does not overturn
+the section-8 verdict on random splits, it does not generalise (1 of 3
+targets regresses), and at +0.005 to +0.025 it is comparable to the seed
+noise section 7.6 already told us to expect.
+
+## 10. Multi-task pooling: more data does not rescue the GIN
+
+`scripts/gnn_07_multitask.py` tests the industrial setting the
+single-task runs cannot: pool `egfr_full` + `abl1` + `mapk14` into
+**27,992 molecule rows** (25,143 unique SMILES - and **2,525, i.e. 10.0%,
+appear under more than one target**) and train one GIN on all of it. Two
+arms, each 3 seeds x 2 splits: **MT-GIN** (shared 4-layer trunk + one
+linear head per target, every batch drawn from a single task) and
+**pooled**, a negative control with one shared head that ignores the task
+label entirely. Evaluation uses each target's own persisted split and each
+target's own train statistics for standardisation.
+
+Test R2, 3-seed mean ± std (Δ = vs the single-task RF):
+
+| Task | Split | ST-RF | ST-GIN | pooled | MT-GIN |
+|---|---|---|---|---|---|
+| `egfr_full` | random | 0.759 | 0.707±0.006 (−0.053) | 0.535±0.051 (−0.224) | 0.530±0.033 (−0.229) |
+| `egfr_full` | scaffold | 0.593 | 0.558±0.010 (−0.035) | 0.451±0.027 (−0.141) | 0.356±0.078 (−0.236) |
+| `abl1` | random | 0.792 | 0.752±0.006 (−0.039) | 0.638±0.060 (−0.153) | 0.625±0.035 (−0.167) |
+| `abl1` | scaffold | 0.723 | 0.710±0.037 (−0.013) | 0.554±0.072 (−0.169) | 0.614±0.032 (−0.109) |
+| `mapk14` | random | 0.736 | 0.678±0.007 (−0.058) | 0.195±0.023 (−0.541) | 0.554±0.031 (−0.182) |
+| `mapk14` | scaffold | 0.617 | 0.611±0.024 (−0.006) | 0.182±0.160 (−0.435) | 0.538±0.020 (−0.079) |
+
+![multitask random](figures/multitask/random.png)
+![multitask scaffold](figures/multitask/scaffold.png)
+
+**Pooling loses on every cell.** Neither arm beats the single-task RF in
+any of the 6 task x split cells, and both are *worse* than the single-task
+GIN everywhere: MT-GIN trails RF by **−0.079 to −0.236**, pooled by
+**−0.141 to −0.541**, against **−0.006 to −0.058** for the single-task
+GIN. More molecules from more targets made the model worse, not better.
+
+**Sharing is destructive; per-target heads only partly repair it.** The
+shared head drags `mapk14` down to **0.195/0.182** (from 0.678/0.611
+single-task) - pooled training destroys the target-specific signal. The
+MT heads pull it back to **0.554/0.538, +0.36** on both splits, but still
+−0.124/−0.073 below the single-task GIN. Averaged over the 6 cells MT sits
+**+0.11** above pooled, yet that average is carried almost entirely by
+`mapk14`; on `egfr_full` (both splits) and `abl1`/random, MT is actually
+*below* pooled.
+
+**Leakage caveat.** Because the pooled set contains shared molecules, on
+the random split **775 unique SMILES** sit in one target's train set while
+appearing in another target's test set (169 on the scaffold split). That
+can only *inflate* the pooled and MT numbers, so the real deficit is at
+least as large as the table shows.
+
+**Head-capacity diagnostic.** This spec uses a **linear** head where
+`gnn_03` uses an MLP head; a single-task re-run through the same linear
+head scores **0.661** against the MLP's **0.707** on `egfr_full`/random
+(run kept under `results/_diag_tasks1/`) - a structural handicap of
+~0.04-0.05 that the spec fixed in advance. It is
+not what decides the verdict: crediting MT-GIN with that handicap back
+would lift it to 0.40-0.67, still below the single-task GIN in all six
+cells.
+
 ## Repository layout
 
 ```
@@ -433,7 +559,7 @@ target transform.
 
 ## Conclusions
 
-Eight experiments, one page. Every number below is 3-seed mean +/- std and
+Ten experiments, one page. Every number below is 3-seed mean +/- std and
 recomputable from `results/` (run ledger: `experiments/LOG.md`).
 
 1. **The GIN does not beat Morgan fingerprints + RF on ~6.2k EGFR
@@ -485,6 +611,28 @@ recomputable from `results/` (run ledger: `experiments/LOG.md`).
    reproduces on 4 targets (worst-50 overlap 21-42 vs 1-7 expected,
    ρ 0.49-0.65) - "many failures are molecule-intrinsic" holds across
    chemically unrelated targets.
+9. **The frozen recipe understates the GIN; bounded tuning flips a
+   minority of near-parity targets, small and unsteady (section 9).**
+   On the three targets closest to parity, selecting one of 8 configs by
+   3-seed mean validation RMSE (never a single seed) turns the scaffold
+   Δ(mean) positive for VEGFR2 (−0.006 → **+0.005**) and hERG (−0.013 →
+   **+0.025**), with hidden 256 winning on all three - the section 8
+   recipe was capacity-starved. But ABL1 regresses (test R2 0.693, seed
+   std 0.063 - picking a config on 216 validation molecules overfits),
+   the random split flips on **none** of the three (−0.039/−0.003/−0.035),
+   GINE bond features help only hERG (and hurt ABL1 by −0.085), and the
+   wins themselves (+0.005/+0.025) are the size of seed noise. Section 8's
+   verdict is a frozen-recipe verdict; this is its boundary, not a
+   reversal.
+10. **Multi-task pooling is counter-productive at this scale (section
+    10).** Pooling `egfr_full`+`abl1`+`mapk14` (27,992 rows, 10.0% shared
+    SMILES) and training MT-GIN or a pooled single-task control beats the
+    single-task RF in **0 of 6** task x split cells; both are worse than
+    the single-task GIN everywhere (MT −0.079…−0.236 vs RF, pooled
+    −0.141…−0.541, against −0.006…−0.058 for ST-GIN). The shared head
+    destroys `mapk14` (0.195/0.182); per-task heads recover +0.36 but
+    still trail single-task. 775 shared molecules leak across splits on
+    the random partition, which can only flatter these numbers.
 
 ## Interview talking points
 

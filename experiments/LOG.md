@@ -4,7 +4,113 @@ Running log of the deep-dive experiments. Each entry: what ran, headline
 numbers (3-seed mean +/- std unless noted), and the commit holding the
 artifacts. Newest first. Maintained by M4 Air; results produced on M3 Max.
 
+## 2026-10-05
+
+### Experiment B: GIN fairness - bounded tuning + GINE (mapk14 / herg / abl1) — DELIVERED
+
+- Commits: `8ba7329` (`feat: fairness experiment (bounded GIN tuning +
+  GINE) + multitask kinase pooling scripts`), `e7cefd9` (`results:
+  fairness (2/3 targets flip on scaffold after tuning) + multitask
+  pooling (worse)`); this entry and README sections 9-10 land in the
+  follow-up `docs:` commit.
+- **Question**: is section 8's "no clear GIN lead" an artefact of the
+  frozen `gnn_03` recipe? Run on the 3 targets nearest parity in section
+  8 (Δmean scaffold: `mapk14`/VEGFR2 −0.006, `herg` −0.013,
+  `abl1` −0.013).
+- **Protocol** (`experiments/gnn_fairness.py`): bounded grid
+  hidden {128,256} x layers {4,5} x dropout {0.2,0.3} = 8 configs,
+  trained **only on the scaffold split**, seeds 42/1/2; config chosen by
+  **3-seed mean valid RMSE** (README 7.4 lesson - never a single seed).
+  The winner is re-run from scratch on both splits x 3 seeds. GINE
+  variant (GINEConv + BondEncoder over the cached 3-dim bond features,
+  `BOND_FEATURE_DIMS=[13,7,2]`), one fixed config, both splits x 3 seeds.
+  Everything else identical to `gnn_03`. **36 runs per target
+  (24 tune + 6 final + 6 GINE) = 108 total, all exit 0.**
+- **Winners**: `mapk14` 256/4L/0.2 (mean valid RMSE **0.7056**),
+  `herg` 256/5L/0.2 (**0.5145**), `abl1` 256/4L/0.2 (0.8427) -
+  **hidden 256 wins on all three**, i.e. the frozen recipe's hidden 128
+  was capacity-starved.
+- **Results** (test R2, 3-seed mean+-std; Δ = GIN − RF, mean convention):
+  - mapk14/VEGFR2: baseline 0.678+-0.007 / 0.611+-0.024 (Δ −0.058 / −0.006);
+    tuned 0.697+-0.006 / **0.622+-0.012** (Δ −0.039 / **+0.005**);
+    GINE 0.674+-0.003 / 0.594+-0.013 (Δ −0.062 / −0.023)
+  - herg: baseline 0.616+-0.017 / 0.417+-0.007 (Δ +0.000 / −0.013);
+    tuned 0.612+-0.016 / **0.455+-0.009** (Δ −0.003 / **+0.025**);
+    GINE 0.593+-0.025 / **0.454+-0.007** (Δ −0.023 / **+0.024**)
+  - abl1: baseline 0.752+-0.006 / 0.710+-0.037 (Δ −0.039 / −0.013);
+    tuned 0.756+-0.014 / 0.693+-**0.063** (Δ −0.035 / −0.030);
+    GINE 0.753+-0.007 / 0.638+-**0.083** (Δ −0.039 / −0.085)
+- **Verdict**: scaffold flips positive on **2/3** under the mean
+  convention (VEGFR2 +0.005, herg +0.025) - the frozen recipe really did
+  understate the GIN - but the effect is small and validation-noise
+  sensitive: **abl1 is the counter-example** (a config picked on 216
+  validation molecules overfits; test R2 *drops* and the seed std explodes
+  0.037 -> 0.063), and **the random split flips on none**
+  (−0.039 / −0.003 / −0.035). GINE bond features are **not a general
+  gain** (help only herg scaffold +0.024; hurt mapk14 and abl1 scaffold
+  −0.085). Section 8's verdict therefore stands as a *frozen-recipe*
+  statement; this entry is its boundary, not a reversal.
+- **Timing**: **17h41m actual** (mapk14 4h16m, herg 11h30m, abl1 1h55m,
+  serial - one MPS user at a time) against a **4-5h estimate, i.e.
+  3.5-4.4x over**. The 8-config grid on a 11.8k-molecule target dominates
+  the wall clock.
+- **Watcher trap**: `results/fairness/summary_{TAG}.json` is written by
+  `save_state()` after **every** phase, so it already exists right after
+  `tune` with `"phases": ["tune"]`. A watcher keyed on file *existence*
+  fires about a third of the way into a target and reports a
+  half-finished state as done. Correct signals: `phases` contains
+  `"summary"`, or the `[TAG] done: winner=...` line (the finished files
+  list all four phases: tune/final/gine/summary).
+- Artifacts: `results/fairness/{summary.csv, summary_{tag}.json,
+  {tag}_tuning.csv}`, `figures/fairness/{mapk14,herg,abl1}.png`,
+  `logs/fairness_{mapk14,herg,abl1}.log`, `logs/fairness_all.log`,
+  `logs/fairness_all.sh`, `logs/fairness_run_tag.sh`.
+
 ## 2026-10-04
+
+### Experiment C: multi-task kinase pooling (egfr_full + abl1 + mapk14) — DELIVERED — negative result
+
+- Commits: same pair as experiment B (`8ba7329` scripts, `e7cefd9`
+  results/figures/logs); this entry and README section 10 land in the
+  follow-up `docs:` commit.
+- **Question**: does the industrial "multi-task + more data" setting let
+  the GNN overtake the single-task RF it never beat in sections 7-8?
+- **Method** (`scripts/gnn_07_multitask.py`): pool the three datasets -
+  **27,992 molecule rows**, 25,143 unique SMILES, **2,525 (10.0%) shared
+  by two or more targets**. Two arms x 3 seeds x 2 splits (12 runs, all
+  rc=0): **MT-GIN** = shared 4-layer trunk + one linear head per target,
+  every batch drawn from a single task; **pooled** = one shared head that
+  ignores the task label (negative control). Each target keeps its own
+  persisted split and its own train statistics; early stopping on the
+  mean of the three valid RMSEs.
+- **Results** (test R2 3-seed mean, Δ vs ST-RF): **0 of 6 cells won** by
+  either arm. MT-GIN Δ −0.079..−0.236, pooled Δ −0.141..−0.541, against
+  ST-GIN Δ −0.006..−0.058 - pooling widens the gap to RF everywhere.
+  - egfr_full r/s: ST-GIN 0.707 / 0.558 | pooled 0.535 / 0.451 | MT 0.530 / 0.356
+  - abl1      r/s: ST-GIN 0.752 / 0.710 | pooled 0.638 / 0.554 | MT 0.625 / 0.614
+  - mapk14    r/s: ST-GIN 0.678 / 0.611 | pooled **0.195 / 0.182** | MT 0.554 / 0.538
+- **Contamination / partial repair**: the shared head destroys `mapk14`
+  (0.195/0.182 vs 0.678/0.611 single-task); the per-task heads pull it
+  back by **+0.36** on both splits (0.554/0.538) but still trail ST-GIN by
+  −0.124/−0.073. MT averages **+0.11** above pooled across the 6 cells,
+  yet that average is carried entirely by `mapk14` - on `egfr_full` (both
+  splits) and `abl1`/random, MT is *below* pooled.
+- **Leakage**: shared molecules mean **775 unique SMILES** sit in one
+  target's train set while appearing in another target's test set on the
+  random split (169 on scaffold). The direction is to *inflate* pooled/MT
+  scores, so the reported deficit is a lower bound.
+- **Head diagnostic**: the spec fixed a **linear** head where `gnn_03`
+  uses an MLP head - a single-task re-run through the linear head scores
+  **0.661** against `gnn_03`'s **0.707** (egfr_full/random, ~0.04-0.05
+  structural handicap). Crediting that back still leaves MT at 0.40-0.67,
+  below ST-GIN in all six cells - the verdict does not rest on the head.
+- **Verdict**: negative. Pooling / multi-task at this scale makes the GIN
+  worse; neither the extra molecules nor the per-task heads rescue it.
+- Runtime 15:28-15:56 (M3, four parallel chains + `--aggregate`).
+- Artifacts: `results/multitask/{summary.csv, mt_metrics*, 
+  pooled_st_metrics*, *_preds_*.npz, models/}`,
+  `figures/multitask/{random,scaffold}.png`, `logs/multitask.log`,
+  `logs/run_multitask.sh`.
 
 ### ep300 training-budget confirmation (egfr_full) — DELIVERED — verdict unchanged
 
