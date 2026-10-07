@@ -1,0 +1,134 @@
+{
+  "scaffold": {
+    "egfr_full": {
+      "r2": 0.3415642278737423,
+      "rmse": 1.1314781912288507,
+      "mae": 0.9033470908242239,
+      "best_epoch": 37,
+      "best_valid_rmse_std_mean": 0.6582707365353903,
+      "best_valid_rmse_std_by_task": {
+        "egfr_full": 0.7229878306388855,
+        "abl1": 0.564320981502533,
+        "mapk14": 0.6875033974647522
+      },
+      "best_valid_rmse_raw": 1.039935892076329
+    },
+    "abl1": {
+      "r2": 0.6596506892147387,
+      "rmse": 0.7145545053629417,
+      "mae": 0.5413219514868889,
+      "best_epoch": 37,
+      "best_valid_rmse_std_mean": 0.6582707365353903,
+      "best_valid_rmse_std_by_task": {
+        "egfr_full": 0.7229878306388855,
+        "abl1": 0.564320981502533,
+        "mapk14": 0.6875033974647522
+      },
+      "best_valid_rmse_raw": 0.900567529553804
+    },
+    "mapk14": {
+      "r2": 0.5404930542933406,
+      "rmse": 0.8433120492423264,
+      "mae": 0.6319974211625228,
+      "best_epoch": 37,
+      "best_valid_rmse_std_mean": 0.6582707365353903,
+      "best_valid_rmse_std_by_task": {
+        "egfr_full": 0.7229878306388855,
+        "abl1": 0.564320981502533,
+        "mapk14": 0.6875033974647522
+      },
+      "best_valid_rmse_raw": 0.8666209489345533
+    },
+    "_run": {
+      "model": "mt",
+      "seed": 1,
+      "tags": [
+        "egfr_full",
+        "abl1",
+        "mapk14"
+      ],
+      "params": {
+        "model": "mt",
+        "split": "scaffold",
+        "seed": 1,
+        "tasks": 3,
+        "hidden": 128,
+        "num_layers": 4,
+        "dropout": 0.2,
+        "lr": 0.001,
+        "batch_size": 128,
+        "epochs": 100,
+        "patience": 20,
+        "outdir": "/Users/leisirui/qsar-activity-prediction/scripts/../results/multitask",
+        "figdir": "/Users/leisirui/qsar-activity-prediction/scripts/../figures/multitask"
+      },
+      "train_seconds": 373.9
+    }
+  },
+  "random": {
+    "egfr_full": {
+      "r2": 0.5043126439211577,
+      "rmse": 1.0177183086435537,
+      "mae": 0.7980307756335103,
+      "best_epoch": 87,
+      "best_valid_rmse_std_mean": 0.6473901073137919,
+      "best_valid_rmse_std_by_task": {
+        "egfr_full": 0.7071878910064697,
+        "abl1": 0.5688855051994324,
+        "mapk14": 0.6660969257354736
+      },
+      "best_valid_rmse_raw": 1.0157220245610006
+    },
+    "abl1": {
+      "r2": 0.6660360704993293,
+      "rmse": 0.9089258550617714,
+      "mae": 0.7135682019592653,
+      "best_epoch": 87,
+      "best_valid_rmse_std_mean": 0.6473901073137919,
+      "best_valid_rmse_std_by_task": {
+        "egfr_full": 0.7071878910064697,
+        "abl1": 0.5688855051994324,
+        "mapk14": 0.6660969257354736
+      },
+      "best_valid_rmse_raw": 0.9172518955981701
+    },
+    "mapk14": {
+      "r2": 0.5895246815668143,
+      "rmse": 0.7961985289100609,
+      "mae": 0.6171934851359888,
+      "best_epoch": 87,
+      "best_valid_rmse_std_mean": 0.6473901073137919,
+      "best_valid_rmse_std_by_task": {
+        "egfr_full": 0.7071878910064697,
+        "abl1": 0.5688855051994324,
+        "mapk14": 0.6660969257354736
+      },
+      "best_valid_rmse_raw": 0.8413070254821093
+    },
+    "_run": {
+      "model": "mt",
+      "seed": 1,
+      "tags": [
+        "egfr_full",
+        "abl1",
+        "mapk14"
+      ],
+      "params": {
+        "model": "mt",
+        "split": "random",
+        "seed": 1,
+        "tasks": 3,
+        "hidden": 128,
+        "num_layers": 4,
+        "dropout": 0.2,
+        "lr": 0.001,
+        "batch_size": 128,
+        "epochs": 100,
+        "patience": 20,
+        "outdir": "/Users/leisirui/qsar-activity-prediction/scripts/../results/multitask",
+        "figdir": "/Users/leisirui/qsar-activity-prediction/scripts/../figures/multitask"
+      },
+      "train_seconds": 769.4
+    }
+  }
+}

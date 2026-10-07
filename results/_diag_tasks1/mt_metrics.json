@@ -1,0 +1,38 @@
+{
+  "random": {
+    "egfr_full": {
+      "r2": 0.6614241096263034,
+      "rmse": 0.8411078409296326,
+      "mae": 0.6282719343416038,
+      "best_epoch": 91,
+      "best_valid_rmse_std_mean": 0.5853945016860962,
+      "best_valid_rmse_std_by_task": {
+        "egfr_full": 0.5853945016860962
+      },
+      "best_valid_rmse_raw": 0.8407922363790021
+    },
+    "_run": {
+      "model": "mt",
+      "seed": 42,
+      "tags": [
+        "egfr_full"
+      ],
+      "params": {
+        "model": "mt",
+        "split": "random",
+        "seed": 42,
+        "tasks": 1,
+        "hidden": 128,
+        "num_layers": 4,
+        "dropout": 0.2,
+        "lr": 0.001,
+        "batch_size": 128,
+        "epochs": 100,
+        "patience": 20,
+        "outdir": "results/_diag_tasks1",
+        "figdir": "/Users/leisirui/qsar-activity-prediction/scripts/../figures/multitask"
+      },
+      "train_seconds": 142.9
+    }
+  }
+}

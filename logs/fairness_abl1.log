@@ -1,0 +1,63 @@
+=== fairness_abl1 start Mon Oct  5 07:18:23 CST 2026 ===
+/Users/leisirui/miniforge3/envs/qsar/lib/python3.12/site-packages/torch/jit/_script.py:1491: FutureWarning: `torch.jit.script` is deprecated. Please switch to `torch.compile` or `torch.export`.
+  warnings.warn(
+[abl1] seeds=[42, 1, 2] phases=['tune', 'final', 'gine', 'summary']
+  [tune] {'hidden': 128, 'num_layers': 4, 'dropout': 0.2}
+/Users/leisirui/qsar-activity-prediction/experiments/../scripts/gnn_03_train_gin.py:114: UserWarning: Converting a tensor with requires_grad=True to a scalar may lead to unexpected behavior.
+Consider using tensor.detach() first. (Triggered internally at /Users/runner/work/pytorch/pytorch/torch/csrc/autograd/generated/python_variable_methods.cpp:821.)
+  total += float(loss) * len(batch.y)
+    seed=42 valid_rmse=0.8670 test_rmse=0.7054 test_r2=0.6683 (best epoch 30, 74s)
+    seed=1 valid_rmse=0.8749 test_rmse=0.6763 test_r2=0.6951 (best epoch 59, 79s)
+    seed=2 valid_rmse=0.8994 test_rmse=0.7424 test_r2=0.6326 (best epoch 48, 46s)
+  [tune] {'hidden': 128, 'num_layers': 4, 'dropout': 0.3}
+    seed=42 valid_rmse=0.8091 test_rmse=0.6262 test_r2=0.7386 (best epoch 62, 270s)
+    seed=1 valid_rmse=0.8610 test_rmse=0.6732 test_r2=0.6979 (best epoch 63, 47s)
+    seed=2 valid_rmse=0.8712 test_rmse=0.7003 test_r2=0.6731 (best epoch 63, 73s)
+  [tune] {'hidden': 128, 'num_layers': 5, 'dropout': 0.2}
+    seed=42 valid_rmse=0.8533 test_rmse=0.6442 test_r2=0.7234 (best epoch 55, 72s)
+    seed=1 valid_rmse=0.8700 test_rmse=0.6237 test_r2=0.7407 (best epoch 67, 25s)
+    seed=2 valid_rmse=0.8690 test_rmse=0.6835 test_r2=0.6886 (best epoch 50, 419s)
+  [tune] {'hidden': 128, 'num_layers': 5, 'dropout': 0.3}
+    seed=42 valid_rmse=0.8626 test_rmse=0.6728 test_r2=0.6983 (best epoch 49, 71s)
+    seed=1 valid_rmse=0.8705 test_rmse=0.6660 test_r2=0.7043 (best epoch 67, 25s)
+    seed=2 valid_rmse=0.8900 test_rmse=0.6547 test_r2=0.7143 (best epoch 57, 57s)
+  [tune] {'hidden': 256, 'num_layers': 4, 'dropout': 0.2}
+    seed=42 valid_rmse=0.8329 test_rmse=0.6537 test_r2=0.7151 (best epoch 54, 127s)
+    seed=1 valid_rmse=0.8709 test_rmse=0.6444 test_r2=0.7232 (best epoch 54, 28s)
+    seed=2 valid_rmse=0.8242 test_rmse=0.6181 test_r2=0.7453 (best epoch 86, 42s)
+  [tune] {'hidden': 256, 'num_layers': 4, 'dropout': 0.3}
+    seed=42 valid_rmse=0.8610 test_rmse=0.6375 test_r2=0.7291 (best epoch 71, 329s)
+    seed=1 valid_rmse=0.8566 test_rmse=0.6271 test_r2=0.7378 (best epoch 73, 33s)
+    seed=2 valid_rmse=0.8547 test_rmse=0.7088 test_r2=0.6651 (best epoch 50, 964s)
+  [tune] {'hidden': 256, 'num_layers': 5, 'dropout': 0.2}
+    seed=42 valid_rmse=0.8484 test_rmse=0.6560 test_r2=0.7131 (best epoch 54, 78s)
+    seed=1 valid_rmse=0.8532 test_rmse=0.6693 test_r2=0.7014 (best epoch 63, 56s)
+    seed=2 valid_rmse=0.8918 test_rmse=0.6944 test_r2=0.6785 (best epoch 44, 75s)
+  [tune] {'hidden': 256, 'num_layers': 5, 'dropout': 0.3}
+    seed=42 valid_rmse=0.8393 test_rmse=0.6392 test_r2=0.7276 (best epoch 50, 62s)
+    seed=1 valid_rmse=0.8322 test_rmse=0.6874 test_r2=0.6850 (best epoch 63, 783s)
+    seed=2 valid_rmse=0.8897 test_rmse=0.7304 test_r2=0.6444 (best epoch 48, 33s)
+  [tune] winner={'hidden': 256, 'num_layers': 4, 'dropout': 0.2} mean valid RMSE=0.8427
+  [final] tuned_gin {'hidden': 256, 'num_layers': 4, 'dropout': 0.2}
+    split=random
+    seed=42 valid_rmse=0.7888 test_rmse=0.8079 test_r2=0.7361 (best epoch 65, 937s)
+    seed=1 valid_rmse=0.7713 test_rmse=0.7606 test_r2=0.7661 (best epoch 95, 57s)
+    seed=2 valid_rmse=0.7672 test_rmse=0.7602 test_r2=0.7664 (best epoch 80, 572s)
+    split=scaffold
+    seed=42 valid_rmse=0.8723 test_rmse=0.7709 test_r2=0.6038 (best epoch 30, 16s)
+    seed=1 valid_rmse=0.8637 test_rmse=0.6179 test_r2=0.7455 (best epoch 54, 25s)
+    seed=2 valid_rmse=0.8520 test_rmse=0.6379 test_r2=0.7287 (best epoch 71, 64s)
+  [gine] {'hidden': 128, 'num_layers': 4, 'dropout': 0.2}
+    split=random
+    seed=42 valid_rmse=0.7151 test_rmse=0.7901 test_r2=0.7476 (best epoch 98, 207s)
+    seed=1 valid_rmse=0.7439 test_rmse=0.7912 test_r2=0.7470 (best epoch 91, 58s)
+    seed=2 valid_rmse=0.7315 test_rmse=0.7655 test_r2=0.7631 (best epoch 88, 983s)
+    split=scaffold
+    seed=42 valid_rmse=0.8824 test_rmse=0.8471 test_r2=0.5217 (best epoch 30, 16s)
+    seed=1 valid_rmse=0.8766 test_rmse=0.6644 test_r2=0.7058 (best epoch 52, 48s)
+    seed=2 valid_rmse=0.8474 test_rmse=0.6847 test_r2=0.6875 (best epoch 39, 20s)
+summary -> results/fairness/summary_abl1.json
+summary.csv -> results/fairness/summary.csv (18 rows)
+figure -> figures/fairness/abl1.png
+[abl1] done: winner={'hidden': 256, 'num_layers': 4, 'dropout': 0.2}
+=== fairness_abl1 exit=0 Mon Oct  5 09:13:23 CST 2026 ===
