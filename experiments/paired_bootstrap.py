@@ -12,6 +12,11 @@ GINE predictions; outputs then carry a `_gine` suffix ({tag}_{split}_gine.csv,
 summary_gine.csv, ci_panel_gine.png) so the phase-0 gin artifacts are never
 overwritten. Default behaviour (--model gin) is unchanged.
 
+`--model attentivefp` (P8 phase 3) follows the same contract against the
+AttentiveFP campaign's predictions: {tag}_{split}_attentivefp.csv,
+summary_attentivefp.csv, ci_panel_attentivefp.png -- gin and gine
+artifacts stay untouched byte-for-byte.
+
 `--splits time` (P8 time-split analysis) gets the same protection for the
 shared outputs: cell files already carry the split in their name
 ({tag}_time.csv), and any run touching a split outside the default
@@ -22,9 +27,10 @@ overwritten by a time run.
 
 Inputs (per tag x split; test_idx alignment is asserted, never assumed):
   results/rf_preds_{tag}_{split}.npz          RF test preds (original pIC50)
-  results/gnn_preds_{tag}_{split}.npz         GIN seed 42   (--model gine:
-  results/gnn_preds_{tag}_{split}_seed1.npz   GIN seed 1     files are
-  results/gnn_preds_{tag}_{split}_seed2.npz   GIN seed 2     *_gine_*)
+  results/gnn_preds_{tag}_{split}.npz         GIN seed 42   (--model gine /
+  results/gnn_preds_{tag}_{split}_seed1.npz   GIN seed 1     attentivefp:
+  results/gnn_preds_{tag}_{split}_seed2.npz   GIN seed 2     infix _gine /
+                                                             _attentivefp)
 
 Two conventions ("model_pair" rows, both written for every cell):
   seed42  single seed-42 GIN vs RF            (reference; single-seed
@@ -41,10 +47,10 @@ Both pairs of one cell draw from an identically seeded Generator
 (seed=42, fresh per call), so seed42 and mean3 are evaluated on the exact
 same resample matrices and the run is order-independent.
 
-Outputs (suffix `_gine` on every path when --model gine; gin is unchanged;
-the shared summary/figure additionally carry the split suffix when --splits
-touches a split outside random/scaffold, e.g. summary_time.csv /
-ci_panel_time.png -- see split_suffix):
+Outputs (suffix `_gine` / `_attentivefp` on every path when --model gine /
+attentivefp; gin is unchanged; the shared summary/figure additionally carry
+the split suffix when --splits touches a split outside random/scaffold,
+e.g. summary_time.csv / ci_panel_time.png -- see split_suffix):
   results/significance/{tag}_{split}.csv   one row per model_pair with the
                                            point deltas, the 95% CI bounds,
                                            p_one_sided = #(dR2_boot > 0)/B
@@ -65,7 +71,7 @@ BASE = os.path.join(os.path.dirname(__file__), "..")
 
 TAGS = ("a2a", "abl1", "egfr", "egfr_full", "herg", "hivpr", "mpro", "vegfr2")
 SPLITS = ("random", "scaffold")
-MODELS = ("gin", "gine")
+MODELS = ("gin", "gine", "attentivefp")
 SEED_SUFFIXES = ("", "_seed1", "_seed2")
 PAIRS = ("seed42", "mean3")
 N_BOOT = 10_000
@@ -363,7 +369,8 @@ def parse_args(argv=None):
     p = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     p.add_argument("--model", default="gin", choices=list(MODELS),
                    help="GNN variant to compare against RF (default gin; "
-                        "gine writes *_gine outputs)")
+                        "gine/attentivefp write *_gine / *_attentivefp "
+                        "outputs)")
     p.add_argument("--tags", default=",".join(TAGS),
                    help="comma-separated dataset tags")
     p.add_argument("--splits", default=",".join(SPLITS),

@@ -148,6 +148,68 @@ artifacts. Newest first. Maintained by M4 Air; results produced on M3 Max.
     `logs/p8_rf_time_{egfr_full,herg,herg_retry}.log`,
     `logs/p8_uncertainty_gine.log`.
 
+### P8 phase 3: AttentiveFP control (48 runs) — DELIVERED
+
+- **Method**: `scripts/gnn_03_train_gin.py --model attentivefp` - PyG
+  AttentiveFP (gated attention + a GRU readout over 30 timesteps) on the
+  same `AtomEncoder` + `BondEncoder` front-end, every other element of
+  the frozen `gnn_03` recipe untouched - run as **8 targets x 2 splits x
+  3 seeds = 48 runs, all rc=0** (`logs/p8_afp_all.sh` ->
+  `logs/p8_afp_all.log`), then `experiments/afp_panel.py` +
+  `experiments/paired_bootstrap.py --model attentivefp` (mean3, B=10,000).
+  Every run kept per-seed predictions, so - unlike the GINE panel's
+  fairness-vintage rows - all 16 cells are bootstrappable.
+- **Results** (16 cells, mean3): **9 CIs exclude 0 - 8 favour RF**
+  (a2a/random, abl1/random, abl1/scaffold, egfr/random, egfr_full/random,
+  hivpr/scaffold **−0.239**, mpro/scaffold, vegfr2/scaffold), **exactly 1
+  favours AttentiveFP: `herg`/scaffold +0.013 [+0.035, +0.092]**, and 7
+  CIs contain 0. **Random: 8/8 Δ negative** (−0.026 to −0.103).
+  Reference frame at `herg`/scaffold: GIN **−0.013** (negative), GINE
+  **+0.024** (point estimate only, fairness vintage) - the one cell the
+  enhanced variants keep landing positive on (tuned GIN +0.025, GINE
+  +0.024, AFP +0.013), and the first time it crosses significance (its
+  `seed42` row is −0.006, not significant). Under the `seed42`
+  convention the panel reads **12/16 significant, every cell to RF** -
+  the third panel in a row where single-seed and mean3 pick different
+  significance sets (gin manufactured 2 GIN wins; here the only AFP win
+  exists only under mean3).
+- **Verdict**: the verdict hardens once more. AttentiveFP - attention,
+  GRU readout and bond features together, the strongest published
+  small-molecule readout - still loses 8 cells significantly to the
+  fingerprint RF, wins exactly one, and is negative on all 8 random
+  cells. With bond features (GINE), bounded tuning and AttentiveFP now
+  each tried and none flipping a verdict, "the GIN does not beat the
+  fingerprint RF" is no longer a complaint about our GIN implementation -
+  it is a data-scale / signal statement.
+- **Caveat** (convention, same as `experiments/gine_panel.py`): the
+  panel's `d_r2_mean` is the per-seed-mean Δ (mean of the 3 seed R2s
+  minus RF R2) while `ci_lo/ci_hi` is the mean3 *ensemble* Δ (R2 of the
+  per-molecule mean prediction minus RF R2); ensembling lifts R2, so the
+  point estimate and the interval need not coincide - `herg`/scaffold
+  reads **+0.013** as a point Δ against a **[+0.035, +0.092]** CI,
+  `hivpr`/scaffold **−0.239** against an ensemble centre of −0.193. Both
+  numbers are reported per their own convention.
+- **Timing / environment**: **~4.3h wall clock on the M3 Max**
+  (caffeinate-wrapped, unattended: 48 runs 01:34 -> 05:17 local, plus
+  wrap-up). The driver's auto push was rejected as non-fast-forward, so
+  the M4 fetched `20980df` over the LAN and merged it as `854a82c`
+  (05:55). Docs written on the M4 Air.
+- **Tests**: 66 -> **73**, all green (`tests/test_afp_panel.py` new;
+  `tests/test_p8_analysis.py` extended for `--model attentivefp`).
+- **Artifacts**:
+  - analysis: `experiments/afp_panel.py`,
+    `experiments/paired_bootstrap.py --model attentivefp`.
+  - results: `results/afp_panel/summary.csv` (16 rows),
+    `results/significance/summary_attentivefp.csv` + 16 per-cell
+    `results/significance/{tag}_{split}_attentivefp.csv`;
+    `results/gnn_{metrics,preds}_{tag}_attentivefp*` from the 48 runs.
+  - figures: `figures/afp_panel/panel_dR2.png`,
+    `figures/significance/ci_panel_attentivefp.png`,
+    `figures/significance/ci_panel_with_afp.png` (gin / gine / afp mean3
+    CIs side by side).
+  - tests: `tests/test_afp_panel.py`.
+  - logs: `logs/p8_afp_all.{sh,log}`.
+
 ## 2026-10-08
 
 ### Dataset tag rename: `mapk14` → `vegfr2`

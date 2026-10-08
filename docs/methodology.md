@@ -68,14 +68,24 @@ AtomEncoder (sum of per-feature embeddings) -> 4 x [GINConv -> BatchNorm
 Geometric, trained on an Apple M4 (MPS). The default `gin` does not use
 bond features (plain GINConv aggregates node features only), but the
 cached 3-dim bond features are no longer "stored but unused":
-`scripts/gnn_03_train_gin.py --model {gin, gine, attentivefp}` builds the
-baseline **GIN** (byte-for-byte the original recipe, artifacts keep their
-old names), **GINE** (same shell; `GINEConv` consumes
-`BondEncoder(data.edge_attr)`, `BOND_FEATURE_DIMS = [13, 7, 2]`), or
-PyG **AttentiveFP** on top of the same two encoders. The P8 GINE panel
-(Statistical significance below) runs the `gine` variant across all
-8 targets - bond features are used, and they still do not flip the
-verdict. Pooling is mean rather than the paper's sum so prediction scale
+`scripts/gnn_03_train_gin.py --model {gin, gine, attentivefp}` - all three
+choices are live and were run panel-wide - builds the baseline **GIN**
+(byte-for-byte the original recipe, artifacts keep their old names),
+**GINE** (same shell; `GINEConv` consumes `BondEncoder(data.edge_attr)`,
+`BOND_FEATURE_DIMS = [13, 7, 2]`), or PyG **AttentiveFP**. AttentiveFP
+keeps the same two embedding front-ends (`AtomEncoder` -> in_channels,
+`BondEncoder` -> edge_dim) and then runs the raw PyG model as-is:
+`AttentiveFP(in_channels=hidden, hidden_channels=hidden, out_channels=1,
+edge_dim=hidden, num_layers=4, num_timesteps=30, dropout=dropout)` -
+gated atom/bond attention with a GRU readout over 30 timesteps, no
+residual/BatchNorm shell of its own; hidden 128, 4 layers, dropout 0.2,
+100 epochs, early stopping on validation RMSE - everything else is the
+frozen `gnn_03` recipe. The P8 GINE panel (Statistical significance
+below) runs the `gine` variant across all 8 targets - bond features are
+used, and they still do not flip the verdict. P8 phase 3 runs the
+`attentivefp` variant the same way (8 targets x 2 splits x 3 seeds = 48
+runs; `results/afp_panel/summary.csv`) and it wins 1 of 16 cells.
+Pooling is mean rather than the paper's sum so prediction scale
 does not couple to molecule size. Target standardized with train
 statistics; metrics reported in original pIC50 units.
 
@@ -119,13 +129,19 @@ separable from resampling noise - analysis only, nothing is retrained:
   significantly favour RF (egfr/random, egfr_full both splits,
   hivpr/scaffold −0.118, mpro/scaffold −0.098). Only positive point
   estimate: `herg`/scaffold +0.024, no CI.
+- **AttentiveFP** (`--model attentivefp`, P8 phase 3): all 16 cells have a
+  CI - 8 significantly favour RF, **1 favours AttentiveFP**
+  (`herg`/scaffold +0.013 [+0.035, +0.092]), 7 contain 0; summary in
+  `results/significance/summary_attentivefp.csv` (details: the
+  "AttentiveFP control" write-up under supplementary experiments).
 - **Outputs**: `results/significance/summary.csv`,
   `results/significance/summary_gine.csv`,
-  `results/significance/summary_time.csv`, per-cell
-  `results/significance/{tag}_{split}{,_gine}.csv`; forest plots
-  `figures/significance/ci_panel.png` (+ `_gine` / `_time` /
-  `_with_gine` variants). The time-split run flips the pattern - see the
-  next section.
+  `results/significance/summary_time.csv`,
+  `results/significance/summary_attentivefp.csv`, per-cell
+  `results/significance/{tag}_{split}{,_gine,_attentivefp}.csv`; forest
+  plots `figures/significance/ci_panel.png` (+ `_gine` / `_time` /
+  `_with_gine` / `_attentivefp` / `_with_afp` variants). The time-split
+  run flips the pattern - see the next section.
 
 ## Publication-year (time) split
 
@@ -340,6 +356,23 @@ r=2/2048 configuration is confirmed as the anchor (reproduction
 delta <= 0.004 against the headline metrics).
 
 ![fp ablation](../figures/fp_ablation/fp_ablation_egfr.png)
+
+**AttentiveFP control (P8 phase 3): the strongest GNN does not flip the
+verdict.** `gnn_03 --model attentivefp` (gated attention + 30-timestep
+GRU readout over the same atom/bond encoders, frozen recipe otherwise)
+ran 8 targets x 2 splits x 3 seeds = 48 runs. Under the mean3 paired
+bootstrap **9 of 16 CIs exclude 0 - 8 favour RF, 1 favours AttentiveFP**
+(`herg`/scaffold **+0.013 [+0.035, +0.092]**, the only positive Δ; the
+point and the CI follow different conventions, per-seed mean vs mean3
+ensemble, see `experiments/afp_panel.py`), 7 CIs contain 0, and all 8
+random-split Δ are negative (−0.026 to −0.103). The `seed42` convention
+reads 12/16 significant, every cell to RF. Tables
+`results/afp_panel/summary.csv`,
+`results/significance/summary_attentivefp.csv`; figures
+`figures/afp_panel/panel_dR2.png`,
+`figures/significance/ci_panel_attentivefp.png`,
+`figures/significance/ci_panel_with_afp.png` (gin / gine / afp side by
+side).
 
 ## Multi-task details: sharing & head capacity
 

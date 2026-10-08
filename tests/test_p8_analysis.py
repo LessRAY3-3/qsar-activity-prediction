@@ -94,6 +94,77 @@ def test_parse_args_defaults_to_gin(load_experiment):
     assert args.n_boot == 10_000
     assert args.fig is None                    # resolved per --model in main
     assert mod.parse_args(["--model", "gine"]).model == "gine"
+    assert mod.parse_args(["--model", "attentivefp"]).model == "attentivefp"
+
+
+# ---------------------------------------------------------------- --model attentivefp
+
+def test_model_naming_attentivefp_distinguishes_outputs(load_experiment):
+    """attentivefp artifacts carry the _attentivefp infix/suffix, and the
+    gin/gine names stay byte-for-byte what they were."""
+    mod = load_experiment("paired_bootstrap")
+    assert "attentivefp" in mod.MODELS
+    assert mod.gnn_preds_name("a2a", "random", "", "attentivefp") == \
+        "gnn_preds_a2a_attentivefp_random.npz"
+    assert mod.gnn_preds_name("a2a", "scaffold", "_seed2", "attentivefp") == \
+        "gnn_preds_a2a_attentivefp_scaffold_seed2.npz"
+    assert mod.out_stem("a2a", "random", "attentivefp") == "a2a_random_attentivefp"
+    assert mod.summary_name("attentivefp") == "summary_attentivefp.csv"
+    assert mod.default_fig_name("attentivefp") == "ci_panel_attentivefp.png"
+    # gin / gine defaults unchanged
+    assert mod.out_stem("a2a", "random") == "a2a_random"
+    assert mod.out_stem("a2a", "random", "gine") == "a2a_random_gine"
+    assert mod.summary_name() == "summary.csv"
+    assert mod.summary_name("gine") == "summary_gine.csv"
+    assert mod.default_fig_name() == "ci_panel.png"
+    assert mod.default_fig_name("gine") == "ci_panel_gine.png"
+
+
+def test_main_attentivefp_run_never_touches_gin_gine_significance(load_experiment,
+                                                                  tmp_path, monkeypatch):
+    """--model attentivefp writes only *_attentivefp artifacts; sentinel
+    gin/gine cell CSVs, summaries and figures stay byte-for-byte intact."""
+    mod = load_experiment("paired_bootstrap")
+    _write_cell(tmp_path, "tiny", "random", model="attentivefp")
+    _write_cell(tmp_path, "tiny", "scaffold", model="attentivefp")
+    monkeypatch.setattr(mod, "BASE", str(tmp_path))
+    out = tmp_path / "out"
+    out.mkdir()
+    sentinels = {
+        out / "summary.csv": "gin summary,do not clobber\n",
+        out / "summary_gine.csv": "gine summary,do not clobber\n",
+        out / "tiny_random.csv": "gin cell,do not clobber\n",
+        out / "tiny_scaffold_gine.csv": "gine cell,do not clobber\n",
+    }
+    for path, text in sentinels.items():
+        path.write_text(text)
+    fig_dir = tmp_path / "figs"
+    fig_sentinels = {}
+    for name, text in (("ci_panel.png", "gin fig"),
+                       ("ci_panel_gine.png", "gine fig")):
+        p = fig_dir / name
+        p.parent.mkdir(parents=True, exist_ok=True)
+        p.write_text(text)
+        fig_sentinels[p] = text
+
+    mod.main(["--model", "attentivefp", "--tags", "tiny",
+              "--splits", "random,scaffold", "--n-boot", "300",
+              "--out-dir", str(out),
+              "--fig", str(fig_dir / "ci_panel_attentivefp.png")])
+
+    for path, text in {**sentinels, **fig_sentinels}.items():
+        assert path.read_text() == text, f"{path.name} was clobbered"
+    # the attentivefp run's own outputs exist, gin/gine names never chosen
+    for split in ("random", "scaffold"):
+        cell = out / f"tiny_{split}_attentivefp.csv"
+        assert cell.exists() and cell.stat().st_size > 0
+    summary = pd.read_csv(out / "summary_attentivefp.csv")
+    assert set(summary["split"]) == {"random", "scaffold"}
+    assert set(summary["pair"]) == {"seed42", "mean3"}
+    assert (fig_dir / "ci_panel_attentivefp.png").stat().st_size > 0
+    assert mod.out_stem("tiny", "random", "attentivefp") != "tiny_random"
+    assert mod.summary_name("attentivefp") != "summary.csv"
+    assert mod.summary_name("attentivefp") != "summary_gine.csv"
 
 
 # ---------------------------------------------------------------- --splits time
@@ -133,8 +204,12 @@ def test_figure_cells_follow_rows_not_default_grid(load_experiment):
     assert mod.figure_cells(mixed) == [("t1", "random"), ("t1", "time")]
 
 
-def _write_cell(tmp_path, tag, split, n=60, seed=0):
-    """Synthetic split npz + rf/gnn preds npz for one (tag, split) cell."""
+def _write_cell(tmp_path, tag, split, n=60, seed=0, model=""):
+    """Synthetic split npz + rf/gnn preds npz for one (tag, split) cell.
+
+    ``model`` adds the preds infix ("" -> gin campaign names, "gine" ->
+    gnn_preds_{tag}_gine_{split}..., "attentivefp" -> ..._attentivefp_...).
+    """
     rng = np.random.default_rng(seed)
     y = rng.uniform(3.0, 9.0, n)
     test_idx = np.arange(n // 3, n)
@@ -145,8 +220,9 @@ def _write_cell(tmp_path, tag, split, n=60, seed=0):
     results.mkdir(exist_ok=True)
     np.savez(results / f"rf_preds_{tag}_{split}.npz", test_idx=test_idx,
              y_true=y, y_pred=y + rng.normal(0, 0.5, n))
+    infix = f"_{model}" if model else ""
     for suf in ("", "_seed1", "_seed2"):
-        np.savez(results / f"gnn_preds_{tag}_{split}{suf}.npz",
+        np.savez(results / f"gnn_preds_{tag}{infix}_{split}{suf}.npz",
                  test_idx=test_idx, y_true=y,
                  y_pred=y + rng.normal(0, 0.7, n))
     return results, split_dir

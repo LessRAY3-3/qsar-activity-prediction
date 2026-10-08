@@ -225,7 +225,7 @@ Learning curve (n = 9,717, no crossover), extrapolated n\* with its
 weak-identifiability caveat, training-budget caveat, cross-target failure
 replication: [methodology](docs/methodology.md).
 
-## Giving the GNN a fair chance (bounded tuning + GINE)
+## Giving the GNN a fair chance (bounded tuning + GINE + AttentiveFP)
 
 Sections above deliberately froze the GIN recipe - every Δ is a
 **frozen-recipe** Δ. `experiments/gnn_fairness.py` (36 runs/target) gives
@@ -277,6 +277,30 @@ bootstrapped cells** (5 significantly favour RF;
 a *frozen-recipe* statement: tuning pushes a minority of near-parity
 targets over zero on scaffold and nowhere else, 1 of 3 targets regresses,
 and the wins (+0.005 / +0.025) are the size of seed noise.
+
+**AttentiveFP control: attention + GRU + bond features, still no
+reversal.** The strongest published small-molecule readout - PyG
+AttentiveFP, gated attention with a 30-timestep GRU over the same
+atom/bond encoders, frozen recipe otherwise - is the third control: 8
+targets x 2 splits x 3 seeds = 48 runs (`experiments/afp_panel.py`,
+`--model attentivefp`). Under the mean3 paired bootstrap it wins **1 of
+16 cells - `herg`/scaffold +0.013 [+0.035, +0.092]** - while **8 cells
+significantly favour RF** and 7 are undecided; on the random split **all
+8 Δ are negative** (−0.026 to −0.103). `herg`/scaffold is the one cell
+every enhanced variant reads positive on (tuned GIN +0.025, GINE +0.024,
+AttentiveFP +0.013) and the first of them to carry it across
+significance; the frozen GIN reads −0.013 there. The point Δ and the CI
+come from two conventions - per-seed mean vs mean3 ensemble - which is
+why the point (+0.013) sits outside its own [+0.035, +0.092] interval
+(`experiments/afp_panel.py` documents both). Tables
+`results/afp_panel/summary.csv`,
+`results/significance/summary_attentivefp.csv`; figures
+`figures/afp_panel/panel_dR2.png` and the three-model forest plot
+`figures/significance/ci_panel_with_afp.png` (gin / gine / afp side by
+side). Bond features, bounded tuning and now AttentiveFP have each
+failed to flip a single verdict, so "the GIN does not beat the
+fingerprint RF" is no longer a complaint about the GIN implementation -
+it is a data-scale / signal statement.
 
 ## Multi-task pooling: more data does not rescue the GIN
 
