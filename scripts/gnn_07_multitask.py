@@ -1,12 +1,12 @@
 """GNN step 7: multi-task kinase pooling (experiment C).
 
-Pool egfr_full + abl1 + mapk14 into one dataset and train a multi-task GIN
+Pool egfr_full + abl1 + vegfr2 into one dataset and train a multi-task GIN
 (shared trunk + one linear head per target), testing whether the
 "multi-task + large data" industrial setting lets the GNN overtake the
 single-task RF baseline that the single-task experiments did not beat.
 
 Data
-    Pools data/processed/{egfr_full,abl1,mapk14}_graphs.npz.  Node ids in
+    Pools data/processed/{egfr_full,abl1,vegfr2}_graphs.npz.  Node ids in
     edge_index are molecule-local (verified for these caches, same format as
     gnn_03), so concatenation needs no offset shifting - plain CSR
     concatenation.  Each molecule carries a task index 0/1/2.
@@ -63,7 +63,7 @@ BASE = os.path.join(os.path.dirname(__file__), "..")
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from gnn_graph_dataset import ATOM_FEATURE_DIMS  # noqa: E402
 
-TASK_TAGS = ["egfr_full", "abl1", "mapk14"]
+TASK_TAGS = ["egfr_full", "abl1", "vegfr2"]
 METHODS = ["st_rf", "st_gin", "pooled_st", "mt_gin"]
 
 
@@ -87,6 +87,10 @@ def parse_args():
     p.add_argument("--figdir", default=os.path.join(BASE, "figures", "multitask"))
     p.add_argument("--aggregate", action="store_true",
                    help="build summary.csv + figures from existing metric files")
+    p.add_argument("--plot-only", action="store_true",
+                   help="alias for --aggregate: rebuild summary.csv + "
+                        "figures/multitask/{random,scaffold}.png from the "
+                        "existing results/multitask/*.json (no training)")
     return p.parse_args()
 
 
@@ -515,7 +519,7 @@ def aggregate(args):
 
 def main():
     args = parse_args()
-    if args.aggregate:
+    if args.aggregate or args.plot_only:
         aggregate(args)
     else:
         train_run(args)

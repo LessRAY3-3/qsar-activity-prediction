@@ -1,7 +1,7 @@
-=== fairness_mapk14 start Sun Oct  4 15:32:25 CST 2026 ===
+=== fairness_vegfr2 start Sun Oct  4 15:32:25 CST 2026 ===
 /Users/leisirui/miniforge3/envs/qsar/lib/python3.12/site-packages/torch/jit/_script.py:1491: FutureWarning: `torch.jit.script` is deprecated. Please switch to `torch.compile` or `torch.export`.
   warnings.warn(
-[mapk14] seeds=[42, 1, 2] phases=['tune', 'final', 'gine', 'summary']
+[vegfr2] seeds=[42, 1, 2] phases=['tune', 'final', 'gine', 'summary']
   [tune] {'hidden': 128, 'num_layers': 4, 'dropout': 0.2}
 /Users/leisirui/qsar-activity-prediction/experiments/../scripts/gnn_03_train_gin.py:114: UserWarning: Converting a tensor with requires_grad=True to a scalar may lead to unexpected behavior.
 Consider using tensor.detach() first. (Triggered internally at /Users/runner/work/pytorch/pytorch/torch/csrc/autograd/generated/python_variable_methods.cpp:821.)
@@ -56,8 +56,8 @@ Consider using tensor.detach() first. (Triggered internally at /Users/runner/wor
     seed=42 valid_rmse=0.7179 test_rmse=0.7758 test_r2=0.6111 (best epoch 100, 774s)
     seed=1 valid_rmse=0.7424 test_rmse=0.7969 test_r2=0.5896 (best epoch 99, 1226s)
     seed=2 valid_rmse=0.7476 test_rmse=0.8051 test_r2=0.5812 (best epoch 92, 466s)
-summary -> results/fairness/summary_mapk14.json
+summary -> results/fairness/summary_vegfr2.json
 summary.csv -> results/fairness/summary.csv (6 rows)
-figure -> figures/fairness/mapk14.png
-[mapk14] done: winner={'hidden': 256, 'num_layers': 4, 'dropout': 0.2}
-=== fairness_mapk14 exit=0 Sun Oct  4 19:48:24 CST 2026 ===
+figure -> figures/fairness/vegfr2.png
+[vegfr2] done: winner={'hidden': 256, 'num_layers': 4, 'dropout': 0.2}
+=== fairness_vegfr2 exit=0 Sun Oct  4 19:48:24 CST 2026 ===

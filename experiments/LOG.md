@@ -4,9 +4,18 @@ Running log of the deep-dive experiments. Each entry: what ran, headline
 numbers (3-seed mean +/- std unless noted), and the commit holding the
 artifacts. Newest first. Maintained by M4 Air; results produced on M3 Max.
 
+## 2026-10-08
+
+### Dataset tag rename: `mapk14` → `vegfr2`
+
+- The tag `mapk14` was renamed to `vegfr2` globally: CHEMBL279 is
+  VEGFR2/KDR, so the old tag was a misnomer - all files, results and
+  figures for this dataset were renamed accordingly (data, models,
+  results, figures, logs, code defaults, README, this log).
+
 ## 2026-10-05
 
-### Experiment B: GIN fairness - bounded tuning + GINE (mapk14 / herg / abl1) — DELIVERED
+### Experiment B: GIN fairness - bounded tuning + GINE (vegfr2 / herg / abl1) — DELIVERED
 
 - Commits: `8ba7329` (`feat: fairness experiment (bounded GIN tuning +
   GINE) + multitask kinase pooling scripts`), `e7cefd9` (`results:
@@ -15,7 +24,7 @@ artifacts. Newest first. Maintained by M4 Air; results produced on M3 Max.
   follow-up `docs:` commit.
 - **Question**: is section 8's "no clear GIN lead" an artefact of the
   frozen `gnn_03` recipe? Run on the 3 targets nearest parity in section
-  8 (Δmean scaffold: `mapk14`/VEGFR2 −0.006, `herg` −0.013,
+  8 (Δmean scaffold: `vegfr2`/VEGFR2 −0.006, `herg` −0.013,
   `abl1` −0.013).
 - **Protocol** (`experiments/gnn_fairness.py`): bounded grid
   hidden {128,256} x layers {4,5} x dropout {0.2,0.3} = 8 configs,
@@ -26,12 +35,12 @@ artifacts. Newest first. Maintained by M4 Air; results produced on M3 Max.
   `BOND_FEATURE_DIMS=[13,7,2]`), one fixed config, both splits x 3 seeds.
   Everything else identical to `gnn_03`. **36 runs per target
   (24 tune + 6 final + 6 GINE) = 108 total, all exit 0.**
-- **Winners**: `mapk14` 256/4L/0.2 (mean valid RMSE **0.7056**),
+- **Winners**: `vegfr2` 256/4L/0.2 (mean valid RMSE **0.7056**),
   `herg` 256/5L/0.2 (**0.5145**), `abl1` 256/4L/0.2 (0.8427) -
   **hidden 256 wins on all three**, i.e. the frozen recipe's hidden 128
   was capacity-starved.
 - **Results** (test R2, 3-seed mean+-std; Δ = GIN − RF, mean convention):
-  - mapk14/VEGFR2: baseline 0.678+-0.007 / 0.611+-0.024 (Δ −0.058 / −0.006);
+  - vegfr2/VEGFR2: baseline 0.678+-0.007 / 0.611+-0.024 (Δ −0.058 / −0.006);
     tuned 0.697+-0.006 / **0.622+-0.012** (Δ −0.039 / **+0.005**);
     GINE 0.674+-0.003 / 0.594+-0.013 (Δ −0.062 / −0.023)
   - herg: baseline 0.616+-0.017 / 0.417+-0.007 (Δ +0.000 / −0.013);
@@ -47,10 +56,10 @@ artifacts. Newest first. Maintained by M4 Air; results produced on M3 Max.
   validation molecules overfits; test R2 *drops* and the seed std explodes
   0.037 -> 0.063), and **the random split flips on none**
   (−0.039 / −0.003 / −0.035). GINE bond features are **not a general
-  gain** (help only herg scaffold +0.024; hurt mapk14 and abl1 scaffold
+  gain** (help only herg scaffold +0.024; hurt vegfr2 and abl1 scaffold
   −0.085). Section 8's verdict therefore stands as a *frozen-recipe*
   statement; this entry is its boundary, not a reversal.
-- **Timing**: **17h41m actual** (mapk14 4h16m, herg 11h30m, abl1 1h55m,
+- **Timing**: **17h41m actual** (vegfr2 4h16m, herg 11h30m, abl1 1h55m,
   serial - one MPS user at a time) against a **4-5h estimate, i.e.
   3.5-4.4x over**. The 8-config grid on a 11.8k-molecule target dominates
   the wall clock.
@@ -62,13 +71,13 @@ artifacts. Newest first. Maintained by M4 Air; results produced on M3 Max.
   `"summary"`, or the `[TAG] done: winner=...` line (the finished files
   list all four phases: tune/final/gine/summary).
 - Artifacts: `results/fairness/{summary.csv, summary_{tag}.json,
-  {tag}_tuning.csv}`, `figures/fairness/{mapk14,herg,abl1}.png`,
-  `logs/fairness_{mapk14,herg,abl1}.log`, `logs/fairness_all.log`,
+  {tag}_tuning.csv}`, `figures/fairness/{vegfr2,herg,abl1}.png`,
+  `logs/fairness_{vegfr2,herg,abl1}.log`, `logs/fairness_all.log`,
   `logs/fairness_all.sh`, `logs/fairness_run_tag.sh`.
 
 ## 2026-10-04
 
-### Experiment C: multi-task kinase pooling (egfr_full + abl1 + mapk14) — DELIVERED — negative result
+### Experiment C: multi-task kinase pooling (egfr_full + abl1 + vegfr2) — DELIVERED — negative result
 
 - Commits: same pair as experiment B (`8ba7329` scripts, `e7cefd9`
   results/figures/logs); this entry and README section 10 land in the
@@ -88,12 +97,12 @@ artifacts. Newest first. Maintained by M4 Air; results produced on M3 Max.
   ST-GIN Δ −0.006..−0.058 - pooling widens the gap to RF everywhere.
   - egfr_full r/s: ST-GIN 0.707 / 0.558 | pooled 0.535 / 0.451 | MT 0.530 / 0.356
   - abl1      r/s: ST-GIN 0.752 / 0.710 | pooled 0.638 / 0.554 | MT 0.625 / 0.614
-  - mapk14    r/s: ST-GIN 0.678 / 0.611 | pooled **0.195 / 0.182** | MT 0.554 / 0.538
-- **Contamination / partial repair**: the shared head destroys `mapk14`
+  - vegfr2    r/s: ST-GIN 0.678 / 0.611 | pooled **0.195 / 0.182** | MT 0.554 / 0.538
+- **Contamination / partial repair**: the shared head destroys `vegfr2`
   (0.195/0.182 vs 0.678/0.611 single-task); the per-task heads pull it
   back by **+0.36** on both splits (0.554/0.538) but still trail ST-GIN by
   −0.124/−0.073. MT averages **+0.11** above pooled across the 6 cells,
-  yet that average is carried entirely by `mapk14` - on `egfr_full` (both
+  yet that average is carried entirely by `vegfr2` - on `egfr_full` (both
   splits) and `abl1`/random, MT is *below* pooled.
 - **Leakage**: shared molecules mean **775 unique SMILES** sit in one
   target's train set while appearing in another target's test set on the
@@ -164,7 +173,7 @@ artifacts. Newest first. Maintained by M4 Air; results produced on M3 Max.
 
 - Commits: `c462607` (`feat: generic ChEMBL downloader (01e) + chain
   runner docs`), `a950e1d` (`results: 6-target panel (a2a/abl1/mpro/hivpr/
-  herg/mapk14) + error analyses`), `39ab879` (`results: egfr_full expansion
+  herg/vegfr2) + error analyses`), `39ab879` (`results: egfr_full expansion
   (13,497 cpds) + learning curve to n=9717 + scaling verdict`), `3aca834`
   (`docs: LOG + README cross-target section + data provenance`); the Δ
   convention was then corrected to the 3-seed mean in the follow-up
@@ -185,7 +194,7 @@ artifacts. Newest first. Maintained by M4 Air; results produced on M3 Max.
 - One command per target; cleaning/featurizing/splitting/GIN code paths are
   untouched - only `QSAR_TAG` changes.
 
-**6-target panel (a2a / abl1 / mpro / hivpr / herg / mapk14)**
+**6-target panel (a2a / abl1 / mpro / hivpr / herg / vegfr2)**
 - Same protocol as EGFR: Morgan r=2/2048 + grid-tuned RF, splits regenerated
   and verified bit-identically by `gnn_01_make_splits.py`, GIN 3 seeds
   (42/1/2). Test R2, RF / GIN mean+-std:
@@ -194,17 +203,19 @@ artifacts. Newest first. Maintained by M4 Air; results produced on M3 Max.
   - mpro    n=4,424    random 0.730 / 0.707+-0.003    scaffold 0.509 / 0.408+-0.022
   - hivpr   n=2,799    random 0.737 / 0.726+-0.005    scaffold 0.554 / 0.527+-0.028
   - herg    n=12,019   random 0.615 / 0.616+-0.017    scaffold 0.430 / 0.417+-0.007
-  - mapk14  n=11,797   random 0.736 / 0.678+-0.007    scaffold 0.617 / 0.611+-0.024
-- **Naming note: CHEMBL279 is VEGFR2 (KDR), not MAPK14.** The `mapk14` tag is
-  a misnomer kept for file-name continuity - every activity row carries
+  - vegfr2  n=11,797   random 0.736 / 0.678+-0.007    scaffold 0.617 / 0.611+-0.024
+- **Naming note: CHEMBL279 is VEGFR2 (KDR), not a MAPK target.** This
+  dataset was released under an erroneous tag and renamed to `vegfr2` on
+  2026-10-08 (see the rename record at the top of this log) - every
+  activity row carries
   `target_pref_name = "Vascular endothelial growth factor receptor 2"`
-  (verified against the ChEMBL target API). Treat the row as VEGFR2
-  everywhere (README section 8, `results/multi_target/summary.csv`).
+  (verified against the ChEMBL target API). Read every panel row as
+  VEGFR2 (README section 8, `results/multi_target/summary.csv`).
 - Headline (**3-seed mean convention**): across the 8 panel targets x 2
   splits the GIN **never clearly leads** - 15 of 16 cells are negative and
   the 16th (herg random, +0.0003) is a tie. Random: 7 negative + herg tie,
-  range +0.000 to -0.058 (worst mapk14/VEGFR2). Scaffold: all 8 negative,
-  closest mapk14/VEGFR2 **-0.006**, worst mpro **-0.102**. Magnitude is
+  range +0.000 to -0.058 (worst vegfr2/VEGFR2). Scaffold: all 8 negative,
+  closest vegfr2/VEGFR2 **-0.006**, worst mpro **-0.102**. Magnitude is
   target-dependent but sign is not: abl1 (2,698 cpds) and herg (12,019)
   both land at -0.013, so Δ does not follow n.
 - Delta convention (**corrected 2026-10-04, docs follow-up commit**): every
@@ -213,7 +224,7 @@ artifacts. Newest first. Maintained by M4 Air; results produced on M3 Max.
   rounding. The `d_r2_gin_minus_rf` column inside `results/comparison_*.csv`
   is **not** that number - it is the **seed-42** GIN run minus RF, and it is
   reference-only from here on: it reports scaffold "wins" for abl1 (+0.030)
-  and mapk14/VEGFR2 (+0.028) that both **flip sign** under the mean
+  and vegfr2/VEGFR2 (+0.028) that both **flip sign** under the mean
   (-0.013 / -0.006), and a herg random -0.021 where the mean is +0.000.
   Quoting single-seed deltas contradicts README interview point 6 (GIN
   scaffold R2 varies +-0.02 across seeds), so the campaign headline is
@@ -270,7 +281,7 @@ artifacts. Newest first. Maintained by M4 Air; results produced on M3 Max.
 - Worst-50 overlap (random / scaffold) and Spearman rho of per-molecule
   |error|, from `results/error_analysis_{tag}_{split}.csv`:
   - egfr    **25 / 21**, rho **0.52 / 0.52**  (random expectation ~2)
-  - mapk14  **25 / 30**, rho **0.49 / 0.55**  (expectation ~1)
+  - vegfr2  **25 / 30**, rho **0.49 / 0.55**  (expectation ~1)
   - herg    **32 / 42**, rho **0.52 / 0.60**  (expectation ~1)
   - a2a     **32 / 32**, rho **0.63 / 0.65**  (expectation ~7)
 - Overlap spans 21-42 against an expected 1-7 (10-40x chance), rho
@@ -286,12 +297,12 @@ artifacts. Newest first. Maintained by M4 Air; results produced on M3 Max.
   (`/Users/leisirui/qsar-activity-prediction`, python 3.12); the chain and
   curve logs are kept as `logs/egfr_full_chain.log` and
   `logs/egfr_full_curve.log`. Docs written on the M4 Air.
-- herg / mapk14 `gnn_01` verification lines were not in the archived logs;
+- herg / vegfr2 `gnn_01` verification lines were not in the archived logs;
   re-run on the M4 Air for this sign-off (deterministic, seconds):
   `[OK ] random R2=0.6152846 (expected 0.6152846)` /
   `[OK ] scaffold R2=0.4296432 (expected 0.4296432)` (herg) and
   `[OK ] random R2=0.7361120 (expected 0.7361120)` /
-  `[OK ] scaffold R2=0.6169340 (expected 0.6169340)` (mapk14); regenerated
+  `[OK ] scaffold R2=0.6169340 (expected 0.6169340)` (vegfr2); regenerated
   split arrays are content-identical to the archived ones.
 
 ## 2026-10-03

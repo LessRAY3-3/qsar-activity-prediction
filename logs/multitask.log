@@ -11,22 +11,22 @@
   warnings.warn(
 /Users/leisirui/miniforge3/envs/qsar/lib/python3.12/site-packages/torch/jit/_script.py:1491: FutureWarning: `torch.jit.script` is deprecated. Please switch to `torch.compile` or `torch.export`.
   warnings.warn(
-[mt/random/seed42] tasks=['egfr_full', 'abl1', 'mapk14'] device=mps
-[pooled/random/seed42] tasks=['egfr_full', 'abl1', 'mapk14'] device=mps
+[mt/random/seed42] tasks=['egfr_full', 'abl1', 'vegfr2'] device=mps
+[pooled/random/seed42] tasks=['egfr_full', 'abl1', 'vegfr2'] device=mps
   egfr_full: y_mean=6.662 y_std=1.436 n_train=9717 n_valid=1080 n_test=2700
   egfr_full: y_mean=6.662 y_std=1.436 n_train=9717 n_valid=1080 n_test=2700
   abl1: y_mean=6.961 y_std=1.612 n_train=1942 n_valid=216 n_test=540
   abl1: y_mean=6.961 y_std=1.612 n_train=1942 n_valid=216 n_test=540
-  mapk14: y_mean=6.517 y_std=1.263 n_train=8493 n_valid=944 n_test=2360
-  mapk14: y_mean=6.517 y_std=1.263 n_train=8493 n_valid=944 n_test=2360
-[pooled/scaffold/seed42] tasks=['egfr_full', 'abl1', 'mapk14'] device=mps
-[mt/scaffold/seed42] tasks=['egfr_full', 'abl1', 'mapk14'] device=mps
+  vegfr2: y_mean=6.517 y_std=1.263 n_train=8493 n_valid=944 n_test=2360
+  vegfr2: y_mean=6.517 y_std=1.263 n_train=8493 n_valid=944 n_test=2360
+[pooled/scaffold/seed42] tasks=['egfr_full', 'abl1', 'vegfr2'] device=mps
+[mt/scaffold/seed42] tasks=['egfr_full', 'abl1', 'vegfr2'] device=mps
   egfr_full: y_mean=6.599 y_std=1.438 n_train=9706 n_valid=1079 n_test=2712
   egfr_full: y_mean=6.599 y_std=1.438 n_train=9706 n_valid=1079 n_test=2712
   abl1: y_mean=6.681 y_std=1.596 n_train=1943 n_valid=216 n_test=539
   abl1: y_mean=6.681 y_std=1.596 n_train=1943 n_valid=216 n_test=539
-  mapk14: y_mean=6.517 y_std=1.261 n_train=8479 n_valid=943 n_test=2375
-  mapk14: y_mean=6.517 y_std=1.261 n_train=8479 n_valid=943 n_test=2375
+  vegfr2: y_mean=6.517 y_std=1.261 n_train=8479 n_valid=943 n_test=2375
+  vegfr2: y_mean=6.517 y_std=1.261 n_train=8479 n_valid=943 n_test=2375
   pooled train=20128 (per-task [9706, 1943, 8479]), 158 steps/epoch
   pooled train=20152 (per-task [9717, 1942, 8493]), 158 steps/epoch
   pooled train=20128 (per-task [9706, 1943, 8479]), 158 steps/epoch
@@ -44,397 +44,397 @@ Consider using tensor.detach() first. (Triggered internally at /Users/runner/wor
 Consider using tensor.detach() first. (Triggered internally at /Users/runner/work/pytorch/pytorch/torch/csrc/autograd/generated/python_variable_methods.cpp:821.)
   total += float(loss) * len(batch.y)
   epoch   1  train_mse=0.8009  mean_valid_rmse_std=0.9220  lr=1.0e-03 *
-           egfr_full:std=0.969/raw=1.391  abl1:std=0.738/raw=1.190  mapk14:std=1.059/raw=1.338
+           egfr_full:std=0.969/raw=1.391  abl1:std=0.738/raw=1.190  vegfr2:std=1.059/raw=1.338
   epoch   1  train_mse=0.8155  mean_valid_rmse_std=0.9041  lr=1.0e-03 *
-           egfr_full:std=0.888/raw=1.277  abl1:std=0.848/raw=1.354  mapk14:std=0.976/raw=1.231
+           egfr_full:std=0.888/raw=1.277  abl1:std=0.848/raw=1.354  vegfr2:std=0.976/raw=1.231
   epoch   3  train_mse=0.6782  mean_valid_rmse_std=0.8971  lr=1.0e-03 *
-           egfr_full:std=0.934/raw=1.341  abl1:std=0.724/raw=1.167  mapk14:std=1.034/raw=1.306
+           egfr_full:std=0.934/raw=1.341  abl1:std=0.724/raw=1.167  vegfr2:std=1.034/raw=1.306
   epoch   4  train_mse=0.6365  mean_valid_rmse_std=0.8846  lr=1.0e-03 *
-           egfr_full:std=0.885/raw=1.271  abl1:std=0.814/raw=1.312  mapk14:std=0.955/raw=1.206
+           egfr_full:std=0.885/raw=1.271  abl1:std=0.814/raw=1.312  vegfr2:std=0.955/raw=1.206
   epoch   4  train_mse=0.6128  mean_valid_rmse_std=0.8360  lr=1.0e-03 *
-           egfr_full:std=0.949/raw=1.365  abl1:std=0.647/raw=1.032  mapk14:std=0.912/raw=1.149
+           egfr_full:std=0.949/raw=1.365  abl1:std=0.647/raw=1.032  vegfr2:std=0.912/raw=1.149
   epoch   6  train_mse=0.6019  mean_valid_rmse_std=0.8204  lr=1.0e-03 *
-           egfr_full:std=0.817/raw=1.173  abl1:std=0.727/raw=1.172  mapk14:std=0.918/raw=1.159
+           egfr_full:std=0.817/raw=1.173  abl1:std=0.727/raw=1.172  vegfr2:std=0.918/raw=1.159
   epoch   6  train_mse=0.5803  mean_valid_rmse_std=0.7704  lr=1.0e-03 *
-           egfr_full:std=0.817/raw=1.175  abl1:std=0.590/raw=0.941  mapk14:std=0.904/raw=1.140
+           egfr_full:std=0.817/raw=1.175  abl1:std=0.590/raw=0.941  vegfr2:std=0.904/raw=1.140
   epoch   1  train_mse=0.7629  mean_valid_rmse_std=0.9449  lr=1.0e-03 *
-           egfr_full:std=1.046/raw=1.502  abl1:std=0.740/raw=1.193  mapk14:std=1.049/raw=1.325
+           egfr_full:std=1.046/raw=1.502  abl1:std=0.740/raw=1.193  vegfr2:std=1.049/raw=1.325
   epoch   1  train_mse=0.8355  mean_valid_rmse_std=1.0206  lr=1.0e-03 *
-           egfr_full:std=1.077/raw=1.550  abl1:std=0.826/raw=1.317  mapk14:std=1.159/raw=1.461
+           egfr_full:std=1.077/raw=1.550  abl1:std=0.826/raw=1.317  vegfr2:std=1.159/raw=1.461
   epoch   8  train_mse=0.5617  mean_valid_rmse_std=0.8203  lr=1.0e-03 *
-           egfr_full:std=0.866/raw=1.244  abl1:std=0.669/raw=1.079  mapk14:std=0.926/raw=1.169
+           egfr_full:std=0.866/raw=1.244  abl1:std=0.669/raw=1.079  vegfr2:std=0.926/raw=1.169
   epoch  10  train_mse=0.5430  mean_valid_rmse_std=0.8007  lr=1.0e-03 *
-           egfr_full:std=0.823/raw=1.182  abl1:std=0.737/raw=1.188  mapk14:std=0.842/raw=1.064
+           egfr_full:std=0.823/raw=1.182  abl1:std=0.737/raw=1.188  vegfr2:std=0.842/raw=1.064
   epoch  10  train_mse=0.5303  mean_valid_rmse_std=0.7869  lr=1.0e-03
-           egfr_full:std=0.823/raw=1.184  abl1:std=0.649/raw=1.036  mapk14:std=0.888/raw=1.120
+           egfr_full:std=0.823/raw=1.184  abl1:std=0.649/raw=1.036  vegfr2:std=0.888/raw=1.120
   epoch   2  train_mse=0.7143  mean_valid_rmse_std=0.9083  lr=1.0e-03 *
-           egfr_full:std=0.929/raw=1.337  abl1:std=0.768/raw=1.225  mapk14:std=1.028/raw=1.296
+           egfr_full:std=0.929/raw=1.337  abl1:std=0.768/raw=1.225  vegfr2:std=1.028/raw=1.296
   epoch  12  train_mse=0.4952  mean_valid_rmse_std=0.7530  lr=1.0e-03 *
-           egfr_full:std=0.781/raw=1.124  abl1:std=0.631/raw=1.006  mapk14:std=0.847/raw=1.068
+           egfr_full:std=0.781/raw=1.124  abl1:std=0.631/raw=1.006  vegfr2:std=0.847/raw=1.068
   epoch   3  train_mse=0.6261  mean_valid_rmse_std=0.8359  lr=1.0e-03 *
-           egfr_full:std=0.941/raw=1.351  abl1:std=0.684/raw=1.103  mapk14:std=0.883/raw=1.115
+           egfr_full:std=0.941/raw=1.351  abl1:std=0.684/raw=1.103  vegfr2:std=0.883/raw=1.115
   epoch  16  train_mse=0.4720  mean_valid_rmse_std=0.7787  lr=1.0e-03 *
-           egfr_full:std=0.791/raw=1.136  abl1:std=0.675/raw=1.089  mapk14:std=0.870/raw=1.098
+           egfr_full:std=0.791/raw=1.136  abl1:std=0.675/raw=1.089  vegfr2:std=0.870/raw=1.098
   epoch   4  train_mse=0.6790  mean_valid_rmse_std=0.8552  lr=1.0e-03 *
-           egfr_full:std=0.896/raw=1.289  abl1:std=0.719/raw=1.148  mapk14:std=0.950/raw=1.198
+           egfr_full:std=0.896/raw=1.289  abl1:std=0.719/raw=1.148  vegfr2:std=0.950/raw=1.198
   epoch  18  train_mse=0.4615  mean_valid_rmse_std=0.7710  lr=1.0e-03 *
-           egfr_full:std=0.822/raw=1.181  abl1:std=0.681/raw=1.099  mapk14:std=0.810/raw=1.023
+           egfr_full:std=0.822/raw=1.181  abl1:std=0.681/raw=1.099  vegfr2:std=0.810/raw=1.023
   epoch  20  train_mse=0.4339  mean_valid_rmse_std=0.8039  lr=1.0e-03
-           egfr_full:std=0.814/raw=1.170  abl1:std=0.688/raw=1.109  mapk14:std=0.910/raw=1.149
+           egfr_full:std=0.814/raw=1.170  abl1:std=0.688/raw=1.109  vegfr2:std=0.910/raw=1.149
   epoch  20  train_mse=0.4340  mean_valid_rmse_std=0.7907  lr=5.0e-04
-           egfr_full:std=0.860/raw=1.237  abl1:std=0.738/raw=1.178  mapk14:std=0.775/raw=0.976
+           egfr_full:std=0.860/raw=1.237  abl1:std=0.738/raw=1.178  vegfr2:std=0.775/raw=0.976
   epoch   5  train_mse=0.6509  mean_valid_rmse_std=0.8336  lr=1.0e-03 *
-           egfr_full:std=0.865/raw=1.244  abl1:std=0.689/raw=1.100  mapk14:std=0.947/raw=1.194
+           egfr_full:std=0.865/raw=1.244  abl1:std=0.689/raw=1.100  vegfr2:std=0.947/raw=1.194
   epoch   6  train_mse=0.5588  mean_valid_rmse_std=0.7485  lr=1.0e-03 *
-           egfr_full:std=0.776/raw=1.115  abl1:std=0.619/raw=0.999  mapk14:std=0.850/raw=1.073
+           egfr_full:std=0.776/raw=1.115  abl1:std=0.619/raw=0.999  vegfr2:std=0.850/raw=1.073
   epoch  23  train_mse=0.4387  mean_valid_rmse_std=0.7634  lr=1.0e-03 *
-           egfr_full:std=0.777/raw=1.116  abl1:std=0.685/raw=1.104  mapk14:std=0.829/raw=1.047
+           egfr_full:std=0.777/raw=1.116  abl1:std=0.685/raw=1.104  vegfr2:std=0.829/raw=1.047
   epoch  23  train_mse=0.4070  mean_valid_rmse_std=0.7048  lr=5.0e-04 *
-           egfr_full:std=0.775/raw=1.115  abl1:std=0.609/raw=0.973  mapk14:std=0.730/raw=0.920
+           egfr_full:std=0.775/raw=1.115  abl1:std=0.609/raw=0.973  vegfr2:std=0.730/raw=0.920
   epoch  24  train_mse=0.3796  mean_valid_rmse_std=0.6718  lr=5.0e-04 *
-           egfr_full:std=0.706/raw=1.015  abl1:std=0.564/raw=0.901  mapk14:std=0.745/raw=0.940
+           egfr_full:std=0.706/raw=1.015  abl1:std=0.564/raw=0.901  vegfr2:std=0.745/raw=0.940
   epoch   6  train_mse=0.6560  mean_valid_rmse_std=0.8298  lr=1.0e-03 *
-           egfr_full:std=0.880/raw=1.266  abl1:std=0.706/raw=1.127  mapk14:std=0.903/raw=1.138
+           egfr_full:std=0.880/raw=1.266  abl1:std=0.706/raw=1.127  vegfr2:std=0.903/raw=1.138
   epoch   8  train_mse=0.5933  mean_valid_rmse_std=0.7950  lr=1.0e-03 *
-           egfr_full:std=0.839/raw=1.207  abl1:std=0.639/raw=1.020  mapk14:std=0.907/raw=1.143
+           egfr_full:std=0.839/raw=1.207  abl1:std=0.639/raw=1.020  vegfr2:std=0.907/raw=1.143
   epoch  30  train_mse=0.3849  mean_valid_rmse_std=0.7241  lr=5.0e-04
-           egfr_full:std=0.853/raw=1.227  abl1:std=0.581/raw=0.927  mapk14:std=0.738/raw=0.931
+           egfr_full:std=0.853/raw=1.227  abl1:std=0.581/raw=0.927  vegfr2:std=0.738/raw=0.931
   epoch  30  train_mse=0.4095  mean_valid_rmse_std=0.7989  lr=1.0e-03
-           egfr_full:std=0.796/raw=1.143  abl1:std=0.573/raw=0.924  mapk14:std=1.028/raw=1.299
+           egfr_full:std=0.796/raw=1.143  abl1:std=0.573/raw=0.924  vegfr2:std=1.028/raw=1.299
   epoch  10  train_mse=0.5046  mean_valid_rmse_std=0.8055  lr=1.0e-03
-           egfr_full:std=0.889/raw=1.277  abl1:std=0.632/raw=1.018  mapk14:std=0.896/raw=1.132
+           egfr_full:std=0.889/raw=1.277  abl1:std=0.632/raw=1.018  vegfr2:std=0.896/raw=1.132
   epoch  32  train_mse=0.3625  mean_valid_rmse_std=0.7571  lr=5.0e-04 *
-           egfr_full:std=0.691/raw=0.993  abl1:std=0.631/raw=1.018  mapk14:std=0.949/raw=1.198
+           egfr_full:std=0.691/raw=0.993  abl1:std=0.631/raw=1.018  vegfr2:std=0.949/raw=1.198
   epoch  10  train_mse=0.5848  mean_valid_rmse_std=0.7956  lr=1.0e-03
-           egfr_full:std=0.839/raw=1.207  abl1:std=0.637/raw=1.017  mapk14:std=0.911/raw=1.148
+           egfr_full:std=0.839/raw=1.207  abl1:std=0.637/raw=1.017  vegfr2:std=0.911/raw=1.148
   epoch  33  train_mse=0.3436  mean_valid_rmse_std=0.7454  lr=5.0e-04 *
-           egfr_full:std=0.730/raw=1.049  abl1:std=0.547/raw=0.882  mapk14:std=0.959/raw=1.211
+           egfr_full:std=0.730/raw=1.049  abl1:std=0.547/raw=0.882  vegfr2:std=0.959/raw=1.211
   epoch  11  train_mse=0.5518  mean_valid_rmse_std=0.7757  lr=1.0e-03 *
-           egfr_full:std=0.860/raw=1.237  abl1:std=0.591/raw=0.944  mapk14:std=0.875/raw=1.103
+           egfr_full:std=0.860/raw=1.237  abl1:std=0.591/raw=0.944  vegfr2:std=0.875/raw=1.103
   epoch  38  train_mse=0.3519  mean_valid_rmse_std=0.7411  lr=5.0e-04 *
-           egfr_full:std=0.711/raw=1.021  abl1:std=0.575/raw=0.927  mapk14:std=0.938/raw=1.184
+           egfr_full:std=0.711/raw=1.021  abl1:std=0.575/raw=0.927  vegfr2:std=0.938/raw=1.184
   epoch  40  train_mse=0.3483  mean_valid_rmse_std=0.7274  lr=1.3e-04
-           egfr_full:std=0.744/raw=1.069  abl1:std=0.686/raw=1.094  mapk14:std=0.753/raw=0.949
+           egfr_full:std=0.744/raw=1.069  abl1:std=0.686/raw=1.094  vegfr2:std=0.753/raw=0.949
   epoch  16  train_mse=0.4164  mean_valid_rmse_std=0.7100  lr=5.0e-04 *
-           egfr_full:std=0.723/raw=1.038  abl1:std=0.632/raw=1.019  mapk14:std=0.775/raw=0.979
+           egfr_full:std=0.723/raw=1.038  abl1:std=0.632/raw=1.019  vegfr2:std=0.775/raw=0.979
   epoch  40  train_mse=0.3648  mean_valid_rmse_std=0.8529  lr=5.0e-04
-           egfr_full:std=0.656/raw=0.942  abl1:std=0.784/raw=1.265  mapk14:std=1.119/raw=1.413
+           egfr_full:std=0.656/raw=0.942  abl1:std=0.784/raw=1.265  vegfr2:std=1.119/raw=1.413
   epoch  18  train_mse=0.4186  mean_valid_rmse_std=0.7052  lr=5.0e-04 *
-           egfr_full:std=0.839/raw=1.206  abl1:std=0.544/raw=0.877  mapk14:std=0.732/raw=0.925
+           egfr_full:std=0.839/raw=1.206  abl1:std=0.544/raw=0.877  vegfr2:std=0.732/raw=0.925
   early stop at epoch 44 (best epoch 24)
   TEST egfr_full R2=0.4581  RMSE=1.0265  MAE=0.7856
   TEST abl1      R2=0.5964  RMSE=0.7781  MAE=0.6231
-  TEST mapk14    R2=0.5129  RMSE=0.8683  MAE=0.6779
+  TEST vegfr2    R2=0.5129  RMSE=0.8683  MAE=0.6779
   (271s, params=156419)
   saved -> results/multitask/mt_metrics.json, mt_preds_scaffold.npz, models/mt_scaffold.pt
 === END 2026-10-04 15:32:50 model=mt split=scaffold seed=42 rc=0 duration=273s ===
 === START 2026-10-04 15:32:50 model=mt split=scaffold seed=1 ===
 /Users/leisirui/miniforge3/envs/qsar/lib/python3.12/site-packages/torch/jit/_script.py:1491: FutureWarning: `torch.jit.script` is deprecated. Please switch to `torch.compile` or `torch.export`.
   warnings.warn(
-[mt/scaffold/seed1] tasks=['egfr_full', 'abl1', 'mapk14'] device=mps
+[mt/scaffold/seed1] tasks=['egfr_full', 'abl1', 'vegfr2'] device=mps
   egfr_full: y_mean=6.599 y_std=1.438 n_train=9706 n_valid=1079 n_test=2712
   abl1: y_mean=6.681 y_std=1.596 n_train=1943 n_valid=216 n_test=539
-  mapk14: y_mean=6.517 y_std=1.261 n_train=8479 n_valid=943 n_test=2375
+  vegfr2: y_mean=6.517 y_std=1.261 n_train=8479 n_valid=943 n_test=2375
   pooled train=20128 (per-task [9706, 1943, 8479]), 158 steps/epoch
 /Users/leisirui/qsar-activity-prediction/scripts/gnn_07_multitask.py:316: UserWarning: Converting a tensor with requires_grad=True to a scalar may lead to unexpected behavior.
 Consider using tensor.detach() first. (Triggered internally at /Users/runner/work/pytorch/pytorch/torch/csrc/autograd/generated/python_variable_methods.cpp:821.)
   total += float(loss) * len(batch.y)
   epoch   1  train_mse=0.8260  mean_valid_rmse_std=0.9305  lr=1.0e-03 *
-           egfr_full:std=0.916/raw=1.317  abl1:std=0.861/raw=1.373  mapk14:std=1.015/raw=1.280
+           egfr_full:std=0.916/raw=1.317  abl1:std=0.861/raw=1.373  vegfr2:std=1.015/raw=1.280
   epoch  20  train_mse=0.3974  mean_valid_rmse_std=0.7892  lr=5.0e-04
-           egfr_full:std=0.907/raw=1.302  abl1:std=0.717/raw=1.156  mapk14:std=0.744/raw=0.940
+           egfr_full:std=0.907/raw=1.302  abl1:std=0.717/raw=1.156  vegfr2:std=0.744/raw=0.940
   epoch  47  train_mse=0.3174  mean_valid_rmse_std=0.7333  lr=2.5e-04 *
-           egfr_full:std=0.699/raw=1.004  abl1:std=0.641/raw=1.033  mapk14:std=0.860/raw=1.086
+           egfr_full:std=0.699/raw=1.004  abl1:std=0.641/raw=1.033  vegfr2:std=0.860/raw=1.086
   epoch   2  train_mse=0.6909  mean_valid_rmse_std=0.8955  lr=1.0e-03 *
-           egfr_full:std=0.889/raw=1.278  abl1:std=0.868/raw=1.386  mapk14:std=0.929/raw=1.172
+           egfr_full:std=0.889/raw=1.278  abl1:std=0.868/raw=1.386  vegfr2:std=0.929/raw=1.172
   epoch  20  train_mse=0.4334  mean_valid_rmse_std=0.8618  lr=5.0e-04
-           egfr_full:std=0.843/raw=1.213  abl1:std=0.692/raw=1.104  mapk14:std=1.050/raw=1.324
+           egfr_full:std=0.843/raw=1.213  abl1:std=0.692/raw=1.104  vegfr2:std=1.050/raw=1.324
   epoch  50  train_mse=0.3030  mean_valid_rmse_std=0.7967  lr=2.5e-04
-           egfr_full:std=0.648/raw=0.931  abl1:std=0.731/raw=1.179  mapk14:std=1.011/raw=1.277
+           egfr_full:std=0.648/raw=0.931  abl1:std=0.731/raw=1.179  vegfr2:std=1.011/raw=1.277
   epoch  21  train_mse=0.4394  mean_valid_rmse_std=0.7755  lr=5.0e-04 *
-           egfr_full:std=0.765/raw=1.100  abl1:std=0.595/raw=0.949  mapk14:std=0.967/raw=1.219
+           egfr_full:std=0.765/raw=1.100  abl1:std=0.595/raw=0.949  vegfr2:std=0.967/raw=1.219
   epoch   4  train_mse=0.5829  mean_valid_rmse_std=0.8308  lr=1.0e-03 *
-           egfr_full:std=0.839/raw=1.207  abl1:std=0.638/raw=1.017  mapk14:std=1.016/raw=1.281
+           egfr_full:std=0.839/raw=1.207  abl1:std=0.638/raw=1.017  vegfr2:std=1.016/raw=1.281
   epoch  51  train_mse=0.3023  mean_valid_rmse_std=0.7200  lr=2.5e-04 *
-           egfr_full:std=0.732/raw=1.052  abl1:std=0.519/raw=0.837  mapk14:std=0.909/raw=1.148
+           egfr_full:std=0.732/raw=1.052  abl1:std=0.519/raw=0.837  vegfr2:std=0.909/raw=1.148
   epoch  22  train_mse=0.4308  mean_valid_rmse_std=0.7563  lr=5.0e-04 *
-           egfr_full:std=0.759/raw=1.092  abl1:std=0.577/raw=0.920  mapk14:std=0.933/raw=1.176
+           egfr_full:std=0.759/raw=1.092  abl1:std=0.577/raw=0.920  vegfr2:std=0.933/raw=1.176
   epoch   5  train_mse=0.5665  mean_valid_rmse_std=0.8237  lr=1.0e-03 *
-           egfr_full:std=0.874/raw=1.257  abl1:std=0.655/raw=1.046  mapk14:std=0.942/raw=1.188
+           egfr_full:std=0.874/raw=1.257  abl1:std=0.655/raw=1.046  vegfr2:std=0.942/raw=1.188
   epoch  24  train_mse=0.3870  mean_valid_rmse_std=0.7040  lr=5.0e-04 *
-           egfr_full:std=0.759/raw=1.090  abl1:std=0.611/raw=0.985  mapk14:std=0.742/raw=0.937
+           egfr_full:std=0.759/raw=1.090  abl1:std=0.611/raw=0.985  vegfr2:std=0.742/raw=0.937
   epoch   6  train_mse=0.5631  mean_valid_rmse_std=0.8213  lr=1.0e-03 *
-           egfr_full:std=0.861/raw=1.239  abl1:std=0.700/raw=1.117  mapk14:std=0.903/raw=1.138
+           egfr_full:std=0.861/raw=1.239  abl1:std=0.700/raw=1.117  vegfr2:std=0.903/raw=1.138
   epoch  23  train_mse=0.4340  mean_valid_rmse_std=0.7545  lr=5.0e-04 *
-           egfr_full:std=0.774/raw=1.113  abl1:std=0.603/raw=0.962  mapk14:std=0.887/raw=1.118
+           egfr_full:std=0.774/raw=1.113  abl1:std=0.603/raw=0.962  vegfr2:std=0.887/raw=1.118
   epoch  25  train_mse=0.3893  mean_valid_rmse_std=0.6896  lr=5.0e-04 *
-           egfr_full:std=0.760/raw=1.091  abl1:std=0.580/raw=0.934  mapk14:std=0.730/raw=0.922
+           egfr_full:std=0.760/raw=1.091  abl1:std=0.580/raw=0.934  vegfr2:std=0.730/raw=0.922
   epoch   7  train_mse=0.5615  mean_valid_rmse_std=0.7602  lr=1.0e-03 *
-           egfr_full:std=0.798/raw=1.148  abl1:std=0.636/raw=1.015  mapk14:std=0.846/raw=1.067
+           egfr_full:std=0.798/raw=1.148  abl1:std=0.636/raw=1.015  vegfr2:std=0.846/raw=1.067
   epoch   9  train_mse=0.5464  mean_valid_rmse_std=0.7518  lr=1.0e-03 *
-           egfr_full:std=0.796/raw=1.144  abl1:std=0.612/raw=0.977  mapk14:std=0.848/raw=1.068
+           egfr_full:std=0.796/raw=1.144  abl1:std=0.612/raw=0.977  vegfr2:std=0.848/raw=1.068
   epoch  10  train_mse=0.5313  mean_valid_rmse_std=0.7534  lr=1.0e-03
-           egfr_full:std=0.814/raw=1.171  abl1:std=0.617/raw=0.985  mapk14:std=0.829/raw=1.045
+           egfr_full:std=0.814/raw=1.171  abl1:std=0.617/raw=0.985  vegfr2:std=0.829/raw=1.045
   epoch  26  train_mse=0.4081  mean_valid_rmse_std=0.7528  lr=5.0e-04 *
-           egfr_full:std=0.737/raw=1.060  abl1:std=0.578/raw=0.923  mapk14:std=0.943/raw=1.189
+           egfr_full:std=0.737/raw=1.060  abl1:std=0.578/raw=0.923  vegfr2:std=0.943/raw=1.189
   epoch  60  train_mse=0.2818  mean_valid_rmse_std=0.7982  lr=1.3e-04
-           egfr_full:std=0.656/raw=0.942  abl1:std=0.642/raw=1.035  mapk14:std=1.097/raw=1.386
+           egfr_full:std=0.656/raw=0.942  abl1:std=0.642/raw=1.035  vegfr2:std=1.097/raw=1.386
   epoch  30  train_mse=0.3824  mean_valid_rmse_std=0.7628  lr=5.0e-04
-           egfr_full:std=0.867/raw=1.245  abl1:std=0.665/raw=1.072  mapk14:std=0.757/raw=0.956
+           egfr_full:std=0.867/raw=1.245  abl1:std=0.665/raw=1.072  vegfr2:std=0.757/raw=0.956
   epoch  31  train_mse=0.3775  mean_valid_rmse_std=0.6696  lr=5.0e-04 *
-           egfr_full:std=0.725/raw=1.042  abl1:std=0.574/raw=0.925  mapk14:std=0.710/raw=0.896
+           egfr_full:std=0.725/raw=1.042  abl1:std=0.574/raw=0.925  vegfr2:std=0.710/raw=0.896
   epoch  30  train_mse=0.4069  mean_valid_rmse_std=0.7868  lr=5.0e-04
-           egfr_full:std=0.733/raw=1.054  abl1:std=0.616/raw=0.983  mapk14:std=1.012/raw=1.275
+           egfr_full:std=0.733/raw=1.054  abl1:std=0.616/raw=0.983  vegfr2:std=1.012/raw=1.275
   epoch  16  train_mse=0.4700  mean_valid_rmse_std=0.7377  lr=1.0e-03 *
-           egfr_full:std=0.830/raw=1.194  abl1:std=0.583/raw=0.930  mapk14:std=0.800/raw=1.008
+           egfr_full:std=0.830/raw=1.194  abl1:std=0.583/raw=0.930  vegfr2:std=0.800/raw=1.008
   epoch  33  train_mse=0.3740  mean_valid_rmse_std=0.7335  lr=5.0e-04 *
-           egfr_full:std=0.737/raw=1.061  abl1:std=0.573/raw=0.914  mapk14:std=0.890/raw=1.122
+           egfr_full:std=0.737/raw=1.061  abl1:std=0.573/raw=0.914  vegfr2:std=0.890/raw=1.122
   epoch  20  train_mse=0.4363  mean_valid_rmse_std=0.7173  lr=1.0e-03 *
-           egfr_full:std=0.770/raw=1.107  abl1:std=0.610/raw=0.974  mapk14:std=0.772/raw=0.973
+           egfr_full:std=0.770/raw=1.107  abl1:std=0.610/raw=0.974  vegfr2:std=0.772/raw=0.973
   epoch  21  train_mse=0.4366  mean_valid_rmse_std=0.7133  lr=1.0e-03 *
-           egfr_full:std=0.746/raw=1.072  abl1:std=0.640/raw=1.022  mapk14:std=0.754/raw=0.950
+           egfr_full:std=0.746/raw=1.072  abl1:std=0.640/raw=1.022  vegfr2:std=0.754/raw=0.950
   epoch  70  train_mse=0.2690  mean_valid_rmse_std=0.7753  lr=6.3e-05
-           egfr_full:std=0.631/raw=0.906  abl1:std=0.685/raw=1.104  mapk14:std=1.010/raw=1.276
+           egfr_full:std=0.631/raw=0.906  abl1:std=0.685/raw=1.104  vegfr2:std=1.010/raw=1.276
   epoch  39  train_mse=0.3348  mean_valid_rmse_std=0.6690  lr=5.0e-04 *
-           egfr_full:std=0.683/raw=0.981  abl1:std=0.631/raw=1.018  mapk14:std=0.692/raw=0.874
+           egfr_full:std=0.683/raw=0.981  abl1:std=0.631/raw=1.018  vegfr2:std=0.692/raw=0.874
   early stop at epoch 71 (best epoch 51)
   TEST egfr_full R2=0.4683  RMSE=1.0541  MAE=0.8237
   TEST abl1      R2=0.7005  RMSE=0.8608  MAE=0.6511
-  TEST mapk14    R2=0.1993  RMSE=1.1120  MAE=0.9062
+  TEST vegfr2    R2=0.1993  RMSE=1.1120  MAE=0.9062
   (445s, params=156161)
   saved -> results/multitask/pooled_st_metrics.json, pooled_preds_random.npz, models/pooled_random.pt
 === END 2026-10-04 15:35:44 model=pooled split=random seed=42 rc=0 duration=447s ===
 === START 2026-10-04 15:35:44 model=pooled split=random seed=1 ===
   epoch  40  train_mse=0.3606  mean_valid_rmse_std=0.7358  lr=5.0e-04
-           egfr_full:std=0.774/raw=1.111  abl1:std=0.698/raw=1.126  mapk14:std=0.736/raw=0.929
+           egfr_full:std=0.774/raw=1.111  abl1:std=0.698/raw=1.126  vegfr2:std=0.736/raw=0.929
 /Users/leisirui/miniforge3/envs/qsar/lib/python3.12/site-packages/torch/jit/_script.py:1491: FutureWarning: `torch.jit.script` is deprecated. Please switch to `torch.compile` or `torch.export`.
   warnings.warn(
-[pooled/random/seed1] tasks=['egfr_full', 'abl1', 'mapk14'] device=mps
+[pooled/random/seed1] tasks=['egfr_full', 'abl1', 'vegfr2'] device=mps
   egfr_full: y_mean=6.662 y_std=1.436 n_train=9717 n_valid=1080 n_test=2700
   abl1: y_mean=6.961 y_std=1.612 n_train=1942 n_valid=216 n_test=540
-  mapk14: y_mean=6.517 y_std=1.263 n_train=8493 n_valid=944 n_test=2360
+  vegfr2: y_mean=6.517 y_std=1.263 n_train=8493 n_valid=944 n_test=2360
   pooled train=20152 (per-task [9717, 1942, 8493]), 158 steps/epoch
 /Users/leisirui/qsar-activity-prediction/scripts/gnn_07_multitask.py:316: UserWarning: Converting a tensor with requires_grad=True to a scalar may lead to unexpected behavior.
 Consider using tensor.detach() first. (Triggered internally at /Users/runner/work/pytorch/pytorch/torch/csrc/autograd/generated/python_variable_methods.cpp:821.)
   total += float(loss) * len(batch.y)
   epoch   1  train_mse=0.8063  mean_valid_rmse_std=0.8856  lr=1.0e-03 *
-           egfr_full:std=0.938/raw=1.347  abl1:std=0.748/raw=1.206  mapk14:std=0.971/raw=1.227
+           egfr_full:std=0.938/raw=1.347  abl1:std=0.748/raw=1.206  vegfr2:std=0.971/raw=1.227
   epoch  40  train_mse=0.3820  mean_valid_rmse_std=0.8205  lr=5.0e-04
-           egfr_full:std=0.688/raw=0.990  abl1:std=0.676/raw=1.078  mapk14:std=1.097/raw=1.383
+           egfr_full:std=0.688/raw=0.990  abl1:std=0.676/raw=1.078  vegfr2:std=1.097/raw=1.383
   epoch  44  train_mse=0.3285  mean_valid_rmse_std=0.6616  lr=5.0e-04 *
-           egfr_full:std=0.769/raw=1.105  abl1:std=0.512/raw=0.826  mapk14:std=0.703/raw=0.888
+           egfr_full:std=0.769/raw=1.105  abl1:std=0.512/raw=0.826  vegfr2:std=0.703/raw=0.888
   epoch   3  train_mse=0.6717  mean_valid_rmse_std=0.8738  lr=1.0e-03 *
-           egfr_full:std=0.912/raw=1.310  abl1:std=0.760/raw=1.226  mapk14:std=0.949/raw=1.198
+           egfr_full:std=0.912/raw=1.310  abl1:std=0.760/raw=1.226  vegfr2:std=0.949/raw=1.198
   epoch  30  train_mse=0.3513  mean_valid_rmse_std=0.7046  lr=5.0e-04 *
-           egfr_full:std=0.738/raw=1.062  abl1:std=0.639/raw=1.021  mapk14:std=0.736/raw=0.928
+           egfr_full:std=0.738/raw=1.062  abl1:std=0.639/raw=1.021  vegfr2:std=0.736/raw=0.928
   epoch  31  train_mse=0.3584  mean_valid_rmse_std=0.6953  lr=5.0e-04 *
-           egfr_full:std=0.718/raw=1.033  abl1:std=0.659/raw=1.052  mapk14:std=0.708/raw=0.893
+           egfr_full:std=0.718/raw=1.033  abl1:std=0.659/raw=1.052  vegfr2:std=0.708/raw=0.893
   epoch  32  train_mse=0.3481  mean_valid_rmse_std=0.6930  lr=5.0e-04 *
-           egfr_full:std=0.755/raw=1.085  abl1:std=0.611/raw=0.975  mapk14:std=0.713/raw=0.899
+           egfr_full:std=0.755/raw=1.085  abl1:std=0.611/raw=0.975  vegfr2:std=0.713/raw=0.899
   epoch   7  train_mse=0.6099  mean_valid_rmse_std=0.8683  lr=1.0e-03 *
-           egfr_full:std=0.971/raw=1.395  abl1:std=0.730/raw=1.177  mapk14:std=0.903/raw=1.141
+           egfr_full:std=0.971/raw=1.395  abl1:std=0.730/raw=1.177  vegfr2:std=0.903/raw=1.141
   epoch  50  train_mse=0.3238  mean_valid_rmse_std=0.6818  lr=5.0e-04
-           egfr_full:std=0.700/raw=1.005  abl1:std=0.616/raw=0.994  mapk14:std=0.729/raw=0.921
+           egfr_full:std=0.700/raw=1.005  abl1:std=0.616/raw=0.994  vegfr2:std=0.729/raw=0.921
   epoch   9  train_mse=0.5772  mean_valid_rmse_std=0.7974  lr=1.0e-03 *
-           egfr_full:std=0.817/raw=1.173  abl1:std=0.703/raw=1.133  mapk14:std=0.873/raw=1.102
+           egfr_full:std=0.817/raw=1.173  abl1:std=0.703/raw=1.133  vegfr2:std=0.873/raw=1.102
   epoch  10  train_mse=0.5498  mean_valid_rmse_std=0.8497  lr=1.0e-03
-           egfr_full:std=0.885/raw=1.271  abl1:std=0.754/raw=1.215  mapk14:std=0.911/raw=1.150
+           egfr_full:std=0.885/raw=1.271  abl1:std=0.754/raw=1.215  vegfr2:std=0.911/raw=1.150
   epoch  37  train_mse=0.3440  mean_valid_rmse_std=0.6583  lr=5.0e-04 *
-           egfr_full:std=0.723/raw=1.040  abl1:std=0.564/raw=0.901  mapk14:std=0.688/raw=0.867
+           egfr_full:std=0.723/raw=1.040  abl1:std=0.564/raw=0.901  vegfr2:std=0.688/raw=0.867
   epoch  40  train_mse=0.3070  mean_valid_rmse_std=0.6615  lr=5.0e-04
-           egfr_full:std=0.732/raw=1.053  abl1:std=0.560/raw=0.894  mapk14:std=0.693/raw=0.873
+           egfr_full:std=0.732/raw=1.053  abl1:std=0.560/raw=0.894  vegfr2:std=0.693/raw=0.873
   epoch  13  train_mse=0.4834  mean_valid_rmse_std=0.7840  lr=1.0e-03 *
-           egfr_full:std=0.791/raw=1.137  abl1:std=0.634/raw=1.023  mapk14:std=0.926/raw=1.170
+           egfr_full:std=0.791/raw=1.137  abl1:std=0.634/raw=1.023  vegfr2:std=0.926/raw=1.170
   epoch  50  train_mse=0.3191  mean_valid_rmse_std=0.7993  lr=1.3e-04
-           egfr_full:std=0.649/raw=0.934  abl1:std=0.714/raw=1.139  mapk14:std=1.035/raw=1.305
+           egfr_full:std=0.649/raw=0.934  abl1:std=0.714/raw=1.139  vegfr2:std=1.035/raw=1.305
   early stop at epoch 53 (best epoch 33)
   TEST egfr_full R2=0.4523  RMSE=1.0320  MAE=0.7824
   TEST abl1      R2=0.5213  RMSE=0.8475  MAE=0.7199
-  TEST mapk14    R2=0.0945  RMSE=1.1839  MAE=0.9724
+  TEST vegfr2    R2=0.0945  RMSE=1.1839  MAE=0.9724
   (580s, params=156161)
   saved -> results/multitask/pooled_st_metrics.json, pooled_preds_scaffold.npz, models/pooled_scaffold.pt
 === END 2026-10-04 15:37:59 model=pooled split=scaffold seed=42 rc=0 duration=582s ===
 === START 2026-10-04 15:37:59 model=pooled split=scaffold seed=1 ===
 /Users/leisirui/miniforge3/envs/qsar/lib/python3.12/site-packages/torch/jit/_script.py:1491: FutureWarning: `torch.jit.script` is deprecated. Please switch to `torch.compile` or `torch.export`.
   warnings.warn(
-[pooled/scaffold/seed1] tasks=['egfr_full', 'abl1', 'mapk14'] device=mps
+[pooled/scaffold/seed1] tasks=['egfr_full', 'abl1', 'vegfr2'] device=mps
   egfr_full: y_mean=6.599 y_std=1.438 n_train=9706 n_valid=1079 n_test=2712
   abl1: y_mean=6.681 y_std=1.596 n_train=1943 n_valid=216 n_test=539
-  mapk14: y_mean=6.517 y_std=1.261 n_train=8479 n_valid=943 n_test=2375
+  vegfr2: y_mean=6.517 y_std=1.261 n_train=8479 n_valid=943 n_test=2375
   pooled train=20128 (per-task [9706, 1943, 8479]), 158 steps/epoch
 /Users/leisirui/qsar-activity-prediction/scripts/gnn_07_multitask.py:316: UserWarning: Converting a tensor with requires_grad=True to a scalar may lead to unexpected behavior.
 Consider using tensor.detach() first. (Triggered internally at /Users/runner/work/pytorch/pytorch/torch/csrc/autograd/generated/python_variable_methods.cpp:821.)
   total += float(loss) * len(batch.y)
   epoch  60  train_mse=0.2853  mean_valid_rmse_std=0.6585  lr=2.5e-04 *
-           egfr_full:std=0.657/raw=0.943  abl1:std=0.632/raw=1.018  mapk14:std=0.687/raw=0.868
+           egfr_full:std=0.657/raw=0.943  abl1:std=0.632/raw=1.018  vegfr2:std=0.687/raw=0.868
   epoch  20  train_mse=0.4456  mean_valid_rmse_std=0.7851  lr=1.0e-03
-           egfr_full:std=0.781/raw=1.121  abl1:std=0.680/raw=1.096  mapk14:std=0.895/raw=1.130
+           egfr_full:std=0.781/raw=1.121  abl1:std=0.680/raw=1.096  vegfr2:std=0.895/raw=1.130
   epoch   1  train_mse=0.8332  mean_valid_rmse_std=1.0528  lr=1.0e-03 *
-           egfr_full:std=1.140/raw=1.640  abl1:std=0.860/raw=1.373  mapk14:std=1.158/raw=1.460
+           egfr_full:std=1.140/raw=1.640  abl1:std=0.860/raw=1.373  vegfr2:std=1.158/raw=1.460
   epoch   2  train_mse=0.7639  mean_valid_rmse_std=0.8559  lr=1.0e-03 *
-           egfr_full:std=0.924/raw=1.329  abl1:std=0.701/raw=1.118  mapk14:std=0.943/raw=1.189
+           egfr_full:std=0.924/raw=1.329  abl1:std=0.701/raw=1.118  vegfr2:std=0.943/raw=1.189
   epoch  22  train_mse=0.4047  mean_valid_rmse_std=0.7669  lr=5.0e-04 *
-           egfr_full:std=0.804/raw=1.155  abl1:std=0.658/raw=1.061  mapk14:std=0.838/raw=1.059
+           egfr_full:std=0.804/raw=1.155  abl1:std=0.658/raw=1.061  vegfr2:std=0.838/raw=1.059
   epoch  50  train_mse=0.2899  mean_valid_rmse_std=0.6865  lr=2.5e-04
-           egfr_full:std=0.747/raw=1.074  abl1:std=0.621/raw=0.991  mapk14:std=0.692/raw=0.873
+           egfr_full:std=0.747/raw=1.074  abl1:std=0.621/raw=0.991  vegfr2:std=0.692/raw=0.873
   epoch   6  train_mse=0.6308  mean_valid_rmse_std=0.8302  lr=1.0e-03 *
-           egfr_full:std=0.877/raw=1.262  abl1:std=0.708/raw=1.130  mapk14:std=0.905/raw=1.141
+           egfr_full:std=0.877/raw=1.262  abl1:std=0.708/raw=1.130  vegfr2:std=0.905/raw=1.141
   epoch  29  train_mse=0.3992  mean_valid_rmse_std=0.7628  lr=5.0e-04 *
-           egfr_full:std=0.696/raw=1.000  abl1:std=0.587/raw=0.946  mapk14:std=1.005/raw=1.269
+           egfr_full:std=0.696/raw=1.000  abl1:std=0.587/raw=0.946  vegfr2:std=1.005/raw=1.269
   early stop at epoch 57 (best epoch 37)
   epoch  30  train_mse=0.3746  mean_valid_rmse_std=0.7927  lr=5.0e-04
-           egfr_full:std=0.679/raw=0.975  abl1:std=0.618/raw=0.996  mapk14:std=1.082/raw=1.366
+           egfr_full:std=0.679/raw=0.975  abl1:std=0.618/raw=0.996  vegfr2:std=1.082/raw=1.366
   TEST egfr_full R2=0.3416  RMSE=1.1315  MAE=0.9033
   TEST abl1      R2=0.6597  RMSE=0.7146  MAE=0.5413
-  TEST mapk14    R2=0.5405  RMSE=0.8433  MAE=0.6320
+  TEST vegfr2    R2=0.5405  RMSE=0.8433  MAE=0.6320
   (374s, params=156419)
   saved -> results/multitask/mt_metrics_seed1.json, mt_preds_scaffold_seed1.npz, models/mt_scaffold_seed1.pt
   epoch   8  train_mse=0.5777  mean_valid_rmse_std=0.8161  lr=1.0e-03 *
-           egfr_full:std=0.834/raw=1.199  abl1:std=0.639/raw=1.020  mapk14:std=0.975/raw=1.229
+           egfr_full:std=0.834/raw=1.199  abl1:std=0.639/raw=1.020  vegfr2:std=0.975/raw=1.229
 === END 2026-10-04 15:39:07 model=mt split=scaffold seed=1 rc=0 duration=377s ===
 === START 2026-10-04 15:39:07 model=mt split=scaffold seed=2 ===
 /Users/leisirui/miniforge3/envs/qsar/lib/python3.12/site-packages/torch/jit/_script.py:1491: FutureWarning: `torch.jit.script` is deprecated. Please switch to `torch.compile` or `torch.export`.
   warnings.warn(
-[mt/scaffold/seed2] tasks=['egfr_full', 'abl1', 'mapk14'] device=mps
+[mt/scaffold/seed2] tasks=['egfr_full', 'abl1', 'vegfr2'] device=mps
   egfr_full: y_mean=6.599 y_std=1.438 n_train=9706 n_valid=1079 n_test=2712
   abl1: y_mean=6.681 y_std=1.596 n_train=1943 n_valid=216 n_test=539
-  mapk14: y_mean=6.517 y_std=1.261 n_train=8479 n_valid=943 n_test=2375
+  vegfr2: y_mean=6.517 y_std=1.261 n_train=8479 n_valid=943 n_test=2375
   pooled train=20128 (per-task [9706, 1943, 8479]), 158 steps/epoch
 /Users/leisirui/qsar-activity-prediction/scripts/gnn_07_multitask.py:316: UserWarning: Converting a tensor with requires_grad=True to a scalar may lead to unexpected behavior.
 Consider using tensor.detach() first. (Triggered internally at /Users/runner/work/pytorch/pytorch/torch/csrc/autograd/generated/python_variable_methods.cpp:821.)
   total += float(loss) * len(batch.y)
   epoch  31  train_mse=0.3865  mean_valid_rmse_std=0.7606  lr=5.0e-04 *
-           egfr_full:std=0.702/raw=1.009  abl1:std=0.673/raw=1.085  mapk14:std=0.907/raw=1.145
+           egfr_full:std=0.702/raw=1.009  abl1:std=0.673/raw=1.085  vegfr2:std=0.907/raw=1.145
   epoch  70  train_mse=0.2634  mean_valid_rmse_std=0.6834  lr=1.3e-04
-           egfr_full:std=0.700/raw=1.005  abl1:std=0.662/raw=1.067  mapk14:std=0.689/raw=0.870
+           egfr_full:std=0.700/raw=1.005  abl1:std=0.662/raw=1.067  vegfr2:std=0.689/raw=0.870
   epoch  10  train_mse=0.5759  mean_valid_rmse_std=0.8224  lr=1.0e-03
-           egfr_full:std=0.847/raw=1.219  abl1:std=0.696/raw=1.110  mapk14:std=0.924/raw=1.165
+           egfr_full:std=0.847/raw=1.219  abl1:std=0.696/raw=1.110  vegfr2:std=0.924/raw=1.165
   epoch   1  train_mse=0.7827  mean_valid_rmse_std=0.9087  lr=1.0e-03 *
-           egfr_full:std=0.892/raw=1.283  abl1:std=0.773/raw=1.233  mapk14:std=1.062/raw=1.338
+           egfr_full:std=0.892/raw=1.283  abl1:std=0.773/raw=1.233  vegfr2:std=1.062/raw=1.338
   epoch  11  train_mse=0.5726  mean_valid_rmse_std=0.8094  lr=1.0e-03 *
-           egfr_full:std=0.832/raw=1.197  abl1:std=0.674/raw=1.075  mapk14:std=0.922/raw=1.163
+           egfr_full:std=0.832/raw=1.197  abl1:std=0.674/raw=1.075  vegfr2:std=0.922/raw=1.163
   epoch   2  train_mse=0.6877  mean_valid_rmse_std=0.8830  lr=1.0e-03 *
-           egfr_full:std=0.905/raw=1.302  abl1:std=0.799/raw=1.275  mapk14:std=0.945/raw=1.191
+           egfr_full:std=0.905/raw=1.302  abl1:std=0.799/raw=1.275  vegfr2:std=0.945/raw=1.191
   epoch   3  train_mse=0.6689  mean_valid_rmse_std=0.8240  lr=1.0e-03 *
-           egfr_full:std=0.888/raw=1.277  abl1:std=0.661/raw=1.054  mapk14:std=0.923/raw=1.164
+           egfr_full:std=0.888/raw=1.277  abl1:std=0.661/raw=1.054  vegfr2:std=0.923/raw=1.164
   epoch  39  train_mse=0.3783  mean_valid_rmse_std=0.7486  lr=5.0e-04 *
-           egfr_full:std=0.696/raw=1.000  abl1:std=0.585/raw=0.944  mapk14:std=0.965/raw=1.219
+           egfr_full:std=0.696/raw=1.000  abl1:std=0.585/raw=0.944  vegfr2:std=0.965/raw=1.219
   epoch   7  train_mse=0.5531  mean_valid_rmse_std=0.8055  lr=1.0e-03 *
-           egfr_full:std=0.806/raw=1.159  abl1:std=0.704/raw=1.124  mapk14:std=0.906/raw=1.142
+           egfr_full:std=0.806/raw=1.159  abl1:std=0.704/raw=1.124  vegfr2:std=0.906/raw=1.142
   epoch  40  train_mse=0.3243  mean_valid_rmse_std=0.7747  lr=5.0e-04
-           egfr_full:std=0.690/raw=0.991  abl1:std=0.633/raw=1.020  mapk14:std=1.002/raw=1.265
+           egfr_full:std=0.690/raw=0.991  abl1:std=0.633/raw=1.020  vegfr2:std=1.002/raw=1.265
   epoch  17  train_mse=0.4726  mean_valid_rmse_std=0.8082  lr=1.0e-03 *
-           egfr_full:std=0.841/raw=1.209  abl1:std=0.621/raw=0.992  mapk14:std=0.963/raw=1.214
+           egfr_full:std=0.841/raw=1.209  abl1:std=0.621/raw=0.992  vegfr2:std=0.963/raw=1.214
   epoch   8  train_mse=0.5524  mean_valid_rmse_std=0.7946  lr=1.0e-03 *
-           egfr_full:std=0.905/raw=1.302  abl1:std=0.641/raw=1.022  mapk14:std=0.838/raw=1.056
+           egfr_full:std=0.905/raw=1.302  abl1:std=0.641/raw=1.022  vegfr2:std=0.838/raw=1.056
   epoch  18  train_mse=0.4749  mean_valid_rmse_std=0.7568  lr=1.0e-03 *
-           egfr_full:std=0.780/raw=1.122  abl1:std=0.575/raw=0.917  mapk14:std=0.916/raw=1.154
+           egfr_full:std=0.780/raw=1.122  abl1:std=0.575/raw=0.917  vegfr2:std=0.916/raw=1.154
   epoch  80  train_mse=0.2626  mean_valid_rmse_std=0.6755  lr=6.3e-05
-           egfr_full:std=0.760/raw=1.092  abl1:std=0.594/raw=0.958  mapk14:std=0.672/raw=0.848
+           egfr_full:std=0.760/raw=1.092  abl1:std=0.594/raw=0.958  vegfr2:std=0.672/raw=0.848
   early stop at epoch 80 (best epoch 60)
   TEST egfr_full R2=0.5766  RMSE=0.9406  MAE=0.7220
   TEST abl1      R2=0.5806  RMSE=1.0185  MAE=0.7960
-  TEST mapk14    R2=0.5593  RMSE=0.8250  MAE=0.6395
+  TEST vegfr2    R2=0.5593  RMSE=0.8250  MAE=0.6395
   (714s, params=156419)
   saved -> results/multitask/mt_metrics.json, mt_preds_random.npz, models/mt_random.pt
 === END 2026-10-04 15:40:13 model=mt split=random seed=42 rc=0 duration=716s ===
 === START 2026-10-04 15:40:13 model=mt split=random seed=1 ===
   epoch  10  train_mse=0.5110  mean_valid_rmse_std=0.9207  lr=1.0e-03
-           egfr_full:std=1.072/raw=1.543  abl1:std=0.845/raw=1.348  mapk14:std=0.845/raw=1.065
+           egfr_full:std=1.072/raw=1.543  abl1:std=0.845/raw=1.348  vegfr2:std=0.845/raw=1.065
 /Users/leisirui/miniforge3/envs/qsar/lib/python3.12/site-packages/torch/jit/_script.py:1491: FutureWarning: `torch.jit.script` is deprecated. Please switch to `torch.compile` or `torch.export`.
   warnings.warn(
-[mt/random/seed1] tasks=['egfr_full', 'abl1', 'mapk14'] device=mps
+[mt/random/seed1] tasks=['egfr_full', 'abl1', 'vegfr2'] device=mps
   egfr_full: y_mean=6.662 y_std=1.436 n_train=9717 n_valid=1080 n_test=2700
   abl1: y_mean=6.961 y_std=1.612 n_train=1942 n_valid=216 n_test=540
-  mapk14: y_mean=6.517 y_std=1.263 n_train=8493 n_valid=944 n_test=2360
+  vegfr2: y_mean=6.517 y_std=1.263 n_train=8493 n_valid=944 n_test=2360
   pooled train=20152 (per-task [9717, 1942, 8493]), 158 steps/epoch
 /Users/leisirui/qsar-activity-prediction/scripts/gnn_07_multitask.py:316: UserWarning: Converting a tensor with requires_grad=True to a scalar may lead to unexpected behavior.
 Consider using tensor.detach() first. (Triggered internally at /Users/runner/work/pytorch/pytorch/torch/csrc/autograd/generated/python_variable_methods.cpp:821.)
   total += float(loss) * len(batch.y)
   epoch  20  train_mse=0.4653  mean_valid_rmse_std=0.7724  lr=1.0e-03
-           egfr_full:std=0.781/raw=1.124  abl1:std=0.617/raw=0.985  mapk14:std=0.919/raw=1.158
+           egfr_full:std=0.781/raw=1.124  abl1:std=0.617/raw=0.985  vegfr2:std=0.919/raw=1.158
   epoch  11  train_mse=0.4982  mean_valid_rmse_std=0.7596  lr=1.0e-03 *
-           egfr_full:std=0.796/raw=1.145  abl1:std=0.658/raw=1.050  mapk14:std=0.824/raw=1.039
+           egfr_full:std=0.796/raw=1.145  abl1:std=0.658/raw=1.050  vegfr2:std=0.824/raw=1.039
   epoch   1  train_mse=0.7784  mean_valid_rmse_std=0.9257  lr=1.0e-03 *
-           egfr_full:std=0.889/raw=1.276  abl1:std=0.930/raw=1.500  mapk14:std=0.958/raw=1.211
+           egfr_full:std=0.889/raw=1.276  abl1:std=0.930/raw=1.500  vegfr2:std=0.958/raw=1.211
   epoch  13  train_mse=0.4702  mean_valid_rmse_std=0.7590  lr=1.0e-03 *
-           egfr_full:std=0.820/raw=1.180  abl1:std=0.592/raw=0.944  mapk14:std=0.865/raw=1.090
+           egfr_full:std=0.820/raw=1.180  abl1:std=0.592/raw=0.944  vegfr2:std=0.865/raw=1.090
   epoch   3  train_mse=0.5914  mean_valid_rmse_std=0.7859  lr=1.0e-03 *
-           egfr_full:std=0.828/raw=1.190  abl1:std=0.643/raw=1.036  mapk14:std=0.887/raw=1.120
+           egfr_full:std=0.828/raw=1.190  abl1:std=0.643/raw=1.036  vegfr2:std=0.887/raw=1.120
   epoch  16  train_mse=0.4570  mean_valid_rmse_std=0.7547  lr=1.0e-03 *
-           egfr_full:std=0.774/raw=1.113  abl1:std=0.681/raw=1.086  mapk14:std=0.810/raw=1.020
+           egfr_full:std=0.774/raw=1.113  abl1:std=0.681/raw=1.086  vegfr2:std=0.810/raw=1.020
   epoch  50  train_mse=0.3118  mean_valid_rmse_std=0.7583  lr=2.5e-04
-           egfr_full:std=0.673/raw=0.967  abl1:std=0.612/raw=0.987  mapk14:std=0.990/raw=1.250
+           egfr_full:std=0.673/raw=0.967  abl1:std=0.612/raw=0.987  vegfr2:std=0.990/raw=1.250
   epoch  51  train_mse=0.3072  mean_valid_rmse_std=0.7462  lr=2.5e-04 *
-           egfr_full:std=0.695/raw=0.999  abl1:std=0.590/raw=0.952  mapk14:std=0.953/raw=1.204
+           egfr_full:std=0.695/raw=0.999  abl1:std=0.590/raw=0.952  vegfr2:std=0.953/raw=1.204
   epoch   6  train_mse=0.5364  mean_valid_rmse_std=0.7783  lr=1.0e-03 *
-           egfr_full:std=0.808/raw=1.160  abl1:std=0.653/raw=1.052  mapk14:std=0.874/raw=1.104
+           egfr_full:std=0.808/raw=1.160  abl1:std=0.653/raw=1.052  vegfr2:std=0.874/raw=1.104
   epoch  19  train_mse=0.4539  mean_valid_rmse_std=0.7353  lr=1.0e-03 *
-           egfr_full:std=0.794/raw=1.142  abl1:std=0.639/raw=1.019  mapk14:std=0.773/raw=0.975
+           egfr_full:std=0.794/raw=1.142  abl1:std=0.639/raw=1.019  vegfr2:std=0.773/raw=0.975
   epoch  27  train_mse=0.3994  mean_valid_rmse_std=0.7422  lr=5.0e-04 *
-           egfr_full:std=0.832/raw=1.197  abl1:std=0.564/raw=0.900  mapk14:std=0.830/raw=1.047
+           egfr_full:std=0.832/raw=1.197  abl1:std=0.564/raw=0.900  vegfr2:std=0.830/raw=1.047
   epoch  20  train_mse=0.4337  mean_valid_rmse_std=0.7954  lr=1.0e-03
-           egfr_full:std=0.843/raw=1.213  abl1:std=0.741/raw=1.183  mapk14:std=0.801/raw=1.010
+           egfr_full:std=0.843/raw=1.213  abl1:std=0.741/raw=1.183  vegfr2:std=0.801/raw=1.010
   epoch  22  train_mse=0.4191  mean_valid_rmse_std=0.7342  lr=1.0e-03 *
-           egfr_full:std=0.839/raw=1.207  abl1:std=0.597/raw=0.952  mapk14:std=0.767/raw=0.966
+           egfr_full:std=0.839/raw=1.207  abl1:std=0.597/raw=0.952  vegfr2:std=0.767/raw=0.966
   epoch  30  train_mse=0.3675  mean_valid_rmse_std=0.7864  lr=5.0e-04
-           egfr_full:std=0.712/raw=1.025  abl1:std=0.601/raw=0.960  mapk14:std=1.045/raw=1.318
+           egfr_full:std=0.712/raw=1.025  abl1:std=0.601/raw=0.960  vegfr2:std=1.045/raw=1.318
   epoch  23  train_mse=0.4276  mean_valid_rmse_std=0.7111  lr=1.0e-03 *
-           egfr_full:std=0.795/raw=1.144  abl1:std=0.594/raw=0.948  mapk14:std=0.744/raw=0.938
+           egfr_full:std=0.795/raw=1.144  abl1:std=0.594/raw=0.948  vegfr2:std=0.744/raw=0.938
   epoch  10  train_mse=0.4999  mean_valid_rmse_std=0.9563  lr=1.0e-03
-           egfr_full:std=0.824/raw=1.183  abl1:std=1.041/raw=1.678  mapk14:std=1.004/raw=1.269
+           egfr_full:std=0.824/raw=1.183  abl1:std=1.041/raw=1.678  vegfr2:std=1.004/raw=1.269
   epoch  60  train_mse=0.2965  mean_valid_rmse_std=0.7790  lr=1.3e-04
-           egfr_full:std=0.659/raw=0.946  abl1:std=0.653/raw=1.053  mapk14:std=1.025/raw=1.295
+           egfr_full:std=0.659/raw=0.946  abl1:std=0.653/raw=1.053  vegfr2:std=1.025/raw=1.295
   epoch  13  train_mse=0.4441  mean_valid_rmse_std=0.7390  lr=1.0e-03 *
-           egfr_full:std=0.764/raw=1.097  abl1:std=0.652/raw=1.051  mapk14:std=0.801/raw=1.012
+           egfr_full:std=0.764/raw=1.097  abl1:std=0.652/raw=1.051  vegfr2:std=0.801/raw=1.012
   epoch  14  train_mse=0.4541  mean_valid_rmse_std=0.7117  lr=1.0e-03 *
-           egfr_full:std=0.757/raw=1.087  abl1:std=0.564/raw=0.909  mapk14:std=0.814/raw=1.029
+           egfr_full:std=0.757/raw=1.087  abl1:std=0.564/raw=0.909  vegfr2:std=0.814/raw=1.029
   epoch  62  train_mse=0.2969  mean_valid_rmse_std=0.7424  lr=1.3e-04 *
-           egfr_full:std=0.727/raw=1.044  abl1:std=0.600/raw=0.967  mapk14:std=0.900/raw=1.137
+           egfr_full:std=0.727/raw=1.044  abl1:std=0.600/raw=0.967  vegfr2:std=0.900/raw=1.137
   epoch  30  train_mse=0.3848  mean_valid_rmse_std=0.7280  lr=1.0e-03
-           egfr_full:std=0.735/raw=1.058  abl1:std=0.673/raw=1.073  mapk14:std=0.776/raw=0.978
+           egfr_full:std=0.735/raw=1.058  abl1:std=0.673/raw=1.073  vegfr2:std=0.776/raw=0.978
   epoch  18  train_mse=0.4303  mean_valid_rmse_std=0.7042  lr=1.0e-03 *
-           egfr_full:std=0.743/raw=1.067  abl1:std=0.617/raw=0.995  mapk14:std=0.753/raw=0.950
+           egfr_full:std=0.743/raw=1.067  abl1:std=0.617/raw=0.995  vegfr2:std=0.753/raw=0.950
   epoch  39  train_mse=0.3602  mean_valid_rmse_std=0.7309  lr=2.5e-04 *
-           egfr_full:std=0.695/raw=1.000  abl1:std=0.559/raw=0.892  mapk14:std=0.939/raw=1.183
+           egfr_full:std=0.695/raw=1.000  abl1:std=0.559/raw=0.892  vegfr2:std=0.939/raw=1.183
   epoch  40  train_mse=0.3157  mean_valid_rmse_std=0.7841  lr=2.5e-04
-           egfr_full:std=0.696/raw=1.001  abl1:std=0.589/raw=0.940  mapk14:std=1.067/raw=1.345
+           egfr_full:std=0.696/raw=1.001  abl1:std=0.589/raw=0.940  vegfr2:std=1.067/raw=1.345
   epoch  20  train_mse=0.4211  mean_valid_rmse_std=0.9393  lr=1.0e-03
-           egfr_full:std=1.117/raw=1.605  abl1:std=0.875/raw=1.410  mapk14:std=0.826/raw=1.043
+           egfr_full:std=1.117/raw=1.605  abl1:std=0.875/raw=1.410  vegfr2:std=0.826/raw=1.043
   epoch  69  train_mse=0.2776  mean_valid_rmse_std=0.7408  lr=1.3e-04 *
-           egfr_full:std=0.689/raw=0.989  abl1:std=0.573/raw=0.923  mapk14:std=0.961/raw=1.214
+           egfr_full:std=0.689/raw=0.989  abl1:std=0.573/raw=0.923  vegfr2:std=0.961/raw=1.214
   epoch  70  train_mse=0.2882  mean_valid_rmse_std=0.7556  lr=1.3e-04
-           egfr_full:std=0.641/raw=0.920  abl1:std=0.604/raw=0.974  mapk14:std=1.022/raw=1.291
+           egfr_full:std=0.641/raw=0.920  abl1:std=0.604/raw=0.974  vegfr2:std=1.022/raw=1.291
   epoch  38  train_mse=0.3355  mean_valid_rmse_std=0.7016  lr=5.0e-04 *
-           egfr_full:std=0.775/raw=1.114  abl1:std=0.632/raw=1.009  mapk14:std=0.698/raw=0.880
+           egfr_full:std=0.775/raw=1.114  abl1:std=0.632/raw=1.009  vegfr2:std=0.698/raw=0.880
   epoch  39  train_mse=0.3354  mean_valid_rmse_std=0.6852  lr=5.0e-04 *
-           egfr_full:std=0.760/raw=1.093  abl1:std=0.586/raw=0.935  mapk14:std=0.709/raw=0.894
+           egfr_full:std=0.760/raw=1.093  abl1:std=0.586/raw=0.935  vegfr2:std=0.709/raw=0.894
   epoch  73  train_mse=0.2791  mean_valid_rmse_std=0.7382  lr=1.3e-04 *
-           egfr_full:std=0.657/raw=0.944  abl1:std=0.589/raw=0.950  mapk14:std=0.968/raw=1.223
+           egfr_full:std=0.657/raw=0.944  abl1:std=0.589/raw=0.950  vegfr2:std=0.968/raw=1.223
   epoch  40  train_mse=0.3533  mean_valid_rmse_std=0.6992  lr=5.0e-04
-           egfr_full:std=0.749/raw=1.077  abl1:std=0.633/raw=1.010  mapk14:std=0.716/raw=0.902
+           egfr_full:std=0.749/raw=1.077  abl1:std=0.633/raw=1.010  vegfr2:std=0.716/raw=0.902
   epoch  26  train_mse=0.3857  mean_valid_rmse_std=0.6901  lr=1.0e-03 *
-           egfr_full:std=0.720/raw=1.034  abl1:std=0.611/raw=0.984  mapk14:std=0.740/raw=0.935
+           egfr_full:std=0.720/raw=1.034  abl1:std=0.611/raw=0.984  vegfr2:std=0.740/raw=0.935
   epoch  44  train_mse=0.3069  mean_valid_rmse_std=0.6751  lr=5.0e-04 *
-           egfr_full:std=0.744/raw=1.070  abl1:std=0.579/raw=0.924  mapk14:std=0.702/raw=0.885
+           egfr_full:std=0.744/raw=1.070  abl1:std=0.579/raw=0.924  vegfr2:std=0.702/raw=0.885
   epoch  30  train_mse=0.3670  mean_valid_rmse_std=0.6789  lr=1.0e-03 *
-           egfr_full:std=0.691/raw=0.993  abl1:std=0.590/raw=0.952  mapk14:std=0.755/raw=0.954
+           egfr_full:std=0.691/raw=0.993  abl1:std=0.590/raw=0.952  vegfr2:std=0.755/raw=0.954
   epoch  50  train_mse=0.3158  mean_valid_rmse_std=0.7568  lr=1.3e-04
-           egfr_full:std=0.681/raw=0.980  abl1:std=0.589/raw=0.940  mapk14:std=1.000/raw=1.261
+           egfr_full:std=0.681/raw=0.980  abl1:std=0.589/raw=0.940  vegfr2:std=1.000/raw=1.261
   epoch  45  train_mse=0.3185  mean_valid_rmse_std=0.6673  lr=5.0e-04 *
-           egfr_full:std=0.732/raw=1.053  abl1:std=0.589/raw=0.940  mapk14:std=0.681/raw=0.858
+           egfr_full:std=0.732/raw=1.053  abl1:std=0.589/raw=0.940  vegfr2:std=0.681/raw=0.858
   epoch  80  train_mse=0.2840  mean_valid_rmse_std=0.7312  lr=1.3e-04 *
-           egfr_full:std=0.664/raw=0.953  abl1:std=0.618/raw=0.997  mapk14:std=0.911/raw=1.151
+           egfr_full:std=0.664/raw=0.953  abl1:std=0.618/raw=0.997  vegfr2:std=0.911/raw=1.151
   epoch  82  train_mse=0.2809  mean_valid_rmse_std=0.7297  lr=1.3e-04 *
-           egfr_full:std=0.684/raw=0.983  abl1:std=0.584/raw=0.942  mapk14:std=0.921/raw=1.163
+           egfr_full:std=0.684/raw=0.983  abl1:std=0.584/raw=0.942  vegfr2:std=0.921/raw=1.163
   epoch  50  train_mse=0.3218  mean_valid_rmse_std=0.7028  lr=5.0e-04
-           egfr_full:std=0.757/raw=1.089  abl1:std=0.657/raw=1.049  mapk14:std=0.694/raw=0.875
+           egfr_full:std=0.757/raw=1.089  abl1:std=0.657/raw=1.049  vegfr2:std=0.694/raw=0.875
   early stop at epoch 59 (best epoch 39)
   epoch  40  train_mse=0.2964  mean_valid_rmse_std=0.6856  lr=5.0e-04
-           egfr_full:std=0.772/raw=1.109  abl1:std=0.586/raw=0.944  mapk14:std=0.699/raw=0.883
+           egfr_full:std=0.772/raw=1.109  abl1:std=0.586/raw=0.944  vegfr2:std=0.699/raw=0.883
   TEST egfr_full R2=0.4839  RMSE=1.0017  MAE=0.7700
   TEST abl1      R2=0.4860  RMSE=0.8782  MAE=0.7152
-  TEST mapk14    R2=0.0457  RMSE=1.2153  MAE=0.9765
+  TEST vegfr2    R2=0.0457  RMSE=1.2153  MAE=0.9765
   (355s, params=156161)
   saved -> results/multitask/pooled_st_metrics_seed1.json, pooled_preds_scaffold_seed1.npz, models/pooled_scaffold_seed1.pt
 === END 2026-10-04 15:43:59 model=pooled split=scaffold seed=1 rc=0 duration=360s ===
@@ -442,229 +442,229 @@ Consider using tensor.detach() first. (Triggered internally at /Users/runner/wor
 /Users/leisirui/miniforge3/envs/qsar/lib/python3.12/site-packages/torch/jit/_script.py:1491: FutureWarning: `torch.jit.script` is deprecated. Please switch to `torch.compile` or `torch.export`.
   warnings.warn(
   epoch  90  train_mse=0.2798  mean_valid_rmse_std=0.7426  lr=6.3e-05
-           egfr_full:std=0.633/raw=0.909  abl1:std=0.620/raw=1.000  mapk14:std=0.975/raw=1.231
-[pooled/scaffold/seed2] tasks=['egfr_full', 'abl1', 'mapk14'] device=mps
+           egfr_full:std=0.633/raw=0.909  abl1:std=0.620/raw=1.000  vegfr2:std=0.975/raw=1.231
+[pooled/scaffold/seed2] tasks=['egfr_full', 'abl1', 'vegfr2'] device=mps
   egfr_full: y_mean=6.599 y_std=1.438 n_train=9706 n_valid=1079 n_test=2712
   abl1: y_mean=6.681 y_std=1.596 n_train=1943 n_valid=216 n_test=539
-  mapk14: y_mean=6.517 y_std=1.261 n_train=8479 n_valid=943 n_test=2375
+  vegfr2: y_mean=6.517 y_std=1.261 n_train=8479 n_valid=943 n_test=2375
   pooled train=20128 (per-task [9706, 1943, 8479]), 158 steps/epoch
 /Users/leisirui/qsar-activity-prediction/scripts/gnn_07_multitask.py:316: UserWarning: Converting a tensor with requires_grad=True to a scalar may lead to unexpected behavior.
 Consider using tensor.detach() first. (Triggered internally at /Users/runner/work/pytorch/pytorch/torch/csrc/autograd/generated/python_variable_methods.cpp:821.)
   total += float(loss) * len(batch.y)
   epoch   1  train_mse=0.8180  mean_valid_rmse_std=0.9825  lr=1.0e-03 *
-           egfr_full:std=0.995/raw=1.432  abl1:std=0.872/raw=1.392  mapk14:std=1.080/raw=1.361
+           egfr_full:std=0.995/raw=1.432  abl1:std=0.872/raw=1.392  vegfr2:std=1.080/raw=1.361
   epoch  93  train_mse=0.2652  mean_valid_rmse_std=0.7275  lr=6.3e-05 *
-           egfr_full:std=0.670/raw=0.962  abl1:std=0.618/raw=0.996  mapk14:std=0.895/raw=1.130
+           egfr_full:std=0.670/raw=0.962  abl1:std=0.618/raw=0.996  vegfr2:std=0.895/raw=1.130
   epoch   2  train_mse=0.7424  mean_valid_rmse_std=0.8989  lr=1.0e-03 *
-           egfr_full:std=0.931/raw=1.340  abl1:std=0.813/raw=1.297  mapk14:std=0.953/raw=1.201
+           egfr_full:std=0.931/raw=1.340  abl1:std=0.813/raw=1.297  vegfr2:std=0.953/raw=1.201
   epoch  60  train_mse=0.2784  mean_valid_rmse_std=0.7040  lr=2.5e-04
-           egfr_full:std=0.744/raw=1.070  abl1:std=0.697/raw=1.112  mapk14:std=0.671/raw=0.846
+           egfr_full:std=0.744/raw=1.070  abl1:std=0.697/raw=1.112  vegfr2:std=0.671/raw=0.846
   epoch   3  train_mse=0.7307  mean_valid_rmse_std=0.8933  lr=1.0e-03 *
-           egfr_full:std=0.900/raw=1.294  abl1:std=0.788/raw=1.258  mapk14:std=0.992/raw=1.250
+           egfr_full:std=0.900/raw=1.294  abl1:std=0.788/raw=1.258  vegfr2:std=0.992/raw=1.250
   early stop at epoch 65 (best epoch 45)
   TEST egfr_full R2=0.2686  RMSE=1.1925  MAE=0.9646
   TEST abl1      R2=0.5867  RMSE=0.7874  MAE=0.6251
-  TEST mapk14    R2=0.5609  RMSE=0.8244  MAE=0.6172
+  TEST vegfr2    R2=0.5609  RMSE=0.8244  MAE=0.6172
   (559s, params=156419)
   saved -> results/multitask/mt_metrics_seed2.json, mt_preds_scaffold_seed2.npz, models/mt_scaffold_seed2.pt
   epoch  49  train_mse=0.2818  mean_valid_rmse_std=0.6715  lr=2.5e-04 *
-           egfr_full:std=0.750/raw=1.078  abl1:std=0.599/raw=0.966  mapk14:std=0.665/raw=0.840
+           egfr_full:std=0.750/raw=1.078  abl1:std=0.599/raw=0.966  vegfr2:std=0.665/raw=0.840
 === END 2026-10-04 15:48:31 model=mt split=scaffold seed=2 rc=0 duration=564s ===
   epoch   6  train_mse=0.6234  mean_valid_rmse_std=0.8136  lr=1.0e-03 *
-           egfr_full:std=0.827/raw=1.190  abl1:std=0.648/raw=1.034  mapk14:std=0.965/raw=1.217
+           egfr_full:std=0.827/raw=1.190  abl1:std=0.648/raw=1.034  vegfr2:std=0.965/raw=1.217
   epoch  50  train_mse=0.2869  mean_valid_rmse_std=0.6928  lr=2.5e-04
-           egfr_full:std=0.770/raw=1.106  abl1:std=0.643/raw=1.037  mapk14:std=0.665/raw=0.840
+           egfr_full:std=0.770/raw=1.106  abl1:std=0.643/raw=1.037  vegfr2:std=0.665/raw=0.840
   epoch 100  train_mse=0.2636  mean_valid_rmse_std=0.7454  lr=6.3e-05
-           egfr_full:std=0.691/raw=0.993  abl1:std=0.575/raw=0.927  mapk14:std=0.970/raw=1.225
+           egfr_full:std=0.691/raw=0.993  abl1:std=0.575/raw=0.927  vegfr2:std=0.970/raw=1.225
   TEST egfr_full R2=0.5456  RMSE=0.9744  MAE=0.7587
   TEST abl1      R2=0.5573  RMSE=1.0465  MAE=0.8065
-  TEST mapk14    R2=0.2203  RMSE=1.0973  MAE=0.8882
+  TEST vegfr2    R2=0.2203  RMSE=1.0973  MAE=0.8882
   (771s, params=156161)
   saved -> results/multitask/pooled_st_metrics_seed1.json, pooled_preds_random_seed1.npz, models/pooled_random_seed1.pt
 === END 2026-10-04 15:49:32 model=pooled split=random seed=1 rc=0 duration=828s ===
 === START 2026-10-04 15:49:32 model=pooled split=random seed=2 ===
 /Users/leisirui/miniforge3/envs/qsar/lib/python3.12/site-packages/torch/jit/_script.py:1491: FutureWarning: `torch.jit.script` is deprecated. Please switch to `torch.compile` or `torch.export`.
   warnings.warn(
-[pooled/random/seed2] tasks=['egfr_full', 'abl1', 'mapk14'] device=mps
+[pooled/random/seed2] tasks=['egfr_full', 'abl1', 'vegfr2'] device=mps
   egfr_full: y_mean=6.662 y_std=1.436 n_train=9717 n_valid=1080 n_test=2700
   abl1: y_mean=6.961 y_std=1.612 n_train=1942 n_valid=216 n_test=540
-  mapk14: y_mean=6.517 y_std=1.263 n_train=8493 n_valid=944 n_test=2360
+  vegfr2: y_mean=6.517 y_std=1.263 n_train=8493 n_valid=944 n_test=2360
   pooled train=20152 (per-task [9717, 1942, 8493]), 158 steps/epoch
 /Users/leisirui/qsar-activity-prediction/scripts/gnn_07_multitask.py:316: UserWarning: Converting a tensor with requires_grad=True to a scalar may lead to unexpected behavior.
 Consider using tensor.detach() first. (Triggered internally at /Users/runner/work/pytorch/pytorch/torch/csrc/autograd/generated/python_variable_methods.cpp:821.)
   total += float(loss) * len(batch.y)
   epoch   9  train_mse=0.5647  mean_valid_rmse_std=0.7967  lr=1.0e-03 *
-           egfr_full:std=0.841/raw=1.210  abl1:std=0.628/raw=1.002  mapk14:std=0.921/raw=1.161
+           egfr_full:std=0.841/raw=1.210  abl1:std=0.628/raw=1.002  vegfr2:std=0.921/raw=1.161
   epoch   1  train_mse=0.7759  mean_valid_rmse_std=0.9495  lr=1.0e-03 *
-           egfr_full:std=0.945/raw=1.357  abl1:std=0.791/raw=1.276  mapk14:std=1.113/raw=1.405
+           egfr_full:std=0.945/raw=1.357  abl1:std=0.791/raw=1.276  vegfr2:std=1.113/raw=1.405
   epoch  10  train_mse=0.5742  mean_valid_rmse_std=0.9433  lr=1.0e-03
-           egfr_full:std=1.027/raw=1.477  abl1:std=0.870/raw=1.388  mapk14:std=0.933/raw=1.176
+           egfr_full:std=1.027/raw=1.477  abl1:std=0.870/raw=1.388  vegfr2:std=0.933/raw=1.176
   epoch   2  train_mse=0.6993  mean_valid_rmse_std=0.8355  lr=1.0e-03 *
-           egfr_full:std=0.875/raw=1.257  abl1:std=0.701/raw=1.130  mapk14:std=0.931/raw=1.176
+           egfr_full:std=0.875/raw=1.257  abl1:std=0.701/raw=1.130  vegfr2:std=0.931/raw=1.176
   epoch  11  train_mse=0.5500  mean_valid_rmse_std=0.7838  lr=1.0e-03 *
-           egfr_full:std=0.822/raw=1.182  abl1:std=0.609/raw=0.971  mapk14:std=0.921/raw=1.161
+           egfr_full:std=0.822/raw=1.182  abl1:std=0.609/raw=0.971  vegfr2:std=0.921/raw=1.161
   epoch  57  train_mse=0.2744  mean_valid_rmse_std=0.6624  lr=2.5e-04 *
-           egfr_full:std=0.735/raw=1.055  abl1:std=0.583/raw=0.940  mapk14:std=0.670/raw=0.846
+           egfr_full:std=0.735/raw=1.055  abl1:std=0.583/raw=0.940  vegfr2:std=0.670/raw=0.846
   epoch  60  train_mse=0.2815  mean_valid_rmse_std=0.6881  lr=2.5e-04
-           egfr_full:std=0.735/raw=1.056  abl1:std=0.648/raw=1.044  mapk14:std=0.681/raw=0.861
+           egfr_full:std=0.735/raw=1.056  abl1:std=0.648/raw=1.044  vegfr2:std=0.681/raw=0.861
   epoch   8  train_mse=0.5773  mean_valid_rmse_std=0.8127  lr=1.0e-03 *
-           egfr_full:std=0.866/raw=1.244  abl1:std=0.715/raw=1.153  mapk14:std=0.857/raw=1.082
+           egfr_full:std=0.866/raw=1.244  abl1:std=0.715/raw=1.153  vegfr2:std=0.857/raw=1.082
   epoch   9  train_mse=0.5410  mean_valid_rmse_std=0.7966  lr=1.0e-03 *
-           egfr_full:std=0.801/raw=1.151  abl1:std=0.640/raw=1.032  mapk14:std=0.949/raw=1.198
+           egfr_full:std=0.801/raw=1.151  abl1:std=0.640/raw=1.032  vegfr2:std=0.949/raw=1.198
   epoch  10  train_mse=0.5305  mean_valid_rmse_std=0.7974  lr=1.0e-03
-           egfr_full:std=0.857/raw=1.231  abl1:std=0.654/raw=1.054  mapk14:std=0.882/raw=1.114
+           egfr_full:std=0.857/raw=1.231  abl1:std=0.654/raw=1.054  vegfr2:std=0.882/raw=1.114
   epoch  64  train_mse=0.2709  mean_valid_rmse_std=0.6568  lr=2.5e-04 *
-           egfr_full:std=0.688/raw=0.989  abl1:std=0.619/raw=0.999  mapk14:std=0.663/raw=0.837
+           egfr_full:std=0.688/raw=0.989  abl1:std=0.619/raw=0.999  vegfr2:std=0.663/raw=0.837
   epoch  20  train_mse=0.4446  mean_valid_rmse_std=0.7366  lr=5.0e-04 *
-           egfr_full:std=0.786/raw=1.130  abl1:std=0.550/raw=0.878  mapk14:std=0.874/raw=1.101
+           egfr_full:std=0.786/raw=1.130  abl1:std=0.550/raw=0.878  vegfr2:std=0.874/raw=1.101
   epoch  70  train_mse=0.2747  mean_valid_rmse_std=0.6641  lr=2.5e-04
-           egfr_full:std=0.714/raw=1.025  abl1:std=0.600/raw=0.968  mapk14:std=0.678/raw=0.857
+           egfr_full:std=0.714/raw=1.025  abl1:std=0.600/raw=0.968  vegfr2:std=0.678/raw=0.857
   epoch  17  train_mse=0.4637  mean_valid_rmse_std=0.7852  lr=1.0e-03 *
-           egfr_full:std=0.770/raw=1.106  abl1:std=0.688/raw=1.109  mapk14:std=0.897/raw=1.133
+           egfr_full:std=0.770/raw=1.106  abl1:std=0.688/raw=1.109  vegfr2:std=0.897/raw=1.133
   epoch  20  train_mse=0.4486  mean_valid_rmse_std=0.8101  lr=1.0e-03
-           egfr_full:std=0.789/raw=1.134  abl1:std=0.633/raw=1.021  mapk14:std=1.008/raw=1.273
+           egfr_full:std=0.789/raw=1.134  abl1:std=0.633/raw=1.021  vegfr2:std=1.008/raw=1.273
   epoch  29  train_mse=0.3934  mean_valid_rmse_std=0.7341  lr=2.5e-04 *
-           egfr_full:std=0.738/raw=1.062  abl1:std=0.557/raw=0.889  mapk14:std=0.907/raw=1.143
+           egfr_full:std=0.738/raw=1.062  abl1:std=0.557/raw=0.889  vegfr2:std=0.907/raw=1.143
   epoch  30  train_mse=0.3865  mean_valid_rmse_std=0.7381  lr=2.5e-04
-           egfr_full:std=0.726/raw=1.045  abl1:std=0.568/raw=0.907  mapk14:std=0.920/raw=1.159
+           egfr_full:std=0.726/raw=1.045  abl1:std=0.568/raw=0.907  vegfr2:std=0.920/raw=1.159
   epoch  22  train_mse=0.4353  mean_valid_rmse_std=0.7661  lr=1.0e-03 *
-           egfr_full:std=0.730/raw=1.048  abl1:std=0.593/raw=0.957  mapk14:std=0.975/raw=1.232
+           egfr_full:std=0.730/raw=1.048  abl1:std=0.593/raw=0.957  vegfr2:std=0.975/raw=1.232
   epoch  32  train_mse=0.3652  mean_valid_rmse_std=0.7252  lr=2.5e-04 *
-           egfr_full:std=0.753/raw=1.083  abl1:std=0.553/raw=0.882  mapk14:std=0.870/raw=1.096
+           egfr_full:std=0.753/raw=1.083  abl1:std=0.553/raw=0.882  vegfr2:std=0.870/raw=1.096
   epoch  77  train_mse=0.2462  mean_valid_rmse_std=0.6561  lr=1.3e-04 *
-           egfr_full:std=0.694/raw=0.996  abl1:std=0.605/raw=0.975  mapk14:std=0.670/raw=0.846
+           egfr_full:std=0.694/raw=0.996  abl1:std=0.605/raw=0.975  vegfr2:std=0.670/raw=0.846
   epoch  24  train_mse=0.4322  mean_valid_rmse_std=0.7641  lr=1.0e-03 *
-           egfr_full:std=0.726/raw=1.043  abl1:std=0.615/raw=0.992  mapk14:std=0.951/raw=1.201
+           egfr_full:std=0.726/raw=1.043  abl1:std=0.615/raw=0.992  vegfr2:std=0.951/raw=1.201
   epoch  33  train_mse=0.3951  mean_valid_rmse_std=0.7250  lr=2.5e-04 *
-           egfr_full:std=0.810/raw=1.165  abl1:std=0.587/raw=0.936  mapk14:std=0.778/raw=0.981
+           egfr_full:std=0.810/raw=1.165  abl1:std=0.587/raw=0.936  vegfr2:std=0.778/raw=0.981
   epoch  26  train_mse=0.4009  mean_valid_rmse_std=0.7560  lr=1.0e-03 *
-           egfr_full:std=0.771/raw=1.107  abl1:std=0.661/raw=1.066  mapk14:std=0.836/raw=1.056
+           egfr_full:std=0.771/raw=1.107  abl1:std=0.661/raw=1.066  vegfr2:std=0.836/raw=1.056
   epoch  80  train_mse=0.2600  mean_valid_rmse_std=0.6874  lr=1.3e-04
-           egfr_full:std=0.758/raw=1.088  abl1:std=0.664/raw=1.070  mapk14:std=0.641/raw=0.809
+           egfr_full:std=0.758/raw=1.088  abl1:std=0.664/raw=1.070  vegfr2:std=0.641/raw=0.809
   epoch  29  train_mse=0.3957  mean_valid_rmse_std=0.7416  lr=1.0e-03 *
-           egfr_full:std=0.740/raw=1.063  abl1:std=0.582/raw=0.938  mapk14:std=0.902/raw=1.140
+           egfr_full:std=0.740/raw=1.063  abl1:std=0.582/raw=0.938  vegfr2:std=0.902/raw=1.140
   epoch  30  train_mse=0.3947  mean_valid_rmse_std=0.7977  lr=1.0e-03
-           egfr_full:std=0.702/raw=1.008  abl1:std=0.682/raw=1.099  mapk14:std=1.009/raw=1.275
+           egfr_full:std=0.702/raw=1.008  abl1:std=0.682/raw=1.099  vegfr2:std=1.009/raw=1.275
   epoch  39  train_mse=0.3710  mean_valid_rmse_std=0.7166  lr=2.5e-04 *
-           egfr_full:std=0.745/raw=1.071  abl1:std=0.559/raw=0.892  mapk14:std=0.846/raw=1.067
+           egfr_full:std=0.745/raw=1.071  abl1:std=0.559/raw=0.892  vegfr2:std=0.846/raw=1.067
   epoch  32  train_mse=0.3685  mean_valid_rmse_std=0.7374  lr=1.0e-03 *
-           egfr_full:std=0.717/raw=1.030  abl1:std=0.584/raw=0.941  mapk14:std=0.911/raw=1.151
+           egfr_full:std=0.717/raw=1.030  abl1:std=0.584/raw=0.941  vegfr2:std=0.911/raw=1.151
   epoch  40  train_mse=0.3894  mean_valid_rmse_std=0.7257  lr=2.5e-04
-           egfr_full:std=0.729/raw=1.049  abl1:std=0.572/raw=0.913  mapk14:std=0.875/raw=1.104
+           egfr_full:std=0.729/raw=1.049  abl1:std=0.572/raw=0.913  vegfr2:std=0.875/raw=1.104
   epoch  87  train_mse=0.2525  mean_valid_rmse_std=0.6474  lr=6.3e-05 *
-           egfr_full:std=0.707/raw=1.016  abl1:std=0.569/raw=0.917  mapk14:std=0.666/raw=0.841
+           egfr_full:std=0.707/raw=1.016  abl1:std=0.569/raw=0.917  vegfr2:std=0.666/raw=0.841
   epoch  35  train_mse=0.3774  mean_valid_rmse_std=0.7323  lr=1.0e-03 *
-           egfr_full:std=0.820/raw=1.178  abl1:std=0.555/raw=0.894  mapk14:std=0.822/raw=1.038
+           egfr_full:std=0.820/raw=1.178  abl1:std=0.555/raw=0.894  vegfr2:std=0.822/raw=1.038
   epoch  90  train_mse=0.2544  mean_valid_rmse_std=0.6690  lr=6.3e-05
-           egfr_full:std=0.744/raw=1.068  abl1:std=0.616/raw=0.993  mapk14:std=0.647/raw=0.818
+           egfr_full:std=0.744/raw=1.068  abl1:std=0.616/raw=0.993  vegfr2:std=0.647/raw=0.818
   epoch  40  train_mse=0.3765  mean_valid_rmse_std=0.7633  lr=1.0e-03
-           egfr_full:std=0.722/raw=1.037  abl1:std=0.678/raw=1.093  mapk14:std=0.890/raw=1.124
+           egfr_full:std=0.722/raw=1.037  abl1:std=0.678/raw=1.093  vegfr2:std=0.890/raw=1.124
   epoch  41  train_mse=0.3453  mean_valid_rmse_std=0.7318  lr=1.0e-03 *
-           egfr_full:std=0.696/raw=0.999  abl1:std=0.634/raw=1.023  mapk14:std=0.865/raw=1.093
+           egfr_full:std=0.696/raw=0.999  abl1:std=0.634/raw=1.023  vegfr2:std=0.865/raw=1.093
   epoch  50  train_mse=0.3479  mean_valid_rmse_std=0.7168  lr=1.3e-04
-           egfr_full:std=0.727/raw=1.046  abl1:std=0.593/raw=0.946  mapk14:std=0.830/raw=1.047
+           egfr_full:std=0.727/raw=1.046  abl1:std=0.593/raw=0.946  vegfr2:std=0.830/raw=1.047
   epoch  53  train_mse=0.3434  mean_valid_rmse_std=0.7115  lr=1.3e-04 *
-           egfr_full:std=0.704/raw=1.012  abl1:std=0.553/raw=0.883  mapk14:std=0.877/raw=1.106
+           egfr_full:std=0.704/raw=1.012  abl1:std=0.553/raw=0.883  vegfr2:std=0.877/raw=1.106
   epoch 100  train_mse=0.2431  mean_valid_rmse_std=0.6657  lr=3.1e-05
-           egfr_full:std=0.800/raw=1.149  abl1:std=0.548/raw=0.884  mapk14:std=0.649/raw=0.820
+           egfr_full:std=0.800/raw=1.149  abl1:std=0.548/raw=0.884  vegfr2:std=0.649/raw=0.820
   TEST egfr_full R2=0.5043  RMSE=1.0177  MAE=0.7980
   TEST abl1      R2=0.6660  RMSE=0.9089  MAE=0.7136
-  TEST mapk14    R2=0.5895  RMSE=0.7962  MAE=0.6172
+  TEST vegfr2    R2=0.5895  RMSE=0.7962  MAE=0.6172
   (769s, params=156419)
   saved -> results/multitask/mt_metrics_seed1.json, mt_preds_random_seed1.npz, models/mt_random_seed1.pt
 === END 2026-10-04 15:53:07 model=mt split=random seed=1 rc=0 duration=774s ===
 === START 2026-10-04 15:53:07 model=mt split=random seed=2 ===
   epoch  55  train_mse=0.3158  mean_valid_rmse_std=0.6975  lr=1.3e-04 *
-           egfr_full:std=0.744/raw=1.069  abl1:std=0.521/raw=0.832  mapk14:std=0.828/raw=1.044
+           egfr_full:std=0.744/raw=1.069  abl1:std=0.521/raw=0.832  vegfr2:std=0.828/raw=1.044
 /Users/leisirui/miniforge3/envs/qsar/lib/python3.12/site-packages/torch/jit/_script.py:1491: FutureWarning: `torch.jit.script` is deprecated. Please switch to `torch.compile` or `torch.export`.
   warnings.warn(
-[mt/random/seed2] tasks=['egfr_full', 'abl1', 'mapk14'] device=mps
+[mt/random/seed2] tasks=['egfr_full', 'abl1', 'vegfr2'] device=mps
   egfr_full: y_mean=6.662 y_std=1.436 n_train=9717 n_valid=1080 n_test=2700
   abl1: y_mean=6.961 y_std=1.612 n_train=1942 n_valid=216 n_test=540
-  mapk14: y_mean=6.517 y_std=1.263 n_train=8493 n_valid=944 n_test=2360
+  vegfr2: y_mean=6.517 y_std=1.263 n_train=8493 n_valid=944 n_test=2360
   pooled train=20152 (per-task [9717, 1942, 8493]), 158 steps/epoch
 /Users/leisirui/qsar-activity-prediction/scripts/gnn_07_multitask.py:316: UserWarning: Converting a tensor with requires_grad=True to a scalar may lead to unexpected behavior.
 Consider using tensor.detach() first. (Triggered internally at /Users/runner/work/pytorch/pytorch/torch/csrc/autograd/generated/python_variable_methods.cpp:821.)
   total += float(loss) * len(batch.y)
   epoch  50  train_mse=0.3177  mean_valid_rmse_std=0.7225  lr=5.0e-04 *
-           egfr_full:std=0.702/raw=1.009  abl1:std=0.589/raw=0.949  mapk14:std=0.876/raw=1.107
+           egfr_full:std=0.702/raw=1.009  abl1:std=0.589/raw=0.949  vegfr2:std=0.876/raw=1.107
   epoch   1  train_mse=0.7284  mean_valid_rmse_std=0.9094  lr=1.0e-03 *
-           egfr_full:std=1.029/raw=1.478  abl1:std=0.764/raw=1.232  mapk14:std=0.935/raw=1.181
+           egfr_full:std=1.029/raw=1.478  abl1:std=0.764/raw=1.232  vegfr2:std=0.935/raw=1.181
   epoch  52  train_mse=0.3074  mean_valid_rmse_std=0.7203  lr=5.0e-04 *
-           egfr_full:std=0.654/raw=0.939  abl1:std=0.565/raw=0.911  mapk14:std=0.942/raw=1.190
+           egfr_full:std=0.654/raw=0.939  abl1:std=0.565/raw=0.911  vegfr2:std=0.942/raw=1.190
   epoch   3  train_mse=0.6343  mean_valid_rmse_std=0.8469  lr=1.0e-03 *
-           egfr_full:std=0.848/raw=1.218  abl1:std=0.740/raw=1.194  mapk14:std=0.952/raw=1.203
+           egfr_full:std=0.848/raw=1.218  abl1:std=0.740/raw=1.194  vegfr2:std=0.952/raw=1.203
   epoch  60  train_mse=0.3244  mean_valid_rmse_std=0.7167  lr=1.3e-04
-           egfr_full:std=0.705/raw=1.014  abl1:std=0.570/raw=0.910  mapk14:std=0.875/raw=1.103
+           egfr_full:std=0.705/raw=1.014  abl1:std=0.570/raw=0.910  vegfr2:std=0.875/raw=1.103
   epoch   4  train_mse=0.5719  mean_valid_rmse_std=0.8100  lr=1.0e-03 *
-           egfr_full:std=0.813/raw=1.167  abl1:std=0.673/raw=1.085  mapk14:std=0.944/raw=1.192
+           egfr_full:std=0.813/raw=1.167  abl1:std=0.673/raw=1.085  vegfr2:std=0.944/raw=1.192
   epoch  55  train_mse=0.2756  mean_valid_rmse_std=0.7175  lr=5.0e-04 *
-           egfr_full:std=0.758/raw=1.088  abl1:std=0.511/raw=0.823  mapk14:std=0.884/raw=1.117
+           egfr_full:std=0.758/raw=1.088  abl1:std=0.511/raw=0.823  vegfr2:std=0.884/raw=1.117
   epoch   7  train_mse=0.5205  mean_valid_rmse_std=0.7753  lr=1.0e-03 *
-           egfr_full:std=0.768/raw=1.103  abl1:std=0.682/raw=1.100  mapk14:std=0.876/raw=1.107
+           egfr_full:std=0.768/raw=1.103  abl1:std=0.682/raw=1.100  vegfr2:std=0.876/raw=1.107
   epoch   8  train_mse=0.5284  mean_valid_rmse_std=0.7455  lr=1.0e-03 *
-           egfr_full:std=0.783/raw=1.125  abl1:std=0.636/raw=1.025  mapk14:std=0.817/raw=1.032
+           egfr_full:std=0.783/raw=1.125  abl1:std=0.636/raw=1.025  vegfr2:std=0.817/raw=1.032
   epoch  60  train_mse=0.2910  mean_valid_rmse_std=0.7300  lr=5.0e-04
-           egfr_full:std=0.674/raw=0.968  abl1:std=0.577/raw=0.930  mapk14:std=0.939/raw=1.186
+           egfr_full:std=0.674/raw=0.968  abl1:std=0.577/raw=0.930  vegfr2:std=0.939/raw=1.186
   epoch  67  train_mse=0.3256  mean_valid_rmse_std=0.6945  lr=6.3e-05 *
-           egfr_full:std=0.711/raw=1.023  abl1:std=0.534/raw=0.852  mapk14:std=0.838/raw=1.057
+           egfr_full:std=0.711/raw=1.023  abl1:std=0.534/raw=0.852  vegfr2:std=0.838/raw=1.057
   epoch  10  train_mse=0.4910  mean_valid_rmse_std=0.8122  lr=1.0e-03
-           egfr_full:std=0.861/raw=1.236  abl1:std=0.676/raw=1.090  mapk14:std=0.900/raw=1.137
+           egfr_full:std=0.861/raw=1.236  abl1:std=0.676/raw=1.090  vegfr2:std=0.900/raw=1.137
   epoch  12  train_mse=0.4530  mean_valid_rmse_std=0.7132  lr=1.0e-03 *
-           egfr_full:std=0.735/raw=1.056  abl1:std=0.620/raw=1.000  mapk14:std=0.784/raw=0.990
+           egfr_full:std=0.735/raw=1.056  abl1:std=0.620/raw=1.000  vegfr2:std=0.784/raw=0.990
   epoch  70  train_mse=0.3085  mean_valid_rmse_std=0.7399  lr=6.3e-05
-           egfr_full:std=0.686/raw=0.987  abl1:std=0.574/raw=0.916  mapk14:std=0.959/raw=1.209
+           egfr_full:std=0.686/raw=0.987  abl1:std=0.574/raw=0.916  vegfr2:std=0.959/raw=1.209
   epoch  68  train_mse=0.2601  mean_valid_rmse_std=0.7148  lr=2.5e-04 *
-           egfr_full:std=0.661/raw=0.949  abl1:std=0.532/raw=0.858  mapk14:std=0.952/raw=1.202
+           egfr_full:std=0.661/raw=0.949  abl1:std=0.532/raw=0.858  vegfr2:std=0.952/raw=1.202
   epoch  73  train_mse=0.3159  mean_valid_rmse_std=0.6854  lr=6.3e-05 *
-           egfr_full:std=0.741/raw=1.066  abl1:std=0.544/raw=0.868  mapk14:std=0.771/raw=0.972
+           egfr_full:std=0.741/raw=1.066  abl1:std=0.544/raw=0.868  vegfr2:std=0.771/raw=0.972
   epoch  70  train_mse=0.2586  mean_valid_rmse_std=0.7405  lr=2.5e-04
-           egfr_full:std=0.632/raw=0.908  abl1:std=0.572/raw=0.922  mapk14:std=1.017/raw=1.285
+           egfr_full:std=0.632/raw=0.908  abl1:std=0.572/raw=0.922  vegfr2:std=1.017/raw=1.285
   epoch  20  train_mse=0.4195  mean_valid_rmse_std=0.8207  lr=5.0e-04
-           egfr_full:std=0.913/raw=1.311  abl1:std=0.791/raw=1.276  mapk14:std=0.758/raw=0.957
+           egfr_full:std=0.913/raw=1.311  abl1:std=0.791/raw=1.276  vegfr2:std=0.758/raw=0.957
   epoch  73  train_mse=0.2618  mean_valid_rmse_std=0.7097  lr=2.5e-04 *
-           egfr_full:std=0.757/raw=1.088  abl1:std=0.529/raw=0.853  mapk14:std=0.842/raw=1.064
+           egfr_full:std=0.757/raw=1.088  abl1:std=0.529/raw=0.853  vegfr2:std=0.842/raw=1.064
   epoch  21  train_mse=0.3990  mean_valid_rmse_std=0.7106  lr=5.0e-04 *
-           egfr_full:std=0.685/raw=0.984  abl1:std=0.680/raw=1.096  mapk14:std=0.767/raw=0.968
+           egfr_full:std=0.685/raw=0.984  abl1:std=0.680/raw=1.096  vegfr2:std=0.767/raw=0.968
   epoch  80  train_mse=0.3055  mean_valid_rmse_std=0.7753  lr=6.3e-05
-           egfr_full:std=0.655/raw=0.941  abl1:std=0.606/raw=0.967  mapk14:std=1.065/raw=1.343
+           egfr_full:std=0.655/raw=0.941  abl1:std=0.606/raw=0.967  vegfr2:std=1.065/raw=1.343
   epoch  24  train_mse=0.3878  mean_valid_rmse_std=0.6995  lr=5.0e-04 *
-           egfr_full:std=0.716/raw=1.029  abl1:std=0.622/raw=1.003  mapk14:std=0.760/raw=0.960
+           egfr_full:std=0.716/raw=1.029  abl1:std=0.622/raw=1.003  vegfr2:std=0.760/raw=0.960
   epoch  25  train_mse=0.3640  mean_valid_rmse_std=0.6793  lr=5.0e-04 *
-           egfr_full:std=0.709/raw=1.018  abl1:std=0.590/raw=0.951  mapk14:std=0.739/raw=0.933
+           egfr_full:std=0.709/raw=1.018  abl1:std=0.590/raw=0.951  vegfr2:std=0.739/raw=0.933
   epoch  80  train_mse=0.2541  mean_valid_rmse_std=0.7938  lr=2.5e-04
-           egfr_full:std=0.604/raw=0.868  abl1:std=0.670/raw=1.080  mapk14:std=1.107/raw=1.398
+           egfr_full:std=0.604/raw=0.868  abl1:std=0.670/raw=1.080  vegfr2:std=1.107/raw=1.398
   epoch  81  train_mse=0.2473  mean_valid_rmse_std=0.7089  lr=2.5e-04 *
-           egfr_full:std=0.643/raw=0.923  abl1:std=0.546/raw=0.880  mapk14:std=0.938/raw=1.185
+           egfr_full:std=0.643/raw=0.923  abl1:std=0.546/raw=0.880  vegfr2:std=0.938/raw=1.185
   epoch  30  train_mse=0.3631  mean_valid_rmse_std=0.7102  lr=5.0e-04
-           egfr_full:std=0.675/raw=0.970  abl1:std=0.735/raw=1.184  mapk14:std=0.721/raw=0.911
+           egfr_full:std=0.675/raw=0.970  abl1:std=0.735/raw=1.184  vegfr2:std=0.721/raw=0.911
   epoch  85  train_mse=0.2590  mean_valid_rmse_std=0.7031  lr=2.5e-04 *
-           egfr_full:std=0.635/raw=0.912  abl1:std=0.548/raw=0.884  mapk14:std=0.926/raw=1.170
+           egfr_full:std=0.635/raw=0.912  abl1:std=0.548/raw=0.884  vegfr2:std=0.926/raw=1.170
   epoch  90  train_mse=0.3138  mean_valid_rmse_std=0.7557  lr=1.6e-05
-           egfr_full:std=0.670/raw=0.964  abl1:std=0.590/raw=0.942  mapk14:std=1.006/raw=1.269
+           egfr_full:std=0.670/raw=0.964  abl1:std=0.590/raw=0.942  vegfr2:std=1.006/raw=1.269
   early stop at epoch 93 (best epoch 73)
   TEST egfr_full R2=0.4178  RMSE=1.0640  MAE=0.8167
   TEST abl1      R2=0.6537  RMSE=0.7208  MAE=0.5635
-  TEST mapk14    R2=0.4060  RMSE=0.9588  MAE=0.7620
+  TEST vegfr2    R2=0.4060  RMSE=0.9588  MAE=0.7620
   (728s, params=156161)
   saved -> results/multitask/pooled_st_metrics_seed2.json, pooled_preds_scaffold_seed2.npz, models/pooled_scaffold_seed2.pt
 === END 2026-10-04 15:56:11 model=pooled split=scaffold seed=2 rc=0 duration=732s ===
   epoch  90  train_mse=0.2600  mean_valid_rmse_std=0.7639  lr=2.5e-04
-           egfr_full:std=0.608/raw=0.874  abl1:std=0.654/raw=1.054  mapk14:std=1.029/raw=1.300
+           egfr_full:std=0.608/raw=0.874  abl1:std=0.654/raw=1.054  vegfr2:std=1.029/raw=1.300
   epoch  40  train_mse=0.3435  mean_valid_rmse_std=0.7278  lr=2.5e-04
-           egfr_full:std=0.774/raw=1.111  abl1:std=0.704/raw=1.135  mapk14:std=0.706/raw=0.892
+           egfr_full:std=0.774/raw=1.111  abl1:std=0.704/raw=1.135  vegfr2:std=0.706/raw=0.892
   early stop at epoch 45 (best epoch 25)
   TEST egfr_full R2=0.5087  RMSE=1.0132  MAE=0.7808
   TEST abl1      R2=0.6279  RMSE=0.9594  MAE=0.7506
-  TEST mapk14    R2=0.5134  RMSE=0.8669  MAE=0.6779
+  TEST vegfr2    R2=0.5134  RMSE=0.8669  MAE=0.6779
   (212s, params=156419)
   saved -> results/multitask/mt_metrics_seed2.json, mt_preds_random_seed2.npz, models/mt_random_seed2.pt
 === END 2026-10-04 15:56:42 model=mt split=random seed=2 rc=0 duration=215s ===
   epoch 100  train_mse=0.2438  mean_valid_rmse_std=0.7451  lr=1.3e-04
-           egfr_full:std=0.622/raw=0.893  abl1:std=0.652/raw=1.050  mapk14:std=0.962/raw=1.215
+           egfr_full:std=0.622/raw=0.893  abl1:std=0.652/raw=1.050  vegfr2:std=0.962/raw=1.215
   TEST egfr_full R2=0.5910  RMSE=0.9244  MAE=0.7132
   TEST abl1      R2=0.6573  RMSE=0.9207  MAE=0.7031
-  TEST mapk14    R2=0.1644  RMSE=1.1360  MAE=0.9184
+  TEST vegfr2    R2=0.1644  RMSE=1.1360  MAE=0.9184
   (434s, params=156161)
   saved -> results/multitask/pooled_st_metrics_seed2.json, pooled_preds_random_seed2.npz, models/pooled_random_seed2.pt
 === END 2026-10-04 15:56:49 model=pooled split=random seed=2 rc=0 duration=437s ===
@@ -678,8 +678,8 @@ egfr_full  random       0.759±0.000 (Δ+0.000)    0.707±0.006 (Δ-0.053)    0.
 egfr_full  scaffold     0.593±0.000 (Δ+0.000)    0.558±0.010 (Δ-0.035)    0.451±0.027 (Δ-0.141)    0.356±0.078 (Δ-0.236)
 abl1       random       0.792±0.000 (Δ+0.000)    0.752±0.006 (Δ-0.039)    0.638±0.060 (Δ-0.153)    0.625±0.035 (Δ-0.167)
 abl1       scaffold     0.723±0.000 (Δ+0.000)    0.710±0.037 (Δ-0.013)    0.554±0.072 (Δ-0.169)    0.614±0.032 (Δ-0.109)
-mapk14     random       0.736±0.000 (Δ+0.000)    0.678±0.007 (Δ-0.058)    0.195±0.023 (Δ-0.541)    0.554±0.031 (Δ-0.182)
-mapk14     scaffold     0.617±0.000 (Δ+0.000)    0.611±0.024 (Δ-0.006)    0.182±0.160 (Δ-0.435)    0.538±0.020 (Δ-0.079)
+vegfr2     random       0.736±0.000 (Δ+0.000)    0.678±0.007 (Δ-0.058)    0.195±0.023 (Δ-0.541)    0.554±0.031 (Δ-0.182)
+vegfr2     scaffold     0.617±0.000 (Δ+0.000)    0.611±0.024 (Δ-0.006)    0.182±0.160 (Δ-0.435)    0.538±0.020 (Δ-0.079)
 saved -> figures/multitask/random.png
 saved -> figures/multitask/scaffold.png
 === MULTITASK JOB ALL DONE 2026-10-04 15:56:51 ===

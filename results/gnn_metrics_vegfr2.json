@@ -6,7 +6,7 @@
     "best_epoch": 99,
     "best_valid_rmse_std": 0.5937671065330505,
     "params": {
-      "tag": "mapk14",
+      "tag": "vegfr2",
       "hidden": 128,
       "num_layers": 4,
       "dropout": 0.2,
@@ -25,7 +25,7 @@
     "best_epoch": 100,
     "best_valid_rmse_std": 0.5947158932685852,
     "params": {
-      "tag": "mapk14",
+      "tag": "vegfr2",
       "hidden": 128,
       "num_layers": 4,
       "dropout": 0.2,

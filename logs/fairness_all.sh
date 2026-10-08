@@ -2,7 +2,7 @@
 # GIN fairness experiment B: 3 targets serially (nohup; one MPS user at a time).
 #   nohup bash logs/fairness_all.sh > logs/fairness_all.log 2>&1 &
 cd ~/qsar-activity-prediction || exit 1
-for tag in mapk14 herg abl1; do
+for tag in vegfr2 herg abl1; do
   echo "[fairness_all] starting ${tag} $(date)"
   bash logs/fairness_run_tag.sh "$tag"
   rc=$?

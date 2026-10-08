@@ -1,7 +1,7 @@
 """Experiment B: give the GIN a fair chance (bounded tuning + GINE edges).
 
 Question: is "GIN loses to RF" an artefact of the frozen recipe? On the
-three targets with the smallest scaffold delta(mean) (mapk14/VEGFR2
+three targets with the smallest scaffold delta(mean) (vegfr2/VEGFR2
 -0.006, herg -0.013, abl1 -0.013) we run a bounded tuning pass and a
 GINEConv edge-feature variant, everything else held at gnn_03's defaults.
 
@@ -34,7 +34,10 @@ Outputs (same paths locally and on m3):
   figures/fairness/{TAG}.png          RF vs baseline vs tuned vs GINE bars
 
 Usage:
-  python experiments/gnn_fairness.py --tag mapk14
+  python experiments/gnn_fairness.py --tag vegfr2
+  plot only (no training): --tag vegfr2 --plot-only
+    (rebuilds summary.csv + figures/fairness/{TAG}.png from
+    results/fairness/summary_{TAG}.json + the baseline metric files)
   dry run:  --tag abl1 --configs 1 --seeds 42 --epochs 3 --patience 2 \
             --out results/fairness_dry --fig-dir figures/fairness_dry
 """
@@ -76,12 +79,16 @@ SUMMARY_HEADER = ("tag,model,split,n_seeds,r2_mean,r2_std,rmse_mean,"
 
 def parse_args():
     p = argparse.ArgumentParser()
-    p.add_argument("--tag", default=os.environ.get("QSAR_TAG", "mapk14"))
+    p.add_argument("--tag", default=os.environ.get("QSAR_TAG", "vegfr2"))
     p.add_argument("--seeds", default="42,1,2")
     p.add_argument("--configs", type=int, default=8,
                    help="cap on grid configs evaluated (dry runs)")
     p.add_argument("--phases", default="tune,final,gine,summary",
                    help="comma list from {tune,final,gine,summary}")
+    p.add_argument("--plot-only", action="store_true",
+                   help="no training: rebuild summary.csv + the figure from "
+                        "summary_{TAG}.json and the baseline metric files "
+                        "(equivalent to --phases summary)")
     p.add_argument("--out", default=os.path.join(BASE, "results", "fairness"))
     p.add_argument("--fig-dir", default=os.path.join(BASE, "figures", "fairness"))
     # frozen gnn_03 defaults (exposed only so dry runs can shorten them)
@@ -90,7 +97,10 @@ def parse_args():
     p.add_argument("--epochs", type=int, default=100)
     p.add_argument("--patience", type=int, default=20)
     p.add_argument("--no-figure", action="store_true")
-    return p.parse_args()
+    args = p.parse_args()
+    if args.plot_only:
+        args.phases = "summary"
+    return args
 
 
 # ---------------------------------------------------------------- models
