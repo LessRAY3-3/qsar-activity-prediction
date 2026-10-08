@@ -1,13 +1,18 @@
-"""GNN step 3: train a GIN baseline on the molecular graphs.
+"""GNN step 3: train a GIN / GINE / AttentiveFP model on the molecular graphs.
 
-Model (MoleculeNet-style GIN):
-    AtomEncoder (sum of 9 per-feature embeddings)
-    -> num_layers x [GINConv -> BatchNorm -> ReLU -> dropout, residual]
-    -> global mean pool -> MLP head -> pIC50
+Models (--model, default "gin"):
+    gin (MoleculeNet-style GIN, the baseline):
+        AtomEncoder (sum of 9 per-feature embeddings)
+        -> num_layers x [GINConv -> BatchNorm -> ReLU -> dropout, residual]
+        -> global mean pool -> MLP head -> pIC50
+    gine: same shell, GINEConv consumes BondEncoder(data.edge_attr)
+    attentivefp: PyG AttentiveFP on top of AtomEncoder + BondEncoder
+        (no residual/BN shell - it has its own GRU readout)
 
 Notes on the choices:
-  * bond features are NOT used: plain GINConv aggregates node features
-    only (GINEConv would take edges). Keeps the baseline canonical.
+  * the default gin does NOT use bond features: plain GINConv aggregates
+    node features only, keeping the baseline canonical; --model gine /
+    attentivefp feed the cached 3-dim bond features through BondEncoder.
   * mean pooling instead of the paper's sum pooling: molecule sizes vary
     3-100 atoms here; sum pooling couples prediction scale to size.
   * y is standardised with TRAIN mean/std for optimisation stability and
@@ -16,11 +21,12 @@ Notes on the choices:
 Early stopping on validation RMSE (patience configurable); the best
 checkpoint (in memory) is restored before the test evaluation.
 
-Outputs:
-  results/gnn_models/{TAG}_gin_{split}.pt   best model state_dict
-  results/gnn_preds_{TAG}_{split}.npz       test_idx, y_true, y_pred
-  results/gnn_metrics_{TAG}.json            updated {split: {r2, rmse, mae,
-                                            params, best_epoch}}
+Outputs (model name in the filename only when it is not the default gin,
+so existing gin artifacts and commands keep their exact names):
+  results/gnn_models/{TAG}_{model}_{split}{suffix}.pt
+  results/gnn_preds_{TAG}[_{model}]_{split}{suffix}.npz
+  results/gnn_metrics_{TAG}[_{model}]{suffix}.json   updated
+      {split: {r2, rmse, mae, params, best_epoch}}
 """
 import argparse
 import copy
@@ -33,17 +39,23 @@ import numpy as np
 import torch
 import torch.nn as nn
 from torch_geometric.loader import DataLoader
-from torch_geometric.nn import GINConv, global_mean_pool
+from torch_geometric.nn import AttentiveFP, GINEConv, GINConv, global_mean_pool
 
 BASE = os.path.join(os.path.dirname(__file__), "..")
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from gnn_graph_dataset import MoleculeGraphDataset, ATOM_FEATURE_DIMS  # noqa: E402
+from gnn_graph_dataset import (  # noqa: E402
+    ATOM_FEATURE_DIMS,
+    BOND_FEATURE_DIMS,
+    MoleculeGraphDataset,
+)
 
 
 def parse_args():
     p = argparse.ArgumentParser()
     p.add_argument("--tag", default=os.environ.get("QSAR_TAG", "egfr"))
-    p.add_argument("--split", required=True, choices=["random", "scaffold"])
+    p.add_argument("--split", required=True, choices=["random", "scaffold", "time"])
+    p.add_argument("--model", default="gin", choices=["gin", "gine", "attentivefp"],
+                   help="architecture (default gin keeps the baseline artifact names)")
     p.add_argument("--hidden", type=int, default=128)
     p.add_argument("--num-layers", type=int, default=4)
     p.add_argument("--dropout", type=float, default=0.2)
@@ -95,6 +107,89 @@ class GINRegressor(nn.Module):
             h = h + h_new  # residual
         hg = global_mean_pool(h, data.batch)
         return self.head(hg).squeeze(-1)
+
+
+class BondEncoder(nn.Module):
+    """Sum of per-feature embeddings for the 3 bond features (OGB style).
+
+    BOND_FEATURE_DIMS are the exact embedding-table sizes: the featurizer
+    clamps every index into [0, dim-1], so max+1 <= dim by construction.
+    """
+
+    def __init__(self, hidden):
+        super().__init__()
+        self.embs = nn.ModuleList([nn.Embedding(d, hidden) for d in BOND_FEATURE_DIMS])
+        for e in self.embs:
+            nn.init.xavier_uniform_(e.weight.data)
+
+    def forward(self, e):
+        return sum(self.embs[k](e[:, k]) for k in range(e.shape[1]))
+
+
+class GINERegressor(nn.Module):
+    """GIN with bond features: GINEConv(edge_dim=hidden), same shell as GIN.
+
+    Identical to GINRegressor (AtomEncoder -> [conv, BN, ReLU, dropout,
+    residual] x num_layers -> mean pool -> MLP head) except the conv
+    consumes BondEncoder(edge_attr) through GINEConv's edge linear.
+    """
+
+    def __init__(self, hidden=128, num_layers=4, dropout=0.2):
+        super().__init__()
+        self.encoder = AtomEncoder(hidden)
+        self.bond_encoder = BondEncoder(hidden)
+        self.convs = nn.ModuleList([
+            GINEConv(nn.Sequential(
+                nn.Linear(hidden, hidden), nn.ReLU(), nn.Linear(hidden, hidden)),
+                edge_dim=hidden)
+            for _ in range(num_layers)
+        ])
+        self.bns = nn.ModuleList([nn.BatchNorm1d(hidden) for _ in range(num_layers)])
+        self.dropout = dropout
+        self.head = nn.Sequential(
+            nn.Linear(hidden, hidden // 2), nn.ReLU(), nn.Dropout(dropout),
+            nn.Linear(hidden // 2, 1),
+        )
+
+    def forward(self, data):
+        h = self.encoder(data.x)
+        e = self.bond_encoder(data.edge_attr)
+        for conv, bn in zip(self.convs, self.bns):
+            h_new = nn.functional.relu(bn(conv(h, data.edge_index, e)))
+            h_new = nn.functional.dropout(h_new, self.dropout, training=self.training)
+            h = h + h_new  # residual
+        hg = global_mean_pool(h, data.batch)
+        return self.head(hg).squeeze(-1)
+
+
+class AttentiveFPRegressor(nn.Module):
+    """PyG AttentiveFP on top of AtomEncoder + BondEncoder front-ends.
+
+    AttentiveFP has its own GRU/attention readout (no residual/BN shell),
+    so the embedding front-end is applied and the raw model is used as-is.
+    """
+
+    def __init__(self, hidden=128, num_layers=4, dropout=0.2, num_timesteps=30):
+        super().__init__()
+        self.encoder = AtomEncoder(hidden)
+        self.bond_encoder = BondEncoder(hidden)
+        self.fp = AttentiveFP(in_channels=hidden, hidden_channels=hidden,
+                              out_channels=1, edge_dim=hidden,
+                              num_layers=num_layers, num_timesteps=num_timesteps,
+                              dropout=dropout)
+
+    def forward(self, data):
+        x = self.encoder(data.x)
+        e = self.bond_encoder(data.edge_attr)
+        out = self.fp(x=x, edge_index=data.edge_index, edge_attr=e, batch=data.batch)
+        return out.squeeze(-1)
+
+
+MODELS = {"gin": GINRegressor, "gine": GINERegressor, "attentivefp": AttentiveFPRegressor}
+
+
+def build_model(args):
+    return MODELS[args.model](args.hidden, args.num_layers, args.dropout)
 
 
 def run_epoch(model, loader, device, opt=None):
@@ -162,7 +257,7 @@ def main():
     valid_ld = DataLoader(valid_ds, batch_size=512)
     test_ld = DataLoader(test_ds, batch_size=512)
 
-    model = GINRegressor(args.hidden, args.num_layers, args.dropout).to(device)
+    model = build_model(args).to(device)
     opt = torch.optim.Adam(model.parameters(), lr=args.lr)
     sched = torch.optim.lr_scheduler.ReduceLROnPlateau(
         opt, mode="min", factor=0.5, patience=7, min_lr=1e-5)
@@ -194,22 +289,28 @@ def main():
     print(f"  TEST  R2={m['r2']:.4f}  RMSE={m['rmse']:.4f}  MAE={m['mae']:.4f}  "
           f"({time.time() - t0:.0f}s)")
 
+    # gin (default) keeps the original artifact names: the model name only
+    # appears in the filename when it is not the default ("gin").
+    model_infix = "" if args.model == "gin" else f"_{args.model}"
+    pt_name = f"{args.tag}_{args.model}_{args.split}{args.suffix}.pt"
+    preds_name = f"gnn_preds_{args.tag}{model_infix}_{args.split}{args.suffix}.npz"
+
     os.makedirs(os.path.join(BASE, "results", "gnn_models"), exist_ok=True)
     torch.save({"state_dict": best["state"], "args": vars(args),
                 "y_mean": y_mean, "y_std": y_std},
-               os.path.join(BASE, "results", "gnn_models",
-                            f"{args.tag}_gin_{args.split}{args.suffix}.pt"))
-    np.savez(os.path.join(BASE, "results", f"gnn_preds_{args.tag}_{args.split}{args.suffix}.npz"),
+               os.path.join(BASE, "results", "gnn_models", pt_name))
+    np.savez(os.path.join(BASE, "results", preds_name),
              test_idx=split["test_idx"], y_true=ty, y_pred=tp)
 
-    mj = os.path.join(BASE, "results", f"gnn_metrics_{args.tag}{args.suffix}.json")
+    mj = os.path.join(BASE, "results",
+                      f"gnn_metrics_{args.tag}{model_infix}{args.suffix}.json")
     all_m = json.load(open(mj)) if os.path.exists(mj) else {}
     all_m[args.split] = {**m, "best_epoch": best["epoch"],
                          "best_valid_rmse_std": best["rmse"],
                          "params": {k: v for k, v in vars(args).items() if k != "split"}}
     json.dump(all_m, open(mj, "w"), indent=2)
-    print(f"  saved -> results/gnn_models/{args.tag}_gin_{args.split}{args.suffix}.pt, "
-          f"results/gnn_preds_{args.tag}_{args.split}{args.suffix}.npz, "
+    print(f"  saved -> results/gnn_models/{pt_name}, "
+          f"results/{preds_name}, "
           f"{os.path.relpath(mj, BASE)}")
 
 
