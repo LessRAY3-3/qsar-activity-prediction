@@ -60,7 +60,8 @@ def scatter(y_test, pred, tag, path, target):
     plt.plot([lo, hi], [lo, hi], "r--", lw=1.5, label="ideal")
     plt.xlabel("Actual pIC50")
     plt.ylabel("Predicted pIC50")
-    plt.title(f"{target} QSAR - RandomForest ({tag} split)")
+    # short TAG-based title: full target names overflow the 6in canvas
+    plt.title(f"{TAG.upper()} - RandomForest ({tag} split)")
     plt.legend()
     plt.tight_layout()
     plt.savefig(path, dpi=150)
@@ -85,6 +86,13 @@ def run_split(X, y, smiles, train_idx, test_idx, tag, fig_path, target):
 
 
 def main():
+    import argparse
+    p = argparse.ArgumentParser()
+    p.add_argument("--plot-only", action="store_true",
+                   help="skip GridSearchCV; load the saved models, re-plot the "
+                        "predicted-vs-actual figures (metrics are NOT rewritten)")
+    args = p.parse_args()
+
     os.makedirs(FIG_DIR, exist_ok=True)
     os.makedirs(MODEL_DIR, exist_ok=True)
     os.makedirs(os.path.dirname(METRICS_JSON), exist_ok=True)
@@ -98,14 +106,24 @@ def main():
     tr, te = train_test_split(
         np.arange(len(X)), test_size=0.2, random_state=RANDOM_STATE
     )
+    # ---- scaffold split ----
+    tr_s, te_s = scaffold_split(smiles, test_size=0.2)
+
+    if args.plot_only:
+        for split, train_idx, test_idx in (("random", tr, te), ("scaffold", tr_s, te_s)):
+            model = joblib.load(os.path.join(MODEL_DIR, f"rf_{split}_split_{TAG}.joblib"))
+            pred = model.predict(X[test_idx])
+            print(f"[plot-only:{split}] test R2 = {r2_score(y[test_idx], pred):.6f}")
+            scatter(y[test_idx], pred, split,
+                    os.path.join(FIG_DIR, f"pred_vs_actual_{split}_{TAG}.png"), target)
+        return
+
     m_rand, best_rand, _ = run_split(
         X, y, smiles, tr, te, "random",
         os.path.join(FIG_DIR, f"pred_vs_actual_random_{TAG}.png"), target
     )
     joblib.dump(best_rand, os.path.join(MODEL_DIR, f"rf_random_split_{TAG}.joblib"))
 
-    # ---- scaffold split ----
-    tr_s, te_s = scaffold_split(smiles, test_size=0.2)
     m_scaf, best_scaf, _ = run_split(
         X, y, smiles, tr_s, te_s, "scaffold",
         os.path.join(FIG_DIR, f"pred_vs_actual_scaffold_{TAG}.png"), target

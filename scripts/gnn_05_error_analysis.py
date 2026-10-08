@@ -116,7 +116,8 @@ def analyse(split):
     ax.set_ylim(0, lim)
     ax.set_xlabel("|error| RF (Morgan FP)")
     ax.set_ylabel("|error| GIN (molecular graph)")
-    ax.set_title(f"{TAG.upper()} {split} test: {overlap}/{TOP_K} shared worst molecules, "
+    # short title: the long form overflows the 6.4in canvas
+    ax.set_title(f"{TAG.upper()} {split}: {overlap}/{TOP_K} shared worst, "
                  f"Spearman $\\rho$={rho:.2f}")
     ax.legend(loc="upper left")
     fig.tight_layout()

@@ -5,6 +5,7 @@ module-level path constants are monkeypatched.  04's grid is shrunk to a
 single 3-tree candidate so the whole test stays in the seconds range.
 """
 import json
+import sys
 
 import numpy as np
 import pandas as pd
@@ -97,6 +98,8 @@ def test_pipeline_02_03_04_smoke(tmp_path, monkeypatch, load_script, valid_smile
         "PARAM_GRID",
         {"n_estimators": [3], "max_depth": [None], "min_samples_split": [2]},
     )
+    # main() parses CLI flags (e.g. --plot-only); hide pytest's own argv
+    monkeypatch.setattr(sys, "argv", ["04_train_and_evaluate.py"])
     mod04.main()
 
     payload = json.loads(metrics_json.read_text())
