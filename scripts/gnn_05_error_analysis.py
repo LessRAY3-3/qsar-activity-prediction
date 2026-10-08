@@ -95,7 +95,7 @@ def analyse(split):
             continue
         scaf_rows.append((s, int(m.sum()), float(err_rf[m].mean()), float(err_gin[m].mean())))
     scaf_rows.sort(key=lambda r: -(r[2] + r[3]))
-    print(f"  scaffolds with >=5 test mols, hardest by combined mean |err|:")
+    print("  scaffolds with >=5 test mols, hardest by combined mean |err|:")
     print(f"    {'scaffold':<28} {'n':>4} {'mean|err| RF':>13} {'mean|err| GIN':>14}")
     for s, n, er, eg in scaf_rows[:10]:
         print(f"    {s:<28.26} {n:>4} {er:>13.3f} {eg:>14.3f}")

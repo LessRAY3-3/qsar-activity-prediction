@@ -42,6 +42,7 @@ import numpy as np
 BASE = os.path.join(os.path.dirname(__file__), "..")
 sys.path.insert(0, os.path.join(BASE, "scripts"))
 from gnn_03_train_gin import GINRegressor  # noqa: E402
+from qsar_common import morgan_fp_with_info  # noqa: E402
 
 # substructure queries - reproduce the README's 37 / 47 series sizes exactly
 FAMILIES = {
@@ -65,13 +66,10 @@ def parse_args():
 
 
 # ---------------------------------------------------------------- helpers
-def morgan_bit_atoms(mol, bit, radius=2, n_bits=2048):
+def morgan_bit_atoms(mol, bit):
     """Atoms covered by one Morgan bit: union of spheres around the
     (center_atom, radius) entries RDKit reports via bitInfo."""
-    from rdkit.Chem import AllChem
-
-    bi = {}
-    AllChem.GetMorganFingerprintAsBitVect(mol, radius, nBits=n_bits, bitInfo=bi)
+    _, bi = morgan_fp_with_info(mol)
     covered = set()
     for center, r in bi.get(int(bit), []):
         sphere = {int(center)}
@@ -105,7 +103,6 @@ def load_gin(tag, split, device):
 def _make_wrapper(model):
     """Adapt GINRegressor (takes a Data object) to the Explainer calling
     convention model(x=..., edge_index=..., batch=...)."""
-    import torch
     import torch.nn as nn
     from torch_geometric.data import Data
 
@@ -420,7 +417,7 @@ def write_findings(records, path, args):
         ov = [r["overlap_fraction"] for r in ok]
         core = [r["gnn_top_on_core"] for r in ok]
         lines += [
-            f"## Numbers",
+            "## Numbers",
             f"- molecules analysed: {len(records)} "
             f"({', '.join(f'{f} x{sum(1 for r in records if r['family']==f)}' for f in fams)}); "
             f"both methods ok on {len(ok)}",

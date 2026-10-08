@@ -19,17 +19,16 @@ Step 6 - evaluation:
 import json
 import os
 import numpy as np
-import pandas as pd
 import matplotlib
 
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import joblib
-from rdkit import Chem
-from rdkit.Chem.Scaffolds import MurckoScaffold
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 from sklearn.model_selection import GridSearchCV, train_test_split
+
+from qsar_common import RANDOM_STATE, scaffold_split
 
 BASE = os.path.join(os.path.dirname(__file__), "..")
 TAG = os.environ.get("QSAR_TAG", "egfr")  # which dataset: egfr | bace
@@ -37,37 +36,12 @@ IN_NPZ = os.path.join(BASE, "data", "processed", f"{TAG}_fingerprints.npz")
 FIG_DIR = os.path.join(BASE, "figures")
 MODEL_DIR = os.path.join(BASE, "models")
 METRICS_JSON = os.path.join(BASE, "results", f"metrics_{TAG}.json")
-RANDOM_STATE = 42
 
 PARAM_GRID = {
     "n_estimators": [300, 500],
     "max_depth": [None, 20, 40],
     "min_samples_split": [2, 5],
 }
-
-
-def scaffold_split(smiles, test_size=0.2):
-    """Assign whole Bemis-Murcko scaffolds to train/test (test ~= test_size)."""
-    scaffolds = {}
-    for i, smi in enumerate(smiles):
-        mol = Chem.MolFromSmiles(smi)
-        if mol is None:
-            scaf = smi  # fallback: treat molecule as its own scaffold
-        else:
-            scaf = MurckoScaffold.MurckoScaffoldSmiles(mol=mol, includeChirality=False)
-        scaffolds.setdefault(scaf, []).append(i)
-
-    # big scaffolds first -> test set fills up to roughly test_size
-    groups = sorted(scaffolds.values(), key=len, reverse=True)
-    n_test = int(len(smiles) * test_size)
-    test_idx, train_idx, n = [], [], 0
-    for g in groups:
-        if n < n_test:
-            test_idx.extend(g)
-            n += len(g)
-        else:
-            train_idx.extend(g)
-    return np.array(train_idx), np.array(test_idx)
 
 
 def evaluate(model, X_test, y_test, tag):

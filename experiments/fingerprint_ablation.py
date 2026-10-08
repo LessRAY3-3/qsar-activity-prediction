@@ -20,11 +20,15 @@ Exit code 1 + no figure if the anchor fails (caller must stop and report).
 import argparse
 import json
 import os
+import sys
 import time
 
 import numpy as np
 
 BASE = os.path.join(os.path.dirname(__file__), "..")
+sys.path.insert(0, os.path.join(BASE, "scripts"))
+from qsar_common import make_morgan_generator  # noqa: E402
+
 HEADER = "split,radius,n_bits,seed,r2,rmse,mae,train_seconds"
 
 
@@ -44,17 +48,16 @@ def parse_args():
 def morgan_matrix(smiles, radius, n_bits):
     """Identical featurization code path as scripts/03_featurize.py."""
     from rdkit import Chem
-    from rdkit.Chem import AllChem
     from rdkit import RDLogger
 
     RDLogger.DisableLog("rdApp.*")
+    gen = make_morgan_generator(radius, n_bits)
     X = np.zeros((len(smiles), n_bits), dtype=np.uint8)
     for i, smi in enumerate(smiles):
         mol = Chem.MolFromSmiles(smi)
         if mol is None:
             continue
-        fp = AllChem.GetMorganFingerprintAsBitVect(mol, radius, nBits=n_bits)
-        X[i] = np.frombuffer(fp.ToBitString().encode(), dtype=np.uint8) - ord("0")
+        X[i] = np.asarray(gen.GetFingerprintAsNumPy(mol), dtype=np.uint8)
     return X
 
 

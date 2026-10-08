@@ -19,10 +19,10 @@ import sys
 
 import joblib
 import numpy as np
-from rdkit import Chem
-from rdkit.Chem.Scaffolds import MurckoScaffold
 from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 from sklearn.model_selection import train_test_split
+
+from qsar_common import scaffold_split
 
 BASE = os.path.join(os.path.dirname(__file__), "..")
 TAG = "bace"
@@ -31,30 +31,6 @@ MODEL_DIR = os.path.join(BASE, "models")
 METRICS_JSON = os.path.join(BASE, "results", f"metrics_{TAG}.json")
 RANDOM_STATE = 42
 TOL = 1e-4
-
-
-def scaffold_split(smiles, test_size=0.2):
-    """Assign whole Bemis-Murcko scaffolds to train/test (test ~= test_size)."""
-    scaffolds = {}
-    for i, smi in enumerate(smiles):
-        mol = Chem.MolFromSmiles(smi)
-        if mol is None:
-            scaf = smi  # fallback: treat molecule as its own scaffold
-        else:
-            scaf = MurckoScaffold.MurckoScaffoldSmiles(mol=mol, includeChirality=False)
-        scaffolds.setdefault(scaf, []).append(i)
-
-    # big scaffolds first -> test set fills up to roughly test_size
-    groups = sorted(scaffolds.values(), key=len, reverse=True)
-    n_test = int(len(smiles) * test_size)
-    test_idx, train_idx, n = [], [], 0
-    for g in groups:
-        if n < n_test:
-            test_idx.extend(g)
-            n += len(g)
-        else:
-            train_idx.extend(g)
-    return np.array(train_idx), np.array(test_idx)
 
 
 def dump_split(split, test_idx, X, y):
@@ -89,7 +65,7 @@ def main():
     _, te_rand = train_test_split(
         np.arange(len(X)), test_size=0.2, random_state=RANDOM_STATE
     )
-    # ---- scaffold split (verbatim copy of 04_train_and_evaluate.py) ----
+    # ---- scaffold split (from scripts/qsar_common.py, same as 04) ----
     _, te_scaf = scaffold_split(smiles, test_size=0.2)
 
     with open(METRICS_JSON) as f:

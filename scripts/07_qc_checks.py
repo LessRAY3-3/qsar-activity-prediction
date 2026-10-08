@@ -13,10 +13,9 @@ Three checks:
      many chemically equivalent ones. Permutation importance on the held-out
      test set is the honest cross-check before telling the substructure story.
 
-Splits are reconstructed exactly (same random_state / deterministic scaffold
-function as scripts/04_train_and_evaluate.py).
+Splits are reconstructed exactly (same random_state and the shared
+deterministic scaffold function from scripts/qsar_common.py).
 """
-import importlib.util
 import os
 import numpy as np
 import pandas as pd
@@ -27,6 +26,8 @@ import matplotlib.pyplot as plt
 import joblib
 from sklearn.metrics import r2_score
 from sklearn.model_selection import train_test_split
+
+from qsar_common import scaffold_split
 
 BASE = os.path.join(os.path.dirname(__file__), "..")
 TAG = os.environ.get("QSAR_TAG", "egfr")
@@ -39,18 +40,10 @@ OUT_PERM = os.path.join(BASE, "results", f"permutation_importance_{TAG}.csv")
 RANDOM_STATE = 42
 
 
-def load_scaffold_split_func():
-    spec = importlib.util.spec_from_file_location(
-        "mod04", os.path.join(BASE, "scripts", "04_train_and_evaluate.py"))
-    mod = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(mod)
-    return mod.scaffold_split
-
-
 def check_testset_distributions(X, y, smiles):
     tr_r, te_r = train_test_split(np.arange(len(X)), test_size=0.2,
                                   random_state=RANDOM_STATE)
-    tr_s, te_s = load_scaffold_split_func()(smiles, test_size=0.2)
+    tr_s, te_s = scaffold_split(smiles, test_size=0.2)
     yr, ys = y[te_r], y[te_s]
     print("== 1. test-set pIC50 distributions ==")
     for name, v in [("random", yr), ("scaffold", ys)]:
@@ -60,9 +53,13 @@ def check_testset_distributions(X, y, smiles):
     bins = np.linspace(min(yr.min(), ys.min()), max(yr.max(), ys.max()), 31)
     plt.hist(yr, bins=bins, alpha=0.55, label=f"random (std={yr.std():.2f})", density=True)
     plt.hist(ys, bins=bins, alpha=0.55, label=f"scaffold (std={ys.std():.2f})", density=True)
-    plt.xlabel("pIC50"); plt.ylabel("density"); plt.legend()
+    plt.xlabel("pIC50")
+    plt.ylabel("density")
+    plt.legend()
     plt.title(f"Test-set pIC50 distribution - {TAG}")
-    plt.tight_layout(); plt.savefig(FIG_HIST, dpi=150); plt.close()
+    plt.tight_layout()
+    plt.savefig(FIG_HIST, dpi=150)
+    plt.close()
     print(f"  saved -> {FIG_HIST}")
 
 
@@ -95,7 +92,6 @@ def check_importance(X, y, smiles):
     # Manual permutation importance over the top-K MDI bits only (sklearn's
     # permutation_importance would permute all 2048 columns; we only care
     # about the ranking near the top, and the model still sees full-width X).
-    from sklearn.metrics import r2_score
     K, N_REP = 100, 3
     baseline = r2_score(y_te, model.predict(X_te))
     rng = np.random.RandomState(RANDOM_STATE)
@@ -124,9 +120,12 @@ def check_importance(X, y, smiles):
     plt.barh(ypos + 0.2, plot["perm_mean"], height=0.38,
              xerr=plot["perm_std"], label="permutation (test set)")
     plt.yticks(ypos, [f"bit {b}" for b in plot["bit"]])
-    plt.xlabel("importance"); plt.legend()
+    plt.xlabel("importance")
+    plt.legend()
     plt.title(f"MDI vs permutation importance - {TAG} (top-{K} MDI bits)")
-    plt.tight_layout(); plt.savefig(FIG_IMP, dpi=150); plt.close()
+    plt.tight_layout()
+    plt.savefig(FIG_IMP, dpi=150)
+    plt.close()
     print(f"  saved -> {OUT_PERM} and {FIG_IMP}", flush=True)
 
 

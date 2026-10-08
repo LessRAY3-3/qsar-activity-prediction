@@ -13,8 +13,10 @@ import numpy as np
 import pandas as pd
 import joblib
 from rdkit import Chem
-from rdkit.Chem import AllChem, Draw
+from rdkit.Chem import Draw
 from rdkit import RDLogger
+
+from qsar_common import morgan_fp_with_info
 
 RDLogger.DisableLog("rdApp.*")
 
@@ -25,8 +27,6 @@ MODEL = os.path.join(BASE, "models", f"rf_random_split_{TAG}.joblib")
 OUT_CSV = os.path.join(BASE, "results", f"top_bits_{TAG}.csv")
 OUT_PNG = os.path.join(BASE, "figures", f"top_bits_{TAG}.png")
 TOP_N = 9
-RADIUS = 2
-NBITS = 2048
 
 
 def substructure_for_bit(mol, atom_idx, radius):
@@ -59,8 +59,7 @@ def main():
         mol = Chem.MolFromSmiles(smi)
         if mol is None:
             continue
-        info = {}
-        AllChem.GetMorganFingerprintAsBitVect(mol, RADIUS, nBits=NBITS, bitInfo=info)
+        _, info = morgan_fp_with_info(mol)
         for bit in top_bits:
             bit = int(bit)
             if bit not in info:
