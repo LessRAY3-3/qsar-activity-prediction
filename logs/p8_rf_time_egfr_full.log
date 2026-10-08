@@ -1,0 +1,9 @@
+Target: Epidermal growth factor receptor | Feature matrix: X=(13497, 2048), y range [1.60, 17.30]
+
+=== time split: train=9026, test=3448 ===
+Fitting 5 folds for each of 12 candidates, totalling 60 fits
+Best params: {'max_depth': 40, 'min_samples_split': 5, 'n_estimators': 300}  (CV R2 = 0.442)
+[time]  R2 = -0.891   RMSE = 1.899   MAE = 1.590
+
+Metrics merged -> /Users/leisirui/qsar-activity-prediction/results/metrics_egfr_full.json
+RC=0

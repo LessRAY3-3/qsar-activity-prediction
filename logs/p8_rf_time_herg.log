@@ -1,0 +1,9 @@
+Target: Voltage-gated inwardly rectifying potassium channel KCNH2 | Feature matrix: X=(12019, 2048), y range [-0.00, 9.85]
+
+=== time split: train=8326, test=2619 ===
+Fitting 5 folds for each of 12 candidates, totalling 60 fits
+Best params: {'max_depth': None, 'min_samples_split': 2, 'n_estimators': 300}  (CV R2 = 0.448)
+[time]  R2 = -0.034   RMSE = 0.817   MAE = 0.586
+
+Metrics merged -> /Users/leisirui/qsar-activity-prediction/results/metrics_herg.json
+RC=0
