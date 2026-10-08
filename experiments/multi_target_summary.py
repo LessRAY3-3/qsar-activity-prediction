@@ -17,10 +17,10 @@ Effect-size convention (README interview point 6: single-seed GNN numbers
 are noise - GIN scaffold R2 spreads +-0.02 across seeds), so the summary
 columns, the console conclusion and the figure all use the 3-seed mean:
 
-  d_r2_* (mean)   = gin_r2_mean - rf_r2, computed from the comparison
-                    table at full precision (positive = GIN wins)
-  d_r2_seed42_*   = the comparison table's own d_r2_gin_minus_rf, i.e. the
-                    single seed-42 GIN run minus RF -- reference only,
+  d_r2_* (mean)   = gin_r2_mean - rf_r2, taken from the comparison table's
+                    d_r2_mean_gin_minus_rf column (positive = GIN wins)
+  d_r2_seed42_*   = the comparison table's d_r2_seed42_gin_minus_rf, i.e.
+                    the single seed-42 GIN run minus RF -- reference only,
                     because that is what the raw comparison files report
 
 The learning-curve overlay points are already mean-based (mean r2 per
@@ -46,14 +46,14 @@ import pandas as pd
 
 BASE = os.path.join(os.path.dirname(__file__), "..")
 
-# tag -> protein family (mapk14 maps to CHEMBL279, which is actually VEGFR2 --
-# still a kinase, so the family label is unaffected)
+# tag -> protein family (vegfr2 = CHEMBL279, i.e. VEGFR2/KDR -- still a
+# kinase, so the family label is unaffected by the tag name)
 FAMILY = {
     "egfr": "kinase",
     "egfr_full": "kinase",
     "a2a": "gpcr",
     "bace": "protease",
-    "mapk14": "kinase",
+    "vegfr2": "kinase",
     "abl1": "kinase",
     "mpro": "viral-protease",
     "hivpr": "viral-protease",
@@ -137,7 +137,7 @@ def load_tag(tag):
               f"n_molecules left empty")
 
     has_gin = all(c in df.columns for c in ("gin_r2_mean", "gin_r2_std",
-                                            "d_r2_gin_minus_rf"))
+                                            "d_r2_mean_gin_minus_rf"))
     for split in SPLITS:
         hit = df[df["split"] == split]
         if hit.empty:
@@ -155,8 +155,8 @@ def load_tag(tag):
             # primary effect size: 3-seed mean GIN - RF, at full precision
             row[f"d_r2_{split}"] = gm - rf
             # reference only: the comparison table's single-seed (seed-42)
-            # d_r2_gin_minus_rf, kept so the two conventions sit side by side
-            row[f"d_r2_seed42_{split}"] = float(r["d_r2_gin_minus_rf"])
+            # d_r2_seed42_gin_minus_rf, kept so the two conventions sit side by side
+            row[f"d_r2_seed42_{split}"] = float(r["d_r2_seed42_gin_minus_rf"])
         else:
             row[f"gin_r2_mean_{split}"] = np.nan
             row[f"gin_r2_std_{split}"] = np.nan

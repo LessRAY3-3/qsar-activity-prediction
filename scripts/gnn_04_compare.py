@@ -8,7 +8,11 @@ Inputs:
   data/processed/splits/{TAG}_{split}.npz  (for test_idx + scaffold labels)
 
 Outputs:
-  results/comparison_{TAG}.csv                      the comparison table
+  results/comparison_{TAG}.csv                      the comparison table; carries
+                                                    BOTH effect-size conventions:
+                                                    d_*_mean_* (3-seed mean GIN - RF,
+                                                    primary) and d_*_seed42_* (single
+                                                    seed-42 run - RF, reference only)
   results/rf_preds_{TAG}_{split}.npz                RF test preds (cached for
                                                     the error-analysis step)
   figures/compare_pred_vs_actual_{TAG}_{split}.png  scatter, both models side
@@ -75,17 +79,23 @@ def comparison_table():
     rows = []
     for split in ("random", "scaffold"):
         r, g = rf_m[split], gin_m[split]
+        gin_r2_mean = float(np.mean(seeds[split]["r2"]))
+        gin_rmse_mean = float(np.mean(seeds[split]["rmse"]))
         rows.append({
             "split": split,
             "rf_r2": r["r2"], "rf_rmse": r["rmse"], "rf_mae": r["mae"],
             "gin_r2": g["r2"], "gin_rmse": g["rmse"], "gin_mae": g["mae"],
-            "gin_r2_mean": float(np.mean(seeds[split]["r2"])),
+            "gin_r2_mean": gin_r2_mean,
             "gin_r2_std": float(np.std(seeds[split]["r2"])),
-            "gin_rmse_mean": float(np.mean(seeds[split]["rmse"])),
+            "gin_rmse_mean": gin_rmse_mean,
             "gin_rmse_std": float(np.std(seeds[split]["rmse"])),
             "gin_n_seeds": n_seeds,
-            "d_r2_gin_minus_rf": g["r2"] - r["r2"],
-            "d_rmse_gin_minus_rf": g["rmse"] - r["rmse"],
+            # primary effect size: 3-seed mean GIN - RF
+            "d_r2_mean_gin_minus_rf": gin_r2_mean - r["r2"],
+            "d_rmse_mean_gin_minus_rf": gin_rmse_mean - r["rmse"],
+            # reference only: the single seed-42 run - RF
+            "d_r2_seed42_gin_minus_rf": g["r2"] - r["r2"],
+            "d_rmse_seed42_gin_minus_rf": g["rmse"] - r["rmse"],
         })
     return rows
 
@@ -99,13 +109,13 @@ def write_table_csv(rows):
         w.writerows(rows)
     print(f"\n=== RF (Morgan FP) vs GIN ({TAG}) ===")
     print(f"{'split':<9} | {'RF R2':>7} {'RF RMSE':>8} | {'GIN R2 (seed42)':>15} {'GIN RMSE':>8} | "
-          f"{'GIN R2 mean+-std':>17} | {'dR2':>7}")
-    print("-" * 92)
+          f"{'GIN R2 mean+-std':>17} | {'dR2 mean':>9} {'dR2 seed42':>11}")
+    print("-" * 106)
     for r in rows:
         print(f"{r['split']:<9} | {r['rf_r2']:7.3f} {r['rf_rmse']:8.3f} | "
               f"{r['gin_r2']:15.3f} {r['gin_rmse']:8.3f} | "
               f"{r['gin_r2_mean']:8.3f} +-{r['gin_r2_std']:<7.3f} | "
-              f"{r['d_r2_gin_minus_rf']:+7.3f}")
+              f"{r['d_r2_mean_gin_minus_rf']:+9.3f} {r['d_r2_seed42_gin_minus_rf']:+11.3f}")
     print(f"saved -> {os.path.relpath(path, BASE)}")
 
 
