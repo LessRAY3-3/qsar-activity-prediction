@@ -10,14 +10,15 @@ Learnings from earlier runs:
 Fetches assay_type=B first, then F (separate result sets also dodge the
 poisoned record), stops early once TARGET_ROWS raw rows are collected.
 """
-import os, time
+import os
+import time
 import pandas as pd
 import requests
 
 TARGET_ID = "CHEMBL203"
 API = "https://www.ebi.ac.uk/chembl/api/data/activity.json"
 OUT_DIR = os.path.join(os.path.dirname(__file__), "..", "data", "raw")
-OUT_CSV = os.path.join(OUT_DIR, "egfr_chembl_activities.csv")
+OUT_CSV = os.path.join(OUT_DIR, "egfr_activities.csv")
 TARGET_ROWS = 8000          # early stop: plenty for 1000+ unique compounds
 PAGE = 500
 MAX_TRIES_PER_PAGE = 8
