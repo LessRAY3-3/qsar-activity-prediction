@@ -1,0 +1,42 @@
+{
+  "random": {
+    "r2": 0.6671468019485474,
+    "rmse": 0.7169753016284045,
+    "mae": 0.513826310634613,
+    "best_epoch": 99,
+    "best_valid_rmse_std": 0.5864439010620117,
+    "params": {
+      "tag": "vegfr2",
+      "model": "attentivefp",
+      "hidden": 128,
+      "num_layers": 4,
+      "dropout": 0.2,
+      "lr": 0.001,
+      "batch_size": 128,
+      "epochs": 100,
+      "patience": 20,
+      "seed": 1,
+      "suffix": "_seed1"
+    }
+  },
+  "scaffold": {
+    "r2": 0.5757452845573425,
+    "rmse": 0.8103182550675364,
+    "mae": 0.5952019095420837,
+    "best_epoch": 92,
+    "best_valid_rmse_std": 0.6334959268569946,
+    "params": {
+      "tag": "vegfr2",
+      "model": "attentivefp",
+      "hidden": 128,
+      "num_layers": 4,
+      "dropout": 0.2,
+      "lr": 0.001,
+      "batch_size": 128,
+      "epochs": 100,
+      "patience": 20,
+      "seed": 1,
+      "suffix": "_seed1"
+    }
+  }
+}
