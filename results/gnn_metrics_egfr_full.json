@@ -36,5 +36,25 @@
       "seed": 42,
       "suffix": ""
     }
+  },
+  "time": {
+    "r2": -0.3780912160873413,
+    "rmse": 1.6210210944749948,
+    "mae": 1.3448890447616577,
+    "best_epoch": 8,
+    "best_valid_rmse_std": 0.7530563473701477,
+    "params": {
+      "tag": "egfr_full",
+      "model": "gin",
+      "hidden": 128,
+      "num_layers": 4,
+      "dropout": 0.2,
+      "lr": 0.001,
+      "batch_size": 128,
+      "epochs": 100,
+      "patience": 20,
+      "seed": 42,
+      "suffix": ""
+    }
   }
 }

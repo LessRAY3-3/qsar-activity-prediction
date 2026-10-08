@@ -1,0 +1,465 @@
+=== GIN-TIME a2a seed42 start 2026-10-08 15:43:56 ===
+/Users/lessray/Desktop/kimi code/qsar-activity-prediction/.venv/lib/python3.12/site-packages/torch/jit/_script.py:1491: FutureWarning: `torch.jit.script` is deprecated. Please switch to `torch.compile` or `torch.export`.
+  warnings.warn(
+/Users/lessray/Desktop/kimi code/qsar-activity-prediction/scripts/gnn_03_train_gin.py:209: UserWarning: Converting a tensor with requires_grad=True to a scalar may lead to unexpected behavior.
+Consider using tensor.detach() first. (Triggered internally at /Users/runner/work/pytorch/pytorch/torch/csrc/autograd/generated/python_variable_methods.cpp:821.)
+  total += float(loss) * len(batch.y)
+[a2a/time] device=mps  y_mean=6.812 y_std=1.473
+  epoch   1  train_mse=0.9180  valid_rmse=0.9087  lr=1.0e-03 *
+  epoch   3  train_mse=0.5764  valid_rmse=0.9044  lr=1.0e-03 *
+  epoch   5  train_mse=0.4802  valid_rmse=0.7757  lr=1.0e-03 *
+  epoch  10  train_mse=0.3806  valid_rmse=1.1629  lr=1.0e-03
+  epoch  13  train_mse=0.3629  valid_rmse=0.7103  lr=1.0e-03 *
+  epoch  20  train_mse=0.2868  valid_rmse=0.8524  lr=1.0e-03
+  epoch  30  train_mse=0.2503  valid_rmse=0.9259  lr=2.5e-04
+  early stop at epoch 33 (best epoch 13)
+  TEST  R2=-0.1125  RMSE=1.1136  MAE=0.8956  (13s)
+  saved -> results/gnn_models/a2a_gin_time.pt, results/gnn_preds_a2a_time.npz, results/gnn_metrics_a2a.json
+=== END GIN-TIME a2a seed42 rc=0 duration=15s 2026-10-08 15:44:11 ===
+=== GIN-TIME a2a seed1 start 2026-10-08 15:44:11 ===
+/Users/lessray/Desktop/kimi code/qsar-activity-prediction/.venv/lib/python3.12/site-packages/torch/jit/_script.py:1491: FutureWarning: `torch.jit.script` is deprecated. Please switch to `torch.compile` or `torch.export`.
+  warnings.warn(
+/Users/lessray/Desktop/kimi code/qsar-activity-prediction/scripts/gnn_03_train_gin.py:209: UserWarning: Converting a tensor with requires_grad=True to a scalar may lead to unexpected behavior.
+Consider using tensor.detach() first. (Triggered internally at /Users/runner/work/pytorch/pytorch/torch/csrc/autograd/generated/python_variable_methods.cpp:821.)
+  total += float(loss) * len(batch.y)
+[a2a/time] device=mps  y_mean=6.812 y_std=1.473
+  epoch   1  train_mse=0.9668  valid_rmse=0.8358  lr=1.0e-03 *
+  epoch   2  train_mse=0.7499  valid_rmse=0.8237  lr=1.0e-03 *
+  epoch   3  train_mse=0.6335  valid_rmse=0.7572  lr=1.0e-03 *
+  epoch  10  train_mse=0.3816  valid_rmse=1.0818  lr=1.0e-03
+  epoch  11  train_mse=0.3906  valid_rmse=0.7508  lr=1.0e-03 *
+  epoch  20  train_mse=0.3089  valid_rmse=0.8002  lr=5.0e-04
+  epoch  30  train_mse=0.2790  valid_rmse=1.0030  lr=2.5e-04
+  early stop at epoch 31 (best epoch 11)
+  TEST  R2=-0.2081  RMSE=1.1605  MAE=0.9610  (94s)
+  saved -> results/gnn_models/a2a_gin_time_seed1.pt, results/gnn_preds_a2a_time_seed1.npz, results/gnn_metrics_a2a_seed1.json
+=== END GIN-TIME a2a seed1 rc=0 duration=95s 2026-10-08 15:45:46 ===
+=== GIN-TIME a2a seed2 start 2026-10-08 15:45:46 ===
+/Users/lessray/Desktop/kimi code/qsar-activity-prediction/.venv/lib/python3.12/site-packages/torch/jit/_script.py:1491: FutureWarning: `torch.jit.script` is deprecated. Please switch to `torch.compile` or `torch.export`.
+  warnings.warn(
+/Users/lessray/Desktop/kimi code/qsar-activity-prediction/scripts/gnn_03_train_gin.py:209: UserWarning: Converting a tensor with requires_grad=True to a scalar may lead to unexpected behavior.
+Consider using tensor.detach() first. (Triggered internally at /Users/runner/work/pytorch/pytorch/torch/csrc/autograd/generated/python_variable_methods.cpp:821.)
+  total += float(loss) * len(batch.y)
+[a2a/time] device=mps  y_mean=6.812 y_std=1.473
+  epoch   1  train_mse=0.9356  valid_rmse=0.8850  lr=1.0e-03 *
+  epoch   3  train_mse=0.6140  valid_rmse=0.8293  lr=1.0e-03 *
+  epoch   5  train_mse=0.5077  valid_rmse=0.8033  lr=1.0e-03 *
+  epoch   6  train_mse=0.4396  valid_rmse=0.7450  lr=1.0e-03 *
+  epoch   8  train_mse=0.4211  valid_rmse=0.7428  lr=1.0e-03 *
+  epoch  10  train_mse=0.3898  valid_rmse=1.0795  lr=1.0e-03
+  epoch  14  train_mse=0.3461  valid_rmse=0.7047  lr=1.0e-03 *
+  epoch  20  train_mse=0.2801  valid_rmse=0.9707  lr=1.0e-03
+  epoch  30  train_mse=0.2630  valid_rmse=1.1503  lr=2.5e-04
+  early stop at epoch 34 (best epoch 14)
+  TEST  R2=0.0301  RMSE=1.0398  MAE=0.8009  (12s)
+  saved -> results/gnn_models/a2a_gin_time_seed2.pt, results/gnn_preds_a2a_time_seed2.npz, results/gnn_metrics_a2a_seed2.json
+=== END GIN-TIME a2a seed2 rc=0 duration=14s 2026-10-08 15:46:00 ===
+=== GIN-TIME mpro seed42 start 2026-10-08 15:46:00 ===
+/Users/lessray/Desktop/kimi code/qsar-activity-prediction/.venv/lib/python3.12/site-packages/torch/jit/_script.py:1491: FutureWarning: `torch.jit.script` is deprecated. Please switch to `torch.compile` or `torch.export`.
+  warnings.warn(
+/Users/lessray/Desktop/kimi code/qsar-activity-prediction/scripts/gnn_03_train_gin.py:209: UserWarning: Converting a tensor with requires_grad=True to a scalar may lead to unexpected behavior.
+Consider using tensor.detach() first. (Triggered internally at /Users/runner/work/pytorch/pytorch/torch/csrc/autograd/generated/python_variable_methods.cpp:821.)
+  total += float(loss) * len(batch.y)
+[mpro/time] device=mps  y_mean=6.241 y_std=1.054
+  epoch   1  train_mse=0.8536  valid_rmse=1.1076  lr=1.0e-03 *
+  epoch   5  train_mse=0.4921  valid_rmse=1.0258  lr=1.0e-03 *
+  epoch  10  train_mse=0.3876  valid_rmse=1.1891  lr=1.0e-03
+  epoch  20  train_mse=0.3050  valid_rmse=1.1312  lr=5.0e-04
+  early stop at epoch 25 (best epoch 5)
+  TEST  R2=0.0385  RMSE=1.2141  MAE=0.9936  (24s)
+  saved -> results/gnn_models/mpro_gin_time.pt, results/gnn_preds_mpro_time.npz, results/gnn_metrics_mpro.json
+=== END GIN-TIME mpro seed42 rc=0 duration=26s 2026-10-08 15:46:26 ===
+=== GIN-TIME mpro seed1 start 2026-10-08 15:46:26 ===
+/Users/lessray/Desktop/kimi code/qsar-activity-prediction/.venv/lib/python3.12/site-packages/torch/jit/_script.py:1491: FutureWarning: `torch.jit.script` is deprecated. Please switch to `torch.compile` or `torch.export`.
+  warnings.warn(
+/Users/lessray/Desktop/kimi code/qsar-activity-prediction/scripts/gnn_03_train_gin.py:209: UserWarning: Converting a tensor with requires_grad=True to a scalar may lead to unexpected behavior.
+Consider using tensor.detach() first. (Triggered internally at /Users/runner/work/pytorch/pytorch/torch/csrc/autograd/generated/python_variable_methods.cpp:821.)
+  total += float(loss) * len(batch.y)
+[mpro/time] device=mps  y_mean=6.241 y_std=1.054
+  epoch   1  train_mse=0.8594  valid_rmse=1.2274  lr=1.0e-03 *
+  epoch   2  train_mse=0.6378  valid_rmse=1.0610  lr=1.0e-03 *
+  epoch   3  train_mse=0.6074  valid_rmse=1.0559  lr=1.0e-03 *
+  epoch  10  train_mse=0.4257  valid_rmse=1.0201  lr=1.0e-03 *
+  epoch  20  train_mse=0.3117  valid_rmse=1.1146  lr=5.0e-04
+  epoch  30  train_mse=0.2714  valid_rmse=1.0740  lr=2.5e-04
+  early stop at epoch 30 (best epoch 10)
+  TEST  R2=0.1133  RMSE=1.1658  MAE=0.9589  (26s)
+  saved -> results/gnn_models/mpro_gin_time_seed1.pt, results/gnn_preds_mpro_time_seed1.npz, results/gnn_metrics_mpro_seed1.json
+=== END GIN-TIME mpro seed1 rc=0 duration=27s 2026-10-08 15:46:53 ===
+=== GIN-TIME mpro seed2 start 2026-10-08 15:46:53 ===
+/Users/lessray/Desktop/kimi code/qsar-activity-prediction/.venv/lib/python3.12/site-packages/torch/jit/_script.py:1491: FutureWarning: `torch.jit.script` is deprecated. Please switch to `torch.compile` or `torch.export`.
+  warnings.warn(
+/Users/lessray/Desktop/kimi code/qsar-activity-prediction/scripts/gnn_03_train_gin.py:209: UserWarning: Converting a tensor with requires_grad=True to a scalar may lead to unexpected behavior.
+Consider using tensor.detach() first. (Triggered internally at /Users/runner/work/pytorch/pytorch/torch/csrc/autograd/generated/python_variable_methods.cpp:821.)
+  total += float(loss) * len(batch.y)
+[mpro/time] device=mps  y_mean=6.241 y_std=1.054
+  epoch   1  train_mse=0.8474  valid_rmse=1.0932  lr=1.0e-03 *
+  epoch   3  train_mse=0.6267  valid_rmse=1.0378  lr=1.0e-03 *
+  epoch  10  train_mse=0.4229  valid_rmse=1.1126  lr=1.0e-03
+  epoch  20  train_mse=0.3077  valid_rmse=1.1487  lr=2.5e-04
+  early stop at epoch 23 (best epoch 3)
+  TEST  R2=0.0202  RMSE=1.2256  MAE=1.0056  (20s)
+  saved -> results/gnn_models/mpro_gin_time_seed2.pt, results/gnn_preds_mpro_time_seed2.npz, results/gnn_metrics_mpro_seed2.json
+=== END GIN-TIME mpro seed2 rc=0 duration=23s 2026-10-08 15:47:16 ===
+=== GIN-TIME hivpr seed42 start 2026-10-08 15:47:16 ===
+/Users/lessray/Desktop/kimi code/qsar-activity-prediction/.venv/lib/python3.12/site-packages/torch/jit/_script.py:1491: FutureWarning: `torch.jit.script` is deprecated. Please switch to `torch.compile` or `torch.export`.
+  warnings.warn(
+/Users/lessray/Desktop/kimi code/qsar-activity-prediction/scripts/gnn_03_train_gin.py:209: UserWarning: Converting a tensor with requires_grad=True to a scalar may lead to unexpected behavior.
+Consider using tensor.detach() first. (Triggered internally at /Users/runner/work/pytorch/pytorch/torch/csrc/autograd/generated/python_variable_methods.cpp:821.)
+  total += float(loss) * len(batch.y)
+[hivpr/time] device=mps  y_mean=7.104 y_std=1.584
+  epoch   1  train_mse=0.9365  valid_rmse=1.0476  lr=1.0e-03 *
+  epoch   2  train_mse=0.7251  valid_rmse=1.0271  lr=1.0e-03 *
+  epoch   3  train_mse=0.6285  valid_rmse=0.8764  lr=1.0e-03 *
+  epoch   4  train_mse=0.5899  valid_rmse=0.8564  lr=1.0e-03 *
+  epoch   6  train_mse=0.5650  valid_rmse=0.8391  lr=1.0e-03 *
+  epoch  10  train_mse=0.4848  valid_rmse=0.9359  lr=1.0e-03
+  epoch  15  train_mse=0.4249  valid_rmse=0.7922  lr=5.0e-04 *
+  epoch  16  train_mse=0.4073  valid_rmse=0.7773  lr=5.0e-04 *
+  epoch  20  train_mse=0.4039  valid_rmse=0.7705  lr=5.0e-04 *
+  epoch  22  train_mse=0.3493  valid_rmse=0.7395  lr=5.0e-04 *
+  epoch  24  train_mse=0.3707  valid_rmse=0.7328  lr=5.0e-04 *
+  epoch  30  train_mse=0.3407  valid_rmse=0.7929  lr=5.0e-04
+  epoch  34  train_mse=0.3070  valid_rmse=0.7260  lr=2.5e-04 *
+  epoch  35  train_mse=0.3013  valid_rmse=0.7236  lr=2.5e-04 *
+  epoch  40  train_mse=0.2924  valid_rmse=0.7308  lr=2.5e-04
+  epoch  42  train_mse=0.2948  valid_rmse=0.7135  lr=2.5e-04 *
+  epoch  46  train_mse=0.2763  valid_rmse=0.7083  lr=2.5e-04 *
+  epoch  50  train_mse=0.2932  valid_rmse=0.7339  lr=2.5e-04
+  epoch  52  train_mse=0.2765  valid_rmse=0.6877  lr=2.5e-04 *
+  epoch  60  train_mse=0.2739  valid_rmse=0.7169  lr=1.3e-04
+  epoch  70  train_mse=0.2538  valid_rmse=0.7056  lr=6.3e-05
+  early stop at epoch 72 (best epoch 52)
+  TEST  R2=0.1739  RMSE=1.7092  MAE=1.3720  (81s)
+  saved -> results/gnn_models/hivpr_gin_time.pt, results/gnn_preds_hivpr_time.npz, results/gnn_metrics_hivpr.json
+=== END GIN-TIME hivpr seed42 rc=0 duration=82s 2026-10-08 15:48:38 ===
+=== GIN-TIME hivpr seed1 start 2026-10-08 15:48:38 ===
+/Users/lessray/Desktop/kimi code/qsar-activity-prediction/.venv/lib/python3.12/site-packages/torch/jit/_script.py:1491: FutureWarning: `torch.jit.script` is deprecated. Please switch to `torch.compile` or `torch.export`.
+  warnings.warn(
+/Users/lessray/Desktop/kimi code/qsar-activity-prediction/scripts/gnn_03_train_gin.py:209: UserWarning: Converting a tensor with requires_grad=True to a scalar may lead to unexpected behavior.
+Consider using tensor.detach() first. (Triggered internally at /Users/runner/work/pytorch/pytorch/torch/csrc/autograd/generated/python_variable_methods.cpp:821.)
+  total += float(loss) * len(batch.y)
+[hivpr/time] device=mps  y_mean=7.104 y_std=1.584
+  epoch   1  train_mse=0.8483  valid_rmse=0.9958  lr=1.0e-03 *
+  epoch   2  train_mse=0.6615  valid_rmse=0.9506  lr=1.0e-03 *
+  epoch   3  train_mse=0.5922  valid_rmse=0.8868  lr=1.0e-03 *
+  epoch   6  train_mse=0.5378  valid_rmse=0.8835  lr=1.0e-03 *
+  epoch  10  train_mse=0.4505  valid_rmse=0.8730  lr=1.0e-03 *
+  epoch  11  train_mse=0.4604  valid_rmse=0.8721  lr=1.0e-03 *
+  epoch  14  train_mse=0.4043  valid_rmse=0.8221  lr=1.0e-03 *
+  epoch  16  train_mse=0.4178  valid_rmse=0.7941  lr=1.0e-03 *
+  epoch  20  train_mse=0.3942  valid_rmse=0.7994  lr=1.0e-03
+  epoch  24  train_mse=0.3893  valid_rmse=0.7514  lr=1.0e-03 *
+  epoch  30  train_mse=0.3457  valid_rmse=0.8560  lr=1.0e-03
+  epoch  33  train_mse=0.3243  valid_rmse=0.7318  lr=5.0e-04 *
+  epoch  40  train_mse=0.2870  valid_rmse=0.8128  lr=5.0e-04
+  epoch  43  train_mse=0.2830  valid_rmse=0.7175  lr=2.5e-04 *
+  epoch  50  train_mse=0.2665  valid_rmse=0.7295  lr=2.5e-04
+  epoch  51  train_mse=0.2619  valid_rmse=0.7114  lr=2.5e-04 *
+  epoch  53  train_mse=0.2737  valid_rmse=0.7111  lr=2.5e-04 *
+  epoch  60  train_mse=0.2463  valid_rmse=0.7191  lr=2.5e-04
+  epoch  62  train_mse=0.2414  valid_rmse=0.7065  lr=1.3e-04 *
+  epoch  70  train_mse=0.2414  valid_rmse=0.7299  lr=6.3e-05
+  epoch  80  train_mse=0.2166  valid_rmse=0.7332  lr=3.1e-05
+  early stop at epoch 82 (best epoch 62)
+  TEST  R2=0.1576  RMSE=1.7260  MAE=1.3501  (85s)
+  saved -> results/gnn_models/hivpr_gin_time_seed1.pt, results/gnn_preds_hivpr_time_seed1.npz, results/gnn_metrics_hivpr_seed1.json
+=== END GIN-TIME hivpr seed1 rc=0 duration=88s 2026-10-08 15:50:06 ===
+=== GIN-TIME hivpr seed2 start 2026-10-08 15:50:06 ===
+/Users/lessray/Desktop/kimi code/qsar-activity-prediction/.venv/lib/python3.12/site-packages/torch/jit/_script.py:1491: FutureWarning: `torch.jit.script` is deprecated. Please switch to `torch.compile` or `torch.export`.
+  warnings.warn(
+/Users/lessray/Desktop/kimi code/qsar-activity-prediction/scripts/gnn_03_train_gin.py:209: UserWarning: Converting a tensor with requires_grad=True to a scalar may lead to unexpected behavior.
+Consider using tensor.detach() first. (Triggered internally at /Users/runner/work/pytorch/pytorch/torch/csrc/autograd/generated/python_variable_methods.cpp:821.)
+  total += float(loss) * len(batch.y)
+[hivpr/time] device=mps  y_mean=7.104 y_std=1.584
+  epoch   1  train_mse=0.8638  valid_rmse=1.0469  lr=1.0e-03 *
+  epoch   2  train_mse=0.6779  valid_rmse=0.9013  lr=1.0e-03 *
+  epoch   4  train_mse=0.5795  valid_rmse=0.8756  lr=1.0e-03 *
+  epoch   7  train_mse=0.5018  valid_rmse=0.8394  lr=1.0e-03 *
+  epoch  10  train_mse=0.4735  valid_rmse=0.8653  lr=1.0e-03
+  epoch  19  train_mse=0.3784  valid_rmse=0.7996  lr=5.0e-04 *
+  epoch  20  train_mse=0.3699  valid_rmse=0.8289  lr=5.0e-04
+  epoch  24  train_mse=0.3736  valid_rmse=0.7623  lr=5.0e-04 *
+  epoch  30  train_mse=0.3338  valid_rmse=0.8088  lr=5.0e-04
+  epoch  40  train_mse=0.2885  valid_rmse=0.7858  lr=1.3e-04
+  epoch  42  train_mse=0.2873  valid_rmse=0.7608  lr=1.3e-04 *
+  epoch  50  train_mse=0.2660  valid_rmse=0.8223  lr=6.3e-05
+  epoch  60  train_mse=0.2786  valid_rmse=0.7803  lr=3.1e-05
+  early stop at epoch 62 (best epoch 42)
+  TEST  R2=0.2046  RMSE=1.6772  MAE=1.3229  (60s)
+  saved -> results/gnn_models/hivpr_gin_time_seed2.pt, results/gnn_preds_hivpr_time_seed2.npz, results/gnn_metrics_hivpr_seed2.json
+=== END GIN-TIME hivpr seed2 rc=0 duration=62s 2026-10-08 15:51:08 ===
+=== GIN-TIME abl1 seed42 start 2026-10-08 15:51:08 ===
+/Users/lessray/Desktop/kimi code/qsar-activity-prediction/.venv/lib/python3.12/site-packages/torch/jit/_script.py:1491: FutureWarning: `torch.jit.script` is deprecated. Please switch to `torch.compile` or `torch.export`.
+  warnings.warn(
+/Users/lessray/Desktop/kimi code/qsar-activity-prediction/scripts/gnn_03_train_gin.py:209: UserWarning: Converting a tensor with requires_grad=True to a scalar may lead to unexpected behavior.
+Consider using tensor.detach() first. (Triggered internally at /Users/runner/work/pytorch/pytorch/torch/csrc/autograd/generated/python_variable_methods.cpp:821.)
+  total += float(loss) * len(batch.y)
+[abl1/time] device=mps  y_mean=6.769 y_std=1.646
+  epoch   1  train_mse=0.7356  valid_rmse=0.7365  lr=1.0e-03 *
+  epoch   2  train_mse=0.5365  valid_rmse=0.7323  lr=1.0e-03 *
+  epoch   4  train_mse=0.4225  valid_rmse=0.7004  lr=1.0e-03 *
+  epoch  10  train_mse=0.3101  valid_rmse=0.7180  lr=1.0e-03
+  epoch  20  train_mse=0.2356  valid_rmse=0.9691  lr=2.5e-04
+  early stop at epoch 24 (best epoch 4)
+  TEST  R2=0.2521  RMSE=1.3109  MAE=1.0957  (31s)
+  saved -> results/gnn_models/abl1_gin_time.pt, results/gnn_preds_abl1_time.npz, results/gnn_metrics_abl1.json
+=== END GIN-TIME abl1 seed42 rc=0 duration=33s 2026-10-08 15:51:41 ===
+=== GIN-TIME abl1 seed1 start 2026-10-08 15:51:41 ===
+/Users/lessray/Desktop/kimi code/qsar-activity-prediction/.venv/lib/python3.12/site-packages/torch/jit/_script.py:1491: FutureWarning: `torch.jit.script` is deprecated. Please switch to `torch.compile` or `torch.export`.
+  warnings.warn(
+/Users/lessray/Desktop/kimi code/qsar-activity-prediction/scripts/gnn_03_train_gin.py:209: UserWarning: Converting a tensor with requires_grad=True to a scalar may lead to unexpected behavior.
+Consider using tensor.detach() first. (Triggered internally at /Users/runner/work/pytorch/pytorch/torch/csrc/autograd/generated/python_variable_methods.cpp:821.)
+  total += float(loss) * len(batch.y)
+[abl1/time] device=mps  y_mean=6.769 y_std=1.646
+  epoch   1  train_mse=0.7306  valid_rmse=0.7607  lr=1.0e-03 *
+  epoch   2  train_mse=0.5313  valid_rmse=0.6955  lr=1.0e-03 *
+  epoch   3  train_mse=0.4589  valid_rmse=0.6851  lr=1.0e-03 *
+  epoch  10  train_mse=0.3290  valid_rmse=0.7475  lr=1.0e-03
+  epoch  13  train_mse=0.2844  valid_rmse=0.6524  lr=5.0e-04 *
+  epoch  20  train_mse=0.2666  valid_rmse=0.7754  lr=5.0e-04
+  epoch  30  train_mse=0.2299  valid_rmse=0.8643  lr=1.3e-04
+  early stop at epoch 33 (best epoch 13)
+  TEST  R2=0.2641  RMSE=1.3003  MAE=1.0821  (35s)
+  saved -> results/gnn_models/abl1_gin_time_seed1.pt, results/gnn_preds_abl1_time_seed1.npz, results/gnn_metrics_abl1_seed1.json
+=== END GIN-TIME abl1 seed1 rc=0 duration=37s 2026-10-08 15:52:18 ===
+=== GIN-TIME abl1 seed2 start 2026-10-08 15:52:18 ===
+/Users/lessray/Desktop/kimi code/qsar-activity-prediction/.venv/lib/python3.12/site-packages/torch/jit/_script.py:1491: FutureWarning: `torch.jit.script` is deprecated. Please switch to `torch.compile` or `torch.export`.
+  warnings.warn(
+/Users/lessray/Desktop/kimi code/qsar-activity-prediction/scripts/gnn_03_train_gin.py:209: UserWarning: Converting a tensor with requires_grad=True to a scalar may lead to unexpected behavior.
+Consider using tensor.detach() first. (Triggered internally at /Users/runner/work/pytorch/pytorch/torch/csrc/autograd/generated/python_variable_methods.cpp:821.)
+  total += float(loss) * len(batch.y)
+[abl1/time] device=mps  y_mean=6.769 y_std=1.646
+  epoch   1  train_mse=0.6873  valid_rmse=0.7229  lr=1.0e-03 *
+  epoch   2  train_mse=0.5183  valid_rmse=0.7115  lr=1.0e-03 *
+  epoch   3  train_mse=0.4736  valid_rmse=0.7027  lr=1.0e-03 *
+  epoch   8  train_mse=0.3459  valid_rmse=0.6797  lr=1.0e-03 *
+  epoch  10  train_mse=0.3430  valid_rmse=0.7178  lr=1.0e-03
+  epoch  16  train_mse=0.2861  valid_rmse=0.6689  lr=1.0e-03 *
+  epoch  20  train_mse=0.2831  valid_rmse=0.9929  lr=1.0e-03
+  epoch  22  train_mse=0.2645  valid_rmse=0.6627  lr=1.0e-03 *
+  epoch  30  train_mse=0.2430  valid_rmse=0.7036  lr=5.0e-04
+  epoch  40  train_mse=0.1979  valid_rmse=0.8702  lr=2.5e-04
+  early stop at epoch 42 (best epoch 22)
+  TEST  R2=0.1711  RMSE=1.3801  MAE=1.1621  (37s)
+  saved -> results/gnn_models/abl1_gin_time_seed2.pt, results/gnn_preds_abl1_time_seed2.npz, results/gnn_metrics_abl1_seed2.json
+=== END GIN-TIME abl1 seed2 rc=0 duration=38s 2026-10-08 15:52:56 ===
+=== GIN-TIME egfr seed42 start 2026-10-08 15:52:56 ===
+/Users/lessray/Desktop/kimi code/qsar-activity-prediction/.venv/lib/python3.12/site-packages/torch/jit/_script.py:1491: FutureWarning: `torch.jit.script` is deprecated. Please switch to `torch.compile` or `torch.export`.
+  warnings.warn(
+/Users/lessray/Desktop/kimi code/qsar-activity-prediction/scripts/gnn_03_train_gin.py:209: UserWarning: Converting a tensor with requires_grad=True to a scalar may lead to unexpected behavior.
+Consider using tensor.detach() first. (Triggered internally at /Users/runner/work/pytorch/pytorch/torch/csrc/autograd/generated/python_variable_methods.cpp:821.)
+  total += float(loss) * len(batch.y)
+[egfr/time] device=mps  y_mean=6.127 y_std=1.396
+  epoch   1  train_mse=0.6599  valid_rmse=1.0663  lr=1.0e-03 *
+  epoch   2  train_mse=0.5294  valid_rmse=0.9423  lr=1.0e-03 *
+  epoch   4  train_mse=0.4724  valid_rmse=0.9015  lr=1.0e-03 *
+  epoch   8  train_mse=0.3962  valid_rmse=0.8646  lr=1.0e-03 *
+  epoch  10  train_mse=0.3855  valid_rmse=1.0171  lr=1.0e-03
+  epoch  20  train_mse=0.3021  valid_rmse=0.9325  lr=5.0e-04
+  early stop at epoch 28 (best epoch 8)
+  TEST  R2=0.1054  RMSE=1.3028  MAE=1.0669  (58s)
+  saved -> results/gnn_models/egfr_gin_time.pt, results/gnn_preds_egfr_time.npz, results/gnn_metrics_egfr.json
+=== END GIN-TIME egfr seed42 rc=0 duration=60s 2026-10-08 15:53:56 ===
+=== GIN-TIME egfr seed1 start 2026-10-08 15:53:56 ===
+/Users/lessray/Desktop/kimi code/qsar-activity-prediction/.venv/lib/python3.12/site-packages/torch/jit/_script.py:1491: FutureWarning: `torch.jit.script` is deprecated. Please switch to `torch.compile` or `torch.export`.
+  warnings.warn(
+/Users/lessray/Desktop/kimi code/qsar-activity-prediction/scripts/gnn_03_train_gin.py:209: UserWarning: Converting a tensor with requires_grad=True to a scalar may lead to unexpected behavior.
+Consider using tensor.detach() first. (Triggered internally at /Users/runner/work/pytorch/pytorch/torch/csrc/autograd/generated/python_variable_methods.cpp:821.)
+  total += float(loss) * len(batch.y)
+[egfr/time] device=mps  y_mean=6.127 y_std=1.396
+  epoch   1  train_mse=0.7148  valid_rmse=1.0668  lr=1.0e-03 *
+  epoch   2  train_mse=0.5608  valid_rmse=1.0270  lr=1.0e-03 *
+  epoch   3  train_mse=0.4999  valid_rmse=0.9321  lr=1.0e-03 *
+  epoch   4  train_mse=0.4682  valid_rmse=0.8844  lr=1.0e-03 *
+  epoch   6  train_mse=0.4525  valid_rmse=0.8793  lr=1.0e-03 *
+  epoch   9  train_mse=0.4071  valid_rmse=0.8621  lr=1.0e-03 *
+  epoch  10  train_mse=0.3991  valid_rmse=0.9899  lr=1.0e-03
+  epoch  20  train_mse=0.3163  valid_rmse=0.8832  lr=5.0e-04
+  early stop at epoch 29 (best epoch 9)
+  TEST  R2=-0.0133  RMSE=1.3865  MAE=1.1232  (55s)
+  saved -> results/gnn_models/egfr_gin_time_seed1.pt, results/gnn_preds_egfr_time_seed1.npz, results/gnn_metrics_egfr_seed1.json
+=== END GIN-TIME egfr seed1 rc=0 duration=57s 2026-10-08 15:54:53 ===
+=== GIN-TIME egfr seed2 start 2026-10-08 15:54:53 ===
+/Users/lessray/Desktop/kimi code/qsar-activity-prediction/.venv/lib/python3.12/site-packages/torch/jit/_script.py:1491: FutureWarning: `torch.jit.script` is deprecated. Please switch to `torch.compile` or `torch.export`.
+  warnings.warn(
+/Users/lessray/Desktop/kimi code/qsar-activity-prediction/scripts/gnn_03_train_gin.py:209: UserWarning: Converting a tensor with requires_grad=True to a scalar may lead to unexpected behavior.
+Consider using tensor.detach() first. (Triggered internally at /Users/runner/work/pytorch/pytorch/torch/csrc/autograd/generated/python_variable_methods.cpp:821.)
+  total += float(loss) * len(batch.y)
+[egfr/time] device=mps  y_mean=6.127 y_std=1.396
+  epoch   1  train_mse=0.7178  valid_rmse=0.9709  lr=1.0e-03 *
+  epoch   3  train_mse=0.5062  valid_rmse=0.8952  lr=1.0e-03 *
+  epoch   6  train_mse=0.4313  valid_rmse=0.8400  lr=1.0e-03 *
+  epoch  10  train_mse=0.4020  valid_rmse=0.9568  lr=1.0e-03
+  epoch  20  train_mse=0.3258  valid_rmse=0.8963  lr=5.0e-04
+  early stop at epoch 26 (best epoch 6)
+  TEST  R2=0.0177  RMSE=1.3652  MAE=1.1119  (49s)
+  saved -> results/gnn_models/egfr_gin_time_seed2.pt, results/gnn_preds_egfr_time_seed2.npz, results/gnn_metrics_egfr_seed2.json
+=== END GIN-TIME egfr seed2 rc=0 duration=52s 2026-10-08 15:55:45 ===
+=== GIN-TIME vegfr2 seed42 start 2026-10-08 15:55:45 ===
+/Users/lessray/Desktop/kimi code/qsar-activity-prediction/.venv/lib/python3.12/site-packages/torch/jit/_script.py:1491: FutureWarning: `torch.jit.script` is deprecated. Please switch to `torch.compile` or `torch.export`.
+  warnings.warn(
+/Users/lessray/Desktop/kimi code/qsar-activity-prediction/scripts/gnn_03_train_gin.py:209: UserWarning: Converting a tensor with requires_grad=True to a scalar may lead to unexpected behavior.
+Consider using tensor.detach() first. (Triggered internally at /Users/runner/work/pytorch/pytorch/torch/csrc/autograd/generated/python_variable_methods.cpp:821.)
+  total += float(loss) * len(batch.y)
+[vegfr2/time] device=mps  y_mean=6.417 y_std=1.243
+  epoch   1  train_mse=0.8749  valid_rmse=0.9683  lr=1.0e-03 *
+  epoch   3  train_mse=0.7012  valid_rmse=0.9370  lr=1.0e-03 *
+  epoch  10  train_mse=0.5814  valid_rmse=0.9865  lr=1.0e-03
+  epoch  13  train_mse=0.4964  valid_rmse=0.9272  lr=5.0e-04 *
+  epoch  20  train_mse=0.4535  valid_rmse=0.9660  lr=5.0e-04
+  epoch  30  train_mse=0.3842  valid_rmse=1.0241  lr=1.3e-04
+  early stop at epoch 33 (best epoch 13)
+  TEST  R2=0.0499  RMSE=1.2581  MAE=1.0222  (217s)
+  saved -> results/gnn_models/vegfr2_gin_time.pt, results/gnn_preds_vegfr2_time.npz, results/gnn_metrics_vegfr2.json
+=== END GIN-TIME vegfr2 seed42 rc=0 duration=219s 2026-10-08 15:59:24 ===
+=== GIN-TIME vegfr2 seed1 start 2026-10-08 15:59:24 ===
+/Users/lessray/Desktop/kimi code/qsar-activity-prediction/.venv/lib/python3.12/site-packages/torch/jit/_script.py:1491: FutureWarning: `torch.jit.script` is deprecated. Please switch to `torch.compile` or `torch.export`.
+  warnings.warn(
+/Users/lessray/Desktop/kimi code/qsar-activity-prediction/scripts/gnn_03_train_gin.py:209: UserWarning: Converting a tensor with requires_grad=True to a scalar may lead to unexpected behavior.
+Consider using tensor.detach() first. (Triggered internally at /Users/runner/work/pytorch/pytorch/torch/csrc/autograd/generated/python_variable_methods.cpp:821.)
+  total += float(loss) * len(batch.y)
+[vegfr2/time] device=mps  y_mean=6.417 y_std=1.243
+  epoch   1  train_mse=0.8547  valid_rmse=0.9984  lr=1.0e-03 *
+  epoch   8  train_mse=0.5943  valid_rmse=0.9547  lr=1.0e-03 *
+  epoch  10  train_mse=0.5670  valid_rmse=0.9761  lr=1.0e-03
+  epoch  15  train_mse=0.5316  valid_rmse=0.9532  lr=1.0e-03 *
+  epoch  19  train_mse=0.4891  valid_rmse=0.9269  lr=1.0e-03 *
+  epoch  20  train_mse=0.4786  valid_rmse=0.9934  lr=1.0e-03
+  epoch  30  train_mse=0.3972  valid_rmse=0.9810  lr=5.0e-04
+  early stop at epoch 39 (best epoch 19)
+  TEST  R2=-0.0656  RMSE=1.3324  MAE=1.0903  (104s)
+  saved -> results/gnn_models/vegfr2_gin_time_seed1.pt, results/gnn_preds_vegfr2_time_seed1.npz, results/gnn_metrics_vegfr2_seed1.json
+=== END GIN-TIME vegfr2 seed1 rc=0 duration=105s 2026-10-08 16:01:09 ===
+=== GIN-TIME vegfr2 seed2 start 2026-10-08 16:01:09 ===
+/Users/lessray/Desktop/kimi code/qsar-activity-prediction/.venv/lib/python3.12/site-packages/torch/jit/_script.py:1491: FutureWarning: `torch.jit.script` is deprecated. Please switch to `torch.compile` or `torch.export`.
+  warnings.warn(
+/Users/lessray/Desktop/kimi code/qsar-activity-prediction/scripts/gnn_03_train_gin.py:209: UserWarning: Converting a tensor with requires_grad=True to a scalar may lead to unexpected behavior.
+Consider using tensor.detach() first. (Triggered internally at /Users/runner/work/pytorch/pytorch/torch/csrc/autograd/generated/python_variable_methods.cpp:821.)
+  total += float(loss) * len(batch.y)
+[vegfr2/time] device=mps  y_mean=6.417 y_std=1.243
+  epoch   1  train_mse=0.8371  valid_rmse=1.0964  lr=1.0e-03 *
+  epoch   4  train_mse=0.6591  valid_rmse=1.0254  lr=1.0e-03 *
+  epoch   6  train_mse=0.6152  valid_rmse=0.9520  lr=1.0e-03 *
+  epoch   9  train_mse=0.5816  valid_rmse=0.9388  lr=1.0e-03 *
+  epoch  10  train_mse=0.5664  valid_rmse=0.9657  lr=1.0e-03
+  epoch  19  train_mse=0.4530  valid_rmse=0.9107  lr=5.0e-04 *
+  epoch  20  train_mse=0.4435  valid_rmse=0.9098  lr=5.0e-04 *
+  epoch  30  train_mse=0.3882  valid_rmse=0.9708  lr=2.5e-04
+  epoch  40  train_mse=0.3467  valid_rmse=1.0002  lr=1.3e-04
+  early stop at epoch 40 (best epoch 20)
+  TEST  R2=0.0759  RMSE=1.2408  MAE=1.0280  (100s)
+  saved -> results/gnn_models/vegfr2_gin_time_seed2.pt, results/gnn_preds_vegfr2_time_seed2.npz, results/gnn_metrics_vegfr2_seed2.json
+=== END GIN-TIME vegfr2 seed2 rc=0 duration=103s 2026-10-08 16:02:52 ===
+=== GIN-TIME herg seed42 start 2026-10-08 16:02:52 ===
+/Users/lessray/Desktop/kimi code/qsar-activity-prediction/.venv/lib/python3.12/site-packages/torch/jit/_script.py:1491: FutureWarning: `torch.jit.script` is deprecated. Please switch to `torch.compile` or `torch.export`.
+  warnings.warn(
+/Users/lessray/Desktop/kimi code/qsar-activity-prediction/scripts/gnn_03_train_gin.py:209: UserWarning: Converting a tensor with requires_grad=True to a scalar may lead to unexpected behavior.
+Consider using tensor.detach() first. (Triggered internally at /Users/runner/work/pytorch/pytorch/torch/csrc/autograd/generated/python_variable_methods.cpp:821.)
+  total += float(loss) * len(batch.y)
+[herg/time] device=mps  y_mean=5.203 y_std=0.936
+  epoch   1  train_mse=0.8934  valid_rmse=1.1284  lr=1.0e-03 *
+  epoch   3  train_mse=0.7687  valid_rmse=1.0991  lr=1.0e-03 *
+  epoch   8  train_mse=0.6463  valid_rmse=1.0977  lr=1.0e-03 *
+  epoch  10  train_mse=0.6340  valid_rmse=1.1009  lr=1.0e-03
+  epoch  16  train_mse=0.5897  valid_rmse=1.0814  lr=1.0e-03 *
+  epoch  20  train_mse=0.5244  valid_rmse=1.1185  lr=1.0e-03
+  epoch  24  train_mse=0.4975  valid_rmse=1.0696  lr=1.0e-03 *
+  epoch  30  train_mse=0.5681  valid_rmse=1.0664  lr=1.0e-03 *
+  epoch  31  train_mse=0.4777  valid_rmse=1.0355  lr=1.0e-03 *
+  epoch  33  train_mse=0.4510  valid_rmse=1.0185  lr=1.0e-03 *
+  epoch  39  train_mse=0.4332  valid_rmse=1.0098  lr=1.0e-03 *
+  epoch  40  train_mse=0.4279  valid_rmse=1.1022  lr=1.0e-03
+  epoch  50  train_mse=0.3673  valid_rmse=1.0035  lr=5.0e-04 *
+  epoch  52  train_mse=0.3604  valid_rmse=1.0013  lr=5.0e-04 *
+  epoch  60  train_mse=0.3526  valid_rmse=0.9992  lr=5.0e-04 *
+  epoch  65  train_mse=0.3439  valid_rmse=0.9652  lr=5.0e-04 *
+  epoch  67  train_mse=0.3299  valid_rmse=0.9399  lr=5.0e-04 *
+  epoch  70  train_mse=0.3414  valid_rmse=0.9818  lr=5.0e-04
+  epoch  80  train_mse=0.2922  valid_rmse=1.0113  lr=2.5e-04
+  early stop at epoch 87 (best epoch 67)
+  TEST  R2=-0.0200  RMSE=0.8120  MAE=0.5664  (428s)
+  saved -> results/gnn_models/herg_gin_time.pt, results/gnn_preds_herg_time.npz, results/gnn_metrics_herg.json
+=== END GIN-TIME herg seed42 rc=0 duration=429s 2026-10-08 16:10:01 ===
+=== GIN-TIME herg seed1 start 2026-10-08 16:10:01 ===
+/Users/lessray/Desktop/kimi code/qsar-activity-prediction/.venv/lib/python3.12/site-packages/torch/jit/_script.py:1491: FutureWarning: `torch.jit.script` is deprecated. Please switch to `torch.compile` or `torch.export`.
+  warnings.warn(
+/Users/lessray/Desktop/kimi code/qsar-activity-prediction/scripts/gnn_03_train_gin.py:209: UserWarning: Converting a tensor with requires_grad=True to a scalar may lead to unexpected behavior.
+Consider using tensor.detach() first. (Triggered internally at /Users/runner/work/pytorch/pytorch/torch/csrc/autograd/generated/python_variable_methods.cpp:821.)
+  total += float(loss) * len(batch.y)
+[herg/time] device=mps  y_mean=5.203 y_std=0.936
+  epoch   1  train_mse=0.9025  valid_rmse=1.1393  lr=1.0e-03 *
+  epoch   2  train_mse=0.8070  valid_rmse=1.1157  lr=1.0e-03 *
+  epoch   3  train_mse=0.7686  valid_rmse=1.0921  lr=1.0e-03 *
+  epoch  10  train_mse=0.6347  valid_rmse=1.1291  lr=1.0e-03
+  epoch  16  train_mse=0.5469  valid_rmse=1.0687  lr=5.0e-04 *
+  epoch  20  train_mse=0.5195  valid_rmse=1.1068  lr=5.0e-04
+  epoch  30  train_mse=0.4657  valid_rmse=1.0771  lr=2.5e-04
+  early stop at epoch 36 (best epoch 16)
+  TEST  R2=-0.0456  RMSE=0.8221  MAE=0.5689  (104s)
+  saved -> results/gnn_models/herg_gin_time_seed1.pt, results/gnn_preds_herg_time_seed1.npz, results/gnn_metrics_herg_seed1.json
+=== END GIN-TIME herg seed1 rc=0 duration=107s 2026-10-08 16:11:48 ===
+=== GIN-TIME herg seed2 start 2026-10-08 16:11:48 ===
+/Users/lessray/Desktop/kimi code/qsar-activity-prediction/.venv/lib/python3.12/site-packages/torch/jit/_script.py:1491: FutureWarning: `torch.jit.script` is deprecated. Please switch to `torch.compile` or `torch.export`.
+  warnings.warn(
+/Users/lessray/Desktop/kimi code/qsar-activity-prediction/scripts/gnn_03_train_gin.py:209: UserWarning: Converting a tensor with requires_grad=True to a scalar may lead to unexpected behavior.
+Consider using tensor.detach() first. (Triggered internally at /Users/runner/work/pytorch/pytorch/torch/csrc/autograd/generated/python_variable_methods.cpp:821.)
+  total += float(loss) * len(batch.y)
+[herg/time] device=mps  y_mean=5.203 y_std=0.936
+  epoch   1  train_mse=0.8861  valid_rmse=1.3392  lr=1.0e-03 *
+  epoch   2  train_mse=0.8082  valid_rmse=1.0888  lr=1.0e-03 *
+  epoch  10  train_mse=0.6126  valid_rmse=1.1080  lr=5.0e-04
+  epoch  20  train_mse=0.5082  valid_rmse=1.0966  lr=2.5e-04
+  early stop at epoch 22 (best epoch 2)
+  TEST  R2=-0.1629  RMSE=0.8670  MAE=0.6758  (65s)
+  saved -> results/gnn_models/herg_gin_time_seed2.pt, results/gnn_preds_herg_time_seed2.npz, results/gnn_metrics_herg_seed2.json
+=== END GIN-TIME herg seed2 rc=0 duration=67s 2026-10-08 16:12:55 ===
+=== GIN-TIME egfr_full seed42 start 2026-10-08 16:12:55 ===
+/Users/lessray/Desktop/kimi code/qsar-activity-prediction/.venv/lib/python3.12/site-packages/torch/jit/_script.py:1491: FutureWarning: `torch.jit.script` is deprecated. Please switch to `torch.compile` or `torch.export`.
+  warnings.warn(
+/Users/lessray/Desktop/kimi code/qsar-activity-prediction/scripts/gnn_03_train_gin.py:209: UserWarning: Converting a tensor with requires_grad=True to a scalar may lead to unexpected behavior.
+Consider using tensor.detach() first. (Triggered internally at /Users/runner/work/pytorch/pytorch/torch/csrc/autograd/generated/python_variable_methods.cpp:821.)
+  total += float(loss) * len(batch.y)
+[egfr_full/time] device=mps  y_mean=6.445 y_std=1.433
+  epoch   1  train_mse=0.6793  valid_rmse=0.9047  lr=1.0e-03 *
+  epoch   2  train_mse=0.5901  valid_rmse=0.8581  lr=1.0e-03 *
+  epoch   3  train_mse=0.5436  valid_rmse=0.8029  lr=1.0e-03 *
+  epoch   4  train_mse=0.5121  valid_rmse=0.7550  lr=1.0e-03 *
+  epoch   8  train_mse=0.4463  valid_rmse=0.7531  lr=1.0e-03 *
+  epoch  10  train_mse=0.4282  valid_rmse=0.7742  lr=1.0e-03
+  epoch  20  train_mse=0.3413  valid_rmse=0.7769  lr=5.0e-04
+  early stop at epoch 28 (best epoch 8)
+  TEST  R2=-0.3781  RMSE=1.6210  MAE=1.3449  (346s)
+  saved -> results/gnn_models/egfr_full_gin_time.pt, results/gnn_preds_egfr_full_time.npz, results/gnn_metrics_egfr_full.json
+=== END GIN-TIME egfr_full seed42 rc=0 duration=348s 2026-10-08 16:18:43 ===
+=== GIN-TIME egfr_full seed1 start 2026-10-08 16:18:43 ===
+/Users/lessray/Desktop/kimi code/qsar-activity-prediction/.venv/lib/python3.12/site-packages/torch/jit/_script.py:1491: FutureWarning: `torch.jit.script` is deprecated. Please switch to `torch.compile` or `torch.export`.
+  warnings.warn(
+/Users/lessray/Desktop/kimi code/qsar-activity-prediction/scripts/gnn_03_train_gin.py:209: UserWarning: Converting a tensor with requires_grad=True to a scalar may lead to unexpected behavior.
+Consider using tensor.detach() first. (Triggered internally at /Users/runner/work/pytorch/pytorch/torch/csrc/autograd/generated/python_variable_methods.cpp:821.)
+  total += float(loss) * len(batch.y)
+[egfr_full/time] device=mps  y_mean=6.445 y_std=1.433
+  epoch   1  train_mse=0.7072  valid_rmse=0.7339  lr=1.0e-03 *
+  epoch   2  train_mse=0.5935  valid_rmse=0.7230  lr=1.0e-03 *
+  epoch  10  train_mse=0.4373  valid_rmse=0.7623  lr=5.0e-04
+  epoch  20  train_mse=0.3546  valid_rmse=0.7503  lr=2.5e-04
+  early stop at epoch 22 (best epoch 2)
+  TEST  R2=-0.1969  RMSE=1.5107  MAE=1.2367  (79s)
+  saved -> results/gnn_models/egfr_full_gin_time_seed1.pt, results/gnn_preds_egfr_full_time_seed1.npz, results/gnn_metrics_egfr_full_seed1.json
+=== END GIN-TIME egfr_full seed1 rc=0 duration=82s 2026-10-08 16:20:05 ===
+=== GIN-TIME egfr_full seed2 start 2026-10-08 16:20:05 ===
+/Users/lessray/Desktop/kimi code/qsar-activity-prediction/.venv/lib/python3.12/site-packages/torch/jit/_script.py:1491: FutureWarning: `torch.jit.script` is deprecated. Please switch to `torch.compile` or `torch.export`.
+  warnings.warn(
+/Users/lessray/Desktop/kimi code/qsar-activity-prediction/scripts/gnn_03_train_gin.py:209: UserWarning: Converting a tensor with requires_grad=True to a scalar may lead to unexpected behavior.
+Consider using tensor.detach() first. (Triggered internally at /Users/runner/work/pytorch/pytorch/torch/csrc/autograd/generated/python_variable_methods.cpp:821.)
+  total += float(loss) * len(batch.y)
+[egfr_full/time] device=mps  y_mean=6.445 y_std=1.433
+  epoch   1  train_mse=0.6869  valid_rmse=0.7113  lr=1.0e-03 *
+  epoch   9  train_mse=0.4554  valid_rmse=0.7075  lr=1.0e-03 *
+  epoch  10  train_mse=0.4371  valid_rmse=0.7596  lr=1.0e-03
+  epoch  20  train_mse=0.3556  valid_rmse=0.7979  lr=5.0e-04
+  early stop at epoch 29 (best epoch 9)
+  TEST  R2=-0.1462  RMSE=1.4783  MAE=1.1955  (94s)
+  saved -> results/gnn_models/egfr_full_gin_time_seed2.pt, results/gnn_preds_egfr_full_time_seed2.npz, results/gnn_metrics_egfr_full_seed2.json
+=== END GIN-TIME egfr_full seed2 rc=0 duration=96s 2026-10-08 16:21:41 ===
+=== P8 GIN-TIME ALL DONE 2026-10-08 16:21:41 ===

@@ -1,0 +1,42 @@
+{
+  "random": {
+    "r2": 0.6987138390541077,
+    "rmse": 0.662506951889415,
+    "mae": 0.47455713152885437,
+    "best_epoch": 86,
+    "best_valid_rmse_std": 0.5899068713188171,
+    "params": {
+      "tag": "a2a",
+      "model": "gine",
+      "hidden": 128,
+      "num_layers": 4,
+      "dropout": 0.2,
+      "lr": 0.001,
+      "batch_size": 128,
+      "epochs": 100,
+      "patience": 20,
+      "seed": 2,
+      "suffix": "_seed2"
+    }
+  },
+  "scaffold": {
+    "r2": 0.6857832670211792,
+    "rmse": 0.5242297596350952,
+    "mae": 0.39832112193107605,
+    "best_epoch": 40,
+    "best_valid_rmse_std": 0.5703807473182678,
+    "params": {
+      "tag": "a2a",
+      "model": "gine",
+      "hidden": 128,
+      "num_layers": 4,
+      "dropout": 0.2,
+      "lr": 0.001,
+      "batch_size": 128,
+      "epochs": 100,
+      "patience": 20,
+      "seed": 2,
+      "suffix": "_seed2"
+    }
+  }
+}

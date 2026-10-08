@@ -36,5 +36,25 @@
       "seed": 42,
       "suffix": ""
     }
+  },
+  "time": {
+    "r2": 0.17390376329421997,
+    "rmse": 1.7092072957289146,
+    "mae": 1.3719801902770996,
+    "best_epoch": 52,
+    "best_valid_rmse_std": 0.6877254843711853,
+    "params": {
+      "tag": "hivpr",
+      "model": "gin",
+      "hidden": 128,
+      "num_layers": 4,
+      "dropout": 0.2,
+      "lr": 0.001,
+      "batch_size": 128,
+      "epochs": 100,
+      "patience": 20,
+      "seed": 42,
+      "suffix": ""
+    }
   }
 }

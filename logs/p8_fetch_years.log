@@ -1,0 +1,95 @@
+4147 unique docs across 8 tags | 0 already recorded | 4147 to query | workers=4 | out=data/raw/document_years.csv
+  CHEMBL1909046: unparsable document_year None
+  CHEMBL1909046: failed
+  50/4147 | got=49 missing=0 failed=1
+  100/4147 | got=99 missing=0 failed=1
+  150/4147 | got=149 missing=0 failed=1
+  200/4147 | got=199 missing=0 failed=1
+  250/4147 | got=249 missing=0 failed=1
+  300/4147 | got=299 missing=0 failed=1
+  350/4147 | got=349 missing=0 failed=1
+  400/4147 | got=399 missing=0 failed=1
+  450/4147 | got=449 missing=0 failed=1
+  500/4147 | got=499 missing=0 failed=1
+  550/4147 | got=549 missing=0 failed=1
+  600/4147 | got=599 missing=0 failed=1
+  650/4147 | got=649 missing=0 failed=1
+  700/4147 | got=699 missing=0 failed=1
+  750/4147 | got=749 missing=0 failed=1
+  800/4147 | got=799 missing=0 failed=1
+  850/4147 | got=849 missing=0 failed=1
+  900/4147 | got=899 missing=0 failed=1
+  950/4147 | got=949 missing=0 failed=1
+  1000/4147 | got=999 missing=0 failed=1
+  1050/4147 | got=1049 missing=0 failed=1
+  1100/4147 | got=1099 missing=0 failed=1
+  1150/4147 | got=1149 missing=0 failed=1
+  1200/4147 | got=1199 missing=0 failed=1
+  1250/4147 | got=1249 missing=0 failed=1
+  1300/4147 | got=1299 missing=0 failed=1
+  1350/4147 | got=1349 missing=0 failed=1
+  1400/4147 | got=1399 missing=0 failed=1
+  1450/4147 | got=1449 missing=0 failed=1
+  1500/4147 | got=1499 missing=0 failed=1
+  1550/4147 | got=1549 missing=0 failed=1
+  1600/4147 | got=1599 missing=0 failed=1
+  1650/4147 | got=1649 missing=0 failed=1
+  1700/4147 | got=1699 missing=0 failed=1
+  1750/4147 | got=1749 missing=0 failed=1
+  1800/4147 | got=1799 missing=0 failed=1
+  1850/4147 | got=1849 missing=0 failed=1
+  1900/4147 | got=1899 missing=0 failed=1
+  1950/4147 | got=1949 missing=0 failed=1
+  2000/4147 | got=1999 missing=0 failed=1
+  2050/4147 | got=2049 missing=0 failed=1
+  2100/4147 | got=2099 missing=0 failed=1
+  2150/4147 | got=2149 missing=0 failed=1
+  2200/4147 | got=2199 missing=0 failed=1
+  2250/4147 | got=2249 missing=0 failed=1
+  2300/4147 | got=2299 missing=0 failed=1
+  2350/4147 | got=2349 missing=0 failed=1
+  2400/4147 | got=2399 missing=0 failed=1
+  2450/4147 | got=2449 missing=0 failed=1
+  2500/4147 | got=2499 missing=0 failed=1
+  2550/4147 | got=2549 missing=0 failed=1
+  2600/4147 | got=2599 missing=0 failed=1
+  2650/4147 | got=2649 missing=0 failed=1
+  2700/4147 | got=2699 missing=0 failed=1
+  2750/4147 | got=2749 missing=0 failed=1
+  2800/4147 | got=2799 missing=0 failed=1
+  2850/4147 | got=2849 missing=0 failed=1
+  2900/4147 | got=2899 missing=0 failed=1
+  2950/4147 | got=2949 missing=0 failed=1
+  3000/4147 | got=2999 missing=0 failed=1
+  3050/4147 | got=3049 missing=0 failed=1
+  3100/4147 | got=3099 missing=0 failed=1
+  3150/4147 | got=3149 missing=0 failed=1
+  3200/4147 | got=3199 missing=0 failed=1
+  CHEMBL2113921: unparsable document_year None
+  CHEMBL2113921: failed
+  CHEMBL1201862: unparsable document_year None
+  CHEMBL1201862: failed
+  3250/4147 | got=3247 missing=0 failed=3
+  3300/4147 | got=3297 missing=0 failed=3
+  3350/4147 | got=3347 missing=0 failed=3
+  3400/4147 | got=3397 missing=0 failed=3
+  3450/4147 | got=3447 missing=0 failed=3
+  3500/4147 | got=3497 missing=0 failed=3
+  3550/4147 | got=3547 missing=0 failed=3
+  3600/4147 | got=3597 missing=0 failed=3
+  3650/4147 | got=3647 missing=0 failed=3
+  3700/4147 | got=3697 missing=0 failed=3
+  3750/4147 | got=3747 missing=0 failed=3
+  3800/4147 | got=3797 missing=0 failed=3
+  3850/4147 | got=3847 missing=0 failed=3
+  3900/4147 | got=3897 missing=0 failed=3
+  3950/4147 | got=3947 missing=0 failed=3
+  4000/4147 | got=3997 missing=0 failed=3
+  4050/4147 | got=4047 missing=0 failed=3
+  4100/4147 | got=4097 missing=0 failed=3
+
+DONE: got=4144 missing=0 failed=3 skipped=0 attempted=4147 -> data/raw/document_years.csv
+failed docs (empty year; re-run to retry):
+  CHEMBL1201862
+  CHEMBL1909046
+  CHEMBL2113921

@@ -36,5 +36,25 @@
       "seed": 42,
       "suffix": ""
     }
+  },
+  "time": {
+    "r2": -0.01999032497406006,
+    "rmse": 0.8119544985688079,
+    "mae": 0.566433846950531,
+    "best_epoch": 67,
+    "best_valid_rmse_std": 0.9399036169052124,
+    "params": {
+      "tag": "herg",
+      "model": "gin",
+      "hidden": 128,
+      "num_layers": 4,
+      "dropout": 0.2,
+      "lr": 0.001,
+      "batch_size": 128,
+      "epochs": 100,
+      "patience": 20,
+      "seed": 42,
+      "suffix": ""
+    }
   }
 }

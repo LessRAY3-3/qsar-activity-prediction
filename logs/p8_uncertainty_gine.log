@@ -1,0 +1,54 @@
+/Users/lessray/Desktop/kimi code/qsar-activity-prediction/.venv/lib/python3.12/site-packages/torch/jit/_script.py:1491: FutureWarning: `torch.jit.script` is deprecated. Please switch to `torch.compile` or `torch.export`.
+  warnings.warn(
+  [a2a/random] n=350  std med rf=0.463 gin=0.077  AD>=0.4 coverage=0.97  P@100 full=0.980 ad0.40=0.980  (4s)
+  [a2a/scaffold] n=384  std med rf=0.429 gin=0.102  AD>=0.4 coverage=1.00  P@100 full=0.920 ad0.40=0.920  (1s)
+  summary -> results/uncertainty/summary_a2a_gine.json
+  [abl1/random] no gine checkpoints -> GNN rows omitted (RF-only cell)
+  [abl1/random] n=540  std med rf=0.595  AD>=0.4 coverage=0.92  P@100 full=1.000 ad0.40=1.000  (1s)
+  [abl1/scaffold] no gine checkpoints -> GNN rows omitted (RF-only cell)
+  [abl1/scaffold] n=539  std med rf=0.409  AD>=0.4 coverage=1.00  P@100 full=1.000 ad0.40=1.000  (0s)
+  summary -> results/uncertainty/summary_abl1_gine.json
+  [egfr/random] n=1233  std med rf=0.625 gin=0.134  AD>=0.4 coverage=0.96  P@100 full=0.940 ad0.40=0.940  (2s)
+  [egfr/scaffold] n=1236  std med rf=0.808 gin=0.154  AD>=0.4 coverage=0.95  P@100 full=0.920 ad0.40=0.920  (2s)
+  summary -> results/uncertainty/summary_egfr_gine.json
+  [egfr_full/random] n=2700  std med rf=0.647 gin=0.145  AD>=0.4 coverage=0.98  P@100 full=1.000 ad0.40=1.000  (6s)
+  [egfr_full/scaffold] n=2712  std med rf=0.811 gin=0.164  AD>=0.4 coverage=0.97  P@100 full=0.980 ad0.40=0.980  (6s)
+  summary -> results/uncertainty/summary_egfr_full_gine.json
+  [herg/random] no gine checkpoints -> GNN rows omitted (RF-only cell)
+  [herg/random] n=2404  std med rf=0.517  AD>=0.4 coverage=0.94  P@100 full=0.710 ad0.40=0.710  (4s)
+  [herg/scaffold] no gine checkpoints -> GNN rows omitted (RF-only cell)
+  [herg/scaffold] n=2410  std med rf=0.597  AD>=0.4 coverage=0.96  P@100 full=0.680 ad0.40=0.680  (4s)
+  summary -> results/uncertainty/summary_herg_gine.json
+  [hivpr/random] n=560  std med rf=0.647 gin=0.165  AD>=0.4 coverage=0.99  P@100 full=0.980 ad0.40=0.980  (1s)
+  [hivpr/scaffold] n=570  std med rf=0.781 gin=0.184  AD>=0.4 coverage=1.00  P@100 full=0.940 ad0.40=0.940  (1s)
+  summary -> results/uncertainty/summary_hivpr_gine.json
+  [mpro/random] n=885  std med rf=0.523 gin=0.120  AD>=0.4 coverage=0.95  P@100 full=0.840 ad0.40=0.840  (2s)
+  [mpro/scaffold] n=891  std med rf=0.609 gin=0.101  AD>=0.4 coverage=0.96  P@100 full=0.870 ad0.40=0.870  (1s)
+  summary -> results/uncertainty/summary_mpro_gine.json
+  [vegfr2/random] no gine checkpoints -> GNN rows omitted (RF-only cell)
+  [vegfr2/random] n=2360  std med rf=0.639  AD>=0.4 coverage=0.98  P@100 full=1.000 ad0.40=1.000  (4s)
+  [vegfr2/scaffold] no gine checkpoints -> GNN rows omitted (RF-only cell)
+  [vegfr2/scaffold] n=2375  std med rf=0.671  AD>=0.4 coverage=1.00  P@100 full=1.000 ad0.40=1.000  (3s)
+  summary -> results/uncertainty/summary_vegfr2_gine.json
+  figure  -> figures/uncertainty/vs_screen_panel_random_gine.png
+  figure  -> figures/uncertainty/vs_screen_panel_scaffold_gine.png
+
+=== Uncertainty + AD (gine) ===
+  a2a/random    calib slope rf=+0.87 (rho=+0.53, monotone=True) | gin=+1.77 (rho=+0.16, monotone=False) | AD-in cov=0.97 R2 0.734 vs out 0.095
+  a2a/scaffold  calib slope rf=+0.61 (rho=+0.39, monotone=False) | gin=+1.22 (rho=+0.16, monotone=False) | AD-in cov=1.00
+  abl1/random    calib slope rf=+0.66 (rho=+0.47, monotone=True) | AD-in cov=0.92 R2 0.816 vs out 0.101
+  abl1/scaffold  calib slope rf=+0.68 (rho=+0.52, monotone=True) | AD-in cov=1.00
+  egfr/random    calib slope rf=+0.59 (rho=+0.43, monotone=True) | gin=+1.06 (rho=+0.17, monotone=False) | AD-in cov=0.96 R2 0.754 vs out -0.291
+  egfr/scaffold  calib slope rf=+0.47 (rho=+0.28, monotone=False) | gin=+0.91 (rho=+0.14, monotone=False) | AD-in cov=0.95 R2 0.547 vs out 0.119
+  egfr_full/random    calib slope rf=+0.79 (rho=+0.47, monotone=True) | gin=+1.05 (rho=+0.19, monotone=True) | AD-in cov=0.98 R2 0.763 vs out -0.005
+  egfr_full/scaffold  calib slope rf=+0.75 (rho=+0.46, monotone=True) | gin=+0.89 (rho=+0.18, monotone=True) | AD-in cov=0.97 R2 0.583 vs out -0.566
+  herg/random    calib slope rf=+0.80 (rho=+0.40, monotone=True) | AD-in cov=0.94 R2 0.642 vs out 0.102
+  herg/scaffold  calib slope rf=+1.19 (rho=+0.43, monotone=True) | AD-in cov=0.96 R2 0.436 vs out 0.239
+  hivpr/random    calib slope rf=+0.94 (rho=+0.51, monotone=True) | gin=+1.20 (rho=+0.16, monotone=True) | AD-in cov=0.99 R2 0.740 vs out -1.361
+  hivpr/scaffold  calib slope rf=+0.49 (rho=+0.36, monotone=False) | gin=+0.36 (rho=+0.10, monotone=False) | AD-in cov=1.00
+  mpro/random    calib slope rf=+0.94 (rho=+0.54, monotone=True) | gin=+1.62 (rho=+0.12, monotone=False) | AD-in cov=0.95 R2 0.763 vs out 0.099
+  mpro/scaffold  calib slope rf=+0.52 (rho=+0.42, monotone=False) | gin=+1.43 (rho=+0.14, monotone=False) | AD-in cov=0.96 R2 0.542 vs out -0.727
+  vegfr2/random    calib slope rf=+0.81 (rho=+0.52, monotone=True) | AD-in cov=0.98 R2 0.745 vs out -0.099
+  vegfr2/scaffold  calib slope rf=+0.77 (rho=+0.46, monotone=True) | AD-in cov=1.00 R2 0.620 vs out -0.117
+  [random] mean P@100 (hit y>=7): rf_top=0.931  AD>=0.40=0.931  unc_lowstd=0.551  (AD lift +0.000)
+  [scaffold] mean P@100 (hit y>=7): rf_top=0.914  AD>=0.40=0.914  unc_lowstd=0.575  (AD lift +0.000)

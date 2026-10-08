@@ -36,5 +36,25 @@
       "seed": 2,
       "suffix": "_seed2"
     }
+  },
+  "time": {
+    "r2": 0.07592946290969849,
+    "rmse": 1.2407516241914232,
+    "mae": 1.0279920101165771,
+    "best_epoch": 20,
+    "best_valid_rmse_std": 0.9097684621810913,
+    "params": {
+      "tag": "vegfr2",
+      "model": "gin",
+      "hidden": 128,
+      "num_layers": 4,
+      "dropout": 0.2,
+      "lr": 0.001,
+      "batch_size": 128,
+      "epochs": 100,
+      "patience": 20,
+      "seed": 2,
+      "suffix": "_seed2"
+    }
   }
 }

@@ -36,5 +36,25 @@
       "seed": 2,
       "suffix": "_seed2"
     }
+  },
+  "time": {
+    "r2": 0.020172417163848877,
+    "rmse": 1.22555986961819,
+    "mae": 1.005602240562439,
+    "best_epoch": 3,
+    "best_valid_rmse_std": 1.0377836227416992,
+    "params": {
+      "tag": "mpro",
+      "model": "gin",
+      "hidden": 128,
+      "num_layers": 4,
+      "dropout": 0.2,
+      "lr": 0.001,
+      "batch_size": 128,
+      "epochs": 100,
+      "patience": 20,
+      "seed": 2,
+      "suffix": "_seed2"
+    }
   }
 }

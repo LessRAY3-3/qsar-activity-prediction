@@ -32,5 +32,11 @@
     "random_state": 42,
     "verbose": 0,
     "warm_start": false
+  },
+  "time": {
+    "split": "time",
+    "r2": 0.17313730907603297,
+    "rmse": 1.7099999831554697,
+    "mae": 1.3494226352819176
   }
 }

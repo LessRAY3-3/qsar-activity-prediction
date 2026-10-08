@@ -1,0 +1,46 @@
+=== RF-TIME a2a SKIP (model exists) ===
+=== RF-TIME mpro SKIP (model exists) ===
+=== RF-TIME hivpr SKIP (model exists) ===
+=== RF-TIME abl1 start 2026-10-08 16:42:10 ===
+Target: Tyrosine-protein kinase ABL1 | Feature matrix: X=(2698, 2048), y range [3.14, 10.82]
+
+=== time split: train=1788, test=674 ===
+Fitting 5 folds for each of 12 candidates, totalling 60 fits
+Best params: {'max_depth': None, 'min_samples_split': 2, 'n_estimators': 500}  (CV R2 = 0.708)
+[time]  R2 = 0.280   RMSE = 1.287   MAE = 1.051
+
+Metrics merged -> /Users/lessray/Desktop/kimi code/qsar-activity-prediction/results/metrics_abl1.json
+=== END RF-TIME abl1 rc=0 duration=282s 2026-10-08 16:46:52 ===
+=== RF-TIME egfr start 2026-10-08 16:46:52 ===
+Target: Epidermal growth factor receptor | Feature matrix: X=(6165, 2048), y range [1.60, 11.52]
+
+=== time split: train=3947, test=1348 ===
+Fitting 5 folds for each of 12 candidates, totalling 60 fits
+Best params: {'max_depth': 40, 'min_samples_split': 2, 'n_estimators': 500}  (CV R2 = 0.600)
+[time]  R2 = 0.013   RMSE = 1.368   MAE = 1.101
+
+Metrics merged -> /Users/lessray/Desktop/kimi code/qsar-activity-prediction/results/metrics_egfr.json
+=== END RF-TIME egfr rc=0 duration=953s 2026-10-08 17:02:45 ===
+=== RF-TIME vegfr2 start 2026-10-08 17:02:45 ===
+Target: Vascular endothelial growth factor receptor 2 | Feature matrix: X=(11797, 2048), y range [2.39, 10.64]
+
+=== time split: train=7547, test=2583 ===
+Fitting 5 folds for each of 12 candidates, totalling 60 fits
+Best params: {'max_depth': None, 'min_samples_split': 2, 'n_estimators': 500}  (CV R2 = 0.536)
+[time]  R2 = 0.093   RMSE = 1.229   MAE = 0.983
+
+Metrics merged -> /Users/lessray/Desktop/kimi code/qsar-activity-prediction/results/metrics_vegfr2.json
+=== END RF-TIME vegfr2 rc=0 duration=3372s 2026-10-08 17:58:57 ===
+=== RF-TIME herg start 2026-10-08 17:58:57 ===
+Target: Voltage-gated inwardly rectifying potassium channel KCNH2 | Feature matrix: X=(12019, 2048), y range [-0.00, 9.85]
+
+=== time split: train=8326, test=2619 ===
+Fitting 5 folds for each of 12 candidates, totalling 60 fits
+/Users/lessray/Desktop/kimi code/qsar-activity-prediction/.venv/lib/python3.12/site-packages/joblib/externals/loky/backend/resource_tracker.py:444: UserWarning: resource_tracker: There appear to be 1 leaked file objects to clean up at shutdown: {'/var/folders/60/f144lgn97zg1y9wcvg2v5thh0000gn/T/joblib_memmapping_folder_58212_df994190584a4b5eb679867c24713456_1e511fef109b41e894d5d858933ca6c7/58212-4635767392-57306f48adf04b7d95b12d577839e043.pkl': 12}
+  warnings.warn(
+/Users/lessray/Desktop/kimi code/qsar-activity-prediction/.venv/lib/python3.12/site-packages/joblib/externals/loky/backend/resource_tracker.py:444: UserWarning: resource_tracker: There appear to be 36 leaked semlock objects to clean up at shutdown: {'/loky-58212-tjlezzu3': 1, '/loky-58212-65vbrwyr': 1, '/loky-58212-qnswwm6y': 1, '/loky-58212-_fv6ya32': 1, '/loky-58212-o8bitcu9': 1, '/loky-58212-alf5h6f0': 1, '/loky-58212-eojb2j81': 1, '/loky-58212-ai4wtd7o': 1, '/loky-58212-lc_xhu15': 1, '/loky-58212-sb1vp55d': 1, '/loky-58212-1lwum3bz': 1, '/loky-58212-97r7qubl': 1, '/loky-58212-nc0w2guu': 1, '/loky-58212-ka6tt43s': 1, '/loky-58212-osi4c0ls': 1, '/loky-58212-4n0204ej': 1, '/loky-58221-x53dpz7d': 1, '/loky-58221-5pf28flf': 1, '/loky-58218-g0j8zdna': 1, '/loky-58218-3tauqwnv': 1, '/loky-58219-_yarz51l': 1, '/loky-58219-n2n5iqsi': 1, '/loky-58216-057lvc0l': 1, '/loky-58216-8oawho9n': 1, '/loky-58220-x5bm3ali': 1, '/loky-58220-yfzb5uoq': 1, '/loky-58222-v7zxwkch': 1, '/loky-58222-dwlojcgu': 1, '/loky-58225-aw7do2fo': 1, '/loky-58225-vzachfog': 1, '/loky-58217-dhtth5qd': 1, '/loky-58217-k2mhd3li': 1, '/loky-58223-uf4t42yy': 1, '/loky-58223-0_b5ybh1': 1, '/loky-58224-jxaq76h7': 1, '/loky-58224-etskevm2': 1}
+  warnings.warn(
+/Users/lessray/Desktop/kimi code/qsar-activity-prediction/.venv/lib/python3.12/site-packages/joblib/externals/loky/backend/resource_tracker.py:444: UserWarning: resource_tracker: There appear to be 2 leaked folder objects to clean up at shutdown: {'/var/folders/60/f144lgn97zg1y9wcvg2v5thh0000gn/T/joblib_memmapping_folder_58212_df994190584a4b5eb679867c24713456_4a3da44e70d24dc7b2ab63c13c6ca26c': 1, '/var/folders/60/f144lgn97zg1y9wcvg2v5thh0000gn/T/joblib_memmapping_folder_58212_df994190584a4b5eb679867c24713456_1e511fef109b41e894d5d858933ca6c7': 1}
+  warnings.warn(
+/Users/lessray/Desktop/kimi code/qsar-activity-prediction/.venv/lib/python3.12/site-packages/joblib/externals/loky/backend/resource_tracker.py:468: UserWarning: resource_tracker: /var/folders/60/f144lgn97zg1y9wcvg2v5thh0000gn/T/joblib_memmapping_folder_58212_df994190584a4b5eb679867c24713456_4a3da44e70d24dc7b2ab63c13c6ca26c: FileNotFoundError(2, 'No such file or directory')
+  warnings.warn('resource_tracker: %s: %r' % (name, e))

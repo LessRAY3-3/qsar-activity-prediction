@@ -36,5 +36,25 @@
       "seed": 2,
       "suffix": "_seed2"
     }
+  },
+  "time": {
+    "r2": 0.030082285404205322,
+    "rmse": 1.0398137524617834,
+    "mae": 0.8008522987365723,
+    "best_epoch": 14,
+    "best_valid_rmse_std": 0.7047353982925415,
+    "params": {
+      "tag": "a2a",
+      "model": "gin",
+      "hidden": 128,
+      "num_layers": 4,
+      "dropout": 0.2,
+      "lr": 0.001,
+      "batch_size": 128,
+      "epochs": 100,
+      "patience": 20,
+      "seed": 2,
+      "suffix": "_seed2"
+    }
   }
 }

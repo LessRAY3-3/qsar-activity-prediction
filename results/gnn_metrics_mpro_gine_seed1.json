@@ -1,0 +1,42 @@
+{
+  "random": {
+    "r2": 0.6910971999168396,
+    "rmse": 0.6593035772249417,
+    "mae": 0.46592772006988525,
+    "best_epoch": 93,
+    "best_valid_rmse_std": 0.5606874227523804,
+    "params": {
+      "tag": "mpro",
+      "model": "gine",
+      "hidden": 128,
+      "num_layers": 4,
+      "dropout": 0.2,
+      "lr": 0.001,
+      "batch_size": 128,
+      "epochs": 100,
+      "patience": 20,
+      "seed": 1,
+      "suffix": "_seed1"
+    }
+  },
+  "scaffold": {
+    "r2": 0.38820481300354004,
+    "rmse": 0.7937990924341767,
+    "mae": 0.5859278440475464,
+    "best_epoch": 91,
+    "best_valid_rmse_std": 0.5177106857299805,
+    "params": {
+      "tag": "mpro",
+      "model": "gine",
+      "hidden": 128,
+      "num_layers": 4,
+      "dropout": 0.2,
+      "lr": 0.001,
+      "batch_size": 128,
+      "epochs": 100,
+      "patience": 20,
+      "seed": 1,
+      "suffix": "_seed1"
+    }
+  }
+}

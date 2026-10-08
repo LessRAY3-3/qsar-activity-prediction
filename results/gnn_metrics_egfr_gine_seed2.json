@@ -1,0 +1,42 @@
+{
+  "random": {
+    "r2": 0.7024250030517578,
+    "rmse": 0.7503411391391827,
+    "mae": 0.5400170683860779,
+    "best_epoch": 94,
+    "best_valid_rmse_std": 0.5409865379333496,
+    "params": {
+      "tag": "egfr",
+      "model": "gine",
+      "hidden": 128,
+      "num_layers": 4,
+      "dropout": 0.2,
+      "lr": 0.001,
+      "batch_size": 128,
+      "epochs": 100,
+      "patience": 20,
+      "seed": 2,
+      "suffix": "_seed2"
+    }
+  },
+  "scaffold": {
+    "r2": 0.5429215431213379,
+    "rmse": 0.9707471503668571,
+    "mae": 0.7343226075172424,
+    "best_epoch": 100,
+    "best_valid_rmse_std": 0.5197769999504089,
+    "params": {
+      "tag": "egfr",
+      "model": "gine",
+      "hidden": 128,
+      "num_layers": 4,
+      "dropout": 0.2,
+      "lr": 0.001,
+      "batch_size": 128,
+      "epochs": 100,
+      "patience": 20,
+      "seed": 2,
+      "suffix": "_seed2"
+    }
+  }
+}
