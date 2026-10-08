@@ -50,7 +50,8 @@ R2, computed at full precision and only then rounded. Each comparison CSV
 carries both conventions side by side - `d_*_mean_*` (primary) and
 `d_*_seed42_*` (reference only: one seed carries ±0.02 of spread on the
 scaffold score, so a ±0.03 single-seed "win" is indistinguishable from
-noise).
+noise). Whether any given Δ is separable from resampling noise is answered
+by the paired bootstrap under "Statistical significance" below.
 
 ## GNN model & graph featurization
 
@@ -64,11 +65,155 @@ cached as one CSR-style npz (`scripts/gnn_02_build_graphs.py`).
 Model: GIN (Graph Isomorphism Network), the canonical MoleculeNet baseline:
 AtomEncoder (sum of per-feature embeddings) -> 4 x [GINConv -> BatchNorm
 -> ReLU -> dropout, residual] -> global mean pool -> MLP head. PyTorch
-Geometric, trained on an Apple M4 (MPS). Bond features are unused (plain
-GINConv aggregates node features only); pooling is mean rather than the
-paper's sum so prediction scale does not couple to molecule size. Target
-standardized with train statistics; metrics reported in original pIC50
-units (`scripts/gnn_03_train_gin.py`).
+Geometric, trained on an Apple M4 (MPS). The default `gin` does not use
+bond features (plain GINConv aggregates node features only), but the
+cached 3-dim bond features are no longer "stored but unused":
+`scripts/gnn_03_train_gin.py --model {gin, gine, attentivefp}` builds the
+baseline **GIN** (byte-for-byte the original recipe, artifacts keep their
+old names), **GINE** (same shell; `GINEConv` consumes
+`BondEncoder(data.edge_attr)`, `BOND_FEATURE_DIMS = [13, 7, 2]`), or
+PyG **AttentiveFP** on top of the same two encoders. The P8 GINE panel
+(Statistical significance below) runs the `gine` variant across all
+8 targets - bond features are used, and they still do not flip the
+verdict. Pooling is mean rather than the paper's sum so prediction scale
+does not couple to molecule size. Target standardized with train
+statistics; metrics reported in original pIC50 units.
+
+## Statistical significance (paired bootstrap)
+
+`experiments/paired_bootstrap.py` decides whether any single cell's Δ is
+separable from resampling noise - analysis only, nothing is retrained:
+
+- **Method**: B = **10,000** bootstrap replicates; test **molecules**
+  resampled with replacement, *paired* - one index matrix applied to both
+  models' predictions (test-index alignment asserted, never assumed).
+  Every cell is evaluated under two conventions: `seed42` (seed-42 GIN vs
+  RF, reference) and `mean3` (primary: per-molecule mean of the 3 GIN
+  seed predictions vs RF, matching the campaign's mean convention). The
+  95% CI is the [2.5, 97.5] percentile of the bootstrap ΔR2
+  distribution; `p_one_sided = #(ΔR2_boot > 0)/B`; a cell is
+  *significant* iff the CI excludes 0. Signs: ΔR2 = R2_GIN − R2_RF (> 0
+  favours GIN); ΔRMSE = RMSE_GIN − RMSE_RF (> 0 favours RF). Both
+  conventions of a cell draw from the same seeded generator (seed 42, so
+  runs are order-independent).
+- **Results (random/scaffold, gin, 16 cells)** - under `mean3`, only 4
+  cells have a CI excluding 0, **all four favour RF**; GIN wins 0:
+
+  | cell | ΔR2 (mean3) | 95% CI | winner |
+  |---|---|---|---|
+  | `egfr`/random | −0.031 | [−0.054, −0.008] | RF |
+  | `egfr_full`/random | −0.033 | [−0.048, −0.018] | RF |
+  | `mpro`/scaffold | −0.086 | [−0.132, −0.041] | RF |
+  | `vegfr2`/random | −0.033 | [−0.053, −0.015] | RF |
+
+  Under `seed42` two cells instead read as *GIN* wins -
+  `abl1`/scaffold +0.030 [0.002, 0.060] and `vegfr2`/scaffold +0.028
+  [0.008, 0.047] - both of which vanish under `mean3`. This is the
+  single-seed-is-noise convention (Panel Δ conventions above) promoted
+  from a heuristic to a bootstrap result: a lone seed can manufacture a
+  "significant" lead.
+- **GINE** (`--model gine`, `results/significance/summary_gine.csv`):
+  10 of 16 cells have a CI (5 tags x 2 splits with per-seed predictions;
+  `abl1`/`herg`/`vegfr2` reuse the fairness runs - point estimates only,
+  see `results/gine_panel/summary.csv`); **0 cells have CI > 0**, 5
+  significantly favour RF (egfr/random, egfr_full both splits,
+  hivpr/scaffold −0.118, mpro/scaffold −0.098). Only positive point
+  estimate: `herg`/scaffold +0.024, no CI.
+- **Outputs**: `results/significance/summary.csv`,
+  `results/significance/summary_gine.csv`,
+  `results/significance/summary_time.csv`, per-cell
+  `results/significance/{tag}_{split}{,_gine}.csv`; forest plots
+  `figures/significance/ci_panel.png` (+ `_gine` / `_time` /
+  `_with_gine` variants). The time-split run flips the pattern - see the
+  next section.
+
+## Publication-year (time) split
+
+Random/scaffold splits let the model train on molecules published after
+the molecules it is tested on; the time split cuts on publication year so
+only already-known chemistry predicts genuinely newer compounds.
+
+- **Year source**: `scripts/fetch_document_years.py` probes the ChEMBL
+  activity API per `document_chembl_id` and writes
+  `data/raw/document_years.csv` - **4,147 documents** across the 8 tags,
+  deduplicated (3 documents have no year in ChEMBL at all and are listed
+  as failures rather than aborted on).
+- **Split rule** (`scripts/gnn_08_time_splits.py`): a molecule's year is
+  the **min** document_year over all its activity rows - the earliest
+  publication in which it was measured ("first report"); rows with no
+  year are ignored. **test** = newest years counted down until the
+  cumulative molecule count reaches **>= ~20%**; **valid** = the same
+  procedure inside the remaining pool at **10%**, i.e. the newest slice
+  of the pre-test years (train's tail); **train** = everything else,
+  verified disjoint and exhaustive. Because a single recent year can
+  exceed 20% on its own, `test_frac` runs over target where the data
+  ends recently: **a2a 62%** (test 2022-2025) and **mpro 51%**
+  (2024-2025); the other six land at 0.22-0.26. NA guards write a
+  `{TAG}_time_NA.json` marker instead of a split (and consumers skip the
+  tag) when the year span < 8 years, the busiest year holds < 100
+  molecules, or dated-SMILES coverage falls below 95% (95-99% pins
+  undated molecules to the train side).
+- **Training**: RF via `scripts/04_train_and_evaluate.py --split time`,
+  GIN unchanged (`gnn_03` reads the same `{TAG}_time.npz`; 3 seeds).
+- **Results** (`results/time_split/summary.csv`, table in README
+  "Publication-year time split"): panel means RF **0.731 (random) ->
+  −0.084 (time)**, GIN **0.695 -> +0.014**; worst cell `egfr_full` RF
+  **−0.891** (GIN −0.240), `herg` RF −0.034. Significance flips: on
+  random/scaffold the significant cells all favour RF (4/16), on time
+  **5/8 cells are significant and all favour GIN, 0 favour RF** -
+  egfr_full +0.676 [0.617, 0.741], a2a +0.238 [0.129, 0.347], mpro
+  +0.143 [0.112, 0.175], herg +0.076 [0.034, 0.120], egfr +0.058
+  [0.005, 0.112].
+- **Reading**: the GIN *degrades significantly less* under temporal
+  drift - relative robustness, which is what the flipped significance
+  table measures. Absolute performance is the deployment criterion, and
+  there both fail: outside `abl1` (0.280/0.229) and `hivpr`
+  (0.173/0.179), every cell sits between −0.891 and +0.093. Two models
+  at R2 <= 0 are not a model selection problem - the honest number is
+  that neither is deployable on future chemistry at this data size.
+  Artifacts: `figures/time_split/panel_3splits.png`,
+  `figures/time_split/{tag}_timeline.png` (per-target year histograms
+  with both cutoffs), `figures/pred_vs_actual_time_{tag}.png`.
+
+## Uncertainty & applicability domain
+
+`experiments/uncertainty_ad.py` (run twice - `--model gin` and
+`--model gine`) asks three questions per cell (8 targets x
+random/scaffold): can the model say how wrong it might be, is it right
+inside its applicability domain, and does either fact improve a virtual
+screen?
+
+- **Uncertainty route 1 - RF tree-std: usable.** Per-molecule std across
+  the forest's trees, checked by quintile calibration (5 bins, RMSE vs
+  mean std): monotone in **12/16 cells**, slope **~0.74**, Spearman(std,
+  |error|) **~0.45**. Good enough to rank molecules by confidence.
+- **Uncertainty route 2 - GNN 3-seed ensemble: not usable.** Std across
+  the 3 seed predictions correlates with |error| at rho **~0.17** with
+  calibration slope **> 1** - the seeds are far too close to each other
+  (std median ~0.1 pIC50, 0.07-0.18 across cells) to track errors that
+  run ~0.5-1.0 pIC50. A deep-ensemble-style confidence from 3 seeds does
+  not exist here; any downstream filter built on it would be noise.
+- **AD**: max Morgan Tanimoto to the training set, threshold **0.4**
+  (coverage **~97%** of test molecules). In-AD test R2 **~0.67** vs
+  out-of-AD **~−0.19** (worst cell `hivpr`/random **−1.36**; 13 cells
+  have scorable out-of-AD points) - predictions outside the domain are
+  genuinely bad.
+- **Screening loop (the counter-intuitive part)**: ranking the test
+  library by RF prediction and cutting the top 100, an explicit AD filter
+  (sim >= 0.4) changes precision **by 0.000 in 16/16 cells** - no
+  out-of-AD molecule ever reaches the RF's top 100, i.e. **the ranking
+  itself is an implicit AD filter**; adding a second one buys nothing.
+  Confidence works as a *slice*, not a sort: taking the report-positive
+  set {pred >= 7} and keeping only its confident half (std <= median)
+  lifts precision **0.859 -> 0.910** (15/16 cells), while re-ranking the
+  whole library by ascending std collapses P@100 to **0.563 vs 0.922**
+  for the prediction ranking - low-std-first surfaces easy inactives,
+  not potent hits.
+- **Artifacts**: `results/uncertainty/` (per-tag `summary_*.json` +
+  per-cell `{tag}_{split}{,_gine}.csv`), `figures/uncertainty/` (68
+  figures: 32 calibration, 32 AD-error scatters, 4 screening panels -
+  gin and gine), screening panel figures
+  `figures/uncertainty/vs_screen_panel_{random,scaffold}{,_gine}.png`.
 
 ## Hyperparameters: an honest negative result
 

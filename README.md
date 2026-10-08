@@ -190,9 +190,34 @@ deficit, which is what "Δ does not follow n" looks like. The single-seed
 column would have told a different story (two scaffold "wins": `abl1`
 +0.030, VEGFR2 +0.028); both flip sign under the 3-seed mean - the
 3-seed-mean convention (see [docs/interview.md](docs/interview.md)) - and
-the scaling verdict below has no measured crossover either. What varies is
+under a paired bootstrap the seed-42 convention even calls them
+*significant* (`abl1`/scaffold +0.030 [0.002, 0.060], `vegfr2`/scaffold
++0.028 [0.008, 0.047]) while both mean3 CIs straddle zero - and the
+scaling verdict below has no measured crossover either. What varies is
 the *magnitude*: scaffold diversity and assay structure set how far behind
 the GIN falls - the sign never flips.
+
+**Significance, upgraded to bootstrap CIs (P8).** The Δ(mean) statements
+above are now backed by a paired bootstrap (B = 10,000; test molecules
+resampled with replacement, same indices for both models; CI on the
+3-seed-mean prediction). On the 16 random/scaffold cells only **4 have a
+95% CI excluding 0 - all four RF wins** (`egfr`/random −0.031,
+`egfr_full`/random −0.033, `mpro`/scaffold −0.086, `vegfr2`/random
+−0.033); **the GIN wins 0 cells**. The two seed-42 "wins" above are the
+counter-example: a single seed can manufacture a significant-looking
+lead that disappears under the mean convention. Bond features change
+nothing - the full GINE panel is **0 of 10 bootstrapped cells with
+CI > 0** (5 cells significantly favour RF; the only positive point
+estimate, `herg`/scaffold +0.024, has no CI - fairness-vintage runs kept
+no per-seed predictions). Tables
+`results/significance/summary.csv`,
+`results/significance/summary_gine.csv`,
+`results/gine_panel/summary.csv`; forest plots
+`figures/significance/ci_panel.png`,
+`figures/significance/ci_panel_with_gine.png`,
+`figures/gine_panel/panel_dR2.png`. The ±std
+columns throughout are auxiliary spread descriptions - the CIs are the
+significance statement.
 
 ![delta vs n](figures/multi_target/delta_vs_n.png)
 
@@ -242,7 +267,11 @@ molecules (test R2 and seed std both degrade), random flips on none of the three
 
 **(ii) GINE bond features are not a general gain.** They help only `herg`
 scaffold, and hurt `vegfr2` (both splits) and `abl1` scaffold - edge
-features are not the missing ingredient.
+features are not the missing ingredient. Panel-wide this holds with
+bootstrap CIs: across all 8 targets x 2 splits GINE wins **0 of 10
+bootstrapped cells** (5 significantly favour RF;
+`results/gine_panel/summary.csv`, `figures/gine_panel/panel_dR2.png`,
+`figures/significance/ci_panel_with_gine.png`).
 
 **(iii) Boundary, not a reversal.** "No clear lead on any of 16 cells" is
 a *frozen-recipe* statement: tuning pushes a minority of near-parity
@@ -279,6 +308,83 @@ vs **−0.006 to −0.058** for single-task GIN. More molecules from more
 targets made the model worse, not better. Cross-split leakage can only
 *inflate* these numbers; the linear-head handicap does not decide the
 verdict - both in [methodology](docs/methodology.md).
+
+## Publication-year time split: the GIN degrades less, neither model holds up
+
+Random and scaffold splits let the model train on molecules published
+*after* the molecules it is tested on. The deployment-honest cut
+(`scripts/gnn_08_time_splits.py`; a molecule's year = the earliest
+publication it appears in, from `data/raw/document_years.csv` - 4,147
+ChEMBL documents across the 8 tags) withholds the newest years:
+**test = newest publication years cumulating to ~20% of molecules,
+valid = newest ~10% of the rest**. Because one recent year can carry a
+lot of data, the test fraction runs over target on `a2a` (62%) and
+`mpro` (51%) - both datasets end in 2024/2025. RF trained via
+`scripts/04_train_and_evaluate.py --split time`, GIN as always
+(3 seeds, same npz).
+
+Test R2 (random for reference; GIN = 3-seed mean; Δ = mean3 GIN − RF
+with paired-bootstrap 95% CI; `results/time_split/summary.csv`):
+
+| Tag | RF rand | GIN rand | RF time | GIN time | Δ time (mean3) [95% CI] |
+|---|---|---|---|---|---|
+| `a2a` | 0.733 | 0.687 | −0.255 | −0.097 | **+0.238** [0.129, 0.347] |
+| `abl1` | 0.792 | 0.752 | +0.280 | +0.229 | −0.028 [−0.115, 0.068] |
+| `egfr` | 0.747 | 0.690 | +0.013 | +0.037 | **+0.058** [0.005, 0.112] |
+| `egfr_full` | 0.759 | 0.707 | −0.891 | −0.240 | **+0.676** [0.617, 0.741] |
+| `herg` | 0.615 | 0.616 | −0.034 | −0.076 | **+0.076** [0.034, 0.120] |
+| `hivpr` | 0.737 | 0.726 | +0.173 | +0.179 | +0.024 [−0.029, 0.079] |
+| `mpro` | 0.730 | 0.707 | −0.051 | +0.057 | **+0.143** [0.112, 0.175] |
+| `vegfr2` | 0.736 | 0.678 | +0.093 | +0.020 | −0.013 [−0.045, 0.018] |
+
+Panel means: RF **0.731 (random) → −0.084 (time)**, GIN **0.695 →
++0.014**. Bold = 95% CI excludes 0.
+
+**The significance pattern flips.** On random/scaffold the 4 significant
+cells all belonged to RF (none to the GIN); on time, **5 of 8 cells are
+significant and all 5 favour the GIN, 0 favour RF** - the mirror image.
+Read what that actually means: under temporal drift the GIN *degrades
+significantly less* (relative robustness), but the absolute level is
+what a deployment cares about, and there it is bad for both - outside
+`abl1` (0.280/0.229) and `hivpr` (0.173/0.179), every value sits between
+−0.891 and +0.093; RF is negative on 4 of 8 targets (worst `egfr_full`
+**−0.891**, also `herg` −0.034), the GIN on 3 of 8. At R2 ≈ 0 or below,
+neither model is usable on future chemistry - the honest industrial
+number, and the reason this section reports a flip *and* a failure.
+Timelines per target:
+`figures/time_split/{tag}_timeline.png`; aggregate:
+`figures/time_split/panel_3splits.png`; details:
+[methodology](docs/methodology.md).
+
+![3 splits](figures/time_split/panel_3splits.png)
+
+## Uncertainty & applicability domain: RF confidence is usable, GNN confidence is not
+
+`experiments/uncertainty_ad.py` closes the loop from calibrated
+uncertainty to an actual screening decision (8 targets x random/scaffold,
+RF and GIN, plus the GINE ensemble - 48 result files under
+`results/uncertainty/`, figures under `figures/uncertainty/`):
+
+- **RF tree-std calibrates**: 12/16 cells have monotone quintile
+  calibration (RMSE rising with predicted std), slope ~0.74,
+  Spearman(std, |err|) ~0.45 - usable as a per-molecule confidence.
+  The **GNN 3-seed ensemble std does not** (rho ~0.17, slope > 1): the
+  seeds are too close to each other to span the error. Any "GNN
+  uncertainty" claim in this repo would be noise.
+- **AD (max Tanimoto to train ≥ 0.4, coverage ~97%)**: in-AD test R2
+  ~0.67 vs out-of-AD ~−0.19 (worst `hivpr`/random −1.36) - out-of-domain
+  predictions are indeed bad.
+- **The counter-intuitive part**: AD-filtering the screen changes P@100
+  by **0.000 in 16/16 cells** - the RF ranking never puts an out-of-AD
+  molecule in its top 100; the ranking is itself an implicit AD filter,
+  so a second AD pass buys nothing on precision. What does help is
+  slicing the report-positive set {pred ≥ 7} to its confident half
+  (std ≤ median): precision **0.859 → 0.910** (15/16 cells). And
+  confidence must stay a *filter*, not a sort key: re-ranking the
+  library by low std first destroys P@100 (**0.563 vs 0.922**).
+- Caveat: these conclusions are only as good as the std estimate, so
+  they apply to the RF today; the GNN arm has no calibrated std to
+  screen with.
 
 ## Repository layout
 

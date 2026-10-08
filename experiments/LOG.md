@@ -4,6 +4,150 @@ Running log of the deep-dive experiments. Each entry: what ran, headline
 numbers (3-seed mean +/- std unless noted), and the commit holding the
 artifacts. Newest first. Maintained by M4 Air; results produced on M3 Max.
 
+## 2026-10-09
+
+### P8 campaign: paired-bootstrap significance + GINE panel + publication-year time split + uncertainty/AD — DELIVERED
+
+- Commit: pending commit (working tree). This entry and the docs it
+  covers (README section 8/9 CI upgrade + new README sections 11-12;
+  methodology "Statistical significance", "Publication-year (time)
+  split", "Uncertainty & applicability domain" + the GNN model update)
+  all land together in that pending commit.
+- **Question**: stress-test the frozen-recipe verdict ("no clear GIN
+  lead") from four directions: (1) is any per-cell Δ separable from
+  resampling noise? (2) do bond features (GINE) flip "GNN does not beat
+  fingerprint RF"? (3) does the verdict - and the deployment story -
+  survive a publication-year (time) split? (4) can uncertainty estimates
+  + an applicability domain support a virtual-screening loop?
+- **Method** (one bullet per phase):
+  - **Significance** (`experiments/paired_bootstrap.py`): paired
+    bootstrap, B=10,000, test MOLECULES resampled with replacement (one
+    index matrix applied to both models); every cell carries both
+    conventions - `seed42` (reference) and `mean3` (primary: per-molecule
+    mean of the 3 GIN seed predictions vs RF); 95% percentile CI +
+    one-sided empirical p = #(ΔR2_boot > 0)/B; significant = CI excludes
+    0.
+  - **GINE panel** (`experiments/gine_panel.py`): 8 targets x 2 splits; 5
+    new tags (a2a/egfr/egfr_full/hivpr/mpro) trained x3 seeds with
+    `gnn_03 --model gine`; vegfr2/herg/abl1 reuse the fairness run's
+    `gine_runs` - point estimates only, gnn_fairness saved no per-seed
+    predictions, so those 6 cells get no bootstrap.
+  - **Time split**: `scripts/fetch_document_years.py` ->
+    `data/raw/document_years.csv` (4,147 ChEMBL documents across the 8
+    tags, deduped; 3 documents have no year in ChEMBL);
+    `scripts/gnn_08_time_splits.py` cuts on publication year (molecule
+    year = MIN document year = first report; test = newest years
+    cumulating to >= ~20% of molecules; valid = newest ~10% of the
+    remaining pool; NA guards on year span / year coverage / busiest-year
+    density); RF via `04_train_and_evaluate.py --split time`, GIN
+    unchanged (gnn_03 reads the same npz).
+  - **Uncertainty + AD** (`experiments/uncertainty_ad.py`, run for gin and
+    gine): RF per-tree std vs GNN 3-seed ensemble std, quintile
+    calibration (5 bins), AD = max Morgan Tanimoto to the train set
+    >= 0.4, screening strategies ranked by prediction (rf_top /
+    AD-filtered / confidence) with P@100/P@200 plus the report-positive
+    set {pred >= 7}.
+- **Results / headline numbers**:
+  - **Significance, random/scaffold (gin, 16 cells)**: mean3 -> only 4
+    cells have a 95% CI excluding 0, **all four RF wins**:
+    egfr/random **−0.031** [−0.054, −0.008], egfr_full/random **−0.033**
+    [−0.048, −0.018], mpro/scaffold **−0.086** [−0.132, −0.041],
+    vegfr2/random **−0.033** [−0.053, −0.015]; **GIN 0 cells**. The seed42
+    convention instead manufactures 2 "GIN significant wins" -
+    abl1/scaffold +0.030 [0.002, 0.060] and vegfr2/scaffold +0.028
+    [0.008, 0.047] - both vanish under mean3: the bootstrap version of
+    the README's "single seed is noise" rule.
+  - **GINE (16 cells, 10 with CI)**: **0 cells with CI > 0**; 5 cells
+    significantly favour RF (egfr/random, egfr_full both splits,
+    hivpr/scaffold **−0.118**, mpro/scaffold **−0.098**); the only
+    positive point estimate is herg/scaffold **+0.024** (no CI -
+    fairness vintage). Bond features do not flip the verdict.
+  - **Time split (8 targets)**: panel-mean RF R2 0.731 (random) ->
+    **−0.084** (time); GIN 0.695 -> **+0.014**. Worst cells: egfr_full RF
+    **−0.891** (GIN −0.240), herg RF −0.034. Significance pattern
+    **flips**: on time, 5/8 cells are significant and **all 5 favour
+    GIN** (mean3: egfr_full **+0.676** [0.617, 0.741], a2a **+0.238**
+    [0.129, 0.347], mpro **+0.143** [0.112, 0.175], herg **+0.076**
+    [0.034, 0.120], egfr **+0.058** [0.005, 0.112]), **0 cells favour
+    RF** - the mirror image of random/scaffold (4/16, all RF). test_frac
+    runs over target on a2a (62%) and mpro (51%) because one recent year
+    carries most of the data. Honest reading: under temporal drift the
+    GIN degrades significantly less (relative robustness), but absolute
+    R2 is ~0 or negative on 6/8 targets for both models (only abl1
+    0.280/0.229 and hivpr 0.173/0.179 look usable) - neither model is
+    deployable at these numbers, so the flip is a robustness ranking,
+    not a win.
+  - **Uncertainty + AD**: RF tree-std is usable - quintile calibration
+    monotone in 12/16 cells, slope ~0.74, Spearman(std, |err|) ~0.45.
+    The GNN 3-seed ensemble std is not - the seeds are too close (rho
+    ~0.17, slope > 1). AD >= 0.4 covers ~97% of test molecules: in-AD R2
+    ~0.67 vs out-of-AD ~−0.19 (worst hivpr/random **−1.36**).
+    Counter-intuitive screening result: AD filtering changes P@100 by
+    **0.000 in 16/16 cells** - the RF ranking is itself an implicit AD
+    filter (no out-of-AD molecule reaches its top 100). What does help
+    is slicing the report-positive set {pred >= 7} to its confident half
+    (std <= median): precision **0.859 -> 0.910** (15/16 cells); while
+    re-ranking the library by confidence alone destroys precision
+    (P@100 0.563 vs 0.922).
+- **Verdict**: the frozen-recipe verdict survives every stress test and
+  gets *harder*, not softer: GINE never wins significantly (0/10 cells
+  CI > 0), the 4 significant random/scaffold cells all belong to RF, and
+  the only place the GIN wins significantly - the time split - is a
+  place where both models score near zero (relative robustness,
+  absolute failure). Operationally: ship RF with tree-std uncertainty
+  and a confidence filter on the hit set; treat GNN ensemble std and any
+  "GINE advantage" as absent.
+- **Pitfalls**:
+  - **herg RF time hung on the M4**: during the evaluation stage one
+    loky worker disappeared and the main process never exited; killed
+    and re-run - the retry completed normally (`logs/p8_rf_time_herg.log`
+    vs `logs/p8_rf_time_herg_retry.log`). The final herg and egfr_full RF
+    time runs were done on the M3 Max.
+  - **Nested n_jobs=-1 thread storm on the M3**: GridSearchCV workers x
+    RF workers oversubscribed the machine (load 492). Fixed by
+    rate-limiting via `RF_JOBS` / `GS_JOBS` env vars - the M3 copy of
+    `scripts/04_train_and_evaluate.py` carries that env patch, while the
+    M4 copy in this working tree stays stock (the env patch was never
+    ported over here).
+- **Timing / environment**: ~12h wall clock on the M4 Air 16GB (primary)
+  + ~2.5h on the M3 Max (herg/egfr_full RF time); the analysis scripts
+  are single-process and fast. Docs written on the M4 Air.
+- **Tests**: 6 new files (`tests/test_p8_analysis.py`,
+  `test_gnn_models.py`, `test_fetch_years.py`, `test_time_splits.py`,
+  `test_rf_time_split.py`, `test_gine_panel.py`) = 43 cases; suite grows
+  23 -> 66, all green.
+- **Artifacts**:
+  - scripts: new `scripts/fetch_document_years.py`,
+    `scripts/gnn_08_time_splits.py`; modified
+    `scripts/gnn_03_train_gin.py` (`--model {gin,gine,attentivefp}`) and
+    `scripts/04_train_and_evaluate.py` (`--split time`); data
+    `data/raw/document_years.csv`, `data/processed/splits/{tag}_time.npz`
+    (+ `{tag}_time_NA.json` guard markers).
+  - analysis: `experiments/{paired_bootstrap,gine_panel,
+    time_split_summary,uncertainty_ad}.py`.
+  - results: `results/significance/{summary.csv, summary_gine.csv,
+    summary_time.csv, {tag}_{split}{,_gine}.csv}`,
+    `results/gine_panel/summary.csv`,
+    `results/time_split/summary.csv`, `results/uncertainty/` (16 summary
+    json + 32 cell csv), `results/rf_preds_{tag}_time.npz`,
+    `results/gnn_preds_{tag}_time{_seedN}.npz`,
+    `results/gnn_preds_{tag}_gine_{split}{_seedN}.npz`,
+    `results/metrics_{tag}.json` / `results/gnn_metrics_{tag}[_gine].json`
+    (time-split entries added).
+  - figures: `figures/significance/{ci_panel, ci_panel_gine,
+    ci_panel_time, ci_panel_with_gine}.png`,
+    `figures/gine_panel/panel_dR2.png`,
+    `figures/time_split/panel_3splits.png` + `{tag}_timeline.png` x8,
+    `figures/pred_vs_actual_time_{tag}.png` x8,
+    `figures/uncertainty/` (68 files: 32 calib, 32 ad_error, 4
+    vs-screen panels).
+  - tests: `tests/{test_p8_analysis, test_gnn_models, test_fetch_years,
+    test_time_splits, test_rf_time_split, test_gine_panel}.py`.
+  - logs: `logs/p8_fetch_years.log`, `logs/p8_gin_time.{sh,log}`,
+    `logs/p8_gine_all.{sh,log}`, `logs/p8_rf_time.{sh,log}`,
+    `logs/p8_rf_time_{egfr_full,herg,herg_retry}.log`,
+    `logs/p8_uncertainty_gine.log`.
+
 ## 2026-10-08
 
 ### Dataset tag rename: `mapk14` → `vegfr2`
