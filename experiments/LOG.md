@@ -210,6 +210,47 @@ artifacts. Newest first. Maintained by M4 Air; results produced on M3 Max.
   - tests: `tests/test_afp_panel.py`.
   - logs: `logs/p8_afp_all.{sh,log}`.
 
+### Review fixes: delta conventions spelled out, scaffold-split convention note, cuda device branch, best_params backfill, raw-data checksums
+
+Presentation-layer fixes from the user's review - **none of them changes
+any published result number, verdict or figure**. Docs items below land
+with this entry (the same docs pass also added the y-randomization
+real-control 0.7414 vs 0.7466 footnote and the requirements-snapshot
+note in README's Reproduce); the scripts/results items come from the
+parallel pass. Commit: pending.
+
+- **Δ conventions spelled out**: `docs/methodology.md`'s "Panel Δ
+  conventions" now defines both formulas (per-seed-mean vs mean3
+  ensemble), why the ensemble side is always at least as large
+  (ensemble gain never negative), which artifact reports which, and the
+  read rule (significance from CIs, point estimates from panels, never
+  mixed); README §8 points there and the long AttentiveFP explanation
+  shrank to one line. Why: the conventions had only been explained
+  inside `afp_panel.py`, so `egfr`/random −0.056 (panel) vs −0.031
+  (significance) and `herg` +0.013 vs [+0.035, +0.092] read as
+  inconsistencies.
+- **Scaffold-split convention note**: README (first mention + Method)
+  and a new methodology section record that `scaffold_split` fills the
+  **test** set with the largest Bemis-Murcko groups first - the reverse
+  of DeepChem/MoleculeNet's `ScaffoldSplitter` - plus the direction of
+  the difference (scaffold scores slightly optimistic vs DeepChem-style
+  splits; absolute numbers not comparable across implementations,
+  conclusions unchanged), the reason for the choice (chemotype-level
+  error analysis needs the big families in test) and the cost (no
+  re-runs; MoleculeNet alignment later would mean full retraining).
+- **cuda device branch** (scripts/experiments): the shared
+  `select_device()` in `scripts/qsar_common.py` (cuda > mps > cpu)
+  replaces the seven hardcoded `mps else cpu` picks in the GNN and
+  experiment scripts, so CUDA hosts train on cuda; on Apple machines
+  the choice - and every logged device string - is unchanged.
+- **best_params backfill** (results): run metadata that was missing its
+  `best_params_*` block is backfilled with the parameters the run
+  actually used, so stored records read complete; read-side only, the
+  trained models are untouched.
+- **raw-data checksums** (data): the raw-data provenance record now
+  carries per-file checksums, so `data/raw/` downloads can be verified
+  against what was published.
+
 ## 2026-10-08
 
 ### Dataset tag rename: `mapk14` → `vegfr2`

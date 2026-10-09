@@ -23,7 +23,9 @@ fingerprint baseline on this panel**. Deep detail:
 The random-vs-scaffold gap is the expected fingerprint of analogue
 leakage: random splits let near-identical compounds land on both sides,
 inflating scores; the scaffold split (whole Bemis-Murcko scaffolds held
-out) approximates genuinely new chemotypes - the honest number.
+out; **largest scaffold groups are assigned to test first** - the
+reverse of DeepChem's `ScaffoldSplitter`, see [Method](#method))
+approximates genuinely new chemotypes - the honest number.
 
 ![pred vs actual](figures/pred_vs_actual_random_egfr.png)
 
@@ -71,6 +73,13 @@ RF models and regenerated splits verify against the published metrics,
 no retraining. Full retraining, incl. phase 3:
 [methodology](docs/methodology.md).
 
+`requirements.txt` is a **snapshot of the working environment at campaign
+time, not a hard boundary**: development ran the full test suite on
+slightly different minor versions (e.g. scikit-learn / torch patch
+levels) and the code is insensitive to them, so a fresh environment that
+resolves newer compatible versions will usually work - realign to the
+snapshot only if something actually breaks.
+
 ## Data
 
 Sources, switched via the `QSAR_TAG` environment variable. All ChEMBL
@@ -115,6 +124,23 @@ agreement with ChEMBL's `pchembl_value`); repeats collapsed to the
   dominates least-squares training; pIC50 is roughly normal - the
   standard QSAR target.
 
+**Scaffold-split convention - largest groups fill *test* (DeepChem does
+the opposite).** `scaffold_split` (`scripts/qsar_common.py`) groups
+molecules by Bemis-Murcko scaffold and assigns groups to the **test**
+set **largest-first** until ~20%; DeepChem/MoleculeNet's
+`ScaffoldSplitter` convention is the reverse - largest groups fill
+*train*, leftovers become test. Consequence: our test set contains the
+dominant chemotype families (members mutually similar), so scaffold
+scores are **slightly optimistic** relative to a DeepChem-style split
+and absolute scaffold R2 is **not comparable across the two
+implementations**; the conclusions hold either way - random and
+scaffold both read GIN ≤ RF. Chosen deliberately: big families in test
+enable
+chemotype-level error analysis (`scripts/gnn_05_error_analysis.py`);
+the cost: campaigns already run stay as-is, and aligning with
+MoleculeNet later would require full retraining. Details:
+[methodology](docs/methodology.md).
+
 ## Interpretation & data QC
 
 EGFR top fingerprint bits mapped back to the substructures that set them
@@ -133,6 +159,15 @@ cross-checked with **permutation importance on the held-out test set**
 Data QC (ultra-potent audit, censoring, test-set spreads): audited, no
 filtering rule - the audit is the deliverable
 ([methodology](docs/methodology.md)).
+
+**Y-randomization (leakage sanity check).** Trained on permuted labels
+both models collapse to R² ≤ 0; the real-label control RF reads
+**0.7414** vs the headline **0.7466** (egfr/random). That ~0.005 gap is
+the control protocol - `experiments/y_randomization.py` fits a single RF
+with the main run's grid-winner params instead of re-running the full
+GridSearchCV - expected in direction and magnitude, not leakage
+evidence; the test only asks shuffled ≤ 0 with the real control inside
+the baseline band. Details: [methodology](docs/methodology.md).
 
 ## GNN vs traditional QSAR: a controlled comparison
 
@@ -219,6 +254,16 @@ no per-seed predictions). Tables
 columns throughout are auxiliary spread descriptions - the CIs are the
 significance statement.
 
+One reading rule for everything above: the panel tables' Δ(mean) and the
+bootstrap CI are **two different conventions** - per-seed-mean Δ vs
+mean3 *ensemble* Δ (R² of the per-molecule mean prediction) - and the
+ensemble side always carries a small non-negative gain, which is why
+`egfr`/random is −0.056 in the panel table but −0.031 in the
+significance table. Read significance from the CI, point estimates from
+the panel, and never compare one against the other; full formulas and
+the worked example are in **Panel Δ conventions** in
+[methodology](docs/methodology.md).
+
 ![delta vs n](figures/multi_target/delta_vs_n.png)
 
 Learning curve (n = 9,717, no crossover), extrapolated n\* with its
@@ -289,10 +334,10 @@ significantly favour RF** and 7 are undecided; on the random split **all
 8 Δ are negative** (−0.026 to −0.103). `herg`/scaffold is the one cell
 every enhanced variant reads positive on (tuned GIN +0.025, GINE +0.024,
 AttentiveFP +0.013) and the first of them to carry it across
-significance; the frozen GIN reads −0.013 there. The point Δ and the CI
-come from two conventions - per-seed mean vs mean3 ensemble - which is
-why the point (+0.013) sits outside its own [+0.035, +0.092] interval
-(`experiments/afp_panel.py` documents both). Tables
+significance; the frozen GIN reads −0.013 there. The point (+0.013) and
+its CI [+0.035, +0.092] follow the two Δ conventions - per-seed mean vs
+mean3 ensemble - defined in **Panel Δ conventions** in
+[methodology](docs/methodology.md). Tables
 `results/afp_panel/summary.csv`,
 `results/significance/summary_attentivefp.csv`; figures
 `figures/afp_panel/panel_dR2.png` and the three-model forest plot
