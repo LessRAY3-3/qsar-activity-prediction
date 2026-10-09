@@ -48,6 +48,7 @@ from gnn_graph_dataset import (  # noqa: E402
     BOND_FEATURE_DIMS,
     MoleculeGraphDataset,
 )
+from qsar_common import select_device  # noqa: E402
 
 
 def parse_args():
@@ -235,7 +236,7 @@ def main():
     args = parse_args()
     torch.manual_seed(args.seed)
     np.random.seed(args.seed)
-    device = "mps" if torch.backends.mps.is_available() else "cpu"
+    device = select_device()
 
     split = np.load(os.path.join(BASE, "data", "processed", "splits",
                                  f"{args.tag}_{args.split}.npz"))

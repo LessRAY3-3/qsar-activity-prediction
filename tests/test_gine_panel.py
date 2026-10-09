@@ -5,6 +5,7 @@ imported inside the figure functions only) and checks the panel-row
 contract on synthetic inputs with a known ground truth.
 """
 import numpy as np
+import pandas as pd
 import pytest
 
 
@@ -42,3 +43,23 @@ def test_make_row_without_ci_is_point_estimate_only(load_experiment):
     assert np.isnan(row["ci_lo"]) and np.isnan(row["ci_hi"])
     assert row["significant"] is None
     assert row["note"] == mod.NOTE_POINT_ONLY
+
+
+def test_summary_csv_carries_delta_convention(tmp_path, monkeypatch, load_experiment):
+    """build_panel -> summary.csv keeps every column and appends delta_convention."""
+    mod = load_experiment("gine_panel")
+    monkeypatch.setattr(mod, "load_rf_r2", lambda tag, split: 0.70)
+    monkeypatch.setattr(mod, "load_gine_seed_r2",
+                        lambda tag, split: [0.60, 0.62, 0.64])
+    monkeypatch.setattr(mod, "load_gine_ci", lambda tag, split, sig_dir: None)
+
+    panel = mod.build_panel("unused")
+    out = tmp_path / "summary.csv"
+    panel.to_csv(out, index=False)
+
+    got = pd.read_csv(out)
+    assert list(got.columns) == mod.PANEL_COLS
+    assert got.columns[-1] == "delta_convention"
+    assert len(got) == len(mod.TAGS) * len(mod.SPLITS)
+    assert got["delta_convention"].tolist() == [mod.DELTA_CONVENTION] * len(got)
+    assert mod.DELTA_CONVENTION == "point=per-seed-mean_R2;ci=ensemble_mean-pred_R2"

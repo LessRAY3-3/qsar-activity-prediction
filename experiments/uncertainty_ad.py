@@ -74,7 +74,7 @@ import pandas as pd
 BASE = os.path.join(os.path.dirname(__file__), "..")
 sys.path.insert(0, os.path.join(BASE, "scripts"))
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from qsar_common import get_morgan_generator  # noqa: E402
+from qsar_common import get_morgan_generator, select_device  # noqa: E402
 
 TAGS = ("a2a", "abl1", "egfr", "egfr_full", "herg", "hivpr", "mpro", "vegfr2")
 SPLITS = ("random", "scaffold")
@@ -204,7 +204,7 @@ def gnn_ensemble_predict(tag, split, model_kind, test_idx, batch_size=BATCH_SIZE
         else:
             model_cls = gnn03.GINRegressor
 
-    device = "mps" if torch.backends.mps.is_available() else "cpu"
+    device = select_device()
     graphs = os.path.join(BASE, "data", "processed", f"{tag}_graphs.npz")
     ds = MoleculeGraphDataset(graphs, indices=test_idx)
     loader = DataLoader(ds, batch_size=batch_size)

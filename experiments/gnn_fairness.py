@@ -62,6 +62,7 @@ from gnn_03_train_gin import (  # noqa: E402
     AtomEncoder, GINRegressor, metrics, predict, run_epoch,
 )
 from gnn_graph_dataset import BOND_FEATURE_DIMS, MoleculeGraphDataset  # noqa: E402
+from qsar_common import select_device  # noqa: E402
 
 GRID_HIDDEN = (128, 256)
 GRID_LAYERS = (4, 5)
@@ -167,8 +168,7 @@ def train_eval(model_cls, model_kwargs, graphs, train_idx, valid_idx,
 
     torch.manual_seed(seed)
     np.random.seed(seed)
-    device = ("mps" if hasattr(torch.backends, "mps")
-              and torch.backends.mps.is_available() else "cpu")
+    device = select_device()
 
     ds_tr = MoleculeGraphDataset(graphs, indices=train_idx)
     ds_va = MoleculeGraphDataset(graphs, indices=valid_idx)

@@ -62,6 +62,7 @@ from torch_geometric.nn import GINConv, global_mean_pool
 BASE = os.path.join(os.path.dirname(__file__), "..")
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from gnn_graph_dataset import ATOM_FEATURE_DIMS  # noqa: E402
+from qsar_common import select_device  # noqa: E402
 
 TASK_TAGS = ["egfr_full", "abl1", "vegfr2"]
 METHODS = ["st_rf", "st_gin", "pooled_st", "mt_gin"]
@@ -244,7 +245,7 @@ def train_run(args):
     n_tasks = len(tags)
     torch.manual_seed(args.seed)
     np.random.seed(args.seed)
-    device = "mps" if torch.backends.mps.is_available() else "cpu"
+    device = select_device()
 
     # ---- splits & per-target train statistics ----------------------------
     split_idx, y_mean, y_std = {}, np.zeros(n_tasks), np.zeros(n_tasks)

@@ -29,6 +29,7 @@ BASE = os.path.join(os.path.dirname(__file__), "..")
 sys.path.insert(0, os.path.join(BASE, "scripts"))
 from gnn_03_train_gin import GINRegressor, run_epoch, predict, metrics  # noqa: E402
 from gnn_graph_dataset import MoleculeGraphDataset  # noqa: E402
+from qsar_common import select_device  # noqa: E402
 
 HEADER = "split,label,seed,model,r2,rmse,mae,best_epoch,train_seconds"
 
@@ -60,7 +61,7 @@ def gin_train_eval(graphs, train_idx, valid_idx, test_idx, y_all,
 
     torch.manual_seed(seed)
     np.random.seed(seed)
-    device = "mps" if torch.backends.mps.is_available() else "cpu"
+    device = select_device()
 
     y_mean = float(y_all[train_idx].mean())
     y_std = float(y_all[train_idx].std())

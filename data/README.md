@@ -4,6 +4,10 @@ Raw activity files (`raw/`) are not committed (see `.gitignore`) because they
 can be re-downloaded from the sources below. Cleaned files (`processed/`)
 are small and committed.
 
+The sha256 and line count of each raw CSV are listed in `raw/sha256sums.txt`
+(the `data/` directory is gitignored; when the raw files are obtained via the
+Release or re-downloaded, verify them against this manifest).
+
 | File | Provenance |
 |---|---|
 | `raw/egfr_activities.csv` | ChEMBL REST API: `target_chembl_id=CHEMBL203`, `standard_type=IC50`, `standard_units=nM`, assay types B/F. Re-download: `python scripts/01d_download_incremental.py` |

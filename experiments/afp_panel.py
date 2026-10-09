@@ -52,10 +52,11 @@ SPLITS = ("random", "scaffold")
 SEED_SUFFIXES = ("", "_seed1", "_seed2")
 NOTE_BOOTSTRAP = "paired bootstrap mean3, B=10000"
 NOTE_NO_CI = "no bootstrap CSV (run paired_bootstrap.py --model attentivefp first)"
+DELTA_CONVENTION = "point=per-seed-mean_R2;ci=ensemble_mean-pred_R2"
 
 PANEL_COLS = ["tag", "split", "rf_r2", "afp_r2_mean", "afp_r2_std",
               "afp_n_seeds", "d_r2_mean", "ci_lo", "ci_hi",
-              "significant", "note"]
+              "significant", "note", "delta_convention"]
 
 
 # ---------------------------------------------------------------- loading
@@ -118,6 +119,7 @@ def make_row(tag, split, rf_r2, afp_r2s, ci=None):
         "ci_hi": np.nan,
         "significant": None,
         "note": NOTE_NO_CI,
+        "delta_convention": DELTA_CONVENTION,
     }
     if ci is not None:
         lo, hi, sig = ci

@@ -18,9 +18,11 @@ Step 6 - evaluation:
 
 CLI:
   --split {random,scaffold,time} runs only that split; metrics_{TAG}.json
-  is then loaded and only that split's key is (over)written - every other
-  key is preserved bit-for-bit. Default (no --split) keeps the original
-  behaviour: train random + scaffold, rewrite the whole metrics file.
+  is then loaded and only that split's key plus best_params_{split} (the
+  fitted estimator's get_params()) are (over)written - every other key is
+  preserved bit-for-bit. Default (no --split) keeps the original
+  behaviour: train random + scaffold, rewrite the whole metrics file
+  (now carrying best_params_random and best_params_scaffold).
   The time split reads its indices from
   data/processed/splits/{TAG}_time.npz (train_idx/test_idx; valid_idx is
   ignored - RF uses CV, not early stopping). If that npz is missing but a
@@ -100,10 +102,12 @@ def run_split(X, y, smiles, train_idx, test_idx, tag, fig_path, target):
 
 
 def run_single(split, train_idx, test_idx, X, y, smiles, target):
-    """Train/evaluate ONE split, save model + preds npz, merge its metrics key.
+    """Train/evaluate ONE split, save model + preds npz, merge its metrics.
 
-    Used by --split {random,scaffold,time}; the default (no --split) path
-    below keeps the original train-both-then-rewrite-whole-file behaviour.
+    Merges two keys: {split} (r2/rmse/mae) and best_params_{split}
+    (best_estimator_.get_params()). Used by --split {random,scaffold,time};
+    the default (no --split) path below keeps the original
+    train-both-then-rewrite-whole-file behaviour.
     """
     m, best, pred = run_split(
         X, y, smiles, train_idx, test_idx, split,
@@ -115,9 +119,10 @@ def run_single(split, train_idx, test_idx, X, y, smiles, target):
     os.makedirs(RESULTS_DIR, exist_ok=True)
     np.savez(os.path.join(RESULTS_DIR, f"rf_preds_{TAG}_{split}.npz"),
              test_idx=np.asarray(test_idx), y_true=y[test_idx], y_pred=pred)
-    # merge: load whatever is there, overwrite only this split's key, rewrite
+    # merge: load whatever is there, overwrite only this split's keys, rewrite
     payload = json.load(open(METRICS_JSON)) if os.path.exists(METRICS_JSON) else {}
     payload[split] = m
+    payload[f"best_params_{split}"] = best.get_params()
     with open(METRICS_JSON, "w") as f:
         json.dump(payload, f, indent=2)
     print(f"\nMetrics merged -> {os.path.abspath(METRICS_JSON)}")
@@ -213,7 +218,8 @@ def main():
 
     with open(METRICS_JSON, "w") as f:
         json.dump({"target": target, "tag": TAG, "random": m_rand, "scaffold": m_scaf,
-                   "best_params_random": best_rand.get_params()}, f, indent=2)
+                   "best_params_random": best_rand.get_params(),
+                   "best_params_scaffold": best_scaf.get_params()}, f, indent=2)
     print(f"\nMetrics saved -> {os.path.abspath(METRICS_JSON)}")
 
 

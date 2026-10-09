@@ -53,6 +53,7 @@ def _run_main(tmp_path, monkeypatch, load_script, model_args):
     mod = load_script("gnn_03_train_gin")
     monkeypatch.setattr(mod, "BASE", str(tmp_path))
     monkeypatch.setattr(torch.backends.mps, "is_available", lambda: False)
+    monkeypatch.setattr(torch.cuda, "is_available", lambda: False)
     monkeypatch.setattr(sys, "argv",
                         ["gnn_03_train_gin.py", "--tag", TAG, "--split", "random",
                          "--epochs", "2", "--batch-size", "2", "--hidden", "16",

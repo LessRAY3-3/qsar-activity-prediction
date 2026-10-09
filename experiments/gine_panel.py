@@ -55,10 +55,11 @@ BOOTSTRAP_TAGS = ("a2a", "egfr", "egfr_full", "hivpr", "mpro")
 FAIRNESS_TAGS = ("abl1", "herg", "vegfr2")
 SEED_SUFFIXES = ("", "_seed1", "_seed2")
 NOTE_POINT_ONLY = "point estimate only (no per-seed gine preds; no bootstrap)"
+DELTA_CONVENTION = "point=per-seed-mean_R2;ci=ensemble_mean-pred_R2"
 
 PANEL_COLS = ["tag", "split", "rf_r2", "gine_r2_mean", "gine_r2_std",
               "gine_n_seeds", "d_r2_mean", "ci_lo", "ci_hi",
-              "significant", "note"]
+              "significant", "note", "delta_convention"]
 
 
 # ---------------------------------------------------------------- loading
@@ -130,6 +131,7 @@ def make_row(tag, split, rf_r2, gine_r2s, ci=None):
         "ci_hi": np.nan,
         "significant": None,
         "note": "",
+        "delta_convention": DELTA_CONVENTION,
     }
     if ci is None:
         row["note"] = NOTE_POINT_ONLY

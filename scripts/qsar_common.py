@@ -1,10 +1,11 @@
-"""Shared helpers: fingerprint generation and scaffold splitting.
+"""Shared helpers: fingerprint generation, scaffold splitting, device choice.
 
 Single source of truth for every stage of the pipeline (RF, QC, GNN,
 experiments): all Morgan fingerprint generation and the deterministic
 Bemis-Murcko scaffold split import from this module, so the outputs stay
 bit-identical to the historical runs. Function bodies were moved verbatim
-from their original scripts; only docstrings changed.
+from their original scripts; only docstrings changed. The GNN training and
+experiment scripts also share select_device() (cuda > mps > cpu).
 """
 import numpy as np
 from rdkit import Chem
@@ -84,3 +85,20 @@ def murcko_scaffold_list(smiles):
         else:
             scafs.append(MurckoScaffold.MurckoScaffoldSmiles(mol=mol, includeChirality=False))
     return np.array(scafs, dtype=str)
+
+
+def select_device():
+    """Best torch device available: cuda, else mps, else cpu.
+
+    cuda only ever takes priority when torch.cuda.is_available() is True,
+    so on Apple machines the choice (and every logged device string) is
+    unchanged. torch is imported lazily so RF-only stages can use this
+    module without torch at import time.
+    """
+    import torch
+
+    if torch.cuda.is_available():
+        return "cuda"
+    if hasattr(torch.backends, "mps") and torch.backends.mps.is_available():
+        return "mps"
+    return "cpu"

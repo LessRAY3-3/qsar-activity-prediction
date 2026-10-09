@@ -42,7 +42,7 @@ import numpy as np
 BASE = os.path.join(os.path.dirname(__file__), "..")
 sys.path.insert(0, os.path.join(BASE, "scripts"))
 from gnn_03_train_gin import GINRegressor  # noqa: E402
-from qsar_common import morgan_fp_with_info  # noqa: E402
+from qsar_common import morgan_fp_with_info, select_device  # noqa: E402
 
 # substructure queries - reproduce the README's 37 / 47 series sizes exactly
 FAMILIES = {
@@ -235,14 +235,13 @@ def rf_figure(mol, top_bits, bit_shap, bit_atoms_map, path, title):
 # ---------------------------------------------------------------- main
 def main():
     args = parse_args()
-    import torch
     from rdkit import Chem
     from rdkit import RDLogger
 
     RDLogger.DisableLog("rdApp.*")
     os.makedirs(args.out, exist_ok=True)
     os.makedirs(args.fig_dir, exist_ok=True)
-    device = "mps" if torch.backends.mps.is_available() else "cpu"
+    device = select_device()
 
     import pandas as pd
     err_csv = os.path.join(BASE, "results", f"error_analysis_{args.tag}_{args.split}.csv")

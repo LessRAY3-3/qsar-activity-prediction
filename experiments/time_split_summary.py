@@ -38,6 +38,7 @@ BASE = os.path.join(os.path.dirname(__file__), "..")
 TAGS = ("a2a", "abl1", "egfr", "egfr_full", "herg", "hivpr", "mpro", "vegfr2")
 SPLITS = ("random", "scaffold", "time")
 SEED_SUFFIXES = ("", "_seed1", "_seed2")
+DELTA_CONVENTION = "point=per-seed-mean_R2;ci=ensemble_mean-pred_R2"
 
 SUMMARY_COLS = [
     "tag",
@@ -48,6 +49,7 @@ SUMMARY_COLS = [
     "d_r2_mean3", "ci_lo", "ci_hi", "significant", "winner", "p_one_sided",
     "rf_random_r2", "gin_random_r2_mean",
     "rf_scaffold_r2", "gin_scaffold_r2_mean",
+    "delta_convention",
 ]
 
 
@@ -137,6 +139,7 @@ def build_summary():
             "gin_random_r2_mean": ref["random"][1],
             "rf_scaffold_r2": ref["scaffold"][0],
             "gin_scaffold_r2_mean": ref["scaffold"][1],
+            "delta_convention": DELTA_CONVENTION,
         })
     return pd.DataFrame(rows, columns=SUMMARY_COLS)
 

@@ -5,6 +5,7 @@ imported inside the figure functions only) and checks the panel-row
 contract on synthetic inputs with a known ground truth.
 """
 import numpy as np
+import pandas as pd
 import pytest
 
 
@@ -54,3 +55,23 @@ def test_output_paths_never_collide_with_gine_panel(load_experiment):
     assert a.combined_fig.endswith("ci_panel_with_afp.png")
     assert g.combined_fig.endswith("ci_panel_with_gine.png")
     assert not a.combined_fig.endswith("ci_panel.png")
+
+
+def test_summary_csv_carries_delta_convention(tmp_path, monkeypatch, load_experiment):
+    """build_panel -> summary.csv keeps every column and appends delta_convention."""
+    mod = load_experiment("afp_panel")
+    monkeypatch.setattr(mod, "load_rf_r2", lambda tag, split: 0.70)
+    monkeypatch.setattr(mod, "load_afp_seed_r2",
+                        lambda tag, split: [0.60, 0.62, 0.64])
+    monkeypatch.setattr(mod, "load_afp_ci", lambda tag, split, sig_dir: None)
+
+    panel = mod.build_panel("unused")
+    out = tmp_path / "summary.csv"
+    panel.to_csv(out, index=False)
+
+    got = pd.read_csv(out)
+    assert list(got.columns) == mod.PANEL_COLS
+    assert got.columns[-1] == "delta_convention"
+    assert len(got) == len(mod.TAGS) * len(mod.SPLITS)
+    assert got["delta_convention"].tolist() == [mod.DELTA_CONVENTION] * len(got)
+    assert mod.DELTA_CONVENTION == "point=per-seed-mean_R2;ci=ensemble_mean-pred_R2"
