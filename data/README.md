@@ -5,8 +5,9 @@ can be re-downloaded from the sources below. Cleaned files (`processed/`)
 are small and committed.
 
 The sha256 and line count of each raw CSV are listed in `raw/sha256sums.txt`
-(the `data/` directory is gitignored; when the raw files are obtained via the
-Release or re-downloaded, verify them against this manifest).
+- the manifest itself is the only committed exception to the raw-data
+gitignore (force-added; no `!` rule). When the raw files are obtained via
+the Release or re-downloaded, verify them against this manifest.
 
 | File | Provenance |
 |---|---|

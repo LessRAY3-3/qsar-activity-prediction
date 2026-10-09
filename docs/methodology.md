@@ -79,7 +79,10 @@ columns of `results/time_split/summary.csv` (the same numbers as the
 scoring cancels per-molecule seed variance while the denominator SST is
 unchanged, so:
 
-`R2(ensemble) − mean_s R2(seed_s) = mean_m var_s(ŷ_m,s) / SST ≥ 0`
+`R2(ensemble) − mean_s R2(seed_s) = Σ_m var_s(ŷ_m,s) / SST ≥ 0`
+
+(the numerator sums over the n test molecules; equivalently
+`mean_m var_s(ŷ_m,s) / (SST/n)`, the mean variance over the mean square).
 
 The **ensemble gain is never negative**: for any cell
 Δ_ens ≥ Δ_panel (same RF reference), with equality only when the 3
@@ -421,8 +424,9 @@ at the largest n.
 ![learning curve egfr](../figures/learning_curve/learning_curve_egfr.png)
 
 **The signal is real: Y-randomization kills it.** Training on permuted
-labels scores <= 0 on every run (shuffled-label means -0.18 RF / -0.01 GIN,
-all < 0.2) while real-label controls land on the baselines - no
+labels scores <= 0 on every run (random split: shuffled-label means
+-0.18 RF / -0.01 GIN, all < 0.2; scaffold split: -0.15 / -0.02) while
+real-label controls land on the baselines - no
 train/test leakage. One number needs a footnote: the real-label control
 RF reads **0.7414** (random) against the headline **0.7466**, a ~0.005
 gap that comes from the control protocol itself -

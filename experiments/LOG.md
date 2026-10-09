@@ -8,11 +8,12 @@ artifacts. Newest first. Maintained by M4 Air; results produced on M3 Max.
 
 ### P8 campaign: paired-bootstrap significance + GINE panel + publication-year time split + uncertainty/AD — DELIVERED
 
-- Commit: pending commit (working tree). This entry and the docs it
-  covers (README section 8/9 CI upgrade + new README sections 11-12;
+- Commits: `a9d4547` (analysis pipeline), `af276d2` (results+figures),
+  `45e5ce7`/`e25012d` (docs + M3 RF-time logs). This entry and the docs
+  it covers (README section 8/9 CI upgrade + new README sections 11-12;
   methodology "Statistical significance", "Publication-year (time)
   split", "Uncertainty & applicability domain" + the GNN model update)
-  all land together in that pending commit.
+  landed across those four commits.
 - **Question**: stress-test the frozen-recipe verdict ("no clear GIN
   lead") from four directions: (1) is any per-cell Δ separable from
   resampling noise? (2) do bond features (GINE) flip "GNN does not beat
@@ -217,7 +218,9 @@ any published result number, verdict or figure**. Docs items below land
 with this entry (the same docs pass also added the y-randomization
 real-control 0.7414 vs 0.7466 footnote and the requirements-snapshot
 note in README's Reproduce); the scripts/results items come from the
-parallel pass. Commit: pending.
+parallel pass. Commits: `0b9f48d` (scripts/experiments/tests +
+backfilled metrics + panel summaries), `7457cda` (raw manifest),
+`1373596` (this docs pass).
 
 - **Δ conventions spelled out**: `docs/methodology.md`'s "Panel Δ
   conventions" now defines both formulas (per-seed-mean vs mean3
