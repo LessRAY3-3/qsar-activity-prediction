@@ -1,0 +1,11 @@
+# sha256  rows  filename  --  generated 2026-10-09; sha256 = file bytes, rows = total lines incl. header; sorted by filename
+5915d6e37257d2344b20d4a844e778e72335df3f7336b3673e2ba008ea3e984d  2137  a2a_activities.csv
+6c213dfcb31ab16d8686eff8e53921cb773fc1b57288cb608871548f4a34ad7a  5143  abl1_activities.csv
+db1cbba25344133b30625a5a17f747bb10fe4ee0afcdfec030b4fc38a6b553d2  1514  bace_activities.csv
+0c786df525acb0bb8ce54663a93d3180943e30f3b25016c7f6c7dfd24bad9678  8937  egfr_activities.csv
+7006eb7c32acdae8d78297997b9e7b47779b6140ef89d415728e37656112bebb  24561  egfr_full_activities.csv
+8c06a76f0c6487d29ab0f903e6a7a7139f189ab3c1178f159c8be8964602f189  1129  esol_delaney.csv
+851c4966353414ed756d59a70ac691021d712382dbddc0b3fc9fb246030547b5  14610  herg_activities.csv
+bb28f864126f833b3791fa112ab774717cdb4e22a694fbecff1faa90df50d363  3528  hivpr_activities.csv
+960b0c0e728765d3e7c0567a5b9283f7c3592680dd053fa2da7fdd431f230bec  6051  mpro_activities.csv
+2354ce086506827d9b65dff2cab9c49e16c024d42f9261d34acb5907d997edd1  16555  vegfr2_activities.csv
