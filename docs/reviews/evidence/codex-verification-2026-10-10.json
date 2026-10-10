@@ -1,0 +1,536 @@
+{
+  "schema_version": 1,
+  "review_date": "2026-10-10",
+  "base_commit": "25d323e82011bef9c92ba3e240e6d627dc1c6572",
+  "source_review_url": "https://github.com/LessRAY3-3/qsar-activity-prediction/pull/1",
+  "environment": {
+    "python": "3.11.16",
+    "numpy": "2.4.6",
+    "pandas": "3.0.6",
+    "scikit-learn": "1.9.1",
+    "torch": "2.14.1",
+    "torch-geometric": "2.8.0.post1",
+    "rdkit": "2026.9.1",
+    "xgboost": "3.2.0",
+    "pytest": "9.1.1"
+  },
+  "raw_file_checksums": [
+    {
+      "file": "a2a_activities.csv",
+      "expected_sha256": "5915d6e37257d2344b20d4a844e778e72335df3f7336b3673e2ba008ea3e984d",
+      "actual_sha256": "5915d6e37257d2344b20d4a844e778e72335df3f7336b3673e2ba008ea3e984d",
+      "lines_in_manifest": 2137
+    },
+    {
+      "file": "abl1_activities.csv",
+      "expected_sha256": "6c213dfcb31ab16d8686eff8e53921cb773fc1b57288cb608871548f4a34ad7a",
+      "actual_sha256": "6c213dfcb31ab16d8686eff8e53921cb773fc1b57288cb608871548f4a34ad7a",
+      "lines_in_manifest": 5143
+    },
+    {
+      "file": "bace_activities.csv",
+      "expected_sha256": "db1cbba25344133b30625a5a17f747bb10fe4ee0afcdfec030b4fc38a6b553d2",
+      "actual_sha256": "db1cbba25344133b30625a5a17f747bb10fe4ee0afcdfec030b4fc38a6b553d2",
+      "lines_in_manifest": 1514
+    },
+    {
+      "file": "egfr_activities.csv",
+      "expected_sha256": "0c786df525acb0bb8ce54663a93d3180943e30f3b25016c7f6c7dfd24bad9678",
+      "actual_sha256": "0c786df525acb0bb8ce54663a93d3180943e30f3b25016c7f6c7dfd24bad9678",
+      "lines_in_manifest": 8937
+    },
+    {
+      "file": "egfr_full_activities.csv",
+      "expected_sha256": "7006eb7c32acdae8d78297997b9e7b47779b6140ef89d415728e37656112bebb",
+      "actual_sha256": "7006eb7c32acdae8d78297997b9e7b47779b6140ef89d415728e37656112bebb",
+      "lines_in_manifest": 24561
+    },
+    {
+      "file": "esol_delaney.csv",
+      "expected_sha256": "8c06a76f0c6487d29ab0f903e6a7a7139f189ab3c1178f159c8be8964602f189",
+      "actual_sha256": "8c06a76f0c6487d29ab0f903e6a7a7139f189ab3c1178f159c8be8964602f189",
+      "lines_in_manifest": 1129
+    },
+    {
+      "file": "herg_activities.csv",
+      "expected_sha256": "851c4966353414ed756d59a70ac691021d712382dbddc0b3fc9fb246030547b5",
+      "actual_sha256": "851c4966353414ed756d59a70ac691021d712382dbddc0b3fc9fb246030547b5",
+      "lines_in_manifest": 14610
+    },
+    {
+      "file": "hivpr_activities.csv",
+      "expected_sha256": "bb28f864126f833b3791fa112ab774717cdb4e22a694fbecff1faa90df50d363",
+      "actual_sha256": "bb28f864126f833b3791fa112ab774717cdb4e22a694fbecff1faa90df50d363",
+      "lines_in_manifest": 3528
+    },
+    {
+      "file": "mpro_activities.csv",
+      "expected_sha256": "960b0c0e728765d3e7c0567a5b9283f7c3592680dd053fa2da7fdd431f230bec",
+      "actual_sha256": "960b0c0e728765d3e7c0567a5b9283f7c3592680dd053fa2da7fdd431f230bec",
+      "lines_in_manifest": 6051
+    },
+    {
+      "file": "vegfr2_activities.csv",
+      "expected_sha256": "2354ce086506827d9b65dff2cab9c49e16c024d42f9261d34acb5907d997edd1",
+      "actual_sha256": "2354ce086506827d9b65dff2cab9c49e16c024d42f9261d34acb5907d997edd1",
+      "lines_in_manifest": 16555
+    }
+  ],
+  "cleaning_reconstruction": [
+    {
+      "tag": "egfr",
+      "raw_n": 8936,
+      "kept_n": 8837,
+      "clean_n": 6165,
+      "null_pchembl_kept": 1944,
+      "smiles_order_and_counts_equal_pic50_allclose": true
+    },
+    {
+      "tag": "vegfr2",
+      "raw_n": 16554,
+      "kept_n": 16519,
+      "clean_n": 11797,
+      "null_pchembl_kept": 3508,
+      "smiles_order_and_counts_equal_pic50_allclose": true
+    },
+    {
+      "tag": "mpro",
+      "raw_n": 6050,
+      "kept_n": 6039,
+      "clean_n": 4424,
+      "null_pchembl_kept": 1231,
+      "smiles_order_and_counts_equal_pic50_allclose": true
+    },
+    {
+      "tag": "bace",
+      "raw_n": 1513,
+      "kept_n": 1513,
+      "clean_n": 1513,
+      "null_pchembl_kept": 0,
+      "smiles_order_and_counts_equal_pic50_allclose": true
+    },
+    {
+      "tag": "a2a",
+      "raw_n": 2136,
+      "kept_n": 2134,
+      "clean_n": 1746,
+      "null_pchembl_kept": 414,
+      "smiles_order_and_counts_equal_pic50_allclose": true
+    },
+    {
+      "tag": "egfr_full",
+      "raw_n": 24560,
+      "kept_n": 24399,
+      "clean_n": 13497,
+      "null_pchembl_kept": 5556,
+      "smiles_order_and_counts_equal_pic50_allclose": true
+    },
+    {
+      "tag": "abl1",
+      "raw_n": 5142,
+      "kept_n": 5110,
+      "clean_n": 2698,
+      "null_pchembl_kept": 965,
+      "smiles_order_and_counts_equal_pic50_allclose": true
+    },
+    {
+      "tag": "hivpr",
+      "raw_n": 3527,
+      "kept_n": 3422,
+      "clean_n": 2799,
+      "null_pchembl_kept": 322,
+      "smiles_order_and_counts_equal_pic50_allclose": true
+    },
+    {
+      "tag": "herg",
+      "raw_n": 14609,
+      "kept_n": 14606,
+      "clean_n": 12019,
+      "null_pchembl_kept": 4435,
+      "smiles_order_and_counts_equal_pic50_allclose": true
+    }
+  ],
+  "parent_overlap": {
+    "results": [
+      {
+        "tag": "egfr",
+        "n": 6165,
+        "multi": 204,
+        "duplicate_parents": 43,
+        "max_spread": 3.055396776806263,
+        "rdkit": "2026.09.1",
+        "random": {
+          "n_test": 1233,
+          "n_leaked": 15,
+          "percent": 1.2165450121654502,
+          "saved_split_identical": true
+        },
+        "scaffold": {
+          "n_test": 1236,
+          "n_leaked": 0,
+          "percent": 0.0,
+          "saved_split_identical": true
+        }
+      },
+      {
+        "tag": "egfr_full",
+        "n": 13497,
+        "multi": 244,
+        "duplicate_parents": 57,
+        "max_spread": 2.7269987279362624,
+        "rdkit": "2026.09.1",
+        "random": {
+          "n_test": 2700,
+          "n_leaked": 13,
+          "percent": 0.48148148148148145
+        },
+        "scaffold": {
+          "n_test": 2712,
+          "n_leaked": 6,
+          "percent": 0.22123893805309736
+        }
+      },
+      {
+        "tag": "herg",
+        "n": 12019,
+        "multi": 390,
+        "duplicate_parents": 30,
+        "max_spread": 2.094659762394719,
+        "rdkit": "2026.09.1",
+        "random": {
+          "n_test": 2404,
+          "n_leaked": 16,
+          "percent": 0.6655574043261231
+        },
+        "scaffold": {
+          "n_test": 2410,
+          "n_leaked": 17,
+          "percent": 0.7053941908713693
+        }
+      },
+      {
+        "tag": "vegfr2",
+        "n": 11797,
+        "multi": 270,
+        "duplicate_parents": 64,
+        "max_spread": 1.4800309824398887,
+        "rdkit": "2026.09.1",
+        "random": {
+          "n_test": 2360,
+          "n_leaked": 21,
+          "percent": 0.8898305084745762
+        },
+        "scaffold": {
+          "n_test": 2375,
+          "n_leaked": 0,
+          "percent": 0.0
+        }
+      },
+      {
+        "tag": "abl1",
+        "n": 2698,
+        "multi": 68,
+        "duplicate_parents": 27,
+        "max_spread": 0.8432959778798441,
+        "rdkit": "2026.09.1",
+        "random": {
+          "n_test": 540,
+          "n_leaked": 11,
+          "percent": 2.037037037037037
+        },
+        "scaffold": {
+          "n_test": 539,
+          "n_leaked": 0,
+          "percent": 0.0
+        }
+      },
+      {
+        "tag": "mpro",
+        "n": 4424,
+        "multi": 135,
+        "duplicate_parents": 8,
+        "max_spread": 0.39689225308084364,
+        "rdkit": "2026.09.1",
+        "random": {
+          "n_test": 885,
+          "n_leaked": 6,
+          "percent": 0.6779661016949152
+        },
+        "scaffold": {
+          "n_test": 891,
+          "n_leaked": 0,
+          "percent": 0.0
+        }
+      },
+      {
+        "tag": "hivpr",
+        "n": 2799,
+        "multi": 17,
+        "duplicate_parents": 6,
+        "max_spread": 2.4327021149312493,
+        "rdkit": "2026.09.1",
+        "random": {
+          "n_test": 560,
+          "n_leaked": 4,
+          "percent": 0.7142857142857143
+        },
+        "scaffold": {
+          "n_test": 570,
+          "n_leaked": 0,
+          "percent": 0.0
+        }
+      },
+      {
+        "tag": "a2a",
+        "n": 1746,
+        "multi": 13,
+        "duplicate_parents": 1,
+        "max_spread": 0.8232878766757432,
+        "rdkit": "2026.09.1",
+        "random": {
+          "n_test": 350,
+          "n_leaked": 0,
+          "percent": 0.0
+        },
+        "scaffold": {
+          "n_test": 384,
+          "n_leaked": 0,
+          "percent": 0.0
+        }
+      },
+      {
+        "tag": "bace",
+        "n": 1513,
+        "multi": 0,
+        "duplicate_parents": 0,
+        "max_spread": 0.0,
+        "rdkit": "2026.09.1",
+        "random": {
+          "n_test": 303,
+          "n_leaked": 0,
+          "percent": 0.0
+        },
+        "scaffold": {
+          "n_test": 306,
+          "n_leaked": 0,
+          "percent": 0.0
+        }
+      }
+    ],
+    "examples": {
+      "egfr_full": {
+        "train_row": 9327,
+        "test_row": 9326,
+        "train": {
+          "canonical_smiles": "CS(=O)(=O)CCNCc1ccc(-c2ccc3ncnc(Nc4ccc(OCc5cccc(F)c5)c(Cl)c4)c3c2)o1.Cc1ccc(S(=O)(=O)O)cc1.Cc1ccc(S(=O)(=O)O)cc1.O",
+          "pic50": 7.958607314841775,
+          "ic50_nm_median": 11.0,
+          "n_measurements": 7,
+          "molecule_chembl_id": "CHEMBL1201179",
+          "target": "Epidermal growth factor receptor"
+        },
+        "test": {
+          "canonical_smiles": "CS(=O)(=O)CCNCc1ccc(-c2ccc3ncnc(Nc4ccc(OCc5cccc(F)c5)c(Cl)c4)c3c2)o1",
+          "pic50": 7.567672207738396,
+          "ic50_nm_median": 27.06,
+          "n_measurements": 113,
+          "molecule_chembl_id": "CHEMBL554",
+          "target": "Epidermal growth factor receptor"
+        },
+        "parent": "CS(=O)(=O)CCNCc1ccc(-c2ccc3ncnc(Nc4ccc(OCc5cccc(F)c5)c(Cl)c4)c3c2)o1",
+        "train_scaffold": "c1ccc(COc2ccc(Nc3ncnc4ccc(-c5ccco5)cc34)cc2)cc1.c1ccccc1.c1ccccc1",
+        "test_scaffold": "c1ccc(COc2ccc(Nc3ncnc4ccc(-c5ccco5)cc34)cc2)cc1"
+      },
+      "herg": {
+        "train_row": 1513,
+        "test_row": 1512,
+        "train": {
+          "canonical_smiles": "CCCCCCC[N+](CC)(CC)CCCCc1ccc(Cl)cc1.Cc1ccc(S(=O)(=O)[O-])cc1",
+          "pic50": 8.0,
+          "ic50_nm_median": 26.0,
+          "n_measurements": 2,
+          "molecule_chembl_id": "CHEMBL598270",
+          "target": "Voltage-gated inwardly rectifying potassium channel KCNH2"
+        },
+        "test": {
+          "canonical_smiles": "CCCCCCC[N+](CC)(CC)CCCCc1ccc(Cl)cc1",
+          "pic50": 7.361941505418228,
+          "ic50_nm_median": 81.295,
+          "n_measurements": 2,
+          "molecule_chembl_id": "CHEMBL9484",
+          "target": "Voltage-gated inwardly rectifying potassium channel KCNH2"
+        },
+        "parent": "CCCCCCC[N+](CC)(CC)CCCCc1ccc(Cl)cc1",
+        "train_scaffold": "c1ccccc1.c1ccccc1",
+        "test_scaffold": "c1ccccc1"
+      }
+    }
+  },
+  "selected_activity_matches": [
+    {
+      "query_url": "https://www.ebi.ac.uk/chembl/api/data/activity.json?target_chembl_id=CHEMBL203&standard_type=IC50&standard_units=nM&limit=1&assay_type=B&standard_relation=%3E%3D",
+      "activity_id": 2136983,
+      "molecule_chembl_id": "CHEMBL406375",
+      "canonical_smiles": "c1ccc(-c2n[nH]c3c2oc2ccccc23)cc1",
+      "standard_relation": ">=",
+      "standard_value": "10000.0",
+      "pchembl_value": null,
+      "data_validity_comment": null,
+      "document_chembl_id": "CHEMBL1145498",
+      "assay_chembl_id": "CHEMBL940057",
+      "assay_description": "Inhibition of EGFR",
+      "historical_raw_matches": 1,
+      "historical_raw_rows": [
+        2921
+      ],
+      "clean_rows": [
+        {
+          "canonical_smiles": "c1ccc(-c2n[nH]c3c2oc2ccccc23)cc1",
+          "pic50": 5.0,
+          "ic50_nm_median": 10000.0,
+          "n_measurements": 1,
+          "molecule_chembl_id": "CHEMBL406375",
+          "target": "Epidermal growth factor receptor"
+        }
+      ]
+    },
+    {
+      "query_url": "https://www.ebi.ac.uk/chembl/api/data/activity.json?target_chembl_id=CHEMBL203&standard_type=IC50&standard_units=nM&limit=1&assay_type=B&standard_relation=%3C%3D",
+      "activity_id": 16894417,
+      "molecule_chembl_id": "CHEMBL3949197",
+      "canonical_smiles": "COc1cc2ncnc(Nc3ccc(F)c(Cl)c3)c2cc1OCC(=O)NO",
+      "standard_relation": "<=",
+      "standard_value": "100.0",
+      "pchembl_value": null,
+      "data_validity_comment": null,
+      "document_chembl_id": "CHEMBL3881527",
+      "assay_chembl_id": "CHEMBL3881964",
+      "assay_description": "Inhibition of N-terminal GST-fused human EGFR (His672 to Ala1210 residues) expressed in baculovirus expression system using biotinylated PTP1B at Tyr66 as substrate preincubated for 5 mins followed by substrate addition measured after 30 mins by DELFIA",
+      "historical_raw_matches": 1,
+      "historical_raw_rows": [
+        8517
+      ],
+      "clean_rows": [
+        {
+          "canonical_smiles": "COc1cc2ncnc(Nc3ccc(F)c(Cl)c3)c2cc1OCC(=O)NO",
+          "pic50": 7.0,
+          "ic50_nm_median": 100.0,
+          "n_measurements": 1,
+          "molecule_chembl_id": "CHEMBL3949197",
+          "target": "Epidermal growth factor receptor"
+        }
+      ]
+    },
+    {
+      "query_url": "https://www.ebi.ac.uk/chembl/api/data/activity.json?target_chembl_id=CHEMBL203&standard_type=IC50&standard_units=nM&limit=10&assay_type=B&standard_relation=%3D&pchembl_value__isnull=true",
+      "activity_id": 32770,
+      "molecule_chembl_id": "CHEMBL306988",
+      "canonical_smiles": "CC(=C(C#N)C#N)c1ccc(NC(=O)CCC(=O)O)cc1",
+      "standard_relation": "=",
+      "standard_value": "500000.0",
+      "pchembl_value": null,
+      "data_validity_comment": "Outside typical range",
+      "document_chembl_id": "CHEMBL1124610",
+      "assay_chembl_id": "CHEMBL674643",
+      "assay_description": "Inhibitory concentration of EGF dependent autophosphorylation of epidermal growth factor receptor kinase",
+      "historical_raw_matches": 1,
+      "historical_raw_rows": [
+        3
+      ],
+      "clean_rows": [
+        {
+          "canonical_smiles": "CC(=C(C#N)C#N)c1ccc(NC(=O)CCC(=O)O)cc1",
+          "pic50": 3.3010299956639813,
+          "ic50_nm_median": 500000.0,
+          "n_measurements": 1,
+          "molecule_chembl_id": "CHEMBL306988",
+          "target": "Epidermal growth factor receptor"
+        }
+      ]
+    }
+  ],
+  "activity_matching_note": "Current API relations matched historical rows on molecule ID, SMILES, numeric value, assay type, document ID, and assay description; raw_row indices are zero based. This does not reconstruct the full historical relation distribution.",
+  "time_metrics_from_saved_predictions": [
+    {
+      "tag": "a2a",
+      "rf_r2": -0.25522721865315434,
+      "mean_individual_gin_r2_float64": -0.09683582746023127,
+      "individual_score_mean_delta": 0.15839139119292306,
+      "gin_ensemble_r2": -0.017595448582018003,
+      "ensemble_delta": 0.23763177007113634,
+      "stored_ensemble_delta": 0.2376317700711363,
+      "test_indices_identical": true
+    },
+    {
+      "tag": "abl1",
+      "rf_r2": 0.2796636594066194,
+      "mean_individual_gin_r2_float64": 0.22912833370612362,
+      "individual_score_mean_delta": -0.05053532570049579,
+      "gin_ensemble_r2": 0.2521374507589722,
+      "ensemble_delta": -0.02752620864764721,
+      "stored_ensemble_delta": -0.0275262086476472,
+      "test_indices_identical": true
+    },
+    {
+      "tag": "egfr",
+      "rf_r2": 0.013319655163438915,
+      "mean_individual_gin_r2_float64": 0.03658358816163213,
+      "individual_score_mean_delta": 0.023263932998193217,
+      "gin_ensemble_r2": 0.07099675724884036,
+      "ensemble_delta": 0.057677102085401444,
+      "stored_ensemble_delta": 0.0576771020854014,
+      "test_indices_identical": true
+    },
+    {
+      "tag": "egfr_full",
+      "rf_r2": -0.8909056878014654,
+      "mean_individual_gin_r2_float64": -0.24037246938695156,
+      "individual_score_mean_delta": 0.6505332184145138,
+      "gin_ensemble_r2": -0.2150699549861268,
+      "ensemble_delta": 0.6758357328153386,
+      "stored_ensemble_delta": 0.6758357328153386,
+      "test_indices_identical": true
+    },
+    {
+      "tag": "herg",
+      "rf_r2": -0.03377469579827608,
+      "mean_individual_gin_r2_float64": -0.07617907245012308,
+      "individual_score_mean_delta": -0.042404376651847,
+      "gin_ensemble_r2": 0.04190273197422412,
+      "ensemble_delta": 0.0756774277725002,
+      "stored_ensemble_delta": 0.0756774277725002,
+      "test_indices_identical": true
+    },
+    {
+      "tag": "hivpr",
+      "rf_r2": 0.17313730907603297,
+      "mean_individual_gin_r2_float64": 0.17870090498526392,
+      "individual_score_mean_delta": 0.005563595909230945,
+      "gin_ensemble_r2": 0.19754039486496555,
+      "ensemble_delta": 0.024403085788932577,
+      "stored_ensemble_delta": 0.0244030857889325,
+      "test_indices_identical": true
+    },
+    {
+      "tag": "mpro",
+      "rf_r2": -0.05125697501844506,
+      "mean_individual_gin_r2_float64": 0.057325031115248594,
+      "individual_score_mean_delta": 0.10858200613369365,
+      "gin_ensemble_r2": 0.09164077960602657,
+      "ensemble_delta": 0.14289775462447163,
+      "stored_ensemble_delta": 0.1428977546244716,
+      "test_indices_identical": true
+    },
+    {
+      "tag": "vegfr2",
+      "rf_r2": 0.09301313336727879,
+      "mean_individual_gin_r2_float64": 0.02008257540268506,
+      "individual_score_mean_delta": -0.07293055796459373,
+      "gin_ensemble_r2": 0.07996999036033625,
+      "ensemble_delta": -0.013043143006942537,
+      "stored_ensemble_delta": -0.0130431430069425,
+      "test_indices_identical": true
+    }
+  ],
+  "time_precision_note": "Predictions cast to float64 before scoring; per-seed means can differ slightly from original JSON scores. Ensemble deltas match stored summary within 1e-12."
+}
