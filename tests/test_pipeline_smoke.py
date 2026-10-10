@@ -90,7 +90,7 @@ def test_pipeline_02_03_04_smoke(tmp_path, monkeypatch, load_script, valid_smile
     assert X.shape == (24, 2048) and X.dtype == np.uint8
     assert y.shape == (24,) and np.isfinite(y).all()
     assert len(smi) == 24
-    assert smi.tolist() == clean["canonical_smiles"].tolist()  # row alignment
+    assert smi.tolist() == clean["parent_smiles"].tolist()  # row alignment, parent unit
     assert set(np.unique(X)) <= {0, 1}
     assert str(d["target"]) == "Test Kinase"
 
