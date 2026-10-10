@@ -6,7 +6,7 @@
 
 记录级对账**完全确认**了 PR #1 的量级：历史 raw pull 的 24,560 行在今日 API 上 100% 匹配（0 行丢失、0 行新增），匹配行的删失份额 21.5%（不含空 relation）与 PR #1 的 21.5% (5,283/24,560) 一致；按同样清洗流程（nM、去缺失、正值、SMILES 组中位数，仍不加 relation 过滤）复算，**13,497 个化合物的标签与已提交 clean CSV 零差异**（最大偏差 1.8e-15）。清洗后"仅删失"化合物为 **2,722/13,497 = 20.17%**，与 PR #1 声称的 2,718/13,497 ≈ 20.1% 相差 4 个（口径：`>>`/`~`/空 relation 共 151 条记录的处理边界）。两种过滤策略确认**不等价**：`=` 保留 19,106 行/10,775 化合物，`pchembl_value.notna()` 保留 18,843 行/10,675 化合物，差异全部是一方向——263 行（185 个化合物）relation 为 `=` 但 pChEMBL 为空（典型为 `data_validity_comment="Outside typical range"`，如 activity 32770 / CHEMBL306988，500000 nM）。
 
-若按主策略 `standard_relation == "="` 修复标签：2,722 个仅删失化合物整体消失，另有 **896 个化合物的标签会移动**（|Δ| 均值 0.57、最大 4.30 个对数单位；有符号中位数 +0.195）。敏感性 RF 重跑因与后台任务 CPU 冲突**尚未完成**，修复前后指标对比表见"敏感性实验结果"一节占位，待后续回填。
+若按主策略 `standard_relation == "="` 修复标签：2,722 个仅删失化合物整体消失，另有 **896 个化合物的标签会移动**（|Δ| 均值 0.57、最大 4.30 个对数单位；有符号中位数 +0.195）。敏感性 RF 重跑**已完成**：剔除仅删失化合物后 random 切分 **ΔR² = −0.0250**、scaffold 切分 **ΔR² = +0.0088**，方向与审查预期一致、未见结论翻转级别的效应，完整数字见"敏感性实验结果"一节。
 
 ## 范围与产物
 
@@ -16,7 +16,7 @@
 
 - `data/raw/egfr_full_v2_activities.csv` — 新下载（24,560 行；旧 `egfr_full_activities.csv` 未动）
 - `.scratch/h1_sensitivity/reconcile_h1.py` / `reconcile_summary.json` / `label_diff_per_compound.csv` / `censored_only_smiles.csv`（2,722 行）/ `filter_strategy_diff_examples.csv`
-- `.scratch/h1_sensitivity/rf_h1_sensitivity.py` / `rf_h1.log` / `rf_h1_sensitivity.json`（后者待生成）
+- `.scratch/h1_sensitivity/rf_h1_sensitivity.py` / `rf_h1.log` / `rf_h1_sensitivity.json`（三者均已生成；另存 `rf_h1_preds_{random,scaffold}.npz` 与 `rf_h1_scatter_{random,scaffold}.png`）
 
 ## 方法
 
@@ -38,7 +38,7 @@
 
 照 [02_clean_data.py](../../scripts/02_clean_data.py) 逐步复现（unit==nM → `standard_value` 数值化并去缺失 → 去空 SMILES → 去非正值 → pIC50 → 按 canonical_smiles 取 median），**仍不加 relation 过滤**，与已提交 `egfr_full_pic50_clean.csv` 逐化合物对比。"仅删失"定义：清洗后存活记录中**没有任何一条** `standard_relation == "="` 的 SMILES（空 relation、`>>`、`~` 均计为非等号）。
 
-### 敏感性 RF 设计（待执行完）
+### 敏感性 RF 设计（已执行，结果见"敏感性实验结果"一节）
 
 `.scratch/h1_sensitivity/rf_h1_sensitivity.py` 复刻 HEAD 版 [04_train_and_evaluate.py](../../scripts/04_train_and_evaluate.py) 的原始流程（工作区当前副本已含 shuffle 修复，属 L3/Phase C，本次刻意用 HEAD 口径以隔离标签效应）：
 
@@ -97,39 +97,45 @@
 
 ## 敏感性实验结果
 
-**状态：待补（后台任务 CPU 冲突，RF 重跑被推迟，由后续智能体在后台任务全部完成后执行 `.scratch/h1_sensitivity/rf_h1_sensitivity.py` 并回填本节）。**
+实验已执行完毕：`.scratch/h1_sensitivity/rf_h1_sensitivity.py` 在后台任务让出 CPU 后完成两切分重跑，日志 `rf_h1.log`、汇总 JSON `rf_h1_sensitivity.json`、逐样本预测与散点图亦已落盘。
 
-已确定的设计数字（脚本启动日志）：
+### 剔除规模
 
 | split | 训练池 | 剔除 | 测试集 | 剔除 |
 |---|---:|---:|---:|---:|
 | random | 10,797 → 8,619 | 2,178 | 2,700 → 2,156 | 544 |
-| scaffold | 10,785 → 待回填 | 待回填 | 2,712 → 待回填 | 待回填 |
+| scaffold | 10,785 → 8,604 | 2,181 | 2,712 → 2,171 | 541 |
 
-修复前后指标对比（"修复前" = `git show HEAD:results/metrics_egfr_full.json`；"修复后"待回填）：
+### 修复前后指标对比
 
-| split | 指标 | 修复前（HEAD） | 修复后（剔除仅删失） | Δ |
-|---|---|---:|---:|---:|
-| random | R² | 0.7592 | 待回填 | 待回填 |
-| random | RMSE | 0.7093 | 待回填 | 待回填 |
-| random | MAE | 0.4950 | 待回填 | 待回填 |
-| scaffold | R² | 0.5926 | 待回填 | 待回填 |
-| scaffold | RMSE | 0.8901 | 待回填 | 待回填 |
-| scaffold | MAE | 0.6629 | 待回填 | 待回填 |
+"修复前" = `git show HEAD:results/metrics_egfr_full.json`（已核对：该文件在基线 `94572a6` 与当前 HEAD `e7f32ba` 之间无差异，故下表基准仍有效）；"修复后" = 从训练池与测试集剔除仅删失化合物后重跑。
 
-对比口径说明：修复前后测试集构成不同（random 例：2,700 → 2,156），Δ 同时包含"测试集构成变化"与"训练标签清洗"两个效应；若 Δ 很小，可解释为无论哪个方向都未颠覆排序。
+| split | 剔除数 pool/test | 修复前 R² / RMSE | 修复后 R² / RMSE | ΔR² / ΔRMSE |
+|---|---:|---:|---:|---:|
+| random | 2,178 / 544 | 0.7592 / 0.7093 | 0.7342 / 0.7119 | **−0.0250 / +0.0026** |
+| scaffold | 2,181 / 541 | 0.5926 / 0.8901 | 0.6014 / 0.9056 | **+0.0088 / +0.0156** |
 
-## 对总体结论的初步判断（基于对账数字，非模型重测）
+MAE：random 0.4950 → 0.5129（+0.0178）；scaffold 0.6629 → 0.6993（+0.0364）。两切分 GridSearch 选出的最优超参完全一致（`n_estimators=500, max_depth=None, min_samples_split=2`，与 HEAD 最优解相同），best_cv_r² 分别为 0.7120（random）与 0.7143（scaffold），即约 0.712 / 0.714。
+
+**方法注记**：两切分都在**各自同一切分**上做剔除（切分索引不变，仅删失化合物同时移出训练池与测试集），沿用与 HEAD 完全相同的 CV（KFold(5) 不 shuffle）与同一超参网格重新寻优，其余化合物标签逐条不变——因此 Δ 隔离出来的只有"删失标签"这一个效应。
+
+对比口径说明：修复前后测试集构成不同（random 例：2,700 → 2,156），Δ 同时包含"测试集构成变化"与"训练标签清洗"两个成分，但二者都源自同一次剔除处理；Δ 小则说明无论哪个方向都未颠覆排序。
+
+## 对总体结论的初步判断（基于 egfr_full RF 实测 + 记录级对账）
 
 - H1 的机制与量级在记录级被证实：egfr_full 约 1/5 化合物的标签是检测限而非测量值，审查报告的数字不是测量假象。
-- **推断**（未测量）：RF 与 GIN 见的是同一批标签，两者相对比较大概率不因 H1 修复而翻盘；但绝对 R²/RMSE、以及建立在标签上的不确定性/AD 校准数字，都应对外报告时注明"目标含约 20% 删失标签"。
+- **random 切分**：R² 0.7592 → 0.7342，即修复前**虚高约 0.025（相对约 3%）**；RMSE 0.7093 → 0.7119 几乎不变（+0.0026）。删失标签主要抬高绝对 R² 的水位，对误差量级影响极小。
+- **scaffold 切分**：ΔR² = +0.0088、ΔRMSE = +0.0156，均在 ±0.01 / 0.016 量级内，可视为微小。
+- **方向与审查预期一致**：绝对 R² 被删失标签轻度污染，但在 egfr_full 上未见结论翻转级别的效应——两切分的量级与排序没有被推翻。
+- 证据边界：以上仅 RF、仅 egfr_full 单靶点。GIN 与其余靶点的影响由 C 层全量刷新后的最终数字回答；在那之前不对跨模型、跨靶点下结论。
+- RF 与 GIN 见的是同一批标签，两者相对比较大概率不因 H1 修复而翻盘（此条仍是推断，未在 GIN 上实测）；绝对 R²/RMSE 及建立在标签上的不确定性/AD 校准数字，对外报告时仍应注明"目标含约 20% 删失标签"。
 - 若按 `=` 策略修复，数据集规模与全部下游统计（README 面板、显著性、时间切分、fairness）都需以 10,775 化合物口径重算——属 Phase C 数据刷新，本次不做。
-- 在敏感性数字回填之前，不对"结论是否受影响"下最终判断；尤其 GIN/GINE/AttentiveFP、时间切分与多任务一概未测。
+- GIN/GINE/AttentiveFP、时间切分与多任务一概未测。
 
 ## 局限性
 
-- 只覆盖 egfr_full；其余 6 个受影响靶点（a2a、abl1、herg、mpro、vegfr2、hivpr）未做记录级对账（PR #1 的在线测量仍是最优证据）。
-- 敏感性 RF 尚未跑完；本报告的对比表是占位。
+- 本敏感性实验只覆盖 egfr_full（CHEMBL203）一个靶点，且只覆盖 random / scaffold 两个切分；其余 6 个受影响靶点（a2a、abl1、herg、mpro、vegfr2、hivpr）未做记录级对账（PR #1 的在线测量仍是最优证据），也未做敏感性重跑。
+- time 切分未做敏感性重跑。
 - 只测 RF；GNN 家族及所有下游实验（bootstrap 显著性、不确定性/AD、interpretability）未重测。
 - 新 pull 是 2026-10-10 的 API 快照；历史记录身份依赖组合键（无 activity_id 留存）。但 100% 行匹配 + 标签 100% 复现使错配风险极低。
 - `cv=5` 不 shuffle 是刻意复刻 HEAD 原始流程（L3 已指出该缺陷），本次为隔离标签效应不变更；RF `n_jobs` 取值只影响调度不影响结果。
