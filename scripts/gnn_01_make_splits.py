@@ -33,7 +33,15 @@ Output: data/processed/splits/{TAG}_{split}.npz with
   scaffold_smiles : per-molecule Bemis-Murcko scaffold (used later to
       colour the error analysis by chemotype)
   smiles          : copy of the smiles array for a self-consistency check
+
+CLI: --skip-model-check skips the verification against the saved RF
+models. Verification is impossible while the RF models are being
+retrained on refreshed data (the saved models and metrics are from the
+old data and would fail the check); re-run without the flag once the
+new models land. The splits themselves are unaffected - they are
+reproduced deterministically from the fingerprints.
 """
+import argparse
 import json
 import os
 
@@ -79,7 +87,18 @@ def verify_against_saved_model(split_name, test_idx, X, y, expected):
         )
 
 
+def parse_args():
+    p = argparse.ArgumentParser(description=__doc__,
+                                formatter_class=argparse.RawDescriptionHelpFormatter)
+    p.add_argument("--skip-model-check", action="store_true",
+                   help="do not re-predict with the saved RF models to verify the "
+                        "regenerated splits; needed while the RF retrain on the new "
+                        "data is still pending (default keeps the verification)")
+    return p.parse_args()
+
+
 def main():
+    args = parse_args()
     os.makedirs(SPLIT_DIR, exist_ok=True)
     d = np.load(IN_NPZ)
     X, y, smiles = d["X"], d["y"], d["smiles"]
@@ -87,8 +106,10 @@ def main():
     print(f"[{TAG}] {n} molecules | X={X.shape} | y range [{y.min():.2f}, {y.max():.2f}]")
 
     scaf = murcko_scaffold_list(smiles)
-    with open(METRICS_JSON) as f:
-        metrics = json.load(f)
+    metrics = None
+    if not args.skip_model_check:
+        with open(METRICS_JSON) as f:
+            metrics = json.load(f)
 
     splits = {
         "random": train_test_split(np.arange(n), test_size=0.2, random_state=RANDOM_STATE),
@@ -105,9 +126,17 @@ def main():
                  scaffold_smiles=scaf, smiles=smiles)
         print(f"  saved {os.path.relpath(out, BASE)}  "
               f"train={len(tr_new)} valid={len(va)} test={len(te)}")
-        verify_against_saved_model(name, te, X, y, metrics[name])
+        if args.skip_model_check:
+            print(f"  [SKIP] {name} split: RF model verification disabled "
+                  "(--skip-model-check)")
+        else:
+            verify_against_saved_model(name, te, X, y, metrics[name])
 
-    print("All splits reproduced and verified against saved RF models.")
+    if args.skip_model_check:
+        print("All splits reproduced (model verification skipped - "
+              "re-run without --skip-model-check once the new RF models land).")
+    else:
+        print("All splits reproduced and verified against saved RF models.")
 
 
 if __name__ == "__main__":
