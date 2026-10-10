@@ -244,7 +244,13 @@ def print_conclusion(rows):
               f"(dR2 range [{min(vals):+.3f}, {max(vals):+.3f}])")
     print(f"  all cells : {len(neg)} of {len(cells)} negative, "
           f"{len(tie)} tie ({', '.join(t for t, _ in tie) if tie else 'none'}), "
-          f"{len(pos)} positive -> no target gives the GIN a clear lead")
+          f"{len(pos)} positive")
+    if pos:
+        lead = ", ".join(f"{t}/{s}" for t, s in pos)
+        print(f"  verdict   : the GIN has a clear lead on {len(pos)} cell(s): "
+              f"{lead}")
+    else:
+        print("  verdict   : no target gives the GIN a clear lead")
     seed42_scaf_wins = [r["tag"] for r in rows
                         if np.isfinite(r.get("d_r2_seed42_scaffold", np.nan))
                         and r["d_r2_seed42_scaffold"] > 0]
@@ -342,8 +348,10 @@ def verify_summary_csv(path):
         if mc not in df.columns:
             continue
         expected = df[f"gin_r2_mean_{split}"] - df[f"rf_r2_{split}"]
+        # equal_nan: a tag with one missing split round-trips NaN == NaN,
+        # which is what "skipped/absent cells stay absent" means
         if not np.allclose(df[mc].to_numpy(float), expected.to_numpy(float),
-                           rtol=0, atol=1e-12):
+                           rtol=0, atol=1e-12, equal_nan=True):
             print(f"[verify] {mc} does not equal gin_r2_mean - rf_r2 "
                   f"(round-trip failed)")
             ok = False

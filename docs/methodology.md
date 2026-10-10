@@ -70,10 +70,12 @@ The 3 seed predictions are averaged **per molecule** first, one R2 is
 computed from that ensemble prediction (the deployable "3-seed
 ensemble" model), and only then is the RF R2 subtracted. This is the
 `pair=mean3` row of every `results/significance/summary*.csv` (columns
-`d_r2`, `ci_lo/ci_hi`, `p_one_sided`), the `ci_lo/ci_hi` whiskers drawn
-over the panel `d_r2_mean` bars, and the `d_r2_mean3` + `ci_lo/ci_hi`
-columns of `results/time_split/summary.csv` (the same numbers as the
-`mean3` rows of `results/significance/summary_time.csv`).
+`d_r2`, `ci_lo/ci_hi`, `frac_boot_gin_better`; csv files written before
+the 2026-10-10 rename still say `p_one_sided`), the `ci_lo/ci_hi`
+whiskers drawn over the panel `d_r2_mean` bars, and the `d_r2_mean3` +
+`ci_lo/ci_hi` columns of `results/time_split/summary.csv` (the same
+numbers as the `mean3` rows of
+`results/significance/summary_time.csv`).
 
 **Why the two differ, systematically.** Averaging predictions before
 scoring cancels per-molecule seed variance while the denominator SST is
@@ -98,7 +100,9 @@ individual seeds from RF" vs "how far is the deployed ensemble from
 RF"), not a discrepancy.
 
 **Reading rule.** Significance (is this cell separable from 0?) - read
-the CI / p from the significance tables. Point estimates, ±std and panel
+the CI from the significance tables (`frac_boot_gin_better` there is the
+fraction of bootstrap replicates favouring GIN, a direction descriptor,
+not a hypothesis-test p). Point estimates, ±std and panel
 bars - read the panel tables. Never compare a panel point against an
 ensemble CI: `afp_panel`'s `herg`/scaffold is the illustration - its
 point reads **+0.013** (per-seed-mean) while its own ensemble CI is
@@ -147,6 +151,15 @@ Pooling is mean rather than the paper's sum so prediction scale
 does not couple to molecule size. Target standardized with train
 statistics; metrics reported in original pIC50 units.
 
+**RF hyperparameter search.** `scripts/04_train_and_evaluate.py` tunes
+n_estimators x max_depth x min_samples_split with `GridSearchCV` on the
+training pool only, using `KFold(5, shuffle=True, random_state=42)`.
+The shuffle is deliberate: scaffold and time train pools are ordered by
+scaffold group / SMILES, so unshuffled folds would each be one block of
+the same chemotype family (or one alphabetical SMILES run) and the grid
+winner would be picked on folds that never see some families. The test
+set plays no role in the search.
+
 ## Statistical significance (paired bootstrap)
 
 `experiments/paired_bootstrap.py` decides whether any single cell's Δ is
@@ -159,8 +172,11 @@ separable from resampling noise - analysis only, nothing is retrained:
   RF, reference) and `mean3` (primary: per-molecule mean of the 3 GIN
   seed predictions vs RF, matching the campaign's mean convention). The
   95% CI is the [2.5, 97.5] percentile of the bootstrap ΔR2
-  distribution; `p_one_sided = #(ΔR2_boot > 0)/B`; a cell is
-  *significant* iff the CI excludes 0. Signs: ΔR2 = R2_GIN − R2_RF (> 0
+  distribution; `frac_boot_gin_better = #(ΔR2_boot > 0)/B` - the
+  fraction of bootstrap replicates favouring GIN, **not a p-value**
+  (renamed from `p_one_sided` on 2026-10-10; a strong GIN win reads
+  ≈1.0, so filtering on `p < 0.05` would silently drop every GIN win);
+  a cell is *significant* iff the CI excludes 0. Signs: ΔR2 = R2_GIN − R2_RF (> 0
   favours GIN); ΔRMSE = RMSE_GIN − RMSE_RF (> 0 favours RF). Both
   conventions of a cell draw from the same seeded generator (seed 42, so
   runs are order-independent).
@@ -171,7 +187,7 @@ separable from resampling noise - analysis only, nothing is retrained:
   |---|---|---|---|
   | `egfr`/random | −0.031 | [−0.054, −0.008] | RF |
   | `egfr_full`/random | −0.033 | [−0.048, −0.018] | RF |
-  | `mpro`/scaffold | −0.086 | [−0.132, −0.041] | RF |
+  | `mpro`/scaffold | −0.085 | [−0.132, −0.041] | RF |
   | `vegfr2`/random | −0.033 | [−0.053, −0.015] | RF |
 
   Under `seed42` two cells instead read as *GIN* wins -
@@ -268,7 +284,10 @@ only already-known chemistry predicts genuinely newer compounds.
   **5/8 cells are significant and all favour GIN, 0 favour RF** -
   egfr_full +0.676 [0.617, 0.741], a2a +0.238 [0.129, 0.347], mpro
   +0.143 [0.112, 0.175], herg +0.076 [0.034, 0.120], egfr +0.058
-  [0.005, 0.112].
+  [0.005, 0.112]. These Δ and CIs are ensemble (mean3) quantities, not
+  the difference of the per-seed-mean columns displayed next to them -
+  the README table carries a `GIN ens` column and a worked `herg`
+  example (columns subtract to −0.042, ensemble Δ is +0.076).
 - **Reading**: the GIN *degrades significantly less* under temporal
   drift - relative robustness, which is what the flipped significance
   table measures. Absolute performance is the deployment criterion, and
@@ -424,24 +443,34 @@ at the largest n.
 ![learning curve egfr](../figures/learning_curve/learning_curve_egfr.png)
 
 **The signal is real: Y-randomization kills it.** Training on permuted
-labels scores <= 0 on every run (random split: shuffled-label means
--0.18 RF / -0.01 GIN, all < 0.2; scaffold split: -0.15 / -0.02) while
+labels, every shuffled-label group mean scores <= 0 (random split:
+-0.18 RF / -0.01 GIN, all < 0.2; scaffold split: -0.15 / -0.02;
+individual shuffled GIN seeds on `egfr`/random can still land slightly
+positive, -0.029/+0.002/+0.011 - the 3-seed means stay <= 0) while
 real-label controls land on the baselines - no
 train/test leakage. One number needs a footnote: the real-label control
-RF reads **0.7414** (random) against the headline **0.7466**, a ~0.005
-gap that comes from the control protocol itself -
-`experiments/y_randomization.py` fits a single RF with the main run's
-grid-winner params (`best_params_random`) instead of re-running the full
-GridSearchCV, so a small offset from the published baseline is expected
-in both direction and magnitude. It is not leakage evidence: the
-y-randomization verdict only requires shuffled <= 0 with the real control
-landing inside the baseline band.
+RF reads **0.7414** (random) against the headline **0.7466**. The ~0.005
+gap comes from the control's training pool, not from skipped tuning:
+`experiments/y_randomization.py` fits its control RF on the GNN train
+pool (`egfr`/random 4438 rows; scaffold 4436), i.e. without the 10%
+validation carve-out the headline RF also trained on (4932 / 4929 rows -
+494 / 493 more rows). Real and shuffled controls always fit on the same
+pool, so the comparison stays valid. It is not leakage evidence either
+way: the y-randomization verdict only requires shuffled <= 0 with the
+real control landing inside the baseline band.
 
 ![y randomization](../figures/y_randomization/y_randomization_egfr.png)
 
 **XGBoost does not beat the tuned RF either** (-0.010 random /
 -0.044 scaffold vs the same-pool RF control, deterministic across
-seeds). Second negative result: on this featurization, boosting
+seeds). "Deterministic" is literal, and worth reading correctly:
+`XGBRegressor(tree_method="hist")` with the default
+`subsample=1.0` / `colsample_{bytree,bylevel,bynode}=1.0` has no
+stochastic path into the fit, so `random_state` changes nothing and the
+three "seed" runs are identical models - the reported std=0 describes
+repeated deterministic fits, not data- or split-level uncertainty, and
+no algorithm change is needed to manufacture seed spread. Second
+negative result: on this featurization, boosting
 machinery buys nothing over bagging.
 
 ![xgboost](../figures/xgboost/xgboost_egfr.png)

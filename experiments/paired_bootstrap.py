@@ -4,7 +4,9 @@ Question: the campaign's effect size (3-seed mean GIN - RF) is reported per
 (tag, split) cell, but is any single cell's delta separable from resampling
 noise? This script resamples test MOLECULES with replacement (paired: the
 same resample index matrix is applied to both models' predictions) and
-turns each cell's delta into a 95% CI plus a one-sided empirical p-value.
+turns each cell's delta into a 95% CI plus the fraction of bootstrap
+deltas above zero (frac_boot_gin_better -- a fraction, NOT a p-value;
+filtering it at 0.05 would drop every GIN win).
 Analysis only -- no model is trained, no existing file is modified.
 
 `--model gine` (P8 phase 1) reruns the identical procedure against the
@@ -24,6 +26,15 @@ random/scaffold set auto-suffixes the shared summary/figure with that
 split name -> summary_time.csv, ci_panel_time.png (see split_suffix).
 The campaign's summary.csv and ci_panel.png are therefore never
 overwritten by a time run.
+
+The shared summary/figure are merge-updated by (tag, split, pair), never
+blindly rewritten: rows already on disk whose n_boot differs from the
+current run's are left alone unless --force is passed (refusing to mix
+e.g. B=300 smoke-test rows into the B=10000 campaign table). A run that
+does not cover the full tag set or uses a non-default --n-boot is a
+partial run: it writes summary_partial{suffix}.csv /
+ci_panel_partial{suffix}.png and never touches the campaign files, so
+`--tags egfr --n-boot 300` can no longer shrink the 32-row summary to 4.
 
 Inputs (per tag x split; test_idx alignment is asserted, never assumed):
   results/rf_preds_{tag}_{split}.npz          RF test preds (original pIC50)
@@ -53,11 +64,19 @@ the split suffix when --splits touches a split outside random/scaffold,
 e.g. summary_time.csv / ci_panel_time.png -- see split_suffix):
   results/significance/{tag}_{split}.csv   one row per model_pair with the
                                            point deltas, the 95% CI bounds,
-                                           p_one_sided = #(dR2_boot > 0)/B
+                                           frac_boot_gin_better =
+                                           #(dR2_boot > 0)/B, and n_boot
   results/significance/summary{suffix}.csv cells x 2 pairs;
-                                           significant = CI excludes 0
+                                           significant = CI excludes 0;
+                                           n_boot recorded per row so a merge
+                                           can refuse to mix bootstrap sizes
+  results/significance/summary_partial{suffix}.csv
+                                           the same, for partial runs (never
+                                           touches the campaign summary)
   figures/significance/ci_panel{suffix}.png forest plot, one row per
                                            (tag, split), faceted by pair
+  figures/significance/ci_panel_partial{suffix}.png
+                                           the same, for partial runs
 Console: per-pair tally of cells whose CI excludes 0 and the list of
 cells where RF (or GIN/GINE) wins significantly.
 """
@@ -80,8 +99,9 @@ CI_PCT = (2.5, 97.5)
 CHUNK = 500          # resamples per vectorised block (bounds peak memory)
 
 SUMMARY_COLS = ["tag", "split", "pair", "d_r2", "ci_lo", "ci_hi",
-                "significant", "winner", "p_one_sided",
-                "d_rmse", "d_rmse_ci_lo", "d_rmse_ci_hi"]
+                "significant", "winner", "frac_boot_gin_better",
+                "d_rmse", "d_rmse_ci_lo", "d_rmse_ci_hi", "n_boot"]
+SUMMARY_KEYS = ("tag", "split", "pair")
 
 
 # ---------------------------------------------------------------- naming
@@ -97,15 +117,19 @@ def out_stem(tag, split, model="gin"):
     return f"{tag}_{split}" if model == "gin" else f"{tag}_{split}_{model}"
 
 
-def summary_name(model="gin", suffix=""):
-    """Shared summary filename; suffix separates split groups (e.g. _time)."""
-    base = f"summary{suffix}"
+def summary_name(model="gin", suffix="", partial=False):
+    """Shared summary filename; suffix separates split groups (e.g. _time).
+
+    Partial runs default to the summary_partial name so a smoke test can
+    never clobber the campaign table.
+    """
+    base = f"summary_partial{suffix}" if partial else f"summary{suffix}"
     return f"{base}.csv" if model == "gin" else f"{base}_{model}.csv"
 
 
-def default_fig_name(model="gin", suffix=""):
+def default_fig_name(model="gin", suffix="", partial=False):
     """Shared forest-plot filename; suffix separates split groups."""
-    base = f"ci_panel{suffix}"
+    base = f"ci_panel_partial{suffix}" if partial else f"ci_panel{suffix}"
     return f"{base}.png" if model == "gin" else f"{base}_{model}.png"
 
 
@@ -232,7 +256,7 @@ def paired_bootstrap(y_true, pred_gin, pred_rf, n_boot=N_BOOT, seed=BOOT_SEED):
         "delta_r2_point": r2(y, p_gin) - r2(y, p_rf),
         "ci_lo": float(lo),
         "ci_hi": float(hi),
-        "p_one_sided": float(np.mean(d_r2 > 0)),
+        "frac_boot_gin_better": float(np.mean(d_r2 > 0)),
         "delta_rmse_point": rmse(y, p_gin) - rmse(y, p_rf),
         "delta_rmse_ci_lo": float(rlo),
         "delta_rmse_ci_hi": float(rhi),
@@ -261,7 +285,7 @@ def cell_rows(tag, split, n_boot=N_BOOT, seed=BOOT_SEED, model="gin"):
             "ci_hi": hi,
             "significant": bool(lo > 0 or hi < 0),
             "winner": model if lo > 0 else ("rf" if hi < 0 else "tie"),
-            "p_one_sided": res["p_one_sided"],
+            "frac_boot_gin_better": res["frac_boot_gin_better"],
             "delta_rmse_point": res["delta_rmse_point"],
             "delta_rmse_ci_lo": res["delta_rmse_ci_lo"],
             "delta_rmse_ci_hi": res["delta_rmse_ci_hi"],
@@ -329,6 +353,60 @@ def make_figure(rows, fig_path, n_boot=N_BOOT, model="gin"):
     plt.close(fig)
 
 
+# ---------------------------------------------------------------- summary merge
+
+def read_existing_summary(path):
+    """An existing summary frame normalised to the current schema.
+
+    Campaign summaries written before the n_boot column existed are
+    validated as B=N_BOOT (that is the only size the campaign ever ran),
+    and the retired p_one_sided column is renamed to
+    frac_boot_gin_better so legacy files can still be merge-updated.
+    """
+    old = pd.read_csv(path)
+    if "n_boot" not in old.columns:
+        old["n_boot"] = N_BOOT
+    if "p_one_sided" in old.columns and "frac_boot_gin_better" not in old.columns:
+        old = old.rename(columns={"p_one_sided": "frac_boot_gin_better"})
+    return old
+
+
+def merge_summary(summary, summary_path, n_boot, force=False):
+    """Merge-update summary_path by (tag, split, pair); return the merged frame.
+
+    Keys already on disk are refreshed from `summary`; untouched keys are
+    kept. Rows whose stored n_boot differs from this run's are never
+    silently mixed: without --force a SystemExit names the conflict, with
+    --force exactly those keys are overwritten. A missing target is
+    written fresh.
+    """
+    if not os.path.exists(summary_path):
+        return summary
+    old = read_existing_summary(summary_path).set_index(list(SUMMARY_KEYS))
+    new = summary.set_index(list(SUMMARY_KEYS))
+    overlap = old.index.isin(new.index)
+    stale = old[overlap & (old["n_boot"] != n_boot)]
+    if len(stale) and not force:
+        rel = os.path.relpath(summary_path, BASE)
+        raise SystemExit(
+            f"{rel}: {len(stale)} stored row(s) for these cells have a "
+            f"different n_boot ({sorted(set(stale['n_boot']))} vs this "
+            f"run's {n_boot}); refusing to mix bootstrap sizes. Rerun "
+            f"with --force to overwrite those keys.")
+    kept = old[~overlap].reset_index()
+    merged = pd.concat([kept, summary], ignore_index=True)
+    return merged[list(SUMMARY_COLS)]
+
+
+def is_campaign_run(tags, n_boot):
+    """Full tag set at the default B -> may merge into the campaign table.
+
+    Anything else (a tag subset, a smoke-test B) is a partial run: it
+    must stay clear of the campaign summary/figure.
+    """
+    return set(tags) == set(TAGS) and n_boot == N_BOOT
+
+
 # ---------------------------------------------------------------- report
 
 def print_conclusion(summary, model="gin"):
@@ -380,6 +458,10 @@ def parse_args(argv=None):
     p.add_argument("--n-boot", type=int, default=N_BOOT)
     p.add_argument("--seed", type=int, default=BOOT_SEED,
                    help="bootstrap Generator seed (fixed for reproducibility)")
+    p.add_argument("--force", action="store_true",
+                   help="overwrite stored summary rows whose n_boot differs "
+                        "from this run's (default: refuse to mix bootstrap "
+                        "sizes)")
     p.add_argument("--out-dir", default=os.path.join(BASE, "results",
                                                      "significance"))
     p.add_argument("--fig", default=None,
@@ -408,33 +490,43 @@ def main(args=None):
             print(f"[{tag}/{split}] n={cell[0]['n_test']}  "
                   f"mean3 dR2={cell[1]['delta_r2_point']:+.4f} "
                   f"CI[{cell[1]['ci_lo']:+.4f}, {cell[1]['ci_hi']:+.4f}]  "
-                  f"p={cell[1]['p_one_sided']:.4f}")
+                  f"frac_boot_gin_better={cell[1]['frac_boot_gin_better']:.4f}")
     if not rows:
         print("no cells processed")
         return
 
+    partial = not is_campaign_run(tags, args.n_boot)
     summary_rows = [{**r,
                      "pair": r["model_pair"],
                      "d_r2": r["delta_r2_point"],
                      "d_rmse": r["delta_rmse_point"],
                      "d_rmse_ci_lo": r["delta_rmse_ci_lo"],
-                     "d_rmse_ci_hi": r["delta_rmse_ci_hi"]}
+                     "d_rmse_ci_hi": r["delta_rmse_ci_hi"],
+                     "n_boot": r["n_boot"]}
                     for r in rows]
     summary = pd.DataFrame(summary_rows, columns=SUMMARY_COLS)
     suffix = split_suffix(splits)
-    summary_path = os.path.join(out_dir, summary_name(model, suffix))
-    summary.to_csv(summary_path, index=False)
+    summary_path = os.path.join(out_dir, summary_name(model, suffix,
+                                                      partial=partial))
+    merged = merge_summary(summary, summary_path, n_boot=args.n_boot,
+                           force=args.force)
+    merged.to_csv(summary_path, index=False)
 
     fig_path = args.fig or os.path.join(BASE, "figures", "significance",
-                                        default_fig_name(model, suffix))
+                                        default_fig_name(model, suffix,
+                                                         partial=partial))
     fig_path = os.path.abspath(fig_path)
     make_figure(rows, fig_path, n_boot=args.n_boot, model=model)
     print_conclusion(summary, model=model)
     if suffix:
         print(f"\nsplit suffix '{suffix}': shared outputs kept separate "
               "from the random/scaffold campaign files")
+    if partial:
+        print(f"\npartial run ({len(tags)} tag(s), n_boot={args.n_boot}): "
+              "campaign summary/figure left untouched -- only a full-tag "
+              "run at the default --n-boot merges into them")
     print(f"\nsummary -> {os.path.relpath(summary_path, BASE)} "
-          f"({len(summary)} rows)")
+          f"({len(merged)} rows)")
     print(f"figure  -> {os.path.relpath(fig_path, BASE)}")
 
 

@@ -161,13 +161,18 @@ filtering rule - the audit is the deliverable
 ([methodology](docs/methodology.md)).
 
 **Y-randomization (leakage sanity check).** Trained on permuted labels
-both models collapse to R² ≤ 0; the real-label control RF reads
+every group mean collapses to R² ≤ 0 - individual shuffled GIN seeds can
+still land slightly above 0 (`egfr`/random: −0.029/+0.002/+0.011; the
+3-seed means stay ≤ 0); the real-label control RF reads
 **0.7414** vs the headline **0.7466** (egfr/random). That ~0.005 gap is
-the control protocol - `experiments/y_randomization.py` fits a single RF
-with the main run's grid-winner params instead of re-running the full
-GridSearchCV - expected in direction and magnitude, not leakage
-evidence; the test only asks shuffled ≤ 0 with the real control inside
-the baseline band. Details: [methodology](docs/methodology.md).
+the control's training pool, not skipped tuning:
+`experiments/y_randomization.py` fits its RF on the GNN train pool
+(`egfr`/random 4438 rows), while the headline RF also trained on the 10%
+validation carve-out (4932 rows, 494 more) - expected in direction and
+magnitude, not leakage evidence. Real and shuffled controls always fit
+on the same pool, so the comparison stays valid; the test only asks
+shuffled ≤ 0 with the real control inside the baseline band. Details:
+[methodology](docs/methodology.md).
 
 ## GNN vs traditional QSAR: a controlled comparison
 
@@ -237,7 +242,7 @@ above are now backed by a paired bootstrap (B = 10,000; test molecules
 resampled with replacement, same indices for both models; CI on the
 3-seed-mean prediction). On the 16 random/scaffold cells only **4 have a
 95% CI excluding 0 - all four RF wins** (`egfr`/random −0.031,
-`egfr_full`/random −0.033, `mpro`/scaffold −0.086, `vegfr2`/random
+`egfr_full`/random −0.033, `mpro`/scaffold −0.085, `vegfr2`/random
 −0.033); **the GIN wins 0 cells**. The two seed-42 "wins" above are the
 counter-example: a single seed can manufacture a significant-looking
 lead that disappears under the mean convention. Bond features change
@@ -392,22 +397,34 @@ lot of data, the test fraction runs over target on `a2a` (62%) and
 `scripts/04_train_and_evaluate.py --split time`, GIN as always
 (3 seeds, same npz).
 
-Test R2 (random for reference; GIN = 3-seed mean; Δ = mean3 GIN − RF
-with paired-bootstrap 95% CI; `results/time_split/summary.csv`):
+Test R2 (random for reference; GIN = 3-seed mean; GIN ens = R2 of the
+3-seed ensemble prediction; Δ = ensemble GIN − RF with paired-bootstrap
+95% CI; `results/time_split/summary.csv`):
 
-| Tag | RF rand | GIN rand | RF time | GIN time | Δ time (mean3) [95% CI] |
-|---|---|---|---|---|---|
-| `a2a` | 0.733 | 0.687 | −0.255 | −0.097 | **+0.238** [0.129, 0.347] |
-| `abl1` | 0.792 | 0.752 | +0.280 | +0.229 | −0.028 [−0.115, 0.068] |
-| `egfr` | 0.747 | 0.690 | +0.013 | +0.037 | **+0.058** [0.005, 0.112] |
-| `egfr_full` | 0.759 | 0.707 | −0.891 | −0.240 | **+0.676** [0.617, 0.741] |
-| `herg` | 0.615 | 0.616 | −0.034 | −0.076 | **+0.076** [0.034, 0.120] |
-| `hivpr` | 0.737 | 0.726 | +0.173 | +0.179 | +0.024 [−0.029, 0.079] |
-| `mpro` | 0.730 | 0.707 | −0.051 | +0.057 | **+0.143** [0.112, 0.175] |
-| `vegfr2` | 0.736 | 0.678 | +0.093 | +0.020 | −0.013 [−0.045, 0.018] |
+| Tag | RF rand | GIN rand | RF time | GIN time | GIN ens | Δ time (mean3) [95% CI] |
+|---|---|---|---|---|---|---|
+| `a2a` | 0.733 | 0.687 | −0.255 | −0.097 | −0.018 | **+0.238** [0.129, 0.347] |
+| `abl1` | 0.792 | 0.752 | +0.280 | +0.229 | +0.252 | −0.028 [−0.115, 0.068] |
+| `egfr` | 0.747 | 0.690 | +0.013 | +0.037 | +0.071 | **+0.058** [0.005, 0.112] |
+| `egfr_full` | 0.759 | 0.707 | −0.891 | −0.240 | −0.215 | **+0.676** [0.617, 0.741] |
+| `herg` | 0.615 | 0.616 | −0.034 | −0.076 | +0.042 | **+0.076** [0.034, 0.120] |
+| `hivpr` | 0.737 | 0.726 | +0.173 | +0.179 | +0.198 | +0.024 [−0.029, 0.079] |
+| `mpro` | 0.730 | 0.707 | −0.051 | +0.057 | +0.092 | **+0.143** [0.112, 0.175] |
+| `vegfr2` | 0.736 | 0.678 | +0.093 | +0.020 | +0.080 | −0.013 [−0.045, 0.018] |
 
 Panel means: RF **0.731 (random) → −0.084 (time)**, GIN **0.695 →
 +0.014**. Bold = 95% CI excludes 0.
+
+**Reading the Δ column.** Δ and its CI come from the paired bootstrap on
+the **3-seed ensemble prediction** (per-molecule mean of the three GIN
+runs; the `GIN ens` column is that prediction's R2), not from subtracting
+the two displayed columns - ensemble Δ and per-seed-mean Δ are two
+different conventions (see **Panel Δ conventions** in
+[methodology](docs/methodology.md)) and the ensemble is systematically
+≥ the per-seed mean. `herg` is the worked example: GIN time − RF time =
+−0.076 − (−0.034) = **−0.042** (GIN looks worse) while the ensemble Δ is
+**+0.076** [0.034, 0.120] (GIN significantly better) - opposite signs
+from the same three runs.
 
 **The significance pattern flips.** On random/scaffold the 4 significant
 cells all belonged to RF (none to the GIN); on time, **5 of 8 cells are

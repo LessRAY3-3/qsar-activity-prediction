@@ -58,7 +58,12 @@ def load_split_data(split):
 
 
 def collect_gin_metrics():
-    """GIN metrics across seeds: base file + any *_seedN.json siblings."""
+    """GIN metrics across seeds: base file + any *_seedN.json siblings.
+
+    Returns ({split: {r2, rmse}}, n_files); the per-split lists hold only
+    seeds that actually report that split, so a seed file missing one
+    split never inflates that split's count.
+    """
     import re
     per_split = {"random": {"r2": [], "rmse": []}, "scaffold": {"r2": [], "rmse": []}}
     pat = re.compile(rf"^gnn_metrics_{TAG}(_seed\d+)?\.json$")
@@ -75,10 +80,15 @@ def collect_gin_metrics():
 def comparison_table():
     rf_m = json.load(open(RF_METRICS))
     gin_m = json.load(open(GIN_METRICS))
-    seeds, n_seeds = collect_gin_metrics()
+    seeds, n_files = collect_gin_metrics()
     rows = []
     for split in ("random", "scaffold"):
         r, g = rf_m[split], gin_m[split]
+        n_split = len(seeds[split]["r2"])
+        if n_split < n_files:
+            print(f"warning: {TAG}/{split}: only {n_split}/{n_files} seed "
+                  f"metric file(s) carry this split; gin_n_seeds reports "
+                  f"the actual contributing seeds")
         gin_r2_mean = float(np.mean(seeds[split]["r2"]))
         gin_rmse_mean = float(np.mean(seeds[split]["rmse"]))
         rows.append({
@@ -89,7 +99,9 @@ def comparison_table():
             "gin_r2_std": float(np.std(seeds[split]["r2"])),
             "gin_rmse_mean": gin_rmse_mean,
             "gin_rmse_std": float(np.std(seeds[split]["rmse"])),
-            "gin_n_seeds": n_seeds,
+            # actual number of seeds contributing to THIS split, never the
+            # file count (a seed missing this split must not read as 3)
+            "gin_n_seeds": n_split,
             # primary effect size: 3-seed mean GIN - RF
             "d_r2_mean_gin_minus_rf": gin_r2_mean - r["r2"],
             "d_rmse_mean_gin_minus_rf": gin_rmse_mean - r["rmse"],

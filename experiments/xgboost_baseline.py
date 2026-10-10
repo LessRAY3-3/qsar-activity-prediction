@@ -53,7 +53,9 @@ def load_rf_control(tag):
             g = df[(df["split"] == split) & (df["model"] == "rf")
                    & (df["n_train"] == n_max)]
             out[split] = {"r2_mean": float(g["r2"].mean()),
-                          "r2_std": float(g["r2"].std()),
+                          # ddof=0: population std, the repo-wide convention
+                          # (matches the JSON summaries' np.std)
+                          "r2_std": float(g["r2"].std(ddof=0)),
                           "source": f"learning_curve rf n={n_max} (same pool)"}
         return out
     mj = json.load(open(os.path.join(BASE, "results", f"metrics_{tag}.json")))
@@ -73,7 +75,9 @@ def make_figure(csv_path, fig_path, tag, control):
     x = np.arange(len(splits))
     w = 0.35
     xgb_means = [df[df["split"] == s]["r2"].mean() for s in splits]
-    xgb_stds = [df[df["split"] == s]["r2"].std() for s in splits]
+    # ddof=0: population std, the repo-wide convention (JSON summaries use
+    # np.std); pandas' default ddof=1 would not match the committed numbers
+    xgb_stds = [df[df["split"] == s]["r2"].std(ddof=0) for s in splits]
     rf_means = [control[s]["r2_mean"] for s in splits]
     rf_stds = [control[s]["r2_std"] or 0.0 for s in splits]
 

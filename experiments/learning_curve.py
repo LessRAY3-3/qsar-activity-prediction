@@ -6,7 +6,7 @@ saturated at the current dataset size?
 Protocol (everything frozen except the one variable):
   * test set and validation set: the persisted split indices, untouched
   * hyperparameters: the exact values the original pipelines selected
-    (RF: the grid-search winner on the full train pool; GIN: gnn_03's
+    (RF: that split's grid-search winner; GIN: gnn_03's
     defaults -- same architecture, optimizer, scheduler, early stopping)
   * target standardisation: full-train-pool mean/std for every n
   * the one variable: the number of training molecules n, subsampled
@@ -70,10 +70,13 @@ def parse_args():
     return p.parse_args()
 
 
-def load_rf_params(tag):
-    """Freeze RF hyperparameters to the original grid-search winner."""
-    mj = os.path.join(BASE, "results", f"metrics_{tag}.json")
-    bp = json.load(open(mj))["best_params_random"]
+def load_rf_params(mj, split):
+    """Freeze RF hyperparameters to that split's grid-search winner."""
+    bp_key = f"best_params_{split}"
+    if bp_key not in mj:
+        print(f"[{split}] {bp_key} not found; falling back to best_params_random")
+        bp_key = "best_params_random"
+    bp = mj[bp_key]
     return {k: bp[k] for k in RF_GRID_KEYS}
 
 
@@ -168,7 +171,8 @@ def main():
                               f"{args.tag}_fingerprints.npz"))
     X, y = fp["X"], fp["y"]
     graphs = os.path.join(BASE, "data", "processed", f"{args.tag}_graphs.npz")
-    rf_params = load_rf_params(args.tag)
+    mj = json.load(open(os.path.join(BASE, "results", f"metrics_{args.tag}.json")))
+    rf_params_by_split = {}
 
     rows = []
     print(f"[{args.tag}] sizes={sizes} seeds={seeds} splits={splits}")
@@ -181,6 +185,8 @@ def main():
         y_mean, y_std = float(y[train_idx].mean()), float(y[train_idx].std())
         print(f"[{args.tag}/{split}] pool={len(train_idx)} "
               f"valid={len(valid_idx)} test={len(test_idx)}")
+        rf_params = load_rf_params(mj, split)
+        rf_params_by_split[split] = rf_params
         for n in sizes:
             if n > len(train_idx):
                 print(f"  n={n}: skipped (larger than train pool)")
@@ -226,7 +232,7 @@ def main():
                    "runs": len(v)}
                for k, v in sorted(summary.items())}
     json.dump({"tag": args.tag, "sizes": sizes, "seeds": seeds,
-               "rf_params": rf_params, "by_group": summary},
+               "rf_params": rf_params_by_split, "by_group": summary},
               open(sum_path, "w"), indent=2)
     print(f"summary -> {os.path.relpath(sum_path, BASE)}")
 

@@ -4,6 +4,46 @@ Running log of the deep-dive experiments. Each entry: what ran, headline
 numbers (3-seed mean +/- std unless noted), and the commit holding the
 artifacts. Newest first. Maintained by M4 Air; results produced on M3 Max.
 
+## 2026-10-10
+
+### Review 2026-10-10 fix pass (findings PR #1 + independent verification) — DELIVERED (A-layer; no results retrained here)
+
+- Reviews: PR #1 findings (`.claude/skills/qsar-review/references/findings-2026-10-10.md`)
+  and the independent verification (`docs/reviews/codex-verification-2026-10-10.md`,
+  its corrections preferred). Branch `fix/review-2026-10-10`; fixes uncommitted at write time.
+- **Code (A-layer, no retraining)**:
+  - `paired_bootstrap.py`: `p_one_sided` renamed to `frac_boot_gin_better` - the fraction of
+    bootstrap deltas > 0, not a p-value (a strong GIN win reads ~1.0, so a `p < 0.05` filter
+    would drop every GIN win). Summary readers accept both names, so committed csvs still
+    saying `p_one_sided` keep working.
+  - `04_train_and_evaluate.py`: grid CV is now `KFold(5, shuffle=True, random_state=42)` -
+    scaffold/time train pools are ordered by scaffold group / SMILES, so unshuffled folds
+    would be single-chemotype blocks.
+  - `fingerprint_ablation.py` / `learning_curve.py` / `y_randomization.py` /
+    `interpretability_alignment.py`: scaffold cells read `best_params_scaffold`
+    (fallback to `best_params_random` with a printed note).
+  - `time_split_summary.py`: `DELTA_CONVENTION` re-labelled to the ensemble convention
+    (`point=ensemble_mean-pred_R2;ci=ensemble_mean-pred_R2`), matching what `d_r2_mean3`
+    actually stores.
+  - `fingerprint_ablation.py`: summary std now population std (ddof=0), the repo-wide JSON convention.
+- **Docs**: README time-split table gains a `GIN ens` column (ensemble R2 of the 3-seed mean
+  prediction) + a note that the Δ column and CI come from the ensemble bootstrap, not from
+  subtracting the displayed columns (`herg`: columns give −0.042, ensemble Δ +0.076);
+  y-randomization control gap re-attributed to the control's training pool (GNN train pool
+  4438 rows vs headline 4932 on `egfr`/random, 494 fewer) with real and shuffled controls
+  on the same pool; XGBoost seeds documented as deterministic repeats (default
+  subsample/colsample = 1.0 -> std=0 is not a data/split uncertainty estimate);
+  `mpro`/scaffold mean3 Δ corrected to −0.085 (full precision −0.0854787);
+  y-randomization "collapse" wording scoped to group means (shuffled GIN seeds can be
+  slightly positive: −0.029/+0.002/+0.011 on `egfr`/random).
+- **Tests**: `test_time_split_summary.py` pins `DELTA_CONVENTION` against an independent
+  recomputation from the committed `herg`/time per-seed prediction files (ensemble R2
+  +0.041903, RF pinned at −0.033775, ensemble Δ +0.075677; per-seed-mean Δ −0.042404 kept
+  as the contrast).
+- Not in this pass: the RF re-run under shuffled-fold grid selection (recomputes
+  `best_params_*`, rewrites `results/metrics_*.json` + `models/`; summary tables re-derived
+  from it) and the H1/M1 label-policy sensitivity runs - logged separately when they land.
+
 ## 2026-10-09
 
 ### P8 campaign: paired-bootstrap significance + GINE panel + publication-year time split + uncertainty/AD — DELIVERED

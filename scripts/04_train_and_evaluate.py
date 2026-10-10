@@ -39,7 +39,7 @@ import matplotlib.pyplot as plt
 import joblib
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
-from sklearn.model_selection import GridSearchCV, train_test_split
+from sklearn.model_selection import GridSearchCV, KFold, train_test_split
 
 from qsar_common import RANDOM_STATE, scaffold_split
 
@@ -86,10 +86,15 @@ def scatter(y_test, pred, tag, path, target):
 
 def run_split(X, y, smiles, train_idx, test_idx, tag, fig_path, target):
     print(f"\n=== {tag} split: train={len(train_idx)}, test={len(test_idx)} ===")
+    # Shuffled folds: scaffold/time train pools are ordered by scaffold group or
+    # SMILES, so unshuffled KFold would put whole chemotype blocks in one fold.
+    cv = KFold(n_splits=CV_FOLDS, shuffle=True, random_state=RANDOM_STATE)
     gs = GridSearchCV(
-        RandomForestRegressor(random_state=RANDOM_STATE, n_jobs=-1),
+        # inner n_jobs=1 — the outer GridSearchCV pool already saturates the
+        # cores; nesting thrashes (load ~180)
+        RandomForestRegressor(random_state=RANDOM_STATE, n_jobs=1),
         PARAM_GRID,
-        cv=CV_FOLDS,
+        cv=cv,
         scoring="r2",
         n_jobs=-1,
         verbose=1,

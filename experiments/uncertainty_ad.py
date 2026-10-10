@@ -10,8 +10,11 @@ existing result file is touched.
 
 Run:
   python experiments/uncertainty_ad.py                 # --model gin (default)
-  python experiments/uncertainty_ad.py --model gine    # skips cleanly when
-                                                       # no gine .pt exists
+  python experiments/uncertainty_ad.py --model gine    # cells skip cleanly
+                                                       # when the gine .pt
+                                                       # set is absent OR
+                                                       # partial (recorded as
+                                                       # RF-only, n_gnn_seeds)
 
 Inputs (per tag x split):
   results/rf_preds_{tag}_{split}.npz / models/rf_{split}_split_{tag}.joblib
@@ -558,12 +561,13 @@ def process_cell(tag, split, model_kind, out_dir, fig_dir, fp_cache=None,
               f"max|diff|={tree_diff:.2e}")
 
     # ---- GNN deep ensemble (skips when checkpoints are missing)
+    # A partial checkpoint set is treated like an absent one: skip the
+    # GNN rows for this cell and record the actual seed count, rather
+    # than mixing a 1- or 2-seed ensemble into a 3-seed campaign (and
+    # gnn_ensemble_predict would raise on the missing .pt anyway).
     seeds = available_seed_suffixes(tag, split, model_kind)
     gin_pred, gin_std, gnn_diff = None, None, None
-    if seeds:
-        if len(seeds) < len(SEED_SUFFIXES):
-            print(f"  [{tag}/{split}] warning: only {len(seeds)}/3 "
-                  f"{model_kind} checkpoints present")
+    if len(seeds) == len(SEED_SUFFIXES):
         stack = gnn_ensemble_predict(tag, split, model_kind, test_idx,
                                      batch_size=batch_size)
         gin_pred, gin_std = stack.mean(axis=0), stack.std(axis=0)
@@ -577,6 +581,10 @@ def process_cell(tag, split, model_kind, out_dir, fig_dir, fp_cache=None,
             if gnn_diff > 5e-3:
                 print(f"  [{tag}/{split}] warning: ensemble vs stored preds "
                       f"max|diff|={gnn_diff:.2e}")
+    elif seeds:
+        print(f"  [{tag}/{split}] only {len(seeds)}/{len(SEED_SUFFIXES)} "
+              f"{model_kind} checkpoints -> GNN rows omitted (RF-only cell; "
+              f"partial seed set recorded as n_gnn_seeds={len(seeds)})")
     else:
         print(f"  [{tag}/{split}] no {model_kind} checkpoints -> "
               f"GNN rows omitted (RF-only cell)")

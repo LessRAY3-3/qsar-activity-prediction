@@ -8,8 +8,8 @@ should not - the canonical leakage/sanity test. A real-label control group
 
 Protocol matches the main experiments: GNN train pool (train_idx) for RF,
 permuted train/valid for the GIN's early stopping, frozen hyperparameters
-(RF grid winner, gnn_03 recipe), targets standardised with the PERMUTED
-train statistics (the model only ever sees permuted targets).
+(RF: that split's grid winner, gnn_03 recipe), targets standardised with
+the PERMUTED train statistics (the model only ever sees permuted targets).
 
 Outputs:
   results/y_randomization/y_randomization_{TAG}.csv  one row per run
@@ -156,8 +156,7 @@ def main():
     from sklearn.ensemble import RandomForestRegressor
 
     mj = json.load(open(os.path.join(BASE, "results", f"metrics_{args.tag}.json")))
-    bp = mj["best_params_random"]
-    rf_params = {k: bp[k] for k in ("n_estimators", "max_depth", "min_samples_split")}
+    rf_params_by_split = {}
 
     rows = []
     csv_f = open(csv_path, "w")
@@ -175,6 +174,14 @@ def main():
         train_idx, valid_idx, test_idx = sp["train_idx"], sp["valid_idx"], sp["test_idx"]
         pool = np.concatenate([train_idx, valid_idx])
         print(f"[{args.tag}/{split}] pool={len(pool)} test={len(test_idx)}")
+        bp_key = f"best_params_{split}"
+        if bp_key not in mj:
+            print(f"  [{args.tag}/{split}] {bp_key} not found; "
+                  f"falling back to best_params_random")
+            bp_key = "best_params_random"
+        rf_params = {k: mj[bp_key][k]
+                     for k in ("n_estimators", "max_depth", "min_samples_split")}
+        rf_params_by_split[split] = rf_params
 
         # ---- control: real labels ----
         t0 = time.time()
@@ -226,7 +233,7 @@ def main():
                for k, vs in sorted(summary.items())}
     flagged = [k for k, v in summary.items()
                if "shuffled" in k and v["r2_mean"] >= 0.2]
-    json.dump({"tag": args.tag, "seeds": seeds, "rf_params": rf_params,
+    json.dump({"tag": args.tag, "seeds": seeds, "rf_params": rf_params_by_split,
                "groups": summary,
                "verdict": "LEAKAGE SUSPECTED: " + ", ".join(flagged) if flagged
                else "ok: all shuffled-label means < 0.2"},
