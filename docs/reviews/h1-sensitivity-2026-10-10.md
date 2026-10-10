@@ -108,7 +108,7 @@
 
 ### 修复前后指标对比
 
-"修复前" = `git show HEAD:results/metrics_egfr_full.json`（已核对：该文件在基线 `94572a6` 与当前 HEAD `e7f32ba` 之间无差异，故下表基准仍有效）；"修复后" = 从训练池与测试集剔除仅删失化合物后重跑。
+"修复前" = `git show HEAD:results/metrics_egfr_full.json`（已核对：该文件自基线 `94572a6` 起至回填时的 HEAD 一直无差异，故下表基准仍有效）；"修复后" = 从训练池与测试集剔除仅删失化合物后重跑。
 
 | split | 剔除数 pool/test | 修复前 R² / RMSE | 修复后 R² / RMSE | ΔR² / ΔRMSE |
 |---|---:|---:|---:|---:|
