@@ -17,6 +17,7 @@ RAW_COLUMNS = [
     "standard_type",
     "standard_value",
     "standard_units",
+    "standard_relation",
     "pchembl_value",
     "assay_type",
     "assay_description",
@@ -37,6 +38,7 @@ def _raw_rows(smiles):
                 "standard_type": "IC50",
                 "standard_value": ic50_nm,
                 "standard_units": "nM",
+                "standard_relation": "=",
                 "pchembl_value": -np.log10(ic50_nm * 1e-9),
                 "assay_type": "B",
                 "assay_description": "synthetic smoke-test assay",
@@ -65,7 +67,14 @@ def test_pipeline_02_03_04_smoke(tmp_path, monkeypatch, load_script, valid_smile
     assert clean_csv.exists()
     clean = pd.read_csv(clean_csv)
     assert len(clean) == 24  # all unique -> nothing deduplicated away
-    assert {"canonical_smiles", "pic50", "target"}.issubset(clean.columns)
+    assert {
+        "parent_smiles",
+        "canonical_smiles",
+        "pic50",
+        "n_measurements",
+        "n_structural_variants",
+        "target",
+    }.issubset(clean.columns)
     assert np.isfinite(clean["pic50"]).all()
 
     # ---- 03: clean CSV -> fingerprints npz ----

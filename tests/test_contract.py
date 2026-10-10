@@ -33,6 +33,7 @@ def test_01d_raw_output_is_02_raw_input(monkeypatch):
         "canonical_smiles",
         "standard_value",
         "standard_units",
+        "standard_relation",
         "pchembl_value",
         "target_pref_name",
     }
