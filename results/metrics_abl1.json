@@ -3,43 +3,17 @@
   "tag": "abl1",
   "random": {
     "split": "random",
-    "r2": 0.7916182497893267,
-    "rmse": 0.7179736656852892,
-    "mae": 0.5190273504072347
+    "r2": 0.7918509566376419,
+    "rmse": 0.7175726611346699,
+    "mae": 0.5181558320682329
   },
   "scaffold": {
     "split": "scaffold",
-    "r2": 0.7230727583557359,
-    "rmse": 0.6445487414092688,
-    "mae": 0.47645980161416646
+    "r2": 0.7254543335171256,
+    "rmse": 0.6417711961741372,
+    "mae": 0.4729636077408315
   },
   "best_params_random": {
-    "bootstrap": true,
-    "ccp_alpha": 0.0,
-    "criterion": "squared_error",
-    "max_depth": 40,
-    "max_features": 1.0,
-    "max_leaf_nodes": null,
-    "max_samples": null,
-    "min_impurity_decrease": 0.0,
-    "min_samples_leaf": 1,
-    "min_samples_split": 2,
-    "min_weight_fraction_leaf": 0.0,
-    "monotonic_cst": null,
-    "n_estimators": 300,
-    "n_jobs": -1,
-    "oob_score": false,
-    "random_state": 42,
-    "verbose": 0,
-    "warm_start": false
-  },
-  "time": {
-    "split": "time",
-    "r2": 0.2796636594066194,
-    "rmse": 1.2865271447184388,
-    "mae": 1.0508077966849427
-  },
-  "best_params_scaffold": {
     "bootstrap": true,
     "ccp_alpha": 0.0,
     "criterion": "squared_error",
@@ -59,7 +33,7 @@
     "verbose": 0,
     "warm_start": false
   },
-  "best_params_time": {
+  "best_params_scaffold": {
     "bootstrap": true,
     "ccp_alpha": 0.0,
     "criterion": "squared_error",

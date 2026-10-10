@@ -3,43 +3,17 @@
   "tag": "hivpr",
   "random": {
     "split": "random",
-    "r2": 0.737228755910103,
-    "rmse": 0.8673827853749644,
-    "mae": 0.6144095090888128
+    "r2": 0.735399002165044,
+    "rmse": 0.8703974676454644,
+    "mae": 0.6154324332213315
   },
   "scaffold": {
     "split": "scaffold",
-    "r2": 0.5542085824811576,
-    "rmse": 0.9326059143830067,
-    "mae": 0.7272637588805673
+    "r2": 0.5521680660159408,
+    "rmse": 0.9347378812354687,
+    "mae": 0.7290470076012591
   },
   "best_params_random": {
-    "bootstrap": true,
-    "ccp_alpha": 0.0,
-    "criterion": "squared_error",
-    "max_depth": null,
-    "max_features": 1.0,
-    "max_leaf_nodes": null,
-    "max_samples": null,
-    "min_impurity_decrease": 0.0,
-    "min_samples_leaf": 1,
-    "min_samples_split": 5,
-    "min_weight_fraction_leaf": 0.0,
-    "monotonic_cst": null,
-    "n_estimators": 500,
-    "n_jobs": -1,
-    "oob_score": false,
-    "random_state": 42,
-    "verbose": 0,
-    "warm_start": false
-  },
-  "time": {
-    "split": "time",
-    "r2": 0.17313730907603297,
-    "rmse": 1.7099999831554697,
-    "mae": 1.3494226352819176
-  },
-  "best_params_scaffold": {
     "bootstrap": true,
     "ccp_alpha": 0.0,
     "criterion": "squared_error",
@@ -59,11 +33,11 @@
     "verbose": 0,
     "warm_start": false
   },
-  "best_params_time": {
+  "best_params_scaffold": {
     "bootstrap": true,
     "ccp_alpha": 0.0,
     "criterion": "squared_error",
-    "max_depth": 40,
+    "max_depth": null,
     "max_features": 1.0,
     "max_leaf_nodes": null,
     "max_samples": null,

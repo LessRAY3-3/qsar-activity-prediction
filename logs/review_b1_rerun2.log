@@ -1,0 +1,34 @@
+=== [2026-10-10 16:03:49] START egfr random+scaffold ===
+Target: Epidermal growth factor receptor | Feature matrix: X=(6165, 2048), y range [1.60, 11.52]
+
+=== random split: train=4932, test=1233 ===
+Fitting 5 folds for each of 12 candidates, totalling 60 fits
+Best params: {'max_depth': None, 'min_samples_split': 2, 'n_estimators': 500}  (CV R2 = 0.728)
+[random]  R2 = 0.747   RMSE = 0.692   MAE = 0.492
+
+=== scaffold split: train=4929, test=1236 ===
+Fitting 5 folds for each of 12 candidates, totalling 60 fits
+Best params: {'max_depth': None, 'min_samples_split': 2, 'n_estimators': 500}  (CV R2 = 0.746)
+[scaffold]  R2 = 0.562   RMSE = 0.950   MAE = 0.709
+
+Metrics saved -> /Users/lessray/Desktop/kimi code/qsar-activity-prediction/results/metrics_egfr.json
+=== [2026-10-10 16:51:41] END egfr random+scaffold rc=0 ===
+=== [2026-10-10 16:51:41] START herg random+scaffold ===
+Target: Voltage-gated inwardly rectifying potassium channel KCNH2 | Feature matrix: X=(12019, 2048), y range [-0.00, 9.85]
+
+=== random split: train=9615, test=2404 ===
+Fitting 5 folds for each of 12 candidates, totalling 60 fits
+/Users/lessray/Desktop/kimi code/qsar-activity-prediction/.venv/lib/python3.12/site-packages/joblib/externals/loky/backend/resource_tracker.py:444: UserWarning: resource_tracker: There appear to be 1 leaked file objects to clean up at shutdown: {'/var/folders/60/f144lgn97zg1y9wcvg2v5thh0000gn/T/joblib_memmapping_folder_20688_0edbb59984f94339b6418b1794da5044_ab77132b44394454ac795fb17ae80a33/20688-4662645904-f94f1b8787654257b3129abdbf81138d.pkl': 12}
+  warnings.warn(
+/Users/lessray/Desktop/kimi code/qsar-activity-prediction/.venv/lib/python3.12/site-packages/joblib/externals/loky/backend/resource_tracker.py:444: UserWarning: resource_tracker: There appear to be 16 leaked semlock objects to clean up at shutdown: {'/loky-20688-5uhdr4jl': 1, '/loky-20688-bnvz6ecw': 1, '/loky-20688-id1owk1j': 1, '/loky-20688-m57ex7i2': 1, '/loky-20688-gqfdlyjb': 1, '/loky-20688-xbes1pif': 1, '/loky-20688-5nddy3h_': 1, '/loky-20688-6jjsh8rn': 1, '/loky-20688-jmqxuc26': 1, '/loky-20688-ests3gkb': 1, '/loky-20688-q2wy3yga': 1, '/loky-20688-e966c3un': 1, '/loky-20688-sct56exs': 1, '/loky-20688-6ea1_4j2': 1, '/loky-20688-a4v06gxw': 1, '/loky-20688-z6x58zfv': 1}
+  warnings.warn(
+/Users/lessray/Desktop/kimi code/qsar-activity-prediction/.venv/lib/python3.12/site-packages/joblib/externals/loky/backend/resource_tracker.py:444: UserWarning: resource_tracker: There appear to be 2 leaked folder objects to clean up at shutdown: {'/var/folders/60/f144lgn97zg1y9wcvg2v5thh0000gn/T/joblib_memmapping_folder_20688_0edbb59984f94339b6418b1794da5044_cab1c7402e5246b78da99fd230a9ae71': 1, '/var/folders/60/f144lgn97zg1y9wcvg2v5thh0000gn/T/joblib_memmapping_folder_20688_0edbb59984f94339b6418b1794da5044_ab77132b44394454ac795fb17ae80a33': 1}
+  warnings.warn(
+/Users/lessray/Desktop/kimi code/qsar-activity-prediction/.venv/lib/python3.12/site-packages/joblib/externals/loky/backend/resource_tracker.py:468: UserWarning: resource_tracker: /var/folders/60/f144lgn97zg1y9wcvg2v5thh0000gn/T/joblib_memmapping_folder_20688_0edbb59984f94339b6418b1794da5044_cab1c7402e5246b78da99fd230a9ae71: FileNotFoundError(2, 'No such file or directory')
+  warnings.warn('resource_tracker: %s: %r' % (name, e))
+=== RESUME [2026-10-10 17:35:01] after task bash-ect924dg was killed (exit -1, mid-herg); egfr rs done rc=0, remaining: herg vegfr2 egfr_full rs + 8x time ===
+=== [2026-10-10 17:35:01] START herg random+scaffold ===
+Target: Voltage-gated inwardly rectifying potassium channel KCNH2 | Feature matrix: X=(12019, 2048), y range [-0.00, 9.85]
+
+=== random split: train=9615, test=2404 ===
+Fitting 5 folds for each of 12 candidates, totalling 60 fits
