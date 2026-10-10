@@ -3,15 +3,15 @@
   "tag": "hivpr",
   "random": {
     "split": "random",
-    "r2": 0.735399002165044,
-    "rmse": 0.8703974676454644,
-    "mae": 0.6154324332213315
+    "r2": 0.692191224981888,
+    "rmse": 0.885237832097779,
+    "mae": 0.6083497545225193
   },
   "scaffold": {
     "split": "scaffold",
-    "r2": 0.5521680660159408,
-    "rmse": 0.9347378812354687,
-    "mae": 0.7290470076012591
+    "r2": 0.5380349887188622,
+    "rmse": 0.9202741992916071,
+    "mae": 0.7029623520812518
   },
   "best_params_random": {
     "bootstrap": true,
@@ -26,8 +26,8 @@
     "min_samples_split": 5,
     "min_weight_fraction_leaf": 0.0,
     "monotonic_cst": null,
-    "n_estimators": 300,
-    "n_jobs": -1,
+    "n_estimators": 500,
+    "n_jobs": 1,
     "oob_score": false,
     "random_state": 42,
     "verbose": 0,
@@ -47,7 +47,33 @@
     "min_weight_fraction_leaf": 0.0,
     "monotonic_cst": null,
     "n_estimators": 500,
-    "n_jobs": -1,
+    "n_jobs": 1,
+    "oob_score": false,
+    "random_state": 42,
+    "verbose": 0,
+    "warm_start": false
+  },
+  "time": {
+    "split": "time",
+    "r2": -0.02711032536343172,
+    "rmse": 1.7431423109254773,
+    "mae": 1.3942573888668919
+  },
+  "best_params_time": {
+    "bootstrap": true,
+    "ccp_alpha": 0.0,
+    "criterion": "squared_error",
+    "max_depth": 40,
+    "max_features": 1.0,
+    "max_leaf_nodes": null,
+    "max_samples": null,
+    "min_impurity_decrease": 0.0,
+    "min_samples_leaf": 1,
+    "min_samples_split": 5,
+    "min_weight_fraction_leaf": 0.0,
+    "monotonic_cst": null,
+    "n_estimators": 300,
+    "n_jobs": 1,
     "oob_score": false,
     "random_state": 42,
     "verbose": 0,
