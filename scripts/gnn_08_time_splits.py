@@ -17,6 +17,12 @@ Year assignment
   refused (SystemExit) - silent shrinkage of the dataset would make
   downstream metrics incomparable.
 
+  The year join runs on 02's standardized parent SMILES (largest
+  fragment + uncharge), not on raw strings: the fingerprint npz exports
+  parent_smiles (03) while raw activities still carry salt/charge forms,
+  so a string-level reindex would miss every multi-fragment compound,
+  drop year coverage below the thresholds above and pin/refuse the split.
+
 Split (n = molecule count)
   test  : years counted from the newest down until the cumulative count
           reaches >= 0.2n; cutoff_t = the year where accumulation stops;
@@ -51,6 +57,7 @@ trainers read the npz (or skip on the NA marker).
 CLI: --tag (default QSAR_TAG env, then "egfr"), style of 02_clean_data.py.
 """
 import argparse
+import importlib
 import json
 import os
 
@@ -63,6 +70,10 @@ import matplotlib.pyplot as plt
 
 from gnn_01_make_splits import check_disjoint
 from qsar_common import murcko_scaffold_list
+
+# 02's parent standardization (LargestFragmentChooser + Uncharger), reused
+# verbatim so the year join keys on exactly the same unit 02/03 export.
+_parent_smiles = importlib.import_module("02_clean_data")._parent_smiles
 
 BASE = os.path.join(os.path.dirname(__file__), "..")
 TAG = os.environ.get("QSAR_TAG", "egfr")  # which dataset: egfr | bace | ...
@@ -123,11 +134,30 @@ def read_inputs(in_npz, in_activities, in_years):
     return smiles, activities, years
 
 
+def _parent_keys(values):
+    """02's parent standardization for every entry (memoized), for joining.
+
+    Both join sides go through this so the key space is identical whether
+    the npz already holds parent_smiles (03) or a raw canonical string.
+    """
+    cache = {}
+    keys = []
+    for v in values:
+        s = str(v)
+        if s not in cache:
+            cache[s] = _parent_smiles(s)[0]
+        keys.append(cache[s])
+    return keys
+
+
 def assign_years(smiles, activities, years):
     """Per-SMILES earliest publication year (float array, NaN = no year).
 
     Joins activities -> document_years on document_chembl_id, then takes
-    the minimum year over all rows of each canonical_smiles.
+    the minimum year over all rows of each standardized parent SMILES.
+    The reindex key is 02's parent form on BOTH sides: raw activities carry
+    salt/charge variants while the fingerprint npz exports parent_smiles,
+    so plain-string keys would leave those molecules undated.
     """
     acts = activities.dropna(subset=["canonical_smiles", "document_chembl_id"]).copy()
     acts["canonical_smiles"] = acts["canonical_smiles"].astype(str)
@@ -139,8 +169,10 @@ def assign_years(smiles, activities, years):
     docs["document_chembl_id"] = docs["document_chembl_id"].astype(str)
 
     merged = acts.merge(docs, on="document_chembl_id", how="left")
-    per_smiles = merged.groupby("canonical_smiles")["document_year"].min()
-    out = per_smiles.reindex(np.asarray(smiles, dtype=str)).to_numpy(dtype=float)
+    merged["join_smiles"] = _parent_keys(merged["canonical_smiles"])
+    per_smiles = merged.groupby("join_smiles")["document_year"].min()
+    keys = _parent_keys(np.asarray(smiles, dtype=str))
+    out = per_smiles.reindex(keys).to_numpy(dtype=float)
     return np.array(out, dtype=float, copy=True)  # writable copy: ensure_coverage fills NaNs in place
 
 
