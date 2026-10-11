@@ -86,15 +86,19 @@ artifacts. Newest first. Maintained by M4 Air; results produced on M3 Max.
   - **XGBoost**: 13/16 cells ≤ RF (worst `egfr`/scaffold **−0.132**).
   - **Multi-task pool**: 22,492 rows / 21,093 unique SMILES / 1,193 =
     **5.66%** appear under >1 target (pre-refresh 10.0%).
+  - **Fairness campaign completed (3 tags)**: `experiments/gnn_fairness.py`
+    finished on win4070 against the refreshed splits/graphs (`vegfr2`
+    10-11 17:44, `herg` 18:08, `abl1` 18:12 - all four phases in every
+    summary), pulled to `results/fairness/` + `figures/fairness/`; the
+    README fairness table + status notes are re-stamped with the
+    refreshed numbers (RF refs = refreshed panel RF: `vegfr2`
+    0.670/0.585, `herg` 0.607/0.384, `abl1` 0.822/0.714; baseline GIN
+    read from the refreshed `gnn_metrics_*`). `gnn_fairness` still
+    saves no per-seed predictions, so those GINE cells remain point
+    estimates without bootstrap CIs; `results/gine_panel/summary.csv`
+    still carries the earlier `gine_runs` vintage for these three tags
+    (rebuild pending).
 - **In progress / not re-run**:
-  - **Fairness campaign still training on win4070**
-    (`experiments/gnn_fairness.py --tag vegfr2`, up since 10-11 17:16;
-    `results/fairness/summary_vegfr2.json` mid-write at 17:35), so the
-    README fairness table keeps the RF references of its own
-    **pre-refresh** campaign (`vegfr2` 0.736/0.617, `herg` 0.615/0.430,
-    `abl1` 0.792/0.723), and the GINE cells for those three tags still
-    carry no per-seed predictions - hence point estimates without
-    bootstrap CIs in `results/gine_panel/summary.csv`.
   - **`scripts/07_qc_checks.py` not re-run**: `figures/testset_hist_*.png`
     still predate the refresh (flagged in `docs/methodology.md`).
   - `results/significance/summary_time.csv` and the per-cell `*_time.csv`
@@ -105,7 +109,7 @@ artifacts. Newest first. Maintained by M4 Air; results produced on M3 Max.
     `permutation_importance_*` and `top_bits_*` were not re-run either.
   - README: top Status note, the architecture-comparison section
     (GINE/AFP counts) and the fingerprint-ablation section were rewritten
-    against these artifacts; fairness + QC stay flagged inline.
+    against these artifacts; QC stays flagged inline.
 
 ## 2026-10-10
 

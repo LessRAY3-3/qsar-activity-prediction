@@ -16,12 +16,10 @@ fingerprint baseline on this panel**. Deep detail:
 > dedup; review outcome: the 19-item
 > [fix checklist](docs/reviews/fixes-2026-10-11.md), label-policy
 > [sensitivity report](docs/reviews/h1-sensitivity-2026-10-10.md)).
-> The **GINE / AttentiveFP architecture panels** and the
-> **fingerprint-ablation** re-run (all 8 tags) are refreshed against
-> those datasets. One batch is still moving: the **fairness campaign**
-> (`vegfr2`/`herg`/`abl1`) is still training (`experiments/LOG.md`), so
-> only its table keeps the pre-refresh RF references of its own campaign
-> - marked inline.
+> The **GINE / AttentiveFP architecture panels**, the
+> **fingerprint-ablation** re-run (all 8 tags) and the **fairness
+> campaign** (`vegfr2`/`herg`/`abl1`) are refreshed against those
+> datasets (`experiments/LOG.md`).
 
 ## Results
 
@@ -344,75 +342,85 @@ caveat, training-budget caveat, cross-target failure replication:
 
 ## Giving the GNN a fair chance (bounded tuning + GINE + AttentiveFP)
 
-> **Status - architecture panels refreshed (2026-10-11).** The GINE and
-> AttentiveFP panels are retrained against the refreshed data
-> (`experiments/LOG.md`), so every panel and significance number below
-> is a single-vintage batch. The one exception is the fairness table:
-> that campaign (`vegfr2`/`herg`/`abl1`) is still running, so it keeps
-> the RF references of its own (pre-refresh) campaign - and the GINE
-> cells for those three tags carry no per-seed predictions, hence point
+> **Status - panels + fairness refreshed (2026-10-11).** The GINE and
+> AttentiveFP panels and the fairness campaign (`vegfr2`/`herg`/`abl1`)
+> are retrained against the refreshed data (`experiments/LOG.md`), so
+> every number below is a single-vintage batch; the fairness table's RF
+> references equal the refreshed panel RF. `gnn_fairness.py` still
+> saves no per-seed predictions, hence its GINE cells are point
 > estimates without bootstrap CIs.
 
 Sections above deliberately froze the GIN recipe - every Δ is a
 **frozen-recipe** Δ. `experiments/gnn_fairness.py` (36 runs/target) gives
-it a bounded chance: on the three nearest-parity targets *as then
-measured* (`vegfr2` −0.006, `herg` −0.013, `abl1` −0.013), 8 configs
+it a bounded chance: on the three near-parity targets (frozen-recipe
+scaffold Δ on the refreshed panel: `vegfr2` −0.003, `herg` −0.032,
+`abl1` +0.022), 8 configs
 (hidden {128, 256} x layers {4, 5} x dropout {0.2, 0.3}) train **only on
 the scaffold split**, selected by **3-seed mean validation RMSE**, never a
-single seed. Winners: `vegfr2` 256/4L/0.2 (0.7056), `herg` 256/5L/0.2
-(0.5145), `abl1` 256/4L/0.2 (0.8427) - hidden 256 on all three. A **GINE**
+single seed. Winners: `vegfr2` 256/5L/0.2 (0.6937), `herg` 256/5L/0.2
+(0.6215), `abl1` 256/5L/0.2 (0.7833) - 256/5L/0.2 on all three. A **GINE**
 variant adds a `BondEncoder` (`BOND_FEATURE_DIMS = [13, 7, 2]`); all else
 is `gnn_03`'s.
 
-Test R2, 3-seed mean ± std; Δ = GIN − RF (RF = the reference RF of that
-campaign, see the status note):
+Test R2, 3-seed mean ± std; Δ = GIN − RF (RF = this campaign's
+reference RF, equal to the refreshed panel RF):
 
 | Target | Model | random R2 | Δ rand | scaffold R2 | Δ scaf |
 |---|---|---|---|---|---|
-| `vegfr2` (VEGFR2) | RF | 0.736 | — | 0.617 | — |
-| | baseline GIN | 0.678±0.007 | −0.058 | 0.611±0.024 | −0.006 |
-| | tuned GIN | 0.697±0.006 | −0.039 | 0.622±0.012 | **+0.005** |
-| | GINE | 0.674±0.003 | −0.062 | 0.594±0.013 | −0.023 |
-| `herg` | RF | 0.615 | — | 0.430 | — |
-| | baseline GIN | 0.616±0.017 | +0.000 (tie) | 0.417±0.007 | −0.013 |
-| | tuned GIN | 0.612±0.016 | −0.003 | 0.455±0.009 | **+0.025** |
-| | GINE | 0.593±0.025 | −0.023 | 0.454±0.007 | **+0.024** |
-| `abl1` | RF | 0.792 | — | 0.723 | — |
-| | baseline GIN | 0.752±0.006 | −0.039 | 0.710±0.037 | −0.013 |
-| | tuned GIN | 0.756±0.014 | −0.035 | 0.693±0.063 | −0.030 |
-| | GINE | 0.753±0.007 | −0.039 | 0.638±0.083 | −0.085 |
+| `vegfr2` (VEGFR2) | RF | 0.670 | — | 0.585 | — |
+| | baseline GIN | 0.605±0.004 | −0.064 | 0.583±0.002 | −0.003 |
+| | tuned GIN | 0.620±0.003 | −0.050 | 0.600±0.006 | **+0.015** |
+| | GINE | 0.600±0.006 | −0.070 | 0.563±0.010 | −0.022 |
+| `herg` | RF | 0.607 | — | 0.384 | — |
+| | baseline GIN | 0.619±0.009 | **+0.012** | 0.352±0.038 | −0.032 |
+| | tuned GIN | 0.616±0.005 | **+0.009** | 0.385±0.015 | +0.000 (tie) |
+| | GINE | 0.613±0.009 | **+0.006** | 0.352±0.017 | −0.033 |
+| `abl1` | RF | 0.822 | — | 0.714 | — |
+| | baseline GIN | 0.767±0.010 | −0.055 | 0.737±0.027 | **+0.022** |
+| | tuned GIN | 0.765±0.024 | −0.058 | 0.770±0.014 | **+0.056** |
+| | GINE | 0.779±0.009 | −0.043 | 0.742±0.015 | **+0.028** |
 
 ![fairness vegfr2](figures/fairness/vegfr2.png)
 ![fairness herg](figures/fairness/herg.png)
 ![fairness abl1](figures/fairness/abl1.png)
 
 **(i) The frozen recipe really does understate the GIN - but only a
-little, and only on scaffold.** 2 of the 3 nearest targets flip positive
-on the mean convention (`vegfr2`, `herg`) - the recipe was
-capacity-starved. Fragile: `abl1` overfits its **216** validation
-molecules (test R2 and seed std both degrade), random flips on none of the three.
+little, and only on scaffold.** Bounded tuning lifts the scaffold Δ on
+all three targets: `vegfr2` crosses zero (−0.003 → **+0.015**), `herg`
+climbs to a tie (−0.032 → +0.000), and `abl1`, already positive under
+the frozen recipe (+0.022), widens to **+0.056** while its seed spread
+shrinks (0.027 → 0.014) - the recipe was capacity-starved. Random flips
+on none of the three: tuned `vegfr2` and `abl1` stay negative (−0.050 /
+−0.058, `abl1`/random the one cell where tuning costs a little and the
+seed spread grows 0.010 → 0.024), while `herg`/random was already
+positive and eases from +0.012 to +0.009.
 
 **(ii) GINE bond features are not a general gain.** In the fairness
-table above they help only `herg` scaffold and hurt `vegfr2` (both
-splits) and `abl1` scaffold - edge features are not the missing
-ingredient. Panel-wide against the refreshed RF this holds with
-bootstrap CIs: the full GINE panel wins **0 of 10 bootstrapped cells**
-(5 significantly favour RF - `a2a`/scaffold, `egfr`/random,
-`egfr_full`/random, `hivpr`/scaffold, `mpro`/scaffold - and 5 straddle
-0); the remaining 6 cells (`abl1`, `herg`, `vegfr2` - no per-seed GINE
-predictions yet) carry no CI and read point estimates only, 3 of them
-marginally positive (`herg`/scaffold **+0.069**, `vegfr2` +0.004 /
-+0.009). Tables `results/gine_panel/summary.csv`,
-`results/significance/summary_partial_gine.csv`; figures
+table above they help only `abl1` scaffold (**+0.028**) and `herg`
+random (+0.006, marginal), and hurt `vegfr2` on both splits
+(−0.070 / −0.022), `herg` scaffold (−0.033) and `abl1` random
+(−0.043) - edge features are not the missing ingredient. Panel-wide
+against the refreshed RF this holds with bootstrap CIs: the full GINE
+panel wins **0 of 10 bootstrapped cells** (5 significantly favour RF -
+`a2a`/scaffold, `egfr`/random, `egfr_full`/random, `hivpr`/scaffold,
+`mpro`/scaffold - and 5 straddle 0); the remaining 6 cells (`abl1`,
+`herg`, `vegfr2` - no per-seed GINE predictions) carry no CI and read
+point estimates only, 2 of them positive on the refreshed fairness
+runs (`abl1`/scaffold **+0.028**, `herg`/random +0.006). Tables
+`results/significance/summary_partial_gine.csv` +
+`results/gine_panel/summary.csv` (the 10 bootstrapped cells),
+`results/fairness/summary_{tag}.json` (the 3 no-CI tags); figures
 `figures/gine_panel/panel_dR2.png`,
 `figures/significance/ci_panel_with_gine.png`.
 
 **(iii) Boundary, not a reversal.** The frozen recipe itself now shows
 two significant leads (`abl1`/scaffold and `herg`/random - the two GIN
-cells in *Significance* above); bounded tuning pushes a minority of
-near-parity targets over zero on scaffold and nowhere else, 1 of 3
-targets regresses, and the tuned wins (+0.005 / +0.025 against that
-campaign's RF references) are the size of seed noise.
+cells in *Significance* above); bounded tuning crosses zero on scaffold
+and nowhere else - `vegfr2` −0.003 → **+0.015** is inside seed-noise
+range, `herg` only ties (+0.000), and `abl1` widens its already-positive
+lead to **+0.056** - while no random-split cell flips. Three widened or
+new positive cells out of six tuned ones move the boundary; they do not
+reverse the panel verdict.
 
 **AttentiveFP control: attention + GRU + bond features, still no
 reversal.** The strongest published small-molecule readout - PyG
@@ -431,11 +439,12 @@ undecided; on the random split all 8 point estimates are negative
 (−0.167 `a2a` to −0.022 `herg`), and `herg`/random is the one cell
 where the ensemble convention turns a negative point estimate into a
 significant AttentiveFP lead - the other 4 significant random cells
-favour RF. `herg`/scaffold is the one cell every enhanced variant
-reads positive on (tuned GIN +0.025, GINE +0.024, AttentiveFP +0.020
-per-seed) and it carries that lead across significance, as does
-`herg`/random for AttentiveFP alone; the frozen GIN reads −0.032
-there on the refreshed panel. Tables `results/afp_panel/summary.csv`,
+favour RF. `herg`/scaffold is the friendliest cell for the enhanced
+variants (tuned GIN +0.000 tie, GINE −0.033, AttentiveFP +0.020
+per-seed) - only AttentiveFP reads positive there now, and it is the
+one that carries a lead across significance, as does `herg`/random for
+AttentiveFP alone; the frozen GIN reads −0.032 there on the refreshed
+panel. Tables `results/afp_panel/summary.csv`,
 `results/significance/summary_attentivefp.csv`; figures
 `figures/afp_panel/panel_dR2.png` and the three-model forest plot
 `figures/significance/ci_panel_with_afp.png` (gin / gine / afp side by
