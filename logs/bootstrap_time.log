@@ -1,0 +1,28 @@
+[a2a/time] n=802  mean3 dR2=+0.3256 CI[+0.1883, +0.4670]  frac_boot_gin_better=1.0000
+[abl1/time] n=531  mean3 dR2=-0.2358 CI[-0.2746, -0.1965]  frac_boot_gin_better=0.0000
+[egfr/time] n=1233  mean3 dR2=+0.0390 CI[-0.0122, +0.0927]  frac_boot_gin_better=0.9294
+[egfr_full/time] n=3043  mean3 dR2=+0.5923 CI[+0.5355, +0.6561]  frac_boot_gin_better=1.0000
+[herg/time] n=2325  mean3 dR2=+0.0323 CI[-0.0068, +0.0725]  frac_boot_gin_better=0.9444
+[hivpr/time] n=529  mean3 dR2=+0.1148 CI[+0.0356, +0.1963]  frac_boot_gin_better=0.9969
+[mpro/time] n=1750  mean3 dR2=+0.0842 CI[+0.0431, +0.1275]  frac_boot_gin_better=1.0000
+[vegfr2/time] n=2038  mean3 dR2=-0.0521 CI[-0.0773, -0.0260]  frac_boot_gin_better=0.0002
+
+=== Paired bootstrap significance: GIN vs RF ===
+  dR2 = R2_GIN - R2_RF (positive favours GIN); significant = 95% CI excludes 0
+
+  [seed42] 6/8 cells with CI excluding 0
+    RF significantly ahead (2): egfr/time, vegfr2/time
+    GIN significantly ahead (4): a2a/time, egfr_full/time, hivpr/time, mpro/time
+    dR2 point range: [-0.1349, +0.5802]
+
+  [mean3] 6/8 cells with CI excluding 0
+    RF significantly ahead (2): abl1/time, vegfr2/time
+    GIN significantly ahead (4): a2a/time, egfr_full/time, hivpr/time, mpro/time
+    dR2 point range: [-0.2358, +0.5923]
+
+  mean3 (primary): RF significantly wins in 2/8 cells; GIN in 4/8; 2/8 inconclusive
+
+split suffix '_time': shared outputs kept separate from the random/scaffold campaign files
+
+summary -> results/significance/summary_time.csv (16 rows)
+figure  -> figures/significance/ci_panel_time.png

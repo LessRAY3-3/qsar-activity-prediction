@@ -1,0 +1,127 @@
+=== [2026-10-11 13:02:22] driver start experiment=y_randomization tags=a2a abl1 egfr egfr_full herg hivpr mpro OMP_NUM_THREADS=1
+=== [2026-10-11 13:02:22] START y_randomization tag=a2a
+/Users/lessray/Desktop/kimi code/qsar-activity-prediction/.venv/lib/python3.12/site-packages/torch/jit/_script.py:1491: FutureWarning: `torch.jit.script` is deprecated. Please switch to `torch.compile` or `torch.export`.
+  warnings.warn(
+/Users/lessray/Desktop/kimi code/qsar-activity-prediction/experiments/../scripts/gnn_03_train_gin.py:210: UserWarning: Converting a tensor with requires_grad=True to a scalar may lead to unexpected behavior.
+Consider using tensor.detach() first. (Triggered internally at /Users/runner/work/pytorch/pytorch/torch/csrc/autograd/generated/python_variable_methods.cpp:821.)
+  total += float(loss) * len(batch.y)
+[a2a] seeds=[42, 1, 2] splits=['random', 'scaffold'] control_seed=42
+[a2a/random] pool=1092 test=274
+  CONTROL real RF   R2=0.7037 (8s)
+  CONTROL real GIN  R2=0.6223 (best epoch 38, 136s)
+  shuffled seed=42 RF   R2=-0.2565 (15s)
+  shuffled seed=42 GIN  R2=-0.1187 (best epoch 31, 53s)
+  shuffled seed=1 RF   R2=-0.2219 (13s)
+  shuffled seed=1 GIN  R2=-0.0365 (best epoch 29, 85s)
+  shuffled seed=2 RF   R2=-0.1621 (12s)
+  shuffled seed=2 GIN  R2=-0.1027 (best epoch 21, 50s)
+[a2a/scaffold] pool=1067 test=299
+  CONTROL real RF   R2=0.6997 (5s)
+  CONTROL real GIN  R2=0.6298 (best epoch 48, 101s)
+  shuffled seed=42 RF   R2=-0.3136 (13s)
+  shuffled seed=42 GIN  R2=-0.1215 (best epoch 15, 29s)
+  shuffled seed=1 RF   R2=-0.2606 (12s)
+  shuffled seed=1 GIN  R2=-0.0804 (best epoch 6, 37s)
+  shuffled seed=2 RF   R2=-0.3884 (14s)
+  shuffled seed=2 GIN  R2=-0.2191 (best epoch 37, 80s)
+summary -> results/y_randomization/summary_a2a.json
+figure  -> figures/y_randomization/y_randomization_a2a.png
+csv     -> results/y_randomization/y_randomization_a2a.csv (16 rows)
+=== [2026-10-11 13:13:44] END y_randomization tag=a2a rc=0
+=== [2026-10-11 13:13:44] START y_randomization tag=abl1
+/Users/lessray/Desktop/kimi code/qsar-activity-prediction/.venv/lib/python3.12/site-packages/torch/jit/_script.py:1491: FutureWarning: `torch.jit.script` is deprecated. Please switch to `torch.compile` or `torch.export`.
+  warnings.warn(
+/Users/lessray/Desktop/kimi code/qsar-activity-prediction/experiments/../scripts/gnn_03_train_gin.py:210: UserWarning: Converting a tensor with requires_grad=True to a scalar may lead to unexpected behavior.
+Consider using tensor.detach() first. (Triggered internally at /Users/runner/work/pytorch/pytorch/torch/csrc/autograd/generated/python_variable_methods.cpp:821.)
+  total += float(loss) * len(batch.y)
+[abl1] seeds=[42, 1, 2] splits=['random', 'scaffold'] control_seed=42
+[abl1/random] pool=1696 test=424
+  CONTROL real RF   R2=0.8181 (10s)
+  CONTROL real GIN  R2=0.7787 (best epoch 71, 159s)
+  shuffled seed=42 RF   R2=-0.2657 (31s)
+  shuffled seed=42 GIN  R2=-0.0601 (best epoch 17, 52s)
+  shuffled seed=1 RF   R2=-0.0936 (36s)
+  shuffled seed=1 GIN  R2=-0.0389 (best epoch 25, 65s)
+  shuffled seed=2 RF   R2=-0.2855 (26s)
+  shuffled seed=2 GIN  R2=-0.0397 (best epoch 3, 25s)
+[abl1/scaffold] pool=1695 test=425
+  CONTROL real RF   R2=0.7184 (7s)
+  CONTROL real GIN  R2=0.7597 (best epoch 64, 87s)
+  shuffled seed=42 RF   R2=-0.9580 (20s)
+  shuffled seed=42 GIN  R2=-0.8119 (best epoch 1, 20s)
+  shuffled seed=1 RF   R2=-0.6294 (20s)
+  shuffled seed=1 GIN  R2=-0.7195 (best epoch 5, 26s)
+  shuffled seed=2 RF   R2=-0.9417 (22s)
+  shuffled seed=2 GIN  R2=-0.7069 (best epoch 4, 24s)
+summary -> results/y_randomization/summary_abl1.json
+figure  -> figures/y_randomization/y_randomization_abl1.png
+csv     -> results/y_randomization/y_randomization_abl1.csv (16 rows)
+=== [2026-10-11 13:24:27] END y_randomization tag=abl1 rc=0
+=== [2026-10-11 13:24:27] START y_randomization tag=egfr
+/Users/lessray/Desktop/kimi code/qsar-activity-prediction/.venv/lib/python3.12/site-packages/torch/jit/_script.py:1491: FutureWarning: `torch.jit.script` is deprecated. Please switch to `torch.compile` or `torch.export`.
+  warnings.warn(
+/Users/lessray/Desktop/kimi code/qsar-activity-prediction/experiments/../scripts/gnn_03_train_gin.py:210: UserWarning: Converting a tensor with requires_grad=True to a scalar may lead to unexpected behavior.
+Consider using tensor.detach() first. (Triggered internally at /Users/runner/work/pytorch/pytorch/torch/csrc/autograd/generated/python_variable_methods.cpp:821.)
+  total += float(loss) * len(batch.y)
+=== [2026-10-11 14:16:45] REPAIR-watch start: waiting for pid 60199
+[egfr] seeds=[42, 1, 2] splits=['random', 'scaffold'] control_seed=42
+[egfr/random] pool=3648 test=912
+  CONTROL real RF   R2=0.7179 (21s)
+  CONTROL real GIN  R2=0.6760 (best epoch 99, 283s)
+  shuffled seed=42 RF   R2=-0.1011 (133s)
+  shuffled seed=42 GIN  R2=0.0156 (best epoch 7, 57s)
+  shuffled seed=1 RF   R2=-0.1495 (127s)
+  shuffled seed=1 GIN  R2=0.0102 (best epoch 9, 96s)
+  shuffled seed=2 RF   R2=-0.1864 (226s)
+  shuffled seed=2 GIN  R2=0.0162 (best epoch 39, 274s)
+[egfr/scaffold] pool=3648 test=912
+  CONTROL real RF   R2=0.6398 (162s)
+  CONTROL real GIN  R2=0.6188 (best epoch 61, 461s)
+  shuffled seed=42 RF   R2=-0.0267 (241s)
+  shuffled seed=42 GIN  R2=-0.0305 (best epoch 4, 61s)
+  shuffled seed=1 RF   R2=-0.0769 (567s)
+  shuffled seed=1 GIN  R2=-0.0521 (best epoch 14, 132s)
+  shuffled seed=2 RF   R2=-0.0596 (336s)
+  shuffled seed=2 GIN  R2=-0.0136 (best epoch 27, 288s)
+summary -> results/y_randomization/summary_egfr.json
+figure  -> figures/y_randomization/y_randomization_egfr.png
+csv     -> results/y_randomization/y_randomization_egfr.csv (16 rows)
+=== [2026-10-11 14:22:28] END y_randomization tag=egfr rc=0
+=== [2026-10-11 14:22:28] START y_randomization tag=egfr_full
+/Users/lessray/Desktop/kimi code/qsar-activity-prediction/.venv/lib/python3.12/site-packages/torch/jit/_script.py:1491: FutureWarning: `torch.jit.script` is deprecated. Please switch to `torch.compile` or `torch.export`.
+  warnings.warn(
+=== [2026-10-11 14:22:46] REPAIR-watch: original egfr run exited
+=== [2026-10-11 14:22:46] REPAIR: re-running y_randomization --tag egfr
+/Users/lessray/Desktop/kimi code/qsar-activity-prediction/.venv/lib/python3.12/site-packages/torch/jit/_script.py:1491: FutureWarning: `torch.jit.script` is deprecated. Please switch to `torch.compile` or `torch.export`.
+  warnings.warn(
+/Users/lessray/Desktop/kimi code/qsar-activity-prediction/experiments/../scripts/gnn_03_train_gin.py:210: UserWarning: Converting a tensor with requires_grad=True to a scalar may lead to unexpected behavior.
+Consider using tensor.detach() first. (Triggered internally at /Users/runner/work/pytorch/pytorch/torch/csrc/autograd/generated/python_variable_methods.cpp:821.)
+  total += float(loss) * len(batch.y)
+/Users/lessray/Desktop/kimi code/qsar-activity-prediction/experiments/../scripts/gnn_03_train_gin.py:210: UserWarning: Converting a tensor with requires_grad=True to a scalar may lead to unexpected behavior.
+Consider using tensor.detach() first. (Triggered internally at /Users/runner/work/pytorch/pytorch/torch/csrc/autograd/generated/python_variable_methods.cpp:821.)
+  total += float(loss) * len(batch.y)
+[egfr] seeds=[42, 1, 2] splits=['random', 'scaffold'] control_seed=42
+[egfr/random] pool=3648 test=912
+  CONTROL real RF   R2=0.7179 (127s)
+  CONTROL real GIN  R2=0.6817 (best epoch 85, 492s)
+  shuffled seed=42 RF   R2=-0.1011 (213s)
+  shuffled seed=42 GIN  R2=0.0090 (best epoch 22, 121s)
+  shuffled seed=1 RF   R2=-0.1495 (192s)
+  shuffled seed=1 GIN  R2=0.0132 (best epoch 10, 87s)
+  shuffled seed=2 RF   R2=-0.1864 (244s)
+  shuffled seed=2 GIN  R2=0.0267 (best epoch 18, 117s)
+[egfr/scaffold] pool=3648 test=912
+  CONTROL real RF   R2=0.6398 (100s)
+  CONTROL real GIN  R2=0.6356 (best epoch 44, 217s)
+  shuffled seed=42 RF   R2=-0.0267 (332s)
+  shuffled seed=42 GIN  R2=-0.0369 (best epoch 4, 80s)
+  shuffled seed=1 RF   R2=-0.0769 (360s)
+  shuffled seed=1 GIN  R2=-0.0429 (best epoch 7, 218s)
+  shuffled seed=2 RF   R2=-0.0596 (602s)
+  shuffled seed=2 GIN  R2=-0.0587 (best epoch 32, 196s)
+summary -> results/y_randomization/summary_egfr.json
+figure  -> figures/y_randomization/y_randomization_egfr.png
+csv     -> results/y_randomization/y_randomization_egfr.csv (16 rows)
+=== [2026-10-11 15:25:20] REPAIR: egfr rerun rc=0
+/opt/homebrew/Cellar/python@3.12/3.12.14/Frameworks/Python.framework/Versions/3.12/lib/python3.12/multiprocessing/resource_tracker.py:279: UserWarning: resource_tracker: There appear to be 2 leaked semaphore objects to clean up at shutdown
+  warnings.warn('resource_tracker: There appear to be %d '

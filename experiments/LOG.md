@@ -4,6 +4,109 @@ Running log of the deep-dive experiments. Each entry: what ran, headline
 numbers (3-seed mean +/- std unless noted), and the commit holding the
 artifacts. Newest first. Maintained by M4 Air; results produced on M3 Max.
 
+## 2026-10-11
+
+### Full refresh: data rebuild + whole-campaign retrain + README rewrite — DELIVERED (batch uncommitted at write time; commits handled centrally)
+
+- **Data refresh (review H1 / M1)**: `01d`/`01e` downloaders now pull
+  `standard_relation`/`activity_id`, and `02_clean_data.py` keeps only
+  `standard_relation == "="` - censored `>`/`<`/`~` rows are bounds, not
+  labels; salts collapse to the **parent structure before dedup**
+  (`parent_smiles`), and `03_featurize` + the `document_years` join
+  follow the parent too. 7 ChEMBL targets re-pulled raw, `egfr`
+  rebuilt; panel size 45,145 -> **42,796** unique compounds (`herg`
+  12,019 -> 8,403, `egfr` 6,165 -> 4,560, `egfr_full` 13,497 -> 10,729,
+  `vegfr2` 11,797 -> 9,643). Records: `docs/reviews/fixes-2026-10-11.md`,
+  `docs/reviews/h1-sensitivity-2026-10-10.md`, and the fill-in number
+  draft `docs/reviews/readme-numbers-2026-10-11.md`.
+- **Full retrain** (everything below is post-refresh unless flagged):
+  - **RF**: `scripts/04_train_and_evaluate.py`, 8 tags x 3 splits
+    (random / scaffold / time) -> `results/metrics_{tag}.json` +
+    `rf_preds_{tag}_{split}.npz`; `vegfr2` was the last to land
+    (10-11 15:31).
+  - **GIN**: 8 tags x 3 splits x 3 seeds = **72 runs** ->
+    `results/gnn_metrics_{tag}{,_seed1,_seed2}.json` (each file holds
+    random/scaffold/time).
+  - **XGBoost**: `experiments/xgboost_baseline.py`, 8 tags x 2 splits x
+    3 seeds, `rf_control` re-read from the refreshed metrics (15:31).
+  - **Multi-task**: `scripts/gnn_07_multitask.py`, 2 arms x 3 seeds x 2
+    splits -> `results/multitask/` (10:47-11:32).
+  - **Uncertainty + AD**: `experiments/uncertainty_ad.py`, 16 cells x
+    {gin, gine} -> `results/uncertainty/` (15:31).
+  - **Significance**: `experiments/paired_bootstrap.py`, B = 10,000,
+    **both conventions** (`seed42` + `mean3`) for every cell ->
+    `results/significance/summary.csv` (15:28), the per-cell
+    `*_{random,scaffold}[_gine|_attentivefp].csv`,
+    `summary_attentivefp.csv` + `summary_partial_gine.csv` (17:16) and
+    the time CIs merged into `results/time_split/summary.csv` (16:59).
+  - **Architecture panels**: `experiments/gine_panel.py` ->
+    `results/gine_panel/summary.csv` + `figures/gine_panel/`;
+    `experiments/afp_panel.py` (48 runs) -> `results/afp_panel/` +
+    `figures/afp_panel/`; forest plots
+    `figures/significance/ci_panel_with_{gine,afp}.png`.
+  - **Fingerprint ablation**: 8 tags x 2 splits x {r2, r3} x {1024,
+    2048} x 3 seeds = **192 RF fits** -> 8 x
+    `results/fp_ablation/summary_<tag>.json`.
+  - **Auxiliary family**: y-randomization (7 tags), learning curves
+    (7 tags), interpretability alignment (7 tags), error analysis
+    (7 tags), `multi_target` + `time_split` summaries - all re-run on
+    the new data (15:45 / 12:56 / 16:59-17:00); all 7 y-randomization
+    verdicts read `ok: all shuffled-label means < 0.2`. The
+    `run_aux_exp.sh` tag list still excludes `vegfr2`.
+- **Key new numbers**:
+  - **`vegfr2`/time RF = +0.160** (pre-refresh +0.093); `vegfr2` random
+    0.670 / scaffold 0.585 (was 0.736 / 0.617). With that last stale RF
+    gone, every `vegfr2`-derived Δ (panel, time, multitask, xgboost,
+    uncertainty, gine/afp) now sits on the refreshed baseline.
+  - **Significance pattern: RF 7 / GIN 2 / ns 7** across the 16
+    random+scaffold cells (pre-refresh: 4 cells, all RF). The two GIN
+    wins are `abl1`/scaffold **+0.037 [+0.006, +0.069]** and
+    `herg`/random **+0.038 [+0.006, +0.069]**, both
+    `frac_boot_gin_better` ~0.99.
+  - **`abl1`/scaffold flips**: ST-GIN 0.737±0.027 vs RF 0.714, per-seed
+    Δ **+0.022** (seed 42 alone: +0.060) - the one scaffold cell where
+    the GIN beats the RF, and it survives the ensemble bootstrap; the
+    pre-refresh panel had all 8 scaffold cells negative.
+  - **Time split**: 6/8 CIs exclude 0 - GIN ahead on `a2a` **+0.326**,
+    `egfr_full` **+0.592**, `hivpr` **+0.115**, `mpro` **+0.084**; RF
+    ahead on `abl1` **−0.236** and `vegfr2` **−0.052**; `egfr` (+0.039)
+    and `herg` (+0.032) straddle 0 (pre-refresh: 5/8, all GIN).
+  - **GINE panel**: **0 of 10** bootstrapped cells favour GINE, 5
+    significantly favour RF, 5 straddle 0; the other 6 cells
+    (`abl1`/`herg`/`vegfr2`) have no per-seed GINE predictions yet and
+    are point estimates only (3 of them positive: `herg`/scaffold
+    +0.069, `vegfr2` +0.004/+0.009).
+  - **AttentiveFP panel**: wins **2 of 16** (`herg`/scaffold +0.062
+    [+0.030, +0.092], `herg`/random +0.034 [+0.002, +0.065]), 8 cells
+    favour RF, 6 undecided; all 8 random point estimates negative.
+  - **Fingerprint ablation**: random grid stays within **−0.019 …
+    +0.003** of the r=2/2048 anchor on all 8 tags; scaffold spreads
+    **−0.043 … +0.041**, worst cells all r3/1024 (`vegfr2` −0.043,
+    `hivpr` −0.042, `abl1` −0.040).
+  - **XGBoost**: 13/16 cells ≤ RF (worst `egfr`/scaffold **−0.132**).
+  - **Multi-task pool**: 22,492 rows / 21,093 unique SMILES / 1,193 =
+    **5.66%** appear under >1 target (pre-refresh 10.0%).
+- **In progress / not re-run**:
+  - **Fairness campaign still training on win4070**
+    (`experiments/gnn_fairness.py --tag vegfr2`, up since 10-11 17:16;
+    `results/fairness/summary_vegfr2.json` mid-write at 17:35), so the
+    README fairness table keeps the RF references of its own
+    **pre-refresh** campaign (`vegfr2` 0.736/0.617, `herg` 0.615/0.430,
+    `abl1` 0.792/0.723), and the GINE cells for those three tags still
+    carry no per-seed predictions - hence point estimates without
+    bootstrap CIs in `results/gine_panel/summary.csv`.
+  - **`scripts/07_qc_checks.py` not re-run**: `figures/testset_hist_*.png`
+    still predate the refresh (flagged in `docs/methodology.md`).
+  - `results/significance/summary_time.csv` and the per-cell `*_time.csv`
+    are still the 10-10 pre-refresh merge (old `p_one_sided` schema);
+    the refreshed time CIs live in `results/time_split/summary.csv`.
+  - `vegfr2` is outside the aux driver, so its y-randomization /
+    learning curve / interpretability / error analysis remain pre-refresh;
+    `permutation_importance_*` and `top_bits_*` were not re-run either.
+  - README: top Status note, the architecture-comparison section
+    (GINE/AFP counts) and the fingerprint-ablation section were rewritten
+    against these artifacts; fairness + QC stay flagged inline.
+
 ## 2026-10-10
 
 ### Review 2026-10-10 fix pass (findings PR #1 + independent verification) — DELIVERED (A-layer; no results retrained here)

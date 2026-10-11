@@ -44,15 +44,18 @@ def test_summary_csv_carries_delta_convention(tmp_path, monkeypatch, load_experi
 # Independently verified herg/time ground truth (six decimals), recomputed
 # from the committed per-seed prediction npz files:
 #   RF time R2        = -0.033775  (pinned constant, see the test below)
-#   per-seed GIN R2s  = -0.019990 / -0.045609 / -0.162938
-#                       (mean -0.076179 -> per-seed-mean delta -0.042404)
-#   R2(mean GIN pred) = +0.041903  ->  ensemble delta +0.075677
+#   per-seed GIN R2s  = -0.053078 / -0.072149 / -0.033765
+#                       (mean -0.052997 -> per-seed-mean delta -0.019222)
+#   R2(mean GIN pred) = -0.026041  ->  ensemble delta +0.007734
+# Re-pinned 2026-10-11: the label-refresh rebuild rewrote the gnn_preds_*_time
+# npz these GIN numbers come from (ensemble R2 was +0.041903 before the
+# refresh); the RF-side constant is deliberately not tracked.
 # The gnn_preds_* npz files are GNN campaign artifacts; an RF re-run never
 # touches them, while it does rewrite results/metrics_*.json / rf_preds_*.
 HERG_RF_TIME_R2 = -0.033775
-HERG_GIN_ENSEMBLE_R2 = 0.041903
-HERG_GIN_ENSEMBLE_DELTA = 0.075677
-HERG_GIN_PER_SEED_DELTA = -0.042404
+HERG_GIN_ENSEMBLE_R2 = -0.026041
+HERG_GIN_ENSEMBLE_DELTA = 0.007734
+HERG_GIN_PER_SEED_DELTA = -0.019222
 
 
 def _r2(y_true, y_pred):
@@ -67,8 +70,9 @@ def test_delta_convention_matches_independent_ensemble_recomputation(load_experi
 
     The M4 review caught the old label (point=per-seed-mean_R2) describing
     a quantity the summary never stored: for herg the two displayed columns
-    subtract to -0.042 while the stored ensemble delta is +0.076. The
-    convention string is therefore pinned against an independent
+    subtract to a per-seed-mean delta that is NOT the stored ensemble delta
+    (they can even differ in sign - see the egfr/time worked example in the
+    README). The convention string is therefore pinned against an independent
     recomputation from the committed herg/time per-seed GIN predictions;
     the RF R2 stays a pinned constant so an RF re-run cannot invalidate
     the test.

@@ -1,0 +1,95 @@
+{
+  "tag": "hivpr",
+  "seeds": [
+    42,
+    1,
+    2
+  ],
+  "rf_params": {
+    "random": {
+      "n_estimators": 500,
+      "max_depth": null,
+      "min_samples_split": 5
+    },
+    "scaffold": {
+      "n_estimators": 500,
+      "max_depth": null,
+      "min_samples_split": 5
+    }
+  },
+  "groups": {
+    "random/gin/real": {
+      "r2_values": [
+        0.6371
+      ],
+      "r2_mean": 0.63713538646698,
+      "r2_std": 0.0,
+      "runs": 1
+    },
+    "random/gin/shuffled": {
+      "r2_values": [
+        -0.0035,
+        0.005,
+        -0.0044
+      ],
+      "r2_mean": -0.0009462833404541016,
+      "r2_std": 0.004248009263362399,
+      "runs": 3
+    },
+    "random/rf/real": {
+      "r2_values": [
+        0.6674
+      ],
+      "r2_mean": 0.6674383072045345,
+      "r2_std": 0.0,
+      "runs": 1
+    },
+    "random/rf/shuffled": {
+      "r2_values": [
+        -0.2495,
+        -0.2368,
+        -0.1099
+      ],
+      "r2_mean": -0.19874124104878713,
+      "r2_std": 0.06300499988288183,
+      "runs": 3
+    },
+    "scaffold/gin/real": {
+      "r2_values": [
+        0.4514
+      ],
+      "r2_mean": 0.4514382481575012,
+      "r2_std": 0.0,
+      "runs": 1
+    },
+    "scaffold/gin/shuffled": {
+      "r2_values": [
+        -0.0935,
+        -0.1166,
+        -0.0431
+      ],
+      "r2_mean": -0.0844176212946574,
+      "r2_std": 0.030677841855552848,
+      "runs": 3
+    },
+    "scaffold/rf/real": {
+      "r2_values": [
+        0.5558
+      ],
+      "r2_mean": 0.5558216294824421,
+      "r2_std": 0.0,
+      "runs": 1
+    },
+    "scaffold/rf/shuffled": {
+      "r2_values": [
+        -0.1149,
+        -0.2183,
+        -0.3683
+      ],
+      "r2_mean": -0.23383808522978433,
+      "r2_std": 0.10399695327527245,
+      "runs": 3
+    }
+  },
+  "verdict": "ok: all shuffled-label means < 0.2"
+}

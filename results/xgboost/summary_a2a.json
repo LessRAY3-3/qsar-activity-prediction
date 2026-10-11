@@ -1,0 +1,44 @@
+{
+  "tag": "a2a",
+  "seeds": [
+    42,
+    1,
+    2
+  ],
+  "xgb_params": {
+    "n_estimators": 500,
+    "learning_rate": 0.05,
+    "max_depth": 6,
+    "tree_method": "hist",
+    "device": "cpu"
+  },
+  "xgboost_version": "3.4.1",
+  "rf_control": {
+    "random": {
+      "r2_mean": 0.7099535296263921,
+      "r2_std": null,
+      "source": "headline metrics json (full pool, not same-pool)"
+    },
+    "scaffold": {
+      "r2_mean": 0.7024594756345401,
+      "r2_std": null,
+      "source": "headline metrics json (full pool, not same-pool)"
+    }
+  },
+  "by_split": {
+    "random": {
+      "r2_mean": 0.6882811188697815,
+      "r2_std": 0.0,
+      "rmse_mean": 0.626729408350426,
+      "delta_vs_rf_control": -0.02167241075661064,
+      "runs": 3
+    },
+    "scaffold": {
+      "r2_mean": 0.6805821061134338,
+      "r2_std": 0.0,
+      "rmse_mean": 0.5851751836303417,
+      "delta_vs_rf_control": -0.021877369521106305,
+      "runs": 3
+    }
+  }
+}

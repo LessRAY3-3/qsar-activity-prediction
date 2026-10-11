@@ -32,3 +32,25 @@ Target: Voltage-gated inwardly rectifying potassium channel KCNH2 | Feature matr
 
 === random split: train=9615, test=2404 ===
 Fitting 5 folds for each of 12 candidates, totalling 60 fits
+/Users/lessray/Desktop/kimi code/qsar-activity-prediction/.venv/lib/python3.12/site-packages/joblib/externals/loky/backend/resource_tracker.py:444: UserWarning: resource_tracker: There appear to be 1 leaked file objects to clean up at shutdown: {'/var/folders/60/f144lgn97zg1y9wcvg2v5thh0000gn/T/joblib_memmapping_folder_22434_274f8c18c12340049cf4106d079c12c0_c79ada63b1d34db2a59315627c0fef36/22434-4671107248-28715353ee094332837f5a5029f50aea.pkl': 11}
+  warnings.warn(
+/Users/lessray/Desktop/kimi code/qsar-activity-prediction/.venv/lib/python3.12/site-packages/joblib/externals/loky/backend/resource_tracker.py:444: UserWarning: resource_tracker: There appear to be 16 leaked semlock objects to clean up at shutdown: {'/loky-22434-nkfpqxa0': 1, '/loky-22434-641762lp': 1, '/loky-22434-w30_fkf0': 1, '/loky-22434-sr6fq_1g': 1, '/loky-22434-90_3p6yp': 1, '/loky-22434-lmbrs4f_': 1, '/loky-22434-mokxkeep': 1, '/loky-22434-fv4nwxw0': 1, '/loky-22434-z5ibrebn': 1, '/loky-22434-1_9zodgc': 1, '/loky-22434-uc3en28v': 1, '/loky-22434-80213b4k': 1, '/loky-22434-pyp6gcct': 1, '/loky-22434-act45qtn': 1, '/loky-22434-9w3zlzrh': 1, '/loky-22434-nsz2ewrx': 1}
+  warnings.warn(
+/Users/lessray/Desktop/kimi code/qsar-activity-prediction/.venv/lib/python3.12/site-packages/joblib/externals/loky/backend/resource_tracker.py:444: UserWarning: resource_tracker: There appear to be 2 leaked folder objects to clean up at shutdown: {'/var/folders/60/f144lgn97zg1y9wcvg2v5thh0000gn/T/joblib_memmapping_folder_22434_274f8c18c12340049cf4106d079c12c0_1e152d09f7f94c15a1c7d9e6ef9ed872': 1, '/var/folders/60/f144lgn97zg1y9wcvg2v5thh0000gn/T/joblib_memmapping_folder_22434_274f8c18c12340049cf4106d079c12c0_c79ada63b1d34db2a59315627c0fef36': 1}
+  warnings.warn(
+/Users/lessray/Desktop/kimi code/qsar-activity-prediction/.venv/lib/python3.12/site-packages/joblib/externals/loky/backend/resource_tracker.py:468: UserWarning: resource_tracker: /var/folders/60/f144lgn97zg1y9wcvg2v5thh0000gn/T/joblib_memmapping_folder_22434_274f8c18c12340049cf4106d079c12c0_1e152d09f7f94c15a1c7d9e6ef9ed872: FileNotFoundError(2, 'No such file or directory')
+  warnings.warn('resource_tracker: %s: %r' % (name, e))
+=== [2026-10-10 21:18:53] LAUNCH DETACHED runner (setsid, survives task-tree kills); prior tasks bash-ect924dg/bash-w9la9o3a SIGKILLed mid-herg ===
+=== [2026-10-10 21:18:54] START herg --split random ===
+Target: Voltage-gated inwardly rectifying potassium channel KCNH2 | Feature matrix: X=(12019, 2048), y range [-0.00, 9.85]
+
+=== random split: train=9615, test=2404 ===
+Fitting 5 folds for each of 12 candidates, totalling 60 fits
+/Users/lessray/Desktop/kimi code/qsar-activity-prediction/.venv/lib/python3.12/site-packages/joblib/externals/loky/backend/resource_tracker.py:444: UserWarning: resource_tracker: There appear to be 1 leaked file objects to clean up at shutdown: {'/var/folders/60/f144lgn97zg1y9wcvg2v5thh0000gn/T/joblib_memmapping_folder_28366_802db5ec2c474631a21f6865116b4694_4fd11dd90a66467abeebfe8472dc5f74/28366-4626113424-32fbdeebf4be4f959ba895d7da342ad2.pkl': 12}
+  warnings.warn(
+/Users/lessray/Desktop/kimi code/qsar-activity-prediction/.venv/lib/python3.12/site-packages/joblib/externals/loky/backend/resource_tracker.py:444: UserWarning: resource_tracker: There appear to be 16 leaked semlock objects to clean up at shutdown: {'/loky-28366-08g9s470': 1, '/loky-28366-u6b6rdp_': 1, '/loky-28366-dtph4spd': 1, '/loky-28366-l5nvcdoc': 1, '/loky-28366-1anqb36u': 1, '/loky-28366-f6mhzgkb': 1, '/loky-28366-uq98axup': 1, '/loky-28366-o3r6p3bm': 1, '/loky-28366-cdcq66xd': 1, '/loky-28366-s0x485lu': 1, '/loky-28366-quz8ebho': 1, '/loky-28366-v2vdcfq1': 1, '/loky-28366-zr9wcg_y': 1, '/loky-28366-r7mbe9ts': 1, '/loky-28366-uoeycmyv': 1, '/loky-28366-iazlkx5r': 1}
+  warnings.warn(
+/Users/lessray/Desktop/kimi code/qsar-activity-prediction/.venv/lib/python3.12/site-packages/joblib/externals/loky/backend/resource_tracker.py:444: UserWarning: resource_tracker: There appear to be 2 leaked folder objects to clean up at shutdown: {'/var/folders/60/f144lgn97zg1y9wcvg2v5thh0000gn/T/joblib_memmapping_folder_28366_802db5ec2c474631a21f6865116b4694_eb11e2468fdc4d3fb7e3b7e5363a83aa': 1, '/var/folders/60/f144lgn97zg1y9wcvg2v5thh0000gn/T/joblib_memmapping_folder_28366_802db5ec2c474631a21f6865116b4694_4fd11dd90a66467abeebfe8472dc5f74': 1}
+  warnings.warn(
+/Users/lessray/Desktop/kimi code/qsar-activity-prediction/.venv/lib/python3.12/site-packages/joblib/externals/loky/backend/resource_tracker.py:468: UserWarning: resource_tracker: /var/folders/60/f144lgn97zg1y9wcvg2v5thh0000gn/T/joblib_memmapping_folder_28366_802db5ec2c474631a21f6865116b4694_eb11e2468fdc4d3fb7e3b7e5363a83aa: FileNotFoundError(2, 'No such file or directory')
+  warnings.warn('resource_tracker: %s: %r' % (name, e))

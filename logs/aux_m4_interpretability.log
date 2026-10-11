@@ -1,0 +1,110 @@
+=== [2026-10-11 13:02:25] driver start experiment=interpretability tags=a2a abl1 egfr egfr_full herg hivpr mpro OMP_NUM_THREADS=1
+=== [2026-10-11 13:02:25] START interpretability tag=a2a
+/Users/lessray/Desktop/kimi code/qsar-activity-prediction/.venv/lib/python3.12/site-packages/torch/jit/_script.py:1491: FutureWarning: `torch.jit.script` is deprecated. Please switch to `torch.compile` or `torch.export`.
+  warnings.warn(
+Background dataset has 200 samples but max_samples=100. Subsampling to 100 samples for SHAP value computation. To use all samples, set max_samples=200 when initializing the masker.
+/Users/lessray/Desktop/kimi code/qsar-activity-prediction/.venv/lib/python3.12/site-packages/numpy/_core/fromnumeric.py:3862: RuntimeWarning: Mean of empty slice
+  return _methods._mean(a, axis=axis, dtype=dtype,
+/Users/lessray/Desktop/kimi code/qsar-activity-prediction/.venv/lib/python3.12/site-packages/numpy/_core/_methods.py:142: RuntimeWarning: invalid value encountered in scalar divide
+  ret = ret.dtype.type(ret / rcount)
+/Users/lessray/Desktop/kimi code/qsar-activity-prediction/experiments/interpretability_alignment.py:398: UserWarning: No artists with labels found to put in legend.  Note that artists whose label start with an underscore are ignored when legend() is called with no argument.
+  ax.legend()
+[chromone] family size=0 (query O=c1ccoc2ccccc12), selected top-0 by |err_gin - err_rf|
+[thienopyrimidine] family size=0 (query c1ncc2ccsc2n1), selected top-0 by |err_gin - err_rf|
+RF loaded from models/rf_scaffold_split_a2a.joblib (the model whose err_rf selected these molecules)
+records: 0  -> results/interpretability/
+[2026-10-11 13:02:53] archived interpretability outputs for tag=a2a
+=== [2026-10-11 13:02:53] END interpretability tag=a2a rc=0
+=== [2026-10-11 13:02:53] START interpretability tag=abl1
+/Users/lessray/Desktop/kimi code/qsar-activity-prediction/.venv/lib/python3.12/site-packages/torch/jit/_script.py:1491: FutureWarning: `torch.jit.script` is deprecated. Please switch to `torch.compile` or `torch.export`.
+  warnings.warn(
+Background dataset has 200 samples but max_samples=100. Subsampling to 100 samples for SHAP value computation. To use all samples, set max_samples=200 when initializing the masker.
+/Users/lessray/Desktop/kimi code/qsar-activity-prediction/.venv/lib/python3.12/site-packages/numpy/_core/fromnumeric.py:3862: RuntimeWarning: Mean of empty slice
+  return _methods._mean(a, axis=axis, dtype=dtype,
+/Users/lessray/Desktop/kimi code/qsar-activity-prediction/.venv/lib/python3.12/site-packages/numpy/_core/_methods.py:142: RuntimeWarning: invalid value encountered in scalar divide
+  ret = ret.dtype.type(ret / rcount)
+/Users/lessray/Desktop/kimi code/qsar-activity-prediction/experiments/interpretability_alignment.py:398: UserWarning: No artists with labels found to put in legend.  Note that artists whose label start with an underscore are ignored when legend() is called with no argument.
+  ax.legend()
+[chromone] family size=0 (query O=c1ccoc2ccccc12), selected top-0 by |err_gin - err_rf|
+[thienopyrimidine] family size=0 (query c1ncc2ccsc2n1), selected top-0 by |err_gin - err_rf|
+RF loaded from models/rf_scaffold_split_abl1.joblib (the model whose err_rf selected these molecules)
+records: 0  -> results/interpretability/
+[2026-10-11 13:03:19] archived interpretability outputs for tag=abl1
+=== [2026-10-11 13:03:19] END interpretability tag=abl1 rc=0
+=== [2026-10-11 13:03:19] START interpretability tag=egfr
+/Users/lessray/Desktop/kimi code/qsar-activity-prediction/.venv/lib/python3.12/site-packages/torch/jit/_script.py:1491: FutureWarning: `torch.jit.script` is deprecated. Please switch to `torch.compile` or `torch.export`.
+  warnings.warn(
+Background dataset has 200 samples but max_samples=100. Subsampling to 100 samples for SHAP value computation. To use all samples, set max_samples=200 when initializing the masker.
+[chromone] family size=0 (query O=c1ccoc2ccccc12), selected top-0 by |err_gin - err_rf|
+[thienopyrimidine] family size=47 (query c1ncc2ccsc2n1), selected top-5 by |err_gin - err_rf|
+RF loaded from models/rf_scaffold_split_egfr.joblib (the model whose err_rf selected these molecules)
+[thienopyrimidine/mol1] gid=4466 OCc1cccc(-c2cc3c(N[C@H](CO)c4ccccc4)ncnc
+[thienopyrimidine/mol2] gid=1429 CN(C)CCNC(=O)c1ccc(-c2cc3c(N[C@H](CO)c4c
+[thienopyrimidine/mol3] gid=1896 COc1cc(C(N)=O)ccc1-c1cc2c(N[C@H](CO)c3cc
+[thienopyrimidine/mol4] gid=2815 C[C@@H](Nc1ncnc2sc(-c3cccc(C(N)=O)c3)cc1
+[thienopyrimidine/mol5] gid=2469 COc1ccc(C(=O)NCCN(C)C)cc1-c1cc2c(N[C@H](
+records: 5  -> results/interpretability/
+[2026-10-11 13:04:12] archived interpretability outputs for tag=egfr
+=== [2026-10-11 13:04:12] END interpretability tag=egfr rc=0
+=== [2026-10-11 13:04:12] START interpretability tag=egfr_full
+/Users/lessray/Desktop/kimi code/qsar-activity-prediction/.venv/lib/python3.12/site-packages/torch/jit/_script.py:1491: FutureWarning: `torch.jit.script` is deprecated. Please switch to `torch.compile` or `torch.export`.
+  warnings.warn(
+Background dataset has 200 samples but max_samples=100. Subsampling to 100 samples for SHAP value computation. To use all samples, set max_samples=200 when initializing the masker.
+[chromone] family size=0 (query O=c1ccoc2ccccc12), selected top-0 by |err_gin - err_rf|
+[thienopyrimidine] family size=47 (query c1ncc2ccsc2n1), selected top-5 by |err_gin - err_rf|
+RF loaded from models/rf_scaffold_split_egfr_full.joblib (the model whose err_rf selected these molecules)
+[thienopyrimidine/mol1] gid=5488 COc1cc(C(=O)NCCN(C)C)ccc1-c1cc2c(N[C@H](
+[thienopyrimidine/mol2] gid=5487 COc1cc(C(=O)NCCN(C)C)cc(OC)c1-c1cc2c(N[C
+[thienopyrimidine/mol3] gid=7359 C[C@@H](Nc1ncnc2sc(-c3ccc(C(=O)NCCN(C)C)
+[thienopyrimidine/mol4] gid=5373 COc1c(C(=O)NCCN(C)C)cccc1-c1cc2c(N[C@H](
+[thienopyrimidine/mol5] gid=7055 COc1ccccc1-c1cc2c(N[C@@H](CO)c3ccccc3)nc
+records: 5  -> results/interpretability/
+[2026-10-11 13:05:06] archived interpretability outputs for tag=egfr_full
+=== [2026-10-11 13:05:06] END interpretability tag=egfr_full rc=0
+=== [2026-10-11 13:05:06] START interpretability tag=herg
+/Users/lessray/Desktop/kimi code/qsar-activity-prediction/.venv/lib/python3.12/site-packages/torch/jit/_script.py:1491: FutureWarning: `torch.jit.script` is deprecated. Please switch to `torch.compile` or `torch.export`.
+  warnings.warn(
+Background dataset has 200 samples but max_samples=100. Subsampling to 100 samples for SHAP value computation. To use all samples, set max_samples=200 when initializing the masker.
+[chromone] family size=30 (query O=c1ccoc2ccccc12), selected top-5 by |err_gin - err_rf|
+[thienopyrimidine] family size=0 (query c1ncc2ccsc2n1), selected top-0 by |err_gin - err_rf|
+RF loaded from models/rf_scaffold_split_herg.joblib (the model whose err_rf selected these molecules)
+[chromone/mol1] gid=7393 O=C(NC1CCN(Cc2ccc3c(c2)OCO3)CC1)c1cc(=O)
+[chromone/mol2] gid=7384 O=C(NC1CCN(Cc2cc3c(cc2Cl)OCO3)CC1)c1cc(=
+[chromone/mol3] gid=3321 COc1cc2oc(C(=O)NC3CCN(Cc4ccc5c(c4)OCO5)C
+[chromone/mol4] gid=7394 O=C(NC1CCN(Cc2ccc3c(c2)OCO3)CC1)c1cc(=O)
+[chromone/mol5] gid=7395 O=C(NC1CCN(Cc2ccc3c(c2)OCO3)CC1)c1cc(=O)
+records: 5  -> results/interpretability/
+[2026-10-11 13:06:01] archived interpretability outputs for tag=herg
+=== [2026-10-11 13:06:01] END interpretability tag=herg rc=0
+=== [2026-10-11 13:06:01] START interpretability tag=hivpr
+/Users/lessray/Desktop/kimi code/qsar-activity-prediction/.venv/lib/python3.12/site-packages/torch/jit/_script.py:1491: FutureWarning: `torch.jit.script` is deprecated. Please switch to `torch.compile` or `torch.export`.
+  warnings.warn(
+Background dataset has 200 samples but max_samples=100. Subsampling to 100 samples for SHAP value computation. To use all samples, set max_samples=200 when initializing the masker.
+/Users/lessray/Desktop/kimi code/qsar-activity-prediction/.venv/lib/python3.12/site-packages/numpy/_core/fromnumeric.py:3862: RuntimeWarning: Mean of empty slice
+  return _methods._mean(a, axis=axis, dtype=dtype,
+/Users/lessray/Desktop/kimi code/qsar-activity-prediction/.venv/lib/python3.12/site-packages/numpy/_core/_methods.py:142: RuntimeWarning: invalid value encountered in scalar divide
+  ret = ret.dtype.type(ret / rcount)
+/Users/lessray/Desktop/kimi code/qsar-activity-prediction/experiments/interpretability_alignment.py:398: UserWarning: No artists with labels found to put in legend.  Note that artists whose label start with an underscore are ignored when legend() is called with no argument.
+  ax.legend()
+[chromone] family size=0 (query O=c1ccoc2ccccc12), selected top-0 by |err_gin - err_rf|
+[thienopyrimidine] family size=0 (query c1ncc2ccsc2n1), selected top-0 by |err_gin - err_rf|
+RF loaded from models/rf_scaffold_split_hivpr.joblib (the model whose err_rf selected these molecules)
+records: 0  -> results/interpretability/
+[2026-10-11 13:06:26] archived interpretability outputs for tag=hivpr
+=== [2026-10-11 13:06:26] END interpretability tag=hivpr rc=0
+=== [2026-10-11 13:06:26] START interpretability tag=mpro
+/Users/lessray/Desktop/kimi code/qsar-activity-prediction/.venv/lib/python3.12/site-packages/torch/jit/_script.py:1491: FutureWarning: `torch.jit.script` is deprecated. Please switch to `torch.compile` or `torch.export`.
+  warnings.warn(
+Background dataset has 200 samples but max_samples=100. Subsampling to 100 samples for SHAP value computation. To use all samples, set max_samples=200 when initializing the masker.
+[chromone] family size=17 (query O=c1ccoc2ccccc12), selected top-5 by |err_gin - err_rf|
+[thienopyrimidine] family size=0 (query c1ncc2ccsc2n1), selected top-0 by |err_gin - err_rf|
+RF loaded from models/rf_scaffold_split_mpro.joblib (the model whose err_rf selected these molecules)
+[chromone/mol1] gid=325 CC(C)CCOc1cc(O)c2c(=O)c(O)c(-c3cc(O)c(O)
+[chromone/mol2] gid=3316 O=c1cc(-c2ccccc2)oc2cc(O)c(O)c(O)c12
+[chromone/mol3] gid=3259 O=c1c(O)c(-c2ccc(O)cc2)oc2c(O)c(O)cc(O)c
+[chromone/mol4] gid=1648 COc1cc(O)c2c(=O)c(O)c(-c3cc(O)c(O)c(O)c3
+[chromone/mol5] gid=3314 O=c1cc(-c2ccc(O)cc2)oc2cc(O)c(O)c(O)c12
+records: 5  -> results/interpretability/
+[2026-10-11 13:07:04] archived interpretability outputs for tag=mpro
+=== [2026-10-11 13:07:04] END interpretability tag=mpro rc=0
+=== [2026-10-11 13:07:04] driver done experiment=interpretability

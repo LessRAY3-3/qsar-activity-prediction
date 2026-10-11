@@ -1,0 +1,95 @@
+{
+  "tag": "egfr_full",
+  "seeds": [
+    42,
+    1,
+    2
+  ],
+  "rf_params": {
+    "random": {
+      "n_estimators": 500,
+      "max_depth": null,
+      "min_samples_split": 2
+    },
+    "scaffold": {
+      "n_estimators": 500,
+      "max_depth": null,
+      "min_samples_split": 2
+    }
+  },
+  "groups": {
+    "random/gin/real": {
+      "r2_values": [
+        0.677
+      ],
+      "r2_mean": 0.6769536137580872,
+      "r2_std": 0.0,
+      "runs": 1
+    },
+    "random/gin/shuffled": {
+      "r2_values": [
+        0.0055,
+        -0.005,
+        0.0001
+      ],
+      "r2_mean": 0.00019886096318562826,
+      "r2_std": 0.004262812970977118,
+      "runs": 3
+    },
+    "random/rf/real": {
+      "r2_values": [
+        0.7249
+      ],
+      "r2_mean": 0.7249390282083694,
+      "r2_std": 0.0,
+      "runs": 1
+    },
+    "random/rf/shuffled": {
+      "r2_values": [
+        -0.1849,
+        -0.1486,
+        -0.1174
+      ],
+      "r2_mean": -0.15032919326771962,
+      "r2_std": 0.027580801553425727,
+      "runs": 3
+    },
+    "scaffold/gin/real": {
+      "r2_values": [
+        0.5841
+      ],
+      "r2_mean": 0.5841344594955444,
+      "r2_std": 0.0,
+      "runs": 1
+    },
+    "scaffold/gin/shuffled": {
+      "r2_values": [
+        -0.0205,
+        -0.0052,
+        -0.0149
+      ],
+      "r2_mean": -0.013544162114461264,
+      "r2_std": 0.006305674860823947,
+      "runs": 3
+    },
+    "scaffold/rf/real": {
+      "r2_values": [
+        0.5986
+      ],
+      "r2_mean": 0.5986121638157273,
+      "r2_std": 0.0,
+      "runs": 1
+    },
+    "scaffold/rf/shuffled": {
+      "r2_values": [
+        -0.1088,
+        -0.096,
+        -0.0655
+      ],
+      "r2_mean": -0.09009603962538375,
+      "r2_std": 0.018152104608692664,
+      "runs": 3
+    }
+  },
+  "verdict": "ok: all shuffled-label means < 0.2"
+}

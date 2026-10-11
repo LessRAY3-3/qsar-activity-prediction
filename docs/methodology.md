@@ -9,22 +9,128 @@ and every experiment is recomputable from `results/` (run ledger:
 
 ## Data QC
 
+Label and structure policy, as rebuilt on 2026-10-10/11 (per-finding
+status in [`docs/reviews/fixes-2026-10-11.md`](reviews/fixes-2026-10-11.md)):
+
+- **Label policy - keep only `standard_relation == "="`.** Censored
+  records ("IC50 > 10000 nM", "IC50 < 50 nM") are bounds, not exact
+  pIC50 values, so `scripts/02_clean_data.py` now admits only equality
+  relations as labels (review H1; policy rationale, record-level
+  reconciliation and the sensitivity rerun are in
+  [`docs/reviews/h1-sensitivity-2026-10-10.md`](reviews/h1-sensitivity-2026-10-10.md):
+  20.17% of pre-refresh `egfr_full` compounds were censored-only).
+  `pchembl_value.notna()` is **not** an equivalent filter - 263 exact
+  rows carry an empty pChEMBL (typically
+  `data_validity_comment="Outside typical range"`), so the relation test
+  is the single inclusion rule and the pChEMBL cross-check now runs over
+  all retained rows. BACE and ESOL raw files carry no relation column:
+  the filter is skipped for them with a printed note, and bace labels
+  are unchanged.
+- **Parent standardization before dedup.** Each canonical SMILES is
+  standardized with RDKit `LargestFragmentChooser` + `Uncharger` into
+  `parent_smiles`; rows are grouped by `parent_smiles` and take the
+  median pIC50. The original `canonical_smiles` is kept as a provenance
+  column alongside `n_measurements` and `n_structural_variants`, and the
+  clean table is sorted by `parent_smiles` (so fingerprints, graphs and
+  splits inherit that row order). Scope limit, deliberate: this merges
+  multi-fragment/charge variants only - it does **not** resolve
+  tautomers or stereochemistry (the same boundary the audit definition
+  in `docs/reviews/codex-verification-2026-10-10.md` draws). Before the
+  fix, salt forms let the same parent sit in RF train and test for up to
+  **2.04%** of a random test set (ABL1 - PR #1's "~1.7%" was corrected
+  in PR #2); after dedup each parent appears exactly once, so that leak
+  is structurally gone.
+- **Provenance of the refreshed raw pulls.** The 7 ChEMBL panel targets
+  plus the egfr early-stop pull were re-downloaded on 2026-10-10 with
+  both downloaders' `COLUMNS` extended by `standard_relation`,
+  `data_validity_comment` and `activity_id` (`scripts/01d_download_incremental.py`,
+  `scripts/01e_download_chembl.py`). Row counts are identical to the
+  historical pulls (egfr_full: 24,560 rows, reconciled 100% against the
+  API by record-level matching), and `data/raw/sha256sums.txt` was
+  regenerated (manifest dated 2026-10-10).
+
 The audit deliverables behind the README's short QC note:
 
-- **Ultra-potent audit** (pIC50 > 9, i.e. IC50 < 1 nM): EGFR has 326 such
-  rows (3.7%), but they spread across many independent assays and documents
-  (largest single source: 14%) - consistent with genuinely potent
-  inhibitors, not unit mislabels. BACE has 8 rows (0.5%) from a single FRET
-  assay, also kept. No filtering rule was needed; the audit itself is the
-  deliverable.
-- **Inactive-end censoring**: the EGFR scatter plot shows vertical
-  striations at low pIC50 (e.g. many compounds pinned at exactly 5.0 =
-  IC50 10000 nM) - assay detection limits reporting "inactive above X".
-  Known QSAR nuisance, visible in the data.
+- **Ultra-potent audit** (pIC50 > 9, i.e. IC50 < 1 nM): run on the
+  pre-refresh pulls, EGFR had 326 such rows (3.7%), spread across many
+  independent assays and documents (largest single source: 14%) -
+  consistent with genuinely potent inhibitors, not unit mislabels. On
+  the refreshed labels 155 of 4,560 EGFR parents (3.4%) still sit above
+  9 - same picture, conclusion unchanged. BACE has 8 rows (0.5%) from a
+  single FRET assay, also kept. No filtering rule was needed; the audit
+  itself is the deliverable.
+- **Inactive-end censoring**: the pre-refresh EGFR scatter plot showed
+  vertical striations at low pIC50 (e.g. many compounds pinned at
+  exactly 5.0 = IC50 10000 nM) - assay detection limits reporting
+  "inactive above X". Review H1 traced most of that mass to censored
+  records trained as exact labels; under the `=` filter those bounds are
+  gone as labels, and the 27 refreshed EGFR parents still at exactly 5.0
+  are equality-relation measurements, not bounds. Known QSAR nuisance,
+  visible in the data.
 - **Test-set distributions** are compared before trusting any RMSE
   (see the BACE fallback results in the README, and
   `figures/testset_hist_bace.png` / `figures/testset_hist_egfr.png` /
-  `figures/testset_hist_vegfr2.png`).
+  `figures/testset_hist_vegfr2.png` - these histograms predate the
+  refresh; `scripts/07_qc_checks.py` regenerates them and had not been
+  re-run when this section was updated).
+
+## 2026-10-11 data refresh
+
+Two reviews landed on 2026-10-10: the PR #1 findings sheet
+(`.claude/skills/qsar-review/references/findings-2026-10-10.md`,
+H1/M1-M5/L1-L7) and its independent verification
+([`docs/reviews/codex-verification-2026-10-10.md`](reviews/codex-verification-2026-10-10.md),
+whose corrections were preferred over the original wording where they
+disagreed). Code/docs fixes commit `43f5267`; the label/parent policy
+then triggered a full data rebuild - per-finding status, commit hashes
+and verification evidence are tabulated in
+[`docs/reviews/fixes-2026-10-11.md`](reviews/fixes-2026-10-11.md), and
+the pre-rebuild sensitivity experiment (egfr_full RF, censored-only
+compounds dropped: ΔR² **−0.0250** random / **+0.0088** scaffold, no
+verdict-level effect) is recorded in
+[`docs/reviews/h1-sensitivity-2026-10-10.md`](reviews/h1-sensitivity-2026-10-10.md).
+
+What was rebuilt (commits `d1bebd9` -> `e37c572`, raw re-download
+2026-10-10):
+
+- cleaning with the `=` filter + parent dedup (`02_clean_data.py`),
+  parent-SMILES featurization (`03_featurize.py`) and parent-based
+  document-year joins (`gnn_08_time_splits.py`); all 8 ChEMBL tags
+  re-cleaned, bace untouched. Panel size drops from 45,145 to **42,796**
+  parents (herg 12,019 -> 8,403, egfr_full 13,497 -> 10,729, egfr 6,165
+  -> 4,560, ...; full table in
+  `docs/reviews/readme-numbers-2026-10-11.md` appendix A.2);
+- fingerprints, graph caches, random/scaffold/time splits and
+  `document_years.csv` re-derived from the new parents.
+
+Recomputed **after** the rebuild (status at 2026-10-11, see the number
+draft for per-file timestamps):
+
+- **RF**: `results/metrics_{tag}.json` for all 8 panel tags + bace,
+  retrained under the shuffled-fold grid search (`18d888e`, `05be454`;
+  vegfr2 landed 2026-10-11 15:31) - so `best_params_{split}` everywhere
+  reflects L3-fixed CV on the refreshed labels;
+- **GIN**: 3-seed random/scaffold/time panels for all 8 tags
+  (`results/gnn_metrics_*`, `gnn_preds_*`, 2026-10-10 23:20 - 10-11);
+- **Downstream on the new RF/GIN**: XGBoost re-runs
+  (`results/xgboost/`, new labels - its `rf_control` columns still quote
+  the pre-refresh RF and are marked for re-derivation), multitask
+  (`results/multitask/`; its vegfr2 `st_rf` column still quotes the
+  pre-refresh RF), uncertainty/AD (7 tags), error analysis (7
+  tags), and the auxiliary interpretability / y-randomization /
+  learning-curve runs (in progress while this was written).
+
+Status update (2026-10-11): the files this note originally flagged as
+still pre-refresh - the B=10,000 significance tables
+(`results/significance/*`), `results/multi_target/summary.csv`,
+`results/time_split/summary.csv` and the `results/comparison_*` files -
+have since been refreshed, and the sections below quote the refreshed
+tables. Still pre-refresh: the test-set histograms (Data QC) and the
+`rf_control` / `st_rf` columns noted above.
+`docs/reviews/readme-numbers-2026-10-11.md` is the per-file
+NEW/PENDING/STALE map for the README rewrite (its `STALE` markers for
+the significance tables predate the refresh) - re-check file mtimes
+before quoting any CI or panel number.
 
 ## Feature-importance checks (README "Interpretation & data QC")
 
@@ -92,9 +198,9 @@ seeds agree exactly. The offset grows with seed spread - it is a
 property of the convention, not a bug or a data problem.
 
 **Worked example (`egfr`/random).** The panel table and
-`results/comparison_egfr.csv` read **−0.056** (per-seed-mean); the
-`mean3` row of `results/significance/egfr_random.csv` reads **−0.031**
-[−0.054, −0.008] (ensemble). The ~0.025 offset is pure ensemble gain -
+`results/comparison_egfr.csv` read **−0.057** (per-seed-mean); the
+`mean3` row of `results/significance/egfr_random.csv` reads **−0.044**
+[−0.079, −0.010] (ensemble). The ~0.013 offset is pure ensemble gain -
 two right answers to two different questions ("how far are the
 individual seeds from RF" vs "how far is the deployed ensemble from
 RF"), not a discrepancy.
@@ -105,8 +211,8 @@ fraction of bootstrap replicates favouring GIN, a direction descriptor,
 not a hypothesis-test p). Point estimates, ±std and panel
 bars - read the panel tables. Never compare a panel point against an
 ensemble CI: `afp_panel`'s `herg`/scaffold is the illustration - its
-point reads **+0.013** (per-seed-mean) while its own ensemble CI is
-**[+0.035, +0.092]**, so the point sits outside "its own" interval
+point reads **+0.020** (per-seed-mean) while its own ensemble CI is
+**[+0.030, +0.092]**, so the point sits outside "its own" interval
 purely because of the convention difference (`experiments/afp_panel.py`
 documents both). One more reference column: `d_*_seed42_*` is the
 single-seed convention, reference only - one seed carries ±0.02 of
@@ -146,7 +252,9 @@ frozen `gnn_03` recipe. The P8 GINE panel (Statistical significance
 below) runs the `gine` variant across all 8 targets - bond features are
 used, and they still do not flip the verdict. P8 phase 3 runs the
 `attentivefp` variant the same way (8 targets x 2 splits x 3 seeds = 48
-runs; `results/afp_panel/summary.csv`) and it wins 1 of 16 cells.
+runs; `results/afp_panel/summary.csv`) and it wins 1 of 16 cells on
+per-seed panel points (2 of 16 under the mean3 CI - Statistical
+significance below).
 Pooling is mean rather than the paper's sum so prediction scale
 does not couple to molecule size. Target standardized with train
 statistics; metrics reported in original pIC50 units.
@@ -158,7 +266,17 @@ The shuffle is deliberate: scaffold and time train pools are ordered by
 scaffold group / SMILES, so unshuffled folds would each be one block of
 the same chemotype family (or one alphabetical SMILES run) and the grid
 winner would be picked on folds that never see some families. The test
-set plays no role in the search.
+set plays no role in the search. Each split's winner is persisted in
+`results/metrics_{tag}.json` under `best_params_{split}`
+(`best_params_random` / `best_params_scaffold` / `best_params_time`,
+merged next to that split's metrics by step 04), and the auxiliary
+experiments (fingerprint ablation, learning curve, y-randomization)
+read the split-specific key - falling back to `best_params_random` with
+a printed note for tags that predate the backfill. Before review M2 all
+four auxiliary scripts reused `best_params_random` on the scaffold split
+too (the fourth, `interpretability_alignment.py`, no longer refits at
+all: it loads the committed split RF), although the two winners differ
+for 7 of 9 datasets.
 
 ## Statistical significance (paired bootstrap)
 
@@ -180,42 +298,64 @@ separable from resampling noise - analysis only, nothing is retrained:
   favours GIN); ΔRMSE = RMSE_GIN − RMSE_RF (> 0 favours RF). Both
   conventions of a cell draw from the same seeded generator (seed 42, so
   runs are order-independent).
-- **Results (random/scaffold, gin, 16 cells)** - under `mean3`, only 4
-  cells have a CI excluding 0, **all four favour RF**; GIN wins 0:
+- **Results (random/scaffold, gin, 16 cells)** - under `mean3`, 9 of 16
+  cells have a CI excluding 0: **7 favour RF, 2 favour the GIN**
+  (`abl1`/scaffold, `herg`/random); the other 7 straddle 0:
 
   | cell | ΔR2 (mean3) | 95% CI | winner |
   |---|---|---|---|
-  | `egfr`/random | −0.031 | [−0.054, −0.008] | RF |
-  | `egfr_full`/random | −0.033 | [−0.048, −0.018] | RF |
-  | `mpro`/scaffold | −0.085 | [−0.132, −0.041] | RF |
-  | `vegfr2`/random | −0.033 | [−0.053, −0.015] | RF |
+  | `a2a`/random | −0.073 | [−0.138, −0.013] | RF |
+  | `abl1`/random | −0.044 | [−0.076, −0.016] | RF |
+  | `egfr`/random | −0.044 | [−0.079, −0.010] | RF |
+  | `egfr_full`/random | −0.039 | [−0.059, −0.021] | RF |
+  | `hivpr`/random | −0.048 | [−0.083, −0.014] | RF |
+  | `mpro`/scaffold | −0.074 | [−0.133, −0.018] | RF |
+  | `vegfr2`/random | −0.044 | [−0.068, −0.021] | RF |
+  | `abl1`/scaffold | +0.037 | [+0.006, +0.069] | GIN |
+  | `herg`/random | +0.038 | [+0.006, +0.069] | GIN |
 
-  Under `seed42` two cells instead read as *GIN* wins -
-  `abl1`/scaffold +0.030 [0.002, 0.060] and `vegfr2`/scaffold +0.028
-  [0.008, 0.047] - both of which vanish under `mean3`. This is the
-  single-seed-is-noise convention (Panel Δ conventions above) promoted
-  from a heuristic to a bootstrap result: a lone seed can manufacture a
-  "significant" lead.
-- **GINE** (`--model gine`, `results/significance/summary_gine.csv`):
+  Under `seed42` 10 cells are significant - 9 favour RF and the one
+  *GIN* win is `abl1`/scaffold +0.060 [+0.025, +0.096]. The GIN win
+  survives `mean3` at roughly half the single-seed size (+0.037
+  [+0.006, +0.069]), while two `seed42` RF cells (`egfr_full`/scaffold
+  −0.028 [−0.049, −0.007], `hivpr`/scaffold −0.084 [−0.132, −0.038])
+  straddle 0 under `mean3` and `herg`/random gains a CI (+0.001 ->
+  +0.038). This is the single-seed-is-noise convention (Panel Δ
+  conventions above) promoted from a heuristic to a bootstrap result: a
+  lone seed can manufacture a "significant" verdict, and it inflates
+  the one real GIN lead by ~0.023.
+- **GINE** (`--model gine`, `results/significance/summary_partial_gine.csv`):
   10 of 16 cells have a CI (5 tags x 2 splits with per-seed predictions;
   `abl1`/`herg`/`vegfr2` reuse the fairness runs - point estimates only,
   see `results/gine_panel/summary.csv`); **0 cells have CI > 0**, 5
-  significantly favour RF (egfr/random, egfr_full both splits,
-  hivpr/scaffold −0.118, mpro/scaffold −0.098). Only positive point
-  estimate: `herg`/scaffold +0.024, no CI.
+  significantly favour RF (`a2a`/scaffold, `egfr`/random, `egfr_full`/random,
+  `hivpr`/scaffold, `mpro`/scaffold), 5 straddle 0. Positive point
+  estimates: `herg`/scaffold +0.069 and `vegfr2` +0.004 / +0.009, none
+  carries a CI.
 - **AttentiveFP** (`--model attentivefp`, P8 phase 3): all 16 cells have a
-  CI - 8 significantly favour RF, **1 favours AttentiveFP**
-  (`herg`/scaffold +0.013 [+0.035, +0.092]), 7 contain 0; summary in
+  CI - 10 are significant: **8 favour RF, 2 favour AttentiveFP**
+  (`herg`/scaffold +0.062 [+0.030, +0.092], `herg`/random +0.034
+  [+0.002, +0.065]), 6 contain 0; summary in
   `results/significance/summary_attentivefp.csv` (details: the
   "AttentiveFP control" write-up under supplementary experiments).
 - **Outputs**: `results/significance/summary.csv`,
-  `results/significance/summary_gine.csv`,
+  `results/significance/summary_partial_gine.csv`,
   `results/significance/summary_time.csv`,
   `results/significance/summary_attentivefp.csv`, per-cell
   `results/significance/{tag}_{split}{,_gine,_attentivefp}.csv`; forest
   plots `figures/significance/ci_panel.png` (+ `_gine` / `_time` /
-  `_with_gine` / `_attentivefp` / `_with_afp` variants). The time-split
-  run flips the pattern - see the next section.
+  `_with_gine` / `_attentivefp` / `_with_afp` variants). The campaign
+  summaries are **merge-updated by (tag, split, pair)**, never blindly
+  rewritten: every row carries its `n_boot`, and a stored row whose B
+  differs from the current run's is refused with an error unless
+  `--force` is passed - so a `--n-boot 300` smoke test can never mix
+  into the B=10,000 table. Any partial invocation (a tag subset, or a
+  non-default `--n-boot`) is by definition not a campaign run: it writes
+  `summary_partial{suffix}.csv` / `ci_panel_partial{suffix}.png` and
+  leaves the campaign files untouched (review L2; the merge, the
+  legacy-`p_one_sided` reader and the partial-run guard are pinned by
+  `tests/test_p8_analysis.py`). The time-split run flips the pattern -
+  see the next section.
 
 ## Scaffold split convention: largest groups go to *test* (opposite of DeepChem)
 
@@ -277,24 +417,31 @@ only already-known chemistry predicts genuinely newer compounds.
 - **Training**: RF via `scripts/04_train_and_evaluate.py --split time`,
   GIN unchanged (`gnn_03` reads the same `{TAG}_time.npz`; 3 seeds).
 - **Results** (`results/time_split/summary.csv`, table in README
-  "Publication-year time split"): panel means RF **0.731 (random) ->
-  −0.084 (time)**, GIN **0.695 -> +0.014**; worst cell `egfr_full` RF
-  **−0.891** (GIN −0.240), `herg` RF −0.034. Significance flips: on
-  random/scaffold the significant cells all favour RF (4/16), on time
-  **5/8 cells are significant and all favour GIN, 0 favour RF** -
-  egfr_full +0.676 [0.617, 0.741], a2a +0.238 [0.129, 0.347], mpro
-  +0.143 [0.112, 0.175], herg +0.076 [0.034, 0.120], egfr +0.058
-  [0.005, 0.112]. These Δ and CIs are ensemble (mean3) quantities, not
-  the difference of the per-seed-mean columns displayed next to them -
-  the README table carries a `GIN ens` column and a worked `herg`
-  example (columns subtract to −0.042, ensemble Δ is +0.076).
+  "Publication-year time split"): panel means RF **0.694 (random) ->
+  −0.034 (time)**, GIN **0.643 -> +0.032** (time, per-seed mean;
+  ensemble **+0.078**); worst cell `egfr_full` RF **−0.736** (GIN
+  −0.176), then `a2a` RF −0.301 and `herg` RF −0.058. Significance
+  flips: on random/scaffold 9 of 16 cells are significant (7 favour RF,
+  2 favour the GIN), on time **6/8 cells are significant - 4 favour
+  GIN** (`egfr_full` +0.592 [+0.536, +0.656], `a2a` +0.326 [+0.188,
+  +0.467], `hivpr` +0.115 [+0.036, +0.196], `mpro` +0.084 [+0.043,
+  +0.128]) **and 2 favour RF** (`abl1` −0.236 [−0.275, −0.197],
+  `vegfr2` −0.052 [−0.077, −0.026]) - `egfr` (+0.039 [−0.012, +0.093])
+  and `herg` (+0.032 [−0.007, +0.073]) straddle 0. These Δ and CIs are
+  ensemble (mean3) quantities, not the difference of the per-seed-mean
+  columns displayed next to them - the README table carries a `GIN ens`
+  column and a worked `herg` example (columns subtract to +0.005,
+  ensemble Δ is +0.032).
 - **Reading**: the GIN *degrades significantly less* under temporal
-  drift - relative robustness, which is what the flipped significance
-  table measures. Absolute performance is the deployment criterion, and
-  there both fail: outside `abl1` (0.280/0.229) and `hivpr`
-  (0.173/0.179), every cell sits between −0.891 and +0.093. Two models
-  at R2 <= 0 are not a model selection problem - the honest number is
-  that neither is deployable on future chemistry at this data size.
+  drift on most targets - relative robustness, which is what the flipped
+  significance table measures - but the flip is partial: on `abl1` and
+  `vegfr2`, the targets where RF holds up under drift, RF is
+  significantly ahead. Absolute performance is the deployment criterion,
+  and there both fail: outside `abl1` (0.560/0.271 per-seed, +0.324
+  ensemble) nothing on either model clears 0.17 - every other cell sits
+  between −0.736 and +0.162. Two models at R2 <= 0 are not a model
+  selection problem - the honest number is that neither is deployable
+  on future chemistry at this data size.
   Artifacts: `figures/time_split/panel_3splits.png`,
   `figures/time_split/{tag}_timeline.png` (per-target year histograms
   with both cutoffs), `figures/pred_vs_actual_time_{tag}.png`.
@@ -488,12 +635,13 @@ delta <= 0.004 against the headline metrics).
 verdict.** `gnn_03 --model attentivefp` (gated attention + 30-timestep
 GRU readout over the same atom/bond encoders, frozen recipe otherwise)
 ran 8 targets x 2 splits x 3 seeds = 48 runs. Under the mean3 paired
-bootstrap **9 of 16 CIs exclude 0 - 8 favour RF, 1 favours AttentiveFP**
-(`herg`/scaffold **+0.013 [+0.035, +0.092]**, the only positive Δ; the
-point and the CI follow different conventions, per-seed mean vs mean3
-ensemble, see `experiments/afp_panel.py`), 7 CIs contain 0, and all 8
-random-split Δ are negative (−0.026 to −0.103). The `seed42` convention
-reads 12/16 significant, every cell to RF. Tables
+bootstrap **10 of 16 CIs exclude 0 - 8 favour RF, 2 favour
+AttentiveFP** (`herg`/scaffold **+0.062 [+0.030, +0.092]** and
+`herg`/random **+0.034 [+0.002, +0.065]**; the points and the CIs
+follow different conventions, per-seed mean vs mean3 ensemble, see
+`experiments/afp_panel.py`), 6 CIs contain 0, and all 8 random-split
+point Δ are negative (−0.167 to −0.022). The `seed42` convention
+reads 13/16 significant, every cell to RF. Tables
 `results/afp_panel/summary.csv`,
 `results/significance/summary_attentivefp.csv`; figures
 `figures/afp_panel/panel_dR2.png`,

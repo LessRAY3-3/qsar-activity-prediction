@@ -1,0 +1,224 @@
+=== TAG=a2a 2026-10-11 15:32:44 ===
+[a2a] radii=[2, 3] bits=[1024, 2048] seeds=[42, 1, 2]
+[a2a/random] pool=1092 test=274
+  r=2 bits=1024 seed=42 R2=0.6982 (fit 5s, feat 1s)
+  r=2 bits=1024 seed=1 R2=0.6971 (fit 5s, feat 1s)
+  r=2 bits=1024 seed=2 R2=0.7010 (fit 5s, feat 1s)
+  r=2 bits=2048 seed=42 R2=0.7090 (fit 8s, feat 0s)
+  r=2 bits=2048 seed=1 R2=0.7110 (fit 8s, feat 0s)
+  r=2 bits=2048 seed=2 R2=0.7082 (fit 8s, feat 0s)
+  r=3 bits=1024 seed=42 R2=0.6947 (fit 6s, feat 0s)
+  r=3 bits=1024 seed=1 R2=0.6919 (fit 7s, feat 0s)
+  r=3 bits=1024 seed=2 R2=0.6902 (fit 6s, feat 0s)
+  r=3 bits=2048 seed=42 R2=0.7064 (fit 11s, feat 0s)
+  r=3 bits=2048 seed=1 R2=0.7034 (fit 12s, feat 0s)
+  r=3 bits=2048 seed=2 R2=0.6996 (fit 12s, feat 0s)
+[a2a/scaffold] pool=1067 test=299
+  r=2 bits=1024 seed=42 R2=0.7148 (fit 6s, feat 1s)
+  r=2 bits=1024 seed=1 R2=0.7188 (fit 5s, feat 1s)
+  r=2 bits=1024 seed=2 R2=0.7216 (fit 5s, feat 1s)
+  r=2 bits=2048 seed=42 R2=0.7041 (fit 9s, feat 0s)
+  r=2 bits=2048 seed=1 R2=0.7050 (fit 9s, feat 0s)
+  r=2 bits=2048 seed=2 R2=0.7122 (fit 9s, feat 0s)
+  r=3 bits=1024 seed=42 R2=0.7263 (fit 7s, feat 1s)
+  r=3 bits=1024 seed=1 R2=0.7221 (fit 7s, feat 1s)
+  r=3 bits=1024 seed=2 R2=0.7283 (fit 7s, feat 1s)
+  r=3 bits=2048 seed=42 R2=0.7126 (fit 11s, feat 0s)
+  r=3 bits=2048 seed=1 R2=0.7115 (fit 7s, feat 0s)
+  r=3 bits=2048 seed=2 R2=0.7168 (fit 8s, feat 0s)
+summary -> results/fp_ablation/summary_a2a.json
+figure  -> figures/fp_ablation/fp_ablation_a2a.png
+csv     -> results/fp_ablation/fp_ablation_a2a.csv (24 rows)
+--- END a2a rc=0 15:35:58
+=== TAG=abl1 2026-10-11 15:35:58 ===
+[abl1] radii=[2, 3] bits=[1024, 2048] seeds=[42, 1, 2]
+[abl1/random] pool=1696 test=424
+  r=2 bits=1024 seed=42 R2=0.8162 (fit 5s, feat 0s)
+  r=2 bits=1024 seed=1 R2=0.8117 (fit 5s, feat 0s)
+  r=2 bits=1024 seed=2 R2=0.8144 (fit 9s, feat 0s)
+  r=2 bits=2048 seed=42 R2=0.8212 (fit 13s, feat 0s)
+  r=2 bits=2048 seed=1 R2=0.8213 (fit 13s, feat 0s)
+  r=2 bits=2048 seed=2 R2=0.8227 (fit 13s, feat 0s)
+  r=3 bits=1024 seed=42 R2=0.8014 (fit 6s, feat 1s)
+  r=3 bits=1024 seed=1 R2=0.8014 (fit 7s, feat 1s)
+  r=3 bits=1024 seed=2 R2=0.8054 (fit 6s, feat 1s)
+  r=3 bits=2048 seed=42 R2=0.8086 (fit 12s, feat 1s)
+  r=3 bits=2048 seed=1 R2=0.8116 (fit 12s, feat 1s)
+  r=3 bits=2048 seed=2 R2=0.8110 (fit 12s, feat 1s)
+[abl1/scaffold] pool=1695 test=425
+  r=2 bits=1024 seed=42 R2=0.6990 (fit 6s, feat 0s)
+  r=2 bits=1024 seed=1 R2=0.7069 (fit 6s, feat 0s)
+  r=2 bits=1024 seed=2 R2=0.7009 (fit 6s, feat 0s)
+  r=2 bits=2048 seed=42 R2=0.7148 (fit 11s, feat 0s)
+  r=2 bits=2048 seed=1 R2=0.7136 (fit 12s, feat 0s)
+  r=2 bits=2048 seed=2 R2=0.7131 (fit 11s, feat 0s)
+  r=3 bits=1024 seed=42 R2=0.6722 (fit 7s, feat 1s)
+  r=3 bits=1024 seed=1 R2=0.6740 (fit 7s, feat 1s)
+  r=3 bits=1024 seed=2 R2=0.6741 (fit 7s, feat 1s)
+  r=3 bits=2048 seed=42 R2=0.7006 (fit 15s, feat 1s)
+  r=3 bits=2048 seed=1 R2=0.7012 (fit 18s, feat 1s)
+  r=3 bits=2048 seed=2 R2=0.6969 (fit 23s, feat 1s)
+summary -> results/fp_ablation/summary_abl1.json
+figure  -> figures/fp_ablation/fp_ablation_abl1.png
+csv     -> results/fp_ablation/fp_ablation_abl1.csv (24 rows)
+--- END abl1 rc=0 15:40:10
+=== TAG=egfr 2026-10-11 15:40:10 ===
+[egfr] radii=[2, 3] bits=[1024, 2048] seeds=[42, 1, 2]
+[egfr/random] pool=3648 test=912
+  r=2 bits=1024 seed=42 R2=0.7098 (fit 28s, feat 2s)
+  r=2 bits=1024 seed=1 R2=0.7096 (fit 26s, feat 2s)
+  r=2 bits=1024 seed=2 R2=0.7093 (fit 26s, feat 2s)
+  r=2 bits=2048 seed=42 R2=0.7180 (fit 51s, feat 0s)
+  r=2 bits=2048 seed=1 R2=0.7188 (fit 51s, feat 0s)
+  r=2 bits=2048 seed=2 R2=0.7183 (fit 52s, feat 0s)
+  r=3 bits=1024 seed=42 R2=0.7161 (fit 30s, feat 2s)
+  r=3 bits=1024 seed=1 R2=0.7163 (fit 30s, feat 2s)
+  r=3 bits=1024 seed=2 R2=0.7167 (fit 32s, feat 2s)
+  r=3 bits=2048 seed=42 R2=0.7225 (fit 77s, feat 3s)
+  r=3 bits=2048 seed=1 R2=0.7197 (fit 66s, feat 3s)
+  r=3 bits=2048 seed=2 R2=0.7200 (fit 62s, feat 3s)
+[egfr/scaffold] pool=3648 test=912
+  r=2 bits=1024 seed=42 R2=0.6448 (fit 20s, feat 1s)
+  r=2 bits=1024 seed=1 R2=0.6470 (fit 15s, feat 1s)
+  r=2 bits=1024 seed=2 R2=0.6430 (fit 15s, feat 1s)
+  r=2 bits=2048 seed=42 R2=0.6472 (fit 30s, feat 0s)
+  r=2 bits=2048 seed=1 R2=0.6475 (fit 30s, feat 0s)
+  r=2 bits=2048 seed=2 R2=0.6490 (fit 31s, feat 0s)
+  r=3 bits=1024 seed=42 R2=0.6258 (fit 17s, feat 1s)
+  r=3 bits=1024 seed=1 R2=0.6274 (fit 17s, feat 1s)
+  r=3 bits=1024 seed=2 R2=0.6265 (fit 17s, feat 1s)
+  r=3 bits=2048 seed=42 R2=0.6280 (fit 36s, feat 1s)
+  r=3 bits=2048 seed=1 R2=0.6323 (fit 36s, feat 1s)
+  r=3 bits=2048 seed=2 R2=0.6287 (fit 36s, feat 1s)
+summary -> results/fp_ablation/summary_egfr.json
+figure  -> figures/fp_ablation/fp_ablation_egfr.png
+csv     -> results/fp_ablation/fp_ablation_egfr.csv (24 rows)
+--- END egfr rc=0 15:54:15
+=== TAG=egfr_full 2026-10-11 15:54:15 ===
+[egfr_full] radii=[2, 3] bits=[1024, 2048] seeds=[42, 1, 2]
+[egfr_full/random] pool=8583 test=2146
+  r=2 bits=1024 seed=42 R2=0.7239 (fit 52s, feat 1s)
+  r=2 bits=1024 seed=1 R2=0.7251 (fit 50s, feat 1s)
+  r=2 bits=1024 seed=2 R2=0.7247 (fit 47s, feat 1s)
+  r=2 bits=2048 seed=42 R2=0.7275 (fit 106s, feat 0s)
+  r=2 bits=2048 seed=1 R2=0.7280 (fit 107s, feat 0s)
+  r=2 bits=2048 seed=2 R2=0.7282 (fit 108s, feat 0s)
+  r=3 bits=1024 seed=42 R2=0.7115 (fit 50s, feat 1s)
+  r=3 bits=1024 seed=1 R2=0.7126 (fit 52s, feat 1s)
+  r=3 bits=1024 seed=2 R2=0.7127 (fit 53s, feat 1s)
+  r=3 bits=2048 seed=42 R2=0.7181 (fit 112s, feat 1s)
+  r=3 bits=2048 seed=1 R2=0.7202 (fit 110s, feat 1s)
+  r=3 bits=2048 seed=2 R2=0.7207 (fit 111s, feat 1s)
+[egfr_full/scaffold] pool=8563 test=2166
+  r=2 bits=1024 seed=42 R2=0.6117 (fit 45s, feat 1s)
+  r=2 bits=1024 seed=1 R2=0.6114 (fit 47s, feat 1s)
+  r=2 bits=1024 seed=2 R2=0.6106 (fit 47s, feat 1s)
+  r=2 bits=2048 seed=42 R2=0.6130 (fit 98s, feat 0s)
+  r=2 bits=2048 seed=1 R2=0.6084 (fit 94s, feat 0s)
+  r=2 bits=2048 seed=2 R2=0.6121 (fit 99s, feat 0s)
+  r=3 bits=1024 seed=42 R2=0.5918 (fit 52s, feat 1s)
+  r=3 bits=1024 seed=1 R2=0.5911 (fit 52s, feat 1s)
+  r=3 bits=1024 seed=2 R2=0.5897 (fit 52s, feat 1s)
+  r=3 bits=2048 seed=42 R2=0.5829 (fit 116s, feat 1s)
+  r=3 bits=2048 seed=1 R2=0.5857 (fit 115s, feat 1s)
+  r=3 bits=2048 seed=2 R2=0.5837 (fit 113s, feat 1s)
+summary -> results/fp_ablation/summary_egfr_full.json
+figure  -> figures/fp_ablation/fp_ablation_egfr_full.png
+csv     -> results/fp_ablation/fp_ablation_egfr_full.csv (24 rows)
+--- END egfr_full rc=0 16:25:50
+=== TAG=herg 2026-10-11 16:25:50 ===
+[herg] radii=[2, 3] bits=[1024, 2048] seeds=[42, 1, 2]
+[herg/random] pool=6722 test=1681
+  r=2 bits=1024 seed=42 R2=0.6000 (fit 47s, feat 1s)
+  r=2 bits=1024 seed=1 R2=0.6000 (fit 48s, feat 1s)
+  r=2 bits=1024 seed=2 R2=0.5987 (fit 48s, feat 1s)
+  r=2 bits=2048 seed=42 R2=0.6074 (fit 145s, feat 0s)
+  r=2 bits=2048 seed=1 R2=0.6082 (fit 149s, feat 0s)
+  r=2 bits=2048 seed=2 R2=0.6076 (fit 146s, feat 0s)
+  r=3 bits=1024 seed=42 R2=0.5915 (fit 45s, feat 1s)
+  r=3 bits=1024 seed=1 R2=0.5914 (fit 46s, feat 1s)
+  r=3 bits=1024 seed=2 R2=0.5917 (fit 48s, feat 1s)
+  r=3 bits=2048 seed=42 R2=0.5981 (fit 134s, feat 1s)
+  r=3 bits=2048 seed=1 R2=0.5977 (fit 132s, feat 1s)
+  r=3 bits=2048 seed=2 R2=0.6006 (fit 132s, feat 1s)
+[herg/scaffold] pool=6721 test=1682
+  r=2 bits=1024 seed=42 R2=0.3789 (fit 46s, feat 1s)
+  r=2 bits=1024 seed=1 R2=0.3812 (fit 46s, feat 1s)
+  r=2 bits=1024 seed=2 R2=0.3796 (fit 46s, feat 1s)
+  r=2 bits=2048 seed=42 R2=0.3839 (fit 150s, feat 0s)
+  r=2 bits=2048 seed=1 R2=0.3862 (fit 147s, feat 0s)
+  r=2 bits=2048 seed=2 R2=0.3931 (fit 148s, feat 0s)
+  r=3 bits=1024 seed=42 R2=0.3651 (fit 48s, feat 1s)
+  r=3 bits=1024 seed=1 R2=0.3704 (fit 46s, feat 1s)
+  r=3 bits=1024 seed=2 R2=0.3664 (fit 46s, feat 1s)
+  r=3 bits=2048 seed=42 R2=0.3944 (fit 142s, feat 1s)
+  r=3 bits=2048 seed=1 R2=0.3910 (fit 140s, feat 1s)
+  r=3 bits=2048 seed=2 R2=0.3910 (fit 147s, feat 1s)
+summary -> results/fp_ablation/summary_herg.json
+figure  -> figures/fp_ablation/fp_ablation_herg.png
+csv     -> results/fp_ablation/fp_ablation_herg.csv (24 rows)
+--- END herg rc=0 17:03:48
+=== TAG=hivpr 2026-10-11 17:03:48 ===
+[hivpr] radii=[2, 3] bits=[1024, 2048] seeds=[42, 1, 2]
+[hivpr/random] pool=2058 test=515
+  r=2 bits=1024 seed=42 R2=0.6961 (fit 6s, feat 0s)
+  r=2 bits=1024 seed=1 R2=0.6947 (fit 6s, feat 0s)
+  r=2 bits=1024 seed=2 R2=0.6946 (fit 6s, feat 0s)
+  r=2 bits=2048 seed=42 R2=0.6953 (fit 11s, feat 0s)
+  r=2 bits=2048 seed=1 R2=0.6940 (fit 11s, feat 0s)
+  r=2 bits=2048 seed=2 R2=0.6936 (fit 11s, feat 0s)
+  r=3 bits=1024 seed=42 R2=0.6810 (fit 7s, feat 0s)
+  r=3 bits=1024 seed=1 R2=0.6782 (fit 7s, feat 0s)
+  r=3 bits=1024 seed=2 R2=0.6782 (fit 7s, feat 0s)
+  r=3 bits=2048 seed=42 R2=0.6925 (fit 15s, feat 0s)
+  r=3 bits=2048 seed=1 R2=0.6893 (fit 14s, feat 0s)
+  r=3 bits=2048 seed=2 R2=0.6874 (fit 14s, feat 0s)
+[hivpr/scaffold] pool=2049 test=524
+  r=2 bits=1024 seed=42 R2=0.5544 (fit 6s, feat 0s)
+  r=2 bits=1024 seed=1 R2=0.5603 (fit 6s, feat 0s)
+  r=2 bits=1024 seed=2 R2=0.5586 (fit 6s, feat 0s)
+  r=2 bits=2048 seed=42 R2=0.5138 (fit 11s, feat 0s)
+  r=2 bits=2048 seed=1 R2=0.5317 (fit 11s, feat 0s)
+  r=2 bits=2048 seed=2 R2=0.5048 (fit 10s, feat 0s)
+  ANCHOR FAIL scaffold: 0.5168 vs 0.5380
+  r=3 bits=1024 seed=42 R2=0.4725 (fit 7s, feat 0s)
+  r=3 bits=1024 seed=1 R2=0.4839 (fit 7s, feat 0s)
+  r=3 bits=1024 seed=2 R2=0.4673 (fit 7s, feat 0s)
+  r=3 bits=2048 seed=42 R2=0.4994 (fit 13s, feat 0s)
+  r=3 bits=2048 seed=1 R2=0.5101 (fit 13s, feat 0s)
+  r=3 bits=2048 seed=2 R2=0.4994 (fit 13s, feat 0s)
+summary -> results/fp_ablation/summary_hivpr.json
+ANCHOR FAILED -> scaffold: anchor 0.5168 vs headline 0.5380
+FAILED rc=1 tag=hivpr 2026-10-11 17:07:33
+=== TAG=vegfr2 2026-10-11 17:08:53 ===
+[vegfr2] radii=[2, 3] bits=[1024, 2048] seeds=[42, 1, 2]
+[vegfr2/random] pool=7714 test=1929
+  r=2 bits=1024 seed=42 R2=0.6679 (fit 32s, feat 1s)
+  r=2 bits=1024 seed=1 R2=0.6675 (fit 35s, feat 1s)
+  r=2 bits=1024 seed=2 R2=0.6668 (fit 51s, feat 1s)
+  r=2 bits=2048 seed=42 R2=0.6699 (fit 154s, feat 0s)
+  r=2 bits=2048 seed=1 R2=0.6700 (fit 136s, feat 0s)
+  r=2 bits=2048 seed=2 R2=0.6695 (fit 137s, feat 0s)
+  r=3 bits=1024 seed=42 R2=0.6599 (fit 51s, feat 1s)
+  r=3 bits=1024 seed=1 R2=0.6600 (fit 53s, feat 1s)
+  r=3 bits=1024 seed=2 R2=0.6603 (fit 51s, feat 1s)
+  r=3 bits=2048 seed=42 R2=0.6667 (fit 143s, feat 1s)
+  r=3 bits=2048 seed=1 R2=0.6667 (fit 142s, feat 1s)
+  r=3 bits=2048 seed=2 R2=0.6658 (fit 142s, feat 1s)
+[vegfr2/scaffold] pool=7698 test=1945
+  r=2 bits=1024 seed=42 R2=0.5594 (fit 44s, feat 1s)
+  r=2 bits=1024 seed=1 R2=0.5575 (fit 44s, feat 1s)
+  r=2 bits=1024 seed=2 R2=0.5600 (fit 44s, feat 1s)
+  r=2 bits=2048 seed=42 R2=0.5903 (fit 141s, feat 0s)
+  r=2 bits=2048 seed=1 R2=0.5903 (fit 142s, feat 0s)
+  r=2 bits=2048 seed=2 R2=0.5939 (fit 141s, feat 0s)
+  r=3 bits=1024 seed=42 R2=0.5519 (fit 49s, feat 1s)
+  r=3 bits=1024 seed=1 R2=0.5439 (fit 50s, feat 1s)
+  r=3 bits=1024 seed=2 R2=0.5495 (fit 52s, feat 1s)
+  r=3 bits=2048 seed=42 R2=0.5805 (fit 141s, feat 1s)
+  r=3 bits=2048 seed=1 R2=0.5800 (fit 140s, feat 1s)
+  r=3 bits=2048 seed=2 R2=0.5823 (fit 141s, feat 1s)
+summary -> results/fp_ablation/summary_vegfr2.json
+figure  -> figures/fp_ablation/fp_ablation_vegfr2.png
+csv     -> results/fp_ablation/fp_ablation_vegfr2.csv (24 rows)
+VEGFR2_EXIT rc=0 2026-10-11 17:46:36
