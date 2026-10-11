@@ -1,0 +1,35 @@
+Target: Vascular endothelial growth factor receptor 2 | Feature matrix: X=(9643, 2048), y range [2.39, 10.64]
+
+=== random split: train=7714, test=1929 ===
+Fitting 5 folds for each of 12 candidates, totalling 60 fits
+/Users/lessray/Desktop/kimi code/qsar-activity-prediction/.venv/lib/python3.12/site-packages/joblib/externals/loky/backend/resource_tracker.py:444: UserWarning: resource_tracker: There appear to be 6 leaked semlock objects to clean up at shutdown: {'/loky-51758-pwctufcc': 1, '/loky-51758-cnx_tlgk': 1, '/loky-51758-dsi3zy2l': 1, '/loky-51758-yepm4fu7': 1, '/loky-51758-vibjb9us': 1, '/loky-51758-6f9eukue': 1}
+  warnings.warn(
+/Users/lessray/Desktop/kimi code/qsar-activity-prediction/.venv/lib/python3.12/site-packages/joblib/externals/loky/backend/resource_tracker.py:444: UserWarning: resource_tracker: There appear to be 1 leaked folder objects to clean up at shutdown: {'/var/folders/60/f144lgn97zg1y9wcvg2v5thh0000gn/T/joblib_memmapping_folder_51758_8f57f5fb30a34db5ba0a273619d8b684_3357d16ed42440a7be70425800fe495e': 1}
+  warnings.warn(
+/Users/lessray/Desktop/kimi code/qsar-activity-prediction/.venv/lib/python3.12/site-packages/joblib/externals/loky/backend/resource_tracker.py:468: UserWarning: resource_tracker: /var/folders/60/f144lgn97zg1y9wcvg2v5thh0000gn/T/joblib_memmapping_folder_51758_8f57f5fb30a34db5ba0a273619d8b684_3357d16ed42440a7be70425800fe495e: FileNotFoundError(2, 'No such file or directory')
+  warnings.warn('resource_tracker: %s: %r' % (name, e))
+default_exit=143 Sun Oct 11 13:26:29 CST 2026
+Target: Vascular endothelial growth factor receptor 2 | Feature matrix: X=(9643, 2048), y range [2.39, 10.64]
+
+=== time split: train=6325, test=2038 ===
+Fitting 5 folds for each of 12 candidates, totalling 60 fits
+/Users/lessray/Desktop/kimi code/qsar-activity-prediction/.venv/lib/python3.12/site-packages/joblib/externals/loky/backend/resource_tracker.py:444: UserWarning: resource_tracker: There appear to be 1 leaked file objects to clean up at shutdown: {'/var/folders/60/f144lgn97zg1y9wcvg2v5thh0000gn/T/joblib_memmapping_folder_60364_bf0f36605fec4400b656fe73762908de_235791bc587449d78d3279cb60a451fa/60364-4643720560-9a5366f10b024dcd889df5f2223551bf.pkl': 12}
+  warnings.warn(
+/Users/lessray/Desktop/kimi code/qsar-activity-prediction/.venv/lib/python3.12/site-packages/joblib/externals/loky/backend/resource_tracker.py:444: UserWarning: resource_tracker: There appear to be 16 leaked semlock objects to clean up at shutdown: {'/loky-60364-_876nhj_': 1, '/loky-60364-v1k735m8': 1, '/loky-60364-caofsdhu': 1, '/loky-60364-1igk8tq6': 1, '/loky-60364-221bfawi': 1, '/loky-60364-1l4fwwod': 1, '/loky-60364-wm7sf9gz': 1, '/loky-60364-ik5vxkyu': 1, '/loky-60364-gogg2ovt': 1, '/loky-60364-zgsoyn2m': 1, '/loky-60364-n37z8vj2': 1, '/loky-60364-k_7j8pnr': 1, '/loky-60364-tqwmsoga': 1, '/loky-60364-va3jjg1u': 1, '/loky-60364-6puxmk_g': 1, '/loky-60364-yueedjgl': 1}
+  warnings.warn(
+/Users/lessray/Desktop/kimi code/qsar-activity-prediction/.venv/lib/python3.12/site-packages/joblib/externals/loky/backend/resource_tracker.py:444: UserWarning: resource_tracker: There appear to be 2 leaked folder objects to clean up at shutdown: {'/var/folders/60/f144lgn97zg1y9wcvg2v5thh0000gn/T/joblib_memmapping_folder_60364_bf0f36605fec4400b656fe73762908de_2f76a47c9cbb4f97a65ff7405bc97ba0': 1, '/var/folders/60/f144lgn97zg1y9wcvg2v5thh0000gn/T/joblib_memmapping_folder_60364_bf0f36605fec4400b656fe73762908de_235791bc587449d78d3279cb60a451fa': 1}
+  warnings.warn(
+/Users/lessray/Desktop/kimi code/qsar-activity-prediction/.venv/lib/python3.12/site-packages/joblib/externals/loky/backend/resource_tracker.py:468: UserWarning: resource_tracker: /var/folders/60/f144lgn97zg1y9wcvg2v5thh0000gn/T/joblib_memmapping_folder_60364_bf0f36605fec4400b656fe73762908de_2f76a47c9cbb4f97a65ff7405bc97ba0: FileNotFoundError(2, 'No such file or directory')
+  warnings.warn('resource_tracker: %s: %r' % (name, e))
+Target: Vascular endothelial growth factor receptor 2 | Feature matrix: X=(9643, 2048), y range [2.39, 10.64]
+
+=== random split: train=7714, test=1929 ===
+Fitting 5 folds for each of 12 candidates, totalling 60 fits
+/Users/lessray/Desktop/kimi code/qsar-activity-prediction/.venv/lib/python3.12/site-packages/joblib/externals/loky/backend/resource_tracker.py:444: UserWarning: resource_tracker: There appear to be 1 leaked file objects to clean up at shutdown: {'/var/folders/60/f144lgn97zg1y9wcvg2v5thh0000gn/T/joblib_memmapping_folder_61582_d107bbfe569e40a0acee4dc1bb5e323f_42a9d86652ec4861ad4a213af21c77f1/61582-4649285584-fb4d9e06bd0442f0bdbf5125af649df2.pkl': 12}
+  warnings.warn(
+/Users/lessray/Desktop/kimi code/qsar-activity-prediction/.venv/lib/python3.12/site-packages/joblib/externals/loky/backend/resource_tracker.py:444: UserWarning: resource_tracker: There appear to be 16 leaked semlock objects to clean up at shutdown: {'/loky-61582-igxl7gte': 1, '/loky-61582-x9l4nb33': 1, '/loky-61582-prc1oil_': 1, '/loky-61582-4rjq0h4l': 1, '/loky-61582-41t8p76m': 1, '/loky-61582-n0bcjjmf': 1, '/loky-61582-s7u9gpgw': 1, '/loky-61582-tiryo1rb': 1, '/loky-61582-4vvrbs50': 1, '/loky-61582-325gjxwm': 1, '/loky-61582-nyrvweh8': 1, '/loky-61582-ibvdyrio': 1, '/loky-61582-hqwc4ggu': 1, '/loky-61582-zfjp_bev': 1, '/loky-61582-pnq0x_b6': 1, '/loky-61582-gpsqt7m9': 1}
+  warnings.warn(
+/Users/lessray/Desktop/kimi code/qsar-activity-prediction/.venv/lib/python3.12/site-packages/joblib/externals/loky/backend/resource_tracker.py:444: UserWarning: resource_tracker: There appear to be 2 leaked folder objects to clean up at shutdown: {'/var/folders/60/f144lgn97zg1y9wcvg2v5thh0000gn/T/joblib_memmapping_folder_61582_d107bbfe569e40a0acee4dc1bb5e323f_151159b782f648dd8003e00d7749a524': 1, '/var/folders/60/f144lgn97zg1y9wcvg2v5thh0000gn/T/joblib_memmapping_folder_61582_d107bbfe569e40a0acee4dc1bb5e323f_42a9d86652ec4861ad4a213af21c77f1': 1}
+  warnings.warn(
+/Users/lessray/Desktop/kimi code/qsar-activity-prediction/.venv/lib/python3.12/site-packages/joblib/externals/loky/backend/resource_tracker.py:468: UserWarning: resource_tracker: /var/folders/60/f144lgn97zg1y9wcvg2v5thh0000gn/T/joblib_memmapping_folder_61582_d107bbfe569e40a0acee4dc1bb5e323f_151159b782f648dd8003e00d7749a524: FileNotFoundError(2, 'No such file or directory')
+  warnings.warn('resource_tracker: %s: %r' % (name, e))

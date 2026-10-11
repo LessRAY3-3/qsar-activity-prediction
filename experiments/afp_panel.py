@@ -170,9 +170,12 @@ def make_panel_figure(df, fig_path):
         sub = df[df["split"] == split].set_index("tag").loc[list(TAGS)]
         colors = []
         for r in sub.itertuples():
+            # colour follows the CI, never the point estimate: a slightly
+            # negative per-seed mean with an all-positive CI is still
+            # "AttentiveFP ahead", and vice versa
             if not np.isfinite(r.ci_lo) or not _is_true(r.significant):
                 colors.append("0.75")
-            elif r.d_r2_mean > 0:
+            elif r.ci_lo > 0:
                 colors.append("tab:blue")
             else:
                 colors.append("tab:red")

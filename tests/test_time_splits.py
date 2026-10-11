@@ -14,7 +14,10 @@ index-dependent carbon tail), one document per molecule with a synthetic
     unjoinable (99.0% coverage) -> pinned to year_min on the train side
     and the split proceeds; 12 of 200 unjoinable (94%, below
     FILL_YEAR_COVERAGE) -> SystemExit; missing
-    document_years.csv -> SystemExit naming fetch_document_years.py.
+    document_years.csv -> SystemExit naming fetch_document_years.py;
+  * M1/03 regime: activities rows written as salt forms while the npz
+    holds parents -> years join through 02's parent standardization
+    (200/200 coverage, exact per-molecule years), no coverage collapse.
 """
 import json
 
@@ -56,13 +59,15 @@ def _years_short():
     return SHORT_LO + np.arange(N) % (SHORT_HI - SHORT_LO + 1)
 
 
-def _write_inputs(tmp_path, years, broken=()):
+def _write_inputs(tmp_path, years, broken=(), salt=()):
     """Synthetic fingerprints.npz + activities.csv + document_years.csv.
 
     Each molecule gets one document carrying its year; every 7th also gets
     a NEWER second document so the per-SMILES min() is exercised (the
     effective year stays the primary document's).  Indices in ``broken``
     never get a document-year row -> those SMILES cannot join a year.
+    Indices in ``salt`` are written to activities.csv as a multi-fragment
+    (salt) form while the npz keeps the plain SMILES - the M1/03 regime.
     """
     smiles = np.array(_smiles())
     years = np.asarray(years)
@@ -81,11 +86,13 @@ def _write_inputs(tmp_path, years, broken=()):
     raw = tmp_path / "data" / "raw"
     raw.mkdir(parents=True)
     broken = set(broken)
+    salt = set(salt)
     act_rows, year_rows = [], []
     for i, smi in enumerate(smiles):
-        act_rows.append((smi, f"DOC{i:03d}"))
+        act_smi = f"{smi}.Cl" if i in salt else smi
+        act_rows.append((act_smi, f"DOC{i:03d}"))
         if i % 7 == 0:
-            act_rows.append((smi, f"DOCX{i:03d}"))
+            act_rows.append((act_smi, f"DOCX{i:03d}"))
         if i in broken:
             continue
         year_rows.append((f"DOC{i:03d}", int(years[i])))
@@ -107,8 +114,9 @@ def _write_inputs(tmp_path, years, broken=()):
     }
 
 
-def _setup(tmp_path, monkeypatch, mod, years=None, broken=()):
-    paths = _write_inputs(tmp_path, _years() if years is None else years, broken=broken)
+def _setup(tmp_path, monkeypatch, mod, years=None, broken=(), salt=()):
+    paths = _write_inputs(tmp_path, _years() if years is None else years,
+                          broken=broken, salt=salt)
     monkeypatch.setattr(mod, "IN_NPZ", str(paths["npz"]))
     monkeypatch.setattr(mod, "IN_ACTIVITIES", str(paths["acts"]))
     monkeypatch.setattr(mod, "IN_YEARS", str(paths["years"]))
@@ -174,6 +182,30 @@ def test_split_fractions_within_spec(tmp_path, monkeypatch, mod):
     frac_valid = len(out["valid_idx"]) / N
     assert 0.20 <= frac_test <= 0.36, f"test fraction {frac_test:.3f}"
     assert 0.08 <= frac_valid <= 0.22, f"valid fraction {frac_valid:.3f}"
+
+
+def test_salt_activities_join_years_on_parent_keys(tmp_path, monkeypatch, mod, capsys):
+    """activities hold salt forms, the npz holds parents -> years still join.
+
+    03 exports parent_smiles in the fingerprint npz while raw activities
+    keep multi-fragment canonical variants, so the year join must key on
+    02's parent standardization; a string-level reindex would leave those
+    molecules undated and collapse the coverage guard.
+    """
+    salted = set(range(0, N, 3))  # 1/3 salt-form activity rows, 2/3 plain
+    paths = _setup(tmp_path, monkeypatch, mod, salt=salted)
+    acts = pd.read_csv(paths["acts"])
+    assert acts["canonical_smiles"].str.endswith(".Cl").sum() > 0  # fixture really salts rows
+
+    assert mod.main([]) is None  # exit 0: coverage not refused
+
+    printed = capsys.readouterr().out
+    assert f"year coverage: {N}/{N}" in printed
+    assert "have no publication year" not in printed
+
+    d = np.load(paths["splits"] / f"{mod.TAG}_time.npz")
+    np.testing.assert_array_equal(d["year"].astype(int), _years())  # per-molecule years exact
+    np.testing.assert_array_equal(d["smiles"], np.array(_smiles()))  # npz smiles untouched
 
 
 def test_short_year_span_writes_na_marker(tmp_path, monkeypatch, mod, capsys):

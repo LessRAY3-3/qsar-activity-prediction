@@ -1,0 +1,28 @@
+
+=== GINE vs RF panel (8 targets x 2 splits) ===
+  tag        split       rf_r2           gine_r2     d_r2  95% CI (mean3)             sig
+  a2a        random     0.7100     0.6549±0.0107  -0.0550  [-0.1185, +0.0158]         no
+  a2a        scaffold   0.7025     0.6170±0.0084  -0.0855  [-0.1210, -0.0278]         yes
+  abl1       random     0.8222     0.7526±0.0074  -0.0696  (point estimate only)      -
+  abl1       scaffold   0.7144     0.6383±0.0828  -0.0760  (point estimate only)      -
+  egfr       random     0.7214     0.6642±0.0096  -0.0572  [-0.0742, -0.0070]         yes
+  egfr       scaffold   0.6492     0.6120±0.0120  -0.0372  [-0.0521, +0.0071]         no
+  egfr_full  random     0.7289     0.6679±0.0063  -0.0610  [-0.0566, -0.0203]         yes
+  egfr_full  scaffold   0.6081     0.5707±0.0105  -0.0375  [-0.0338, +0.0082]         no
+  herg       random     0.6067     0.5927±0.0254  -0.0140  (point estimate only)      -
+  herg       scaffold   0.3845     0.4537±0.0075  +0.0693  (point estimate only)      -
+  hivpr      random     0.6922     0.6450±0.0138  -0.0472  [-0.0590, +0.0038]         no
+  hivpr      scaffold   0.5380     0.4397±0.0148  -0.0983  [-0.0964, -0.0067]         yes
+  mpro       random     0.6017     0.5550±0.0120  -0.0466  [-0.0880, +0.0315]         no
+  mpro       scaffold   0.4332     0.3329±0.0127  -0.1003  [-0.1298, -0.0120]         yes
+  vegfr2     random     0.6695     0.6739±0.0031  +0.0044  (point estimate only)      -
+  vegfr2     scaffold   0.5853     0.5940±0.0126  +0.0086  (point estimate only)      -
+
+  10/16 cells have a bootstrap CI; 5/10 exclude 0
+  GINE significantly ahead: none
+  RF significantly ahead (5): a2a/scaffold, egfr/random, egfr_full/random, hivpr/scaffold, mpro/scaffold
+  Verdict: GINE never beats RF significantly: 0/10 bootstrapped cells have a CI above 0 -- bond features do not flip the verdict.
+
+summary -> results/gine_panel/summary.csv (16 rows)
+figure  -> figures/gine_panel/panel_dR2.png
+combined -> figures/significance/ci_panel_with_gine.png

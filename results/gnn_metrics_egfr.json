@@ -1,12 +1,13 @@
 {
   "scaffold": {
-    "r2": 0.5444309711456299,
-    "rmse": 0.9691430186772951,
-    "mae": 0.7366563677787781,
-    "best_epoch": 99,
-    "best_valid_rmse_std": 0.5327543020248413,
+    "r2": 0.630845308303833,
+    "rmse": 1.041540360740501,
+    "mae": 0.8073932528495789,
+    "best_epoch": 65,
+    "best_valid_rmse_std": 0.5860572457313538,
     "params": {
       "tag": "egfr",
+      "model": "gin",
       "hidden": 128,
       "num_layers": 4,
       "dropout": 0.2,
@@ -14,17 +15,19 @@
       "batch_size": 128,
       "epochs": 100,
       "patience": 20,
-      "seed": 42
+      "seed": 42,
+      "suffix": ""
     }
   },
   "random": {
-    "r2": 0.6908191442489624,
-    "rmse": 0.764833391409721,
-    "mae": 0.5817612409591675,
-    "best_epoch": 93,
-    "best_valid_rmse_std": 0.5311138033866882,
+    "r2": 0.6694390177726746,
+    "rmse": 0.7986177200007067,
+    "mae": 0.5918937921524048,
+    "best_epoch": 84,
+    "best_valid_rmse_std": 0.5308358073234558,
     "params": {
       "tag": "egfr",
+      "model": "gin",
       "hidden": 128,
       "num_layers": 4,
       "dropout": 0.2,
@@ -32,15 +35,16 @@
       "batch_size": 128,
       "epochs": 100,
       "patience": 20,
-      "seed": 42
+      "seed": 42,
+      "suffix": ""
     }
   },
   "time": {
-    "r2": 0.10535776615142822,
-    "rmse": 1.3028226304935695,
-    "mae": 1.0668647289276123,
-    "best_epoch": 8,
-    "best_valid_rmse_std": 0.8646447658538818,
+    "r2": 0.04038125276565552,
+    "rmse": 1.2539885306769256,
+    "mae": 0.9886125326156616,
+    "best_epoch": 9,
+    "best_valid_rmse_std": 0.8164685368537903,
     "params": {
       "tag": "egfr",
       "model": "gin",

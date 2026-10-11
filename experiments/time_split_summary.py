@@ -23,9 +23,9 @@ Outputs:
                                            tag: random / scaffold / time
 Console: headline conclusions.
 
-Caveats documented in the log/report, not in the numbers: egfr_full RF
-time R2 = -0.891 and herg -0.034 are genuine temporal-drift signals, not
-bugs.
+Caveats documented in the log/report, not in the numbers: targets whose
+RF time R² drops below 0 (e.g. egfr_full, herg) are flagged from the
+data as genuine temporal-drift signals, not bugs.
 """
 import json
 import os
@@ -38,7 +38,7 @@ BASE = os.path.join(os.path.dirname(__file__), "..")
 TAGS = ("a2a", "abl1", "egfr", "egfr_full", "herg", "hivpr", "mpro", "vegfr2")
 SPLITS = ("random", "scaffold", "time")
 SEED_SUFFIXES = ("", "_seed1", "_seed2")
-DELTA_CONVENTION = "point=per-seed-mean_R2;ci=ensemble_mean-pred_R2"
+DELTA_CONVENTION = "point=ensemble_mean-pred_R2;ci=ensemble_mean-pred_R2"
 
 SUMMARY_COLS = [
     "tag",
@@ -46,7 +46,8 @@ SUMMARY_COLS = [
     "n_total", "n_train", "n_valid", "n_test", "test_frac",
     "rf_time_r2", "rf_time_rmse",
     "gin_time_r2_mean", "gin_time_r2_std",
-    "d_r2_mean3", "ci_lo", "ci_hi", "significant", "winner", "p_one_sided",
+    "d_r2_mean3", "ci_lo", "ci_hi", "significant", "winner",
+    "frac_boot_gin_better",
     "rf_random_r2", "gin_random_r2_mean",
     "rf_scaffold_r2", "gin_scaffold_r2_mean",
     "delta_convention",
@@ -102,10 +103,17 @@ def comparison_reference(tag):
 
 
 def time_significance():
-    """mean3 rows of the paired bootstrap as a tag-indexed frame."""
+    """mean3 rows of the paired bootstrap as a tag-indexed frame.
+
+    The stored summary_time.csv may predate the frac_boot_gin_better
+    rename (the committed file still says p_one_sided), so the column is
+    read under either name.
+    """
     df = pd.read_csv(os.path.join(BASE, "results", "significance",
                                   "summary_time.csv"))
     sub = df.loc[df["pair"] == "mean3"].copy()
+    if "frac_boot_gin_better" not in sub.columns:
+        sub = sub.rename(columns={"p_one_sided": "frac_boot_gin_better"})
     if len(sub) != len(TAGS) or set(sub["tag"]) != set(TAGS):
         raise ValueError("significance/summary_time.csv does not cover all tags")
     return sub.set_index("tag")
@@ -134,7 +142,7 @@ def build_summary():
             "ci_hi": float(s["ci_hi"]),
             "significant": bool(s["significant"]),
             "winner": s["winner"],
-            "p_one_sided": float(s["p_one_sided"]),
+            "frac_boot_gin_better": float(s["frac_boot_gin_better"]),
             "rf_random_r2": ref["random"][0],
             "gin_random_r2_mean": ref["random"][1],
             "rf_scaffold_r2": ref["scaffold"][0],
@@ -227,8 +235,13 @@ def print_conclusion(df):
     for r in big.itertuples():
         print(f"  caveat: {r.tag} test_frac={r.test_frac:.2f} > 0.5 "
               "(newest-year data concentration under the cumulative-20% rule)")
-    print("  note: extreme negatives (egfr_full RF -0.891, herg -0.034) are "
-          "genuine temporal drift, not bugs")
+
+    extreme = df.loc[df["rf_time_r2"] < 0, ["tag", "rf_time_r2"]]
+    if len(extreme):
+        cells = ", ".join(f"{r.tag} RF {r.rf_time_r2:+.3f}"
+                          for r in extreme.itertuples())
+        print(f"  note: negative time-split R² ({cells}) reads as genuine "
+              "temporal drift, not a bug")
 
 
 def main():

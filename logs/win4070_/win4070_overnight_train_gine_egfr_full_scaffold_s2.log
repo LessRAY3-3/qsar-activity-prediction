@@ -1,0 +1,44 @@
+/home/lessray/qsar-activity-prediction/.venv/lib/python3.12/site-packages/torch/jit/_script.py:1491: FutureWarning: `torch.jit.script` is deprecated. Please switch to `torch.compile` or `torch.export`.
+  warnings.warn(
+/home/lessray/qsar-activity-prediction/scripts/gnn_03_train_gin.py:210: UserWarning: Converting a tensor with requires_grad=True to a scalar may lead to unexpected behavior.
+Consider using tensor.detach() first. (Triggered internally at /__w/pytorch/pytorch/torch/csrc/autograd/generated/python_variable_methods.cpp:820.)
+  total += float(loss) * len(batch.y)
+[egfr_full/scaffold] device=cuda  y_mean=6.878 y_std=1.331
+  epoch   1  train_mse=0.7978  valid_rmse=0.9004  lr=1.0e-03 *
+  epoch   2  train_mse=0.6888  valid_rmse=0.8892  lr=1.0e-03 *
+  epoch   3  train_mse=0.6488  valid_rmse=0.8332  lr=1.0e-03 *
+  epoch   6  train_mse=0.5864  valid_rmse=0.8142  lr=1.0e-03 *
+  epoch   8  train_mse=0.5610  valid_rmse=0.8029  lr=1.0e-03 *
+  epoch  10  train_mse=0.5280  valid_rmse=0.8152  lr=1.0e-03
+  epoch  11  train_mse=0.5334  valid_rmse=0.7755  lr=1.0e-03 *
+  epoch  15  train_mse=0.4911  valid_rmse=0.7587  lr=1.0e-03 *
+  epoch  16  train_mse=0.4816  valid_rmse=0.7471  lr=1.0e-03 *
+  epoch  19  train_mse=0.4710  valid_rmse=0.7261  lr=1.0e-03 *
+  epoch  20  train_mse=0.4675  valid_rmse=0.7430  lr=1.0e-03
+  epoch  23  train_mse=0.4430  valid_rmse=0.7100  lr=1.0e-03 *
+  epoch  30  train_mse=0.4088  valid_rmse=0.7182  lr=1.0e-03
+  epoch  31  train_mse=0.4123  valid_rmse=0.7039  lr=1.0e-03 *
+  epoch  34  train_mse=0.3891  valid_rmse=0.6933  lr=1.0e-03 *
+  epoch  38  train_mse=0.3798  valid_rmse=0.6863  lr=1.0e-03 *
+  epoch  40  train_mse=0.3724  valid_rmse=0.6928  lr=1.0e-03
+  epoch  43  train_mse=0.3712  valid_rmse=0.6845  lr=1.0e-03 *
+  epoch  45  train_mse=0.3531  valid_rmse=0.6809  lr=1.0e-03 *
+  epoch  50  train_mse=0.3439  valid_rmse=0.6773  lr=1.0e-03 *
+  epoch  51  train_mse=0.3438  valid_rmse=0.6725  lr=1.0e-03 *
+  epoch  56  train_mse=0.3319  valid_rmse=0.6620  lr=1.0e-03 *
+  epoch  60  train_mse=0.3276  valid_rmse=0.6773  lr=1.0e-03
+  epoch  64  train_mse=0.3150  valid_rmse=0.6619  lr=1.0e-03 *
+  epoch  67  train_mse=0.3060  valid_rmse=0.6619  lr=1.0e-03 *
+  epoch  70  train_mse=0.3054  valid_rmse=0.6830  lr=1.0e-03
+  epoch  73  train_mse=0.2778  valid_rmse=0.6547  lr=5.0e-04 *
+  epoch  76  train_mse=0.2732  valid_rmse=0.6478  lr=5.0e-04 *
+  epoch  80  train_mse=0.2689  valid_rmse=0.6572  lr=5.0e-04
+  epoch  81  train_mse=0.2605  valid_rmse=0.6446  lr=5.0e-04 *
+  epoch  83  train_mse=0.2561  valid_rmse=0.6399  lr=5.0e-04 *
+  epoch  89  train_mse=0.2581  valid_rmse=0.6394  lr=5.0e-04 *
+  epoch  90  train_mse=0.2544  valid_rmse=0.6372  lr=5.0e-04 *
+  epoch  91  train_mse=0.2496  valid_rmse=0.6366  lr=5.0e-04 *
+  epoch  98  train_mse=0.2394  valid_rmse=0.6286  lr=5.0e-04 *
+  epoch 100  train_mse=0.2395  valid_rmse=0.6275  lr=5.0e-04 *
+  TEST  R2=0.5571  RMSE=0.9509  MAE=0.7414  (52s)
+  saved -> results/gnn_models/egfr_full_gine_scaffold_seed2.pt, results/gnn_preds_egfr_full_gine_scaffold_seed2.npz, results/gnn_metrics_egfr_full_gine_seed2.json

@@ -1,0 +1,109 @@
+=== [2026-10-11 13:02:19] driver start experiment=learning_curve tags=a2a abl1 egfr egfr_full herg hivpr mpro OMP_NUM_THREADS=1
+=== [2026-10-11 13:02:19] START learning_curve tag=a2a
+/Users/lessray/Desktop/kimi code/qsar-activity-prediction/.venv/lib/python3.12/site-packages/torch/jit/_script.py:1491: FutureWarning: `torch.jit.script` is deprecated. Please switch to `torch.compile` or `torch.export`.
+  warnings.warn(
+/Users/lessray/Desktop/kimi code/qsar-activity-prediction/experiments/../scripts/gnn_03_train_gin.py:210: UserWarning: Converting a tensor with requires_grad=True to a scalar may lead to unexpected behavior.
+Consider using tensor.detach() first. (Triggered internally at /Users/runner/work/pytorch/pytorch/torch/csrc/autograd/generated/python_variable_methods.cpp:821.)
+  total += float(loss) * len(batch.y)
+[a2a] sizes=[500, 1000, 1500, 2000, 2500, 3000, 3500, 4000, 4400] seeds=[42, 1, 2] splits=['random', 'scaffold']
+[a2a/random] pool=982 valid=110 test=274
+  n=500 seed=42 RF   R2=0.6336 RMSE=0.6795 (3s)
+  n=500 seed=42 GIN  R2=0.5766 RMSE=0.7304 (best epoch 37, 64s)
+  n=500 seed=1 RF   R2=0.6468 RMSE=0.6671 (3s)
+  n=500 seed=1 GIN  R2=0.5521 RMSE=0.7513 (best epoch 32, 53s)
+  n=500 seed=2 RF   R2=0.6488 RMSE=0.6652 (3s)
+  n=500 seed=2 GIN  R2=0.6302 RMSE=0.6826 (best epoch 85, 87s)
+  n=1000: skipped (larger than train pool)
+  n=1500: skipped (larger than train pool)
+  n=2000: skipped (larger than train pool)
+  n=2500: skipped (larger than train pool)
+  n=3000: skipped (larger than train pool)
+  n=3500: skipped (larger than train pool)
+  n=4000: skipped (larger than train pool)
+  n=4400: skipped (larger than train pool)
+[a2a/scaffold] pool=960 valid=107 test=299
+  n=500 seed=42 RF   R2=0.7080 RMSE=0.5595 (3s)
+  n=500 seed=42 GIN  R2=0.6596 RMSE=0.6041 (best epoch 41, 48s)
+  n=500 seed=1 RF   R2=0.7333 RMSE=0.5347 (3s)
+  n=500 seed=1 GIN  R2=0.6559 RMSE=0.6074 (best epoch 35, 37s)
+  n=500 seed=2 RF   R2=0.7277 RMSE=0.5402 (2s)
+  n=500 seed=2 GIN  R2=0.6398 RMSE=0.6214 (best epoch 23, 23s)
+  n=1000: skipped (larger than train pool)
+  n=1500: skipped (larger than train pool)
+  n=2000: skipped (larger than train pool)
+  n=2500: skipped (larger than train pool)
+  n=3000: skipped (larger than train pool)
+  n=3500: skipped (larger than train pool)
+  n=4000: skipped (larger than train pool)
+  n=4400: skipped (larger than train pool)
+summary -> results/learning_curve/summary_a2a.json
+figure  -> figures/learning_curve/learning_curve_a2a.png
+csv     -> results/learning_curve/learning_curve_a2a.csv (12 rows)
+=== [2026-10-11 13:08:05] END learning_curve tag=a2a rc=0
+=== [2026-10-11 13:08:05] START learning_curve tag=abl1
+/Users/lessray/Desktop/kimi code/qsar-activity-prediction/.venv/lib/python3.12/site-packages/torch/jit/_script.py:1491: FutureWarning: `torch.jit.script` is deprecated. Please switch to `torch.compile` or `torch.export`.
+  warnings.warn(
+/Users/lessray/Desktop/kimi code/qsar-activity-prediction/experiments/../scripts/gnn_03_train_gin.py:210: UserWarning: Converting a tensor with requires_grad=True to a scalar may lead to unexpected behavior.
+Consider using tensor.detach() first. (Triggered internally at /Users/runner/work/pytorch/pytorch/torch/csrc/autograd/generated/python_variable_methods.cpp:821.)
+  total += float(loss) * len(batch.y)
+[abl1] sizes=[500, 1000, 1500, 2000, 2500, 3000, 3500, 4000, 4400] seeds=[42, 1, 2] splits=['random', 'scaffold']
+[abl1/random] pool=1526 valid=170 test=424
+  n=500 seed=42 RF   R2=0.7551 RMSE=0.7210 (2s)
+  n=500 seed=42 GIN  R2=0.6153 RMSE=0.9036 (best epoch 46, 64s)
+  n=500 seed=1 RF   R2=0.7464 RMSE=0.7337 (2s)
+  n=500 seed=1 GIN  R2=0.6268 RMSE=0.8900 (best epoch 20, 31s)
+  n=500 seed=2 RF   R2=0.7363 RMSE=0.7481 (2s)
+  n=500 seed=2 GIN  R2=0.6302 RMSE=0.8860 (best epoch 35, 42s)
+  n=1000 seed=42 RF   R2=0.7906 RMSE=0.6666 (6s)
+  n=1000 seed=42 GIN  R2=0.7236 RMSE=0.7659 (best epoch 51, 117s)
+  n=1000 seed=1 RF   R2=0.7773 RMSE=0.6875 (5s)
+  n=1000 seed=1 GIN  R2=0.7040 RMSE=0.7926 (best epoch 32, 74s)
+  n=1000 seed=2 RF   R2=0.7851 RMSE=0.6754 (6s)
+  n=1000 seed=2 GIN  R2=0.7318 RMSE=0.7545 (best epoch 46, 88s)
+  n=1500 seed=42 RF   R2=0.8176 RMSE=0.6223 (8s)
+  n=1500 seed=42 GIN  R2=0.7771 RMSE=0.6879 (best epoch 54, 159s)
+  n=1500 seed=1 RF   R2=0.8185 RMSE=0.6207 (12s)
+  n=1500 seed=1 GIN  R2=0.7749 RMSE=0.6912 (best epoch 84, 156s)
+  n=1500 seed=2 RF   R2=0.8195 RMSE=0.6190 (6s)
+  n=1500 seed=2 GIN  R2=0.7682 RMSE=0.7014 (best epoch 78, 122s)
+  n=2000: skipped (larger than train pool)
+  n=2500: skipped (larger than train pool)
+  n=3000: skipped (larger than train pool)
+  n=3500: skipped (larger than train pool)
+  n=4000: skipped (larger than train pool)
+  n=4400: skipped (larger than train pool)
+[abl1/scaffold] pool=1525 valid=170 test=425
+  n=500 seed=42 RF   R2=0.6593 RMSE=0.7329 (2s)
+  n=500 seed=42 GIN  R2=0.6948 RMSE=0.6936 (best epoch 49, 37s)
+  n=500 seed=1 RF   R2=0.6396 RMSE=0.7538 (3s)
+  n=500 seed=1 GIN  R2=0.6542 RMSE=0.7383 (best epoch 48, 32s)
+  n=500 seed=2 RF   R2=0.6293 RMSE=0.7645 (1s)
+  n=500 seed=2 GIN  R2=0.6522 RMSE=0.7405 (best epoch 38, 28s)
+  n=1000 seed=42 RF   R2=0.6750 RMSE=0.7158 (4s)
+  n=1000 seed=42 GIN  R2=0.7138 RMSE=0.6717 (best epoch 50, 56s)
+  n=1000 seed=1 RF   R2=0.6929 RMSE=0.6959 (4s)
+  n=1000 seed=1 GIN  R2=0.6629 RMSE=0.7290 (best epoch 28, 38s)
+  n=1000 seed=2 RF   R2=0.7166 RMSE=0.6684 (6s)
+  n=1000 seed=2 GIN  R2=0.6469 RMSE=0.7461 (best epoch 41, 62s)
+  n=1500 seed=42 RF   R2=0.7121 RMSE=0.6737 (10s)
+  n=1500 seed=42 GIN  R2=0.7742 RMSE=0.5967 (best epoch 49, 93s)
+  n=1500 seed=1 RF   R2=0.7200 RMSE=0.6644 (12s)
+  n=1500 seed=1 GIN  R2=0.7659 RMSE=0.6075 (best epoch 60, 102s)
+  n=1500 seed=2 RF   R2=0.7125 RMSE=0.6733 (13s)
+  n=1500 seed=2 GIN  R2=0.7590 RMSE=0.6164 (best epoch 60, 97s)
+  n=2000: skipped (larger than train pool)
+  n=2500: skipped (larger than train pool)
+  n=3000: skipped (larger than train pool)
+  n=3500: skipped (larger than train pool)
+  n=4000: skipped (larger than train pool)
+  n=4400: skipped (larger than train pool)
+summary -> results/learning_curve/summary_abl1.json
+figure  -> figures/learning_curve/learning_curve_abl1.png
+csv     -> results/learning_curve/learning_curve_abl1.csv (36 rows)
+=== [2026-10-11 13:33:23] END learning_curve tag=abl1 rc=0
+=== [2026-10-11 13:33:23] START learning_curve tag=egfr
+/Users/lessray/Desktop/kimi code/qsar-activity-prediction/.venv/lib/python3.12/site-packages/torch/jit/_script.py:1491: FutureWarning: `torch.jit.script` is deprecated. Please switch to `torch.compile` or `torch.export`.
+  warnings.warn(
+/Users/lessray/Desktop/kimi code/qsar-activity-prediction/experiments/../scripts/gnn_03_train_gin.py:210: UserWarning: Converting a tensor with requires_grad=True to a scalar may lead to unexpected behavior.
+Consider using tensor.detach() first. (Triggered internally at /Users/runner/work/pytorch/pytorch/torch/csrc/autograd/generated/python_variable_methods.cpp:821.)
+  total += float(loss) * len(batch.y)

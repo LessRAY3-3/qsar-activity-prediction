@@ -1,0 +1,29 @@
+/home/lessray/qsar-activity-prediction/.venv/lib/python3.12/site-packages/torch/jit/_script.py:1491: FutureWarning: `torch.jit.script` is deprecated. Please switch to `torch.compile` or `torch.export`.
+  warnings.warn(
+/home/lessray/qsar-activity-prediction/scripts/gnn_03_train_gin.py:210: UserWarning: Converting a tensor with requires_grad=True to a scalar may lead to unexpected behavior.
+Consider using tensor.detach() first. (Triggered internally at /__w/pytorch/pytorch/torch/csrc/autograd/generated/python_variable_methods.cpp:820.)
+  total += float(loss) * len(batch.y)
+[hivpr/random] device=cuda  y_mean=7.336 y_std=1.582
+  epoch   1  train_mse=0.8551  valid_rmse=1.0199  lr=1.0e-03 *
+  epoch   3  train_mse=0.6338  valid_rmse=0.8766  lr=1.0e-03 *
+  epoch   4  train_mse=0.5859  valid_rmse=0.8002  lr=1.0e-03 *
+  epoch   7  train_mse=0.5325  valid_rmse=0.7204  lr=1.0e-03 *
+  epoch  10  train_mse=0.4691  valid_rmse=0.7004  lr=1.0e-03 *
+  epoch  17  train_mse=0.4123  valid_rmse=0.6550  lr=1.0e-03 *
+  epoch  20  train_mse=0.3997  valid_rmse=0.7646  lr=1.0e-03
+  epoch  24  train_mse=0.3432  valid_rmse=0.6402  lr=1.0e-03 *
+  epoch  27  train_mse=0.3351  valid_rmse=0.5938  lr=1.0e-03 *
+  epoch  30  train_mse=0.3245  valid_rmse=0.6488  lr=1.0e-03
+  epoch  37  train_mse=0.2893  valid_rmse=0.5818  lr=5.0e-04 *
+  epoch  40  train_mse=0.2771  valid_rmse=0.6116  lr=5.0e-04
+  epoch  47  train_mse=0.2434  valid_rmse=0.5806  lr=2.5e-04 *
+  epoch  48  train_mse=0.2461  valid_rmse=0.5705  lr=2.5e-04 *
+  epoch  50  train_mse=0.2455  valid_rmse=0.5640  lr=2.5e-04 *
+  epoch  60  train_mse=0.2333  valid_rmse=0.5678  lr=1.3e-04
+  epoch  64  train_mse=0.2256  valid_rmse=0.5624  lr=1.3e-04 *
+  epoch  68  train_mse=0.2189  valid_rmse=0.5606  lr=1.3e-04 *
+  epoch  70  train_mse=0.2112  valid_rmse=0.5668  lr=1.3e-04
+  epoch  80  train_mse=0.2127  valid_rmse=0.5641  lr=6.3e-05
+  early stop at epoch 88 (best epoch 68)
+  TEST  R2=0.6583  RMSE=0.9327  MAE=0.6853  (12s)
+  saved -> results/gnn_models/hivpr_gine_random_seed1.pt, results/gnn_preds_hivpr_gine_random_seed1.npz, results/gnn_metrics_hivpr_gine_seed1.json

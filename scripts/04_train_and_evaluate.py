@@ -31,15 +31,18 @@ CLI:
 """
 import json
 import os
+from contextlib import nullcontext
+
 import numpy as np
 import matplotlib
 
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import joblib
+from joblib import parallel_backend
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
-from sklearn.model_selection import GridSearchCV, train_test_split
+from sklearn.model_selection import GridSearchCV, KFold, train_test_split
 
 from qsar_common import RANDOM_STATE, scaffold_split
 
@@ -86,15 +89,31 @@ def scatter(y_test, pred, tag, path, target):
 
 def run_split(X, y, smiles, train_idx, test_idx, tag, fig_path, target):
     print(f"\n=== {tag} split: train={len(train_idx)}, test={len(test_idx)} ===")
+    # Shuffled folds: scaffold/time train pools are ordered by scaffold group or
+    # SMILES, so unshuffled KFold would put whole chemotype blocks in one fold.
+    cv = KFold(n_splits=CV_FOLDS, shuffle=True, random_state=RANDOM_STATE)
+    # QSAR_CV_BACKEND=threading dodges loky worker deaths seen on some macOS boxes; numerically identical (fixed seeds/folds).
     gs = GridSearchCV(
-        RandomForestRegressor(random_state=RANDOM_STATE, n_jobs=-1),
+        # inner n_jobs=1 — the outer GridSearchCV pool already saturates the
+        # cores; nesting thrashes (load ~180)
+        RandomForestRegressor(random_state=RANDOM_STATE, n_jobs=1),
         PARAM_GRID,
-        cv=CV_FOLDS,
+        cv=cv,
         scoring="r2",
         n_jobs=-1,
         verbose=1,
     )
-    gs.fit(X[train_idx], y[train_idx])
+    cv_backend = os.environ.get("QSAR_CV_BACKEND", "").strip()
+    if cv_backend == "loky_nommap":
+        # no memmapping: the resource tracker was deleting memmap folders under
+        # long grids, killing loky workers mid-run
+        ctx = parallel_backend("loky", max_nbytes=None)
+    elif cv_backend:
+        ctx = parallel_backend(cv_backend)
+    else:
+        ctx = nullcontext()
+    with ctx:
+        gs.fit(X[train_idx], y[train_idx])
     print(f"Best params: {gs.best_params_}  (CV R2 = {gs.best_score_:.3f})")
     metrics, pred = evaluate(gs.best_estimator_, X[test_idx], y[test_idx], tag)
     scatter(y[test_idx], pred, tag, fig_path, target)

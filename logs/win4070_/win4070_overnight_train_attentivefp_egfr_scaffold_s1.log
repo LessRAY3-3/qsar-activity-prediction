@@ -1,0 +1,59 @@
+/home/lessray/qsar-activity-prediction/.venv/lib/python3.12/site-packages/torch/jit/_script.py:1491: FutureWarning: `torch.jit.script` is deprecated. Please switch to `torch.compile` or `torch.export`.
+  warnings.warn(
+/home/lessray/qsar-activity-prediction/scripts/gnn_03_train_gin.py:210: UserWarning: Converting a tensor with requires_grad=True to a scalar may lead to unexpected behavior.
+Consider using tensor.detach() first. (Triggered internally at /__w/pytorch/pytorch/torch/csrc/autograd/generated/python_variable_methods.cpp:820.)
+  total += float(loss) * len(batch.y)
+[egfr/scaffold] device=cuda  y_mean=6.484 y_std=1.339
+  epoch   1  train_mse=1.0000  valid_rmse=1.0223  lr=1.0e-03 *
+  epoch   2  train_mse=0.9465  valid_rmse=0.9685  lr=1.0e-03 *
+  epoch   4  train_mse=0.8680  valid_rmse=0.9295  lr=1.0e-03 *
+  epoch   5  train_mse=0.7672  valid_rmse=0.8805  lr=1.0e-03 *
+  epoch   7  train_mse=0.6904  valid_rmse=0.8468  lr=1.0e-03 *
+  epoch   8  train_mse=0.6695  valid_rmse=0.8394  lr=1.0e-03 *
+  epoch   9  train_mse=0.6563  valid_rmse=0.8301  lr=1.0e-03 *
+  epoch  10  train_mse=0.6399  valid_rmse=0.8338  lr=1.0e-03
+  epoch  11  train_mse=0.6247  valid_rmse=0.8258  lr=1.0e-03 *
+  epoch  12  train_mse=0.6293  valid_rmse=0.8178  lr=1.0e-03 *
+  epoch  13  train_mse=0.6082  valid_rmse=0.8075  lr=1.0e-03 *
+  epoch  14  train_mse=0.6032  valid_rmse=0.8045  lr=1.0e-03 *
+  epoch  16  train_mse=0.6154  valid_rmse=0.7961  lr=1.0e-03 *
+  epoch  17  train_mse=0.5829  valid_rmse=0.7916  lr=1.0e-03 *
+  epoch  18  train_mse=0.5912  valid_rmse=0.7882  lr=1.0e-03 *
+  epoch  19  train_mse=0.5794  valid_rmse=0.7796  lr=1.0e-03 *
+  epoch  20  train_mse=0.5959  valid_rmse=0.7840  lr=1.0e-03
+  epoch  21  train_mse=0.5774  valid_rmse=0.7777  lr=1.0e-03 *
+  epoch  22  train_mse=0.5613  valid_rmse=0.7749  lr=1.0e-03 *
+  epoch  23  train_mse=0.5500  valid_rmse=0.7650  lr=1.0e-03 *
+  epoch  24  train_mse=0.5461  valid_rmse=0.7634  lr=1.0e-03 *
+  epoch  25  train_mse=0.5435  valid_rmse=0.7545  lr=1.0e-03 *
+  epoch  28  train_mse=0.5232  valid_rmse=0.7446  lr=1.0e-03 *
+  epoch  29  train_mse=0.5063  valid_rmse=0.7322  lr=1.0e-03 *
+  epoch  30  train_mse=0.5160  valid_rmse=0.7390  lr=1.0e-03
+  epoch  32  train_mse=0.4886  valid_rmse=0.7178  lr=1.0e-03 *
+  epoch  33  train_mse=0.4811  valid_rmse=0.7125  lr=1.0e-03 *
+  epoch  34  train_mse=0.4747  valid_rmse=0.7047  lr=1.0e-03 *
+  epoch  35  train_mse=0.4665  valid_rmse=0.7042  lr=1.0e-03 *
+  epoch  36  train_mse=0.4586  valid_rmse=0.6975  lr=1.0e-03 *
+  epoch  37  train_mse=0.4586  valid_rmse=0.6945  lr=1.0e-03 *
+  epoch  39  train_mse=0.4394  valid_rmse=0.6812  lr=1.0e-03 *
+  epoch  40  train_mse=0.4341  valid_rmse=0.6765  lr=1.0e-03 *
+  epoch  44  train_mse=0.4113  valid_rmse=0.6722  lr=1.0e-03 *
+  epoch  46  train_mse=0.4071  valid_rmse=0.6672  lr=1.0e-03 *
+  epoch  47  train_mse=0.3798  valid_rmse=0.6580  lr=1.0e-03 *
+  epoch  48  train_mse=0.3750  valid_rmse=0.6547  lr=1.0e-03 *
+  epoch  49  train_mse=0.3771  valid_rmse=0.6461  lr=1.0e-03 *
+  epoch  50  train_mse=0.3617  valid_rmse=0.6548  lr=1.0e-03
+  epoch  54  train_mse=0.3363  valid_rmse=0.6403  lr=1.0e-03 *
+  epoch  55  train_mse=0.3375  valid_rmse=0.6298  lr=1.0e-03 *
+  epoch  59  train_mse=0.3316  valid_rmse=0.6197  lr=1.0e-03 *
+  epoch  60  train_mse=0.3118  valid_rmse=0.6208  lr=1.0e-03
+  epoch  68  train_mse=0.2975  valid_rmse=0.5960  lr=5.0e-04 *
+  epoch  70  train_mse=0.2716  valid_rmse=0.6006  lr=5.0e-04
+  epoch  73  train_mse=0.2640  valid_rmse=0.5910  lr=5.0e-04 *
+  epoch  78  train_mse=0.2510  valid_rmse=0.5836  lr=5.0e-04 *
+  epoch  80  train_mse=0.2488  valid_rmse=0.6076  lr=5.0e-04
+  epoch  83  train_mse=0.2414  valid_rmse=0.5820  lr=5.0e-04 *
+  epoch  90  train_mse=0.2220  valid_rmse=0.5873  lr=5.0e-04
+  epoch 100  train_mse=0.2003  valid_rmse=0.5909  lr=1.3e-04
+  TEST  R2=0.5966  RMSE=1.0887  MAE=0.8527  (76s)
+  saved -> results/gnn_models/egfr_attentivefp_scaffold_seed1.pt, results/gnn_preds_egfr_attentivefp_scaffold_seed1.npz, results/gnn_metrics_egfr_attentivefp_seed1.json

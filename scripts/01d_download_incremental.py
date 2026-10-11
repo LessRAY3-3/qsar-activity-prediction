@@ -25,8 +25,10 @@ MAX_TRIES_PER_PAGE = 8
 
 COLUMNS = [
     "molecule_chembl_id", "canonical_smiles", "standard_type",
-    "standard_value", "standard_units", "pchembl_value", "assay_type",
+    "standard_value", "standard_units", "standard_relation",
+    "data_validity_comment", "pchembl_value", "assay_type",
     "assay_description", "target_pref_name", "bao_label", "document_chembl_id",
+    "activity_id",
 ]
 
 

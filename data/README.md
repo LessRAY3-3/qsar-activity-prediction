@@ -9,6 +9,17 @@ The sha256 and line count of each raw CSV are listed in `raw/sha256sums.txt`
 gitignore (force-added; no `!` rule). When the raw files are obtained via
 the Release or re-downloaded, verify them against this manifest.
 
+Two dating notes for the table below: the ChEMBL raw files were
+re-downloaded on 2026-10-10 with three extra columns
+(`standard_relation`, `data_validity_comment`, `activity_id`) while
+keeping the same row counts as the original pulls, so the manifest (dated
+2026-10-10) is the checksum of what is on disk now; and a "unique
+compound" count in a provenance row is from the original cleaning - after
+the 2026-10-10 label/parent refresh the clean sets are smaller (e.g. a2a
+1,746 -> 1,366, egfr_full 13,497 -> 10,729), with current sizes equal to
+the row counts of the `processed/` files (tabulated in
+`docs/reviews/readme-numbers-2026-10-11.md`, appendix A.2).
+
 | File | Provenance |
 |---|---|
 | `raw/egfr_activities.csv` | ChEMBL REST API: `target_chembl_id=CHEMBL203`, `standard_type=IC50`, `standard_units=nM`, assay types B/F. Re-download: `python scripts/01d_download_incremental.py` |
@@ -21,7 +32,7 @@ the Release or re-downloaded, verify them against this manifest.
 | `raw/hivpr_activities.csv` | ChEMBL REST API: `target_chembl_id=CHEMBL243` (Human immunodeficiency virus type 1 protease), IC50/nM, assay types B/F - 3,527 raw rows -> **2,799 unique compounds** (downloaded 2026-10-03). Downloader: `scripts/01e_download_chembl.py`. Re-download: `python scripts/01e_download_chembl.py --target-chembl-id CHEMBL243 --tag hivpr` |
 | `raw/herg_activities.csv` | ChEMBL REST API: `target_chembl_id=CHEMBL240` (Voltage-gated inwardly rectifying potassium channel KCNH2 / hERG), IC50/nM, assay types B/F - 14,609 raw rows -> **12,019 unique compounds** (downloaded 2026-10-03). Downloader: `scripts/01e_download_chembl.py`. Re-download: `python scripts/01e_download_chembl.py --target-chembl-id CHEMBL240 --tag herg` |
 | `raw/vegfr2_activities.csv` | ChEMBL REST API: `target_chembl_id=CHEMBL279` (VEGFR2 / KDR), IC50/nM, assay types B/F - 16,554 raw rows -> **11,797 unique compounds** (downloaded 2026-10-03). Downloader: `scripts/01e_download_chembl.py`. Re-download: `python scripts/01e_download_chembl.py --target-chembl-id CHEMBL279 --tag vegfr2`. Formerly tagged `mapk14`. |
-| `processed/*_pic50_clean.csv` | One row per unique compound: `canonical_smiles`, median `pic50`, `ic50_nm_median`, `n_measurements`, `target` |
-| `processed/*_fingerprints.npz` | `X` (n x 2048 uint8), `y` (pIC50), `smiles`, `target` |
-| `processed/*_graphs.npz` | molecular graph cache (CSR-style): per-atom 9-feature array, edge index/attrs, counts, `y`, `smiles`, `scaffold_smiles`. Built by `scripts/gnn_02_build_graphs.py` |
+| `processed/*_pic50_clean.csv` | One row per unique parent compound, sorted by `parent_smiles`: `parent_smiles` (dedup key - `LargestFragmentChooser` + `Uncharger`, see `docs/methodology.md` Data QC), `canonical_smiles` (first original SMILES, kept for provenance), median `pic50`, `ic50_nm_median`, `n_measurements`, `n_structural_variants`, `molecule_chembl_id`, `target`. The 8 ChEMBL-tag files were rebuilt on 2026-10-10/11 with the `standard_relation == "="` label filter and parent dedup (`docs/reviews/h1-sensitivity-2026-10-10.md`); `bace` predates the refresh and still carries the old `canonical_smiles`-based schema (no parent columns - its raw has no relation column, so the label filter never applies there) |
+| `processed/*_fingerprints.npz` | `X` (n x 2048 uint8), `y` (pIC50), `smiles` (the standardized parent SMILES, row-aligned with the clean csv; falls back to `canonical_smiles` for pre-refresh inputs), `target` |
+| `processed/*_graphs.npz` | molecular graph cache (CSR-style): per-atom 9-feature array, edge index/attrs, counts, `y`, `smiles` (parent SMILES, same row order as the fingerprints npz), `scaffold_smiles`. Built by `scripts/gnn_02_build_graphs.py` |
 | `processed/splits/*.npz` | frozen train/valid/test indices + scaffold labels for every tag, regenerated and verified bit-identically by `scripts/gnn_01_make_splits.py` (aborts on any metric mismatch). **Not committed** for the new targets: each npz stores full-width SMILES arrays and lands at 1.4-42 MB (regenerable in seconds, same rule as `processed/*_graphs.npz`). The `egfr`/`esol` copies were committed earlier and remain in the repo |

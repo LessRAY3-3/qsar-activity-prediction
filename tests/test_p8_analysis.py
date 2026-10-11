@@ -27,7 +27,7 @@ def test_bootstrap_rf_wins_ci_excludes_zero(load_experiment):
 
     assert res["delta_r2_point"] < 0            # GIN is the worse model
     assert res["ci_hi"] < 0                     # CI keeps the known sign
-    assert res["p_one_sided"] < 0.01            # never beats RF
+    assert res["frac_boot_gin_better"] < 0.01   # never beats RF
     assert res["delta_rmse_point"] > 0          # GIN RMSE larger
     assert res["delta_rmse_ci_lo"] > 0
     assert res["n_boot"] == 2000
@@ -40,7 +40,7 @@ def test_bootstrap_gin_wins_ci_excludes_zero(load_experiment):
 
     assert res["delta_r2_point"] > 0
     assert res["ci_lo"] > 0
-    assert res["p_one_sided"] > 0.99
+    assert res["frac_boot_gin_better"] > 0.99
 
 
 def test_bootstrap_reproducible_and_bounded(load_experiment):
@@ -52,7 +52,7 @@ def test_bootstrap_reproducible_and_bounded(load_experiment):
 
     assert a["ci_lo"] <= a["delta_r2_point"] <= a["ci_hi"]
     assert a["ci_lo"] < a["ci_hi"]
-    assert 0.0 <= a["p_one_sided"] <= 1.0
+    assert 0.0 <= a["frac_boot_gin_better"] <= 1.0
     assert a["delta_rmse_ci_lo"] <= a["delta_rmse_point"] <= a["delta_rmse_ci_hi"]
 
 
@@ -154,11 +154,12 @@ def test_main_attentivefp_run_never_touches_gin_gine_significance(load_experimen
 
     for path, text in {**sentinels, **fig_sentinels}.items():
         assert path.read_text() == text, f"{path.name} was clobbered"
-    # the attentivefp run's own outputs exist, gin/gine names never chosen
+    # the attentivefp run's own outputs exist, gin/gine names never chosen;
+    # a 1-tag smoke run is partial, so it lands on the summary_partial name
     for split in ("random", "scaffold"):
         cell = out / f"tiny_{split}_attentivefp.csv"
         assert cell.exists() and cell.stat().st_size > 0
-    summary = pd.read_csv(out / "summary_attentivefp.csv")
+    summary = pd.read_csv(out / "summary_partial_attentivefp.csv")
     assert set(summary["split"]) == {"random", "scaffold"}
     assert set(summary["pair"]) == {"seed42", "mean3"}
     assert (fig_dir / "ci_panel_attentivefp.png").stat().st_size > 0
@@ -230,40 +231,130 @@ def _write_cell(tmp_path, tag, split, n=60, seed=0, model=""):
 
 def test_main_time_run_never_touches_campaign_summary(load_experiment,
                                                       tmp_path, monkeypatch):
-    """--splits time writes summary_time.csv and leaves a sentinel
-    summary.csv byte-for-byte untouched (suffix-protection integration)."""
+    """A 1-tag time run at B=300 is partial: it writes
+    summary_partial_time.csv and leaves BOTH sentinels -- the random/
+    scaffold campaign summary.csv and a stored summary_time.csv --
+    byte-for-byte untouched."""
     mod = load_experiment("paired_bootstrap")
     _write_cell(tmp_path, "tiny", "time")
     _write_cell(tmp_path, "tiny", "random")
     monkeypatch.setattr(mod, "BASE", str(tmp_path))
     out = tmp_path / "out"
     out.mkdir()
-    sentinel = out / "summary.csv"
-    sentinel.write_text("sentinel,do not clobber\n")
+    sentinels = {
+        out / "summary.csv": "campaign summary,do not clobber\n",
+        out / "summary_time.csv": "time summary,do not clobber\n",
+    }
+    for path, text in sentinels.items():
+        path.write_text(text)
     fig = tmp_path / "figs" / "ci_time.png"
 
     mod.main(["--tags", "tiny", "--splits", "time", "--n-boot", "300",
               "--out-dir", str(out), "--fig", str(fig)])
 
-    assert sentinel.read_text() == "sentinel,do not clobber\n"
+    for path, text in sentinels.items():
+        assert path.read_text() == text, f"{path.name} was clobbered"
     assert fig.exists() and fig.stat().st_size > 0
     cell = out / "tiny_time.csv"
     assert cell.exists() and not (out / "tiny_random.csv").exists()
-    summary = pd.read_csv(out / "summary_time.csv")
+    summary = pd.read_csv(out / "summary_partial_time.csv")
     assert set(summary["split"]) == {"time"}
     assert set(summary["pair"]) == {"seed42", "mean3"}
     assert {"ci_lo", "ci_hi", "significant"} <= set(summary.columns)
 
-    # a default-split run still uses the legacy shared name and replaces
-    # the sentinel in summary.csv (that is its documented behaviour)
-    mod.main(["--tags", "tiny", "--splits", "random", "--n-boot", "300",
-              "--out-dir", str(out),
-              "--fig", str(tmp_path / "figs" / "ci_default.png")])
-    default = pd.read_csv(out / "summary.csv")
-    assert set(default["split"]) == {"random"}
-    # the time run's outputs were never part of that overwrite
-    summary = pd.read_csv(out / "summary_time.csv")
-    assert set(summary["split"]) == {"time"}
+
+def test_summary_merge_refuses_to_mix_n_boot(load_experiment, tmp_path):
+    """Updating stored rows computed at a different B needs --force."""
+    mod = load_experiment("paired_bootstrap")
+    stored = pd.DataFrame([
+        {"tag": "tiny", "split": "random", "pair": "seed42", "d_r2": 0.1,
+         "ci_lo": 0.0, "ci_hi": 0.2, "significant": True, "winner": "gin",
+         "frac_boot_gin_better": 0.9, "d_rmse": -0.1, "d_rmse_ci_lo": -0.2,
+         "d_rmse_ci_hi": 0.0, "n_boot": 300},
+        {"tag": "other", "split": "random", "pair": "seed42", "d_r2": -0.1,
+         "ci_lo": -0.2, "ci_hi": 0.0, "significant": True, "winner": "rf",
+         "frac_boot_gin_better": 0.1, "d_rmse": 0.1, "d_rmse_ci_lo": 0.0,
+         "d_rmse_ci_hi": 0.2, "n_boot": 300},
+    ], columns=mod.SUMMARY_COLS)
+    path = tmp_path / "summary_partial.csv"
+    stored.to_csv(path, index=False)
+
+    update = stored.iloc[[0]].copy()
+    update["n_boot"] = 10_000          # same key, different B
+    with pytest.raises(SystemExit):
+        mod.merge_summary(update, str(path), n_boot=10_000)
+    # untouched on refusal
+    assert pd.read_csv(path).equals(stored)
+
+    # --force overwrites exactly the conflicting key, keeps the rest
+    merged = mod.merge_summary(update, str(path), n_boot=10_000, force=True)
+    assert len(merged) == 2
+    assert merged.set_index(["tag", "split", "pair"]).loc[
+        ("tiny", "random", "seed42"), "d_r2"] == 0.1
+    assert merged.set_index(["tag", "split", "pair"]).loc[
+        ("other", "random", "seed42"), "n_boot"] == 300
+
+
+def test_summary_merge_same_n_boot_updates_without_force(load_experiment,
+                                                         tmp_path):
+    """Same-B reruns merge by (tag, split, pair) and keep untouched rows."""
+    mod = load_experiment("paired_bootstrap")
+    stored = pd.DataFrame([
+        {"tag": "tiny", "split": "random", "pair": "seed42", "d_r2": 0.1,
+         "ci_lo": 0.0, "ci_hi": 0.2, "significant": True, "winner": "gin",
+         "frac_boot_gin_better": 0.9, "d_rmse": -0.1, "d_rmse_ci_lo": -0.2,
+         "d_rmse_ci_hi": 0.0, "n_boot": 300},
+        {"tag": "tiny", "split": "random", "pair": "mean3", "d_r2": 0.2,
+         "ci_lo": 0.1, "ci_hi": 0.3, "significant": True, "winner": "gin",
+         "frac_boot_gin_better": 0.95, "d_rmse": -0.2, "d_rmse_ci_lo": -0.3,
+         "d_rmse_ci_hi": -0.1, "n_boot": 300},
+    ], columns=mod.SUMMARY_COLS)
+    path = tmp_path / "summary_partial.csv"
+    stored.to_csv(path, index=False)
+
+    update = stored.iloc[[0]].copy()
+    update["d_r2"] = 0.15               # refreshed estimate, same B
+    merged = mod.merge_summary(update, str(path), n_boot=300)
+    got = merged.set_index(["tag", "split", "pair"])
+    assert got.loc[("tiny", "random", "seed42"), "d_r2"] == 0.15
+    assert got.loc[("tiny", "random", "mean3"), "d_r2"] == 0.2
+
+
+def test_summary_merge_accepts_legacy_campaign_file(load_experiment,
+                                                    tmp_path):
+    """A pre-n_boot summary with the old p_one_sided column still merges:
+    legacy rows validate as B=N_BOOT and are renamed on the way through."""
+    mod = load_experiment("paired_bootstrap")
+    legacy = pd.DataFrame([
+        {"tag": "tiny", "split": "random", "pair": "seed42", "d_r2": 0.1,
+         "ci_lo": 0.0, "ci_hi": 0.2, "significant": True, "winner": "gin",
+         "p_one_sided": 0.9, "d_rmse": -0.1, "d_rmse_ci_lo": -0.2,
+         "d_rmse_ci_hi": 0.0},
+    ])
+    path = tmp_path / "summary.csv"
+    legacy.to_csv(path, index=False)
+
+    update = legacy.copy()
+    update = update.rename(columns={"p_one_sided": "frac_boot_gin_better"})
+    update["n_boot"] = mod.N_BOOT
+    merged = mod.merge_summary(update[mod.SUMMARY_COLS], str(path),
+                               n_boot=mod.N_BOOT)
+    assert list(merged.columns) == mod.SUMMARY_COLS
+    assert merged["n_boot"].tolist() == [mod.N_BOOT]
+
+    # legacy rows count as B=10000, so a smoke-test B must not overwrite them
+    smoke = update[mod.SUMMARY_COLS].copy()
+    smoke["n_boot"] = 300
+    with pytest.raises(SystemExit):
+        mod.merge_summary(smoke, str(path), n_boot=300)
+
+
+def test_is_campaign_run_flags_partial_invocations(load_experiment):
+    mod = load_experiment("paired_bootstrap")
+    assert mod.is_campaign_run(list(mod.TAGS), mod.N_BOOT)
+    assert not mod.is_campaign_run(["egfr"], mod.N_BOOT)
+    assert not mod.is_campaign_run(list(mod.TAGS), 300)
+    assert not mod.is_campaign_run(["egfr"], 300)
 
 
 # ---------------------------------------------------------------- uncertainty / AD

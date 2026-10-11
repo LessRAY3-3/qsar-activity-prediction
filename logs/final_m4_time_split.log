@@ -1,0 +1,13 @@
+
+=== P8 time-split final summary (8 targets) ===
+  RF  time R² range : [-0.736, +0.560]
+  GIN time R² range : [-0.176, +0.271]
+  mean ΔR² (time − random): RF -0.728, GIN -0.611
+  negative time R²: RF ['a2a', 'egfr_full', 'herg', 'hivpr']; GIN ['a2a', 'egfr_full', 'herg']
+  paired bootstrap (mean3): 5/8 CIs exclude 0 | GIN ahead: ['a2a', 'egfr', 'egfr_full', 'herg', 'mpro']; RF ahead: none
+  caveat: a2a test_frac=0.59 > 0.5 (newest-year data concentration under the cumulative-20% rule)
+  caveat: mpro test_frac=0.51 > 0.5 (newest-year data concentration under the cumulative-20% rule)
+  note: negative time-split R² (a2a RF -0.301, egfr_full RF -0.736, herg RF -0.058, hivpr RF -0.027) reads as genuine temporal drift, not a bug
+
+summary -> results/time_split/summary.csv (8 rows)
+figure  -> figures/time_split/panel_3splits.png

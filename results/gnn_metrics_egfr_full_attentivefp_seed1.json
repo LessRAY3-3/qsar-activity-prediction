@@ -1,10 +1,10 @@
 {
   "random": {
-    "r2": 0.6878226399421692,
-    "rmse": 0.80765216940751,
-    "mae": 0.5771222114562988,
-    "best_epoch": 74,
-    "best_valid_rmse_std": 0.5672153830528259,
+    "r2": 0.640830397605896,
+    "rmse": 0.800207313855419,
+    "mae": 0.593682587146759,
+    "best_epoch": 69,
+    "best_valid_rmse_std": 0.6363542079925537,
     "params": {
       "tag": "egfr_full",
       "model": "attentivefp",
@@ -20,11 +20,11 @@
     }
   },
   "scaffold": {
-    "r2": 0.4791942834854126,
-    "rmse": 1.0062997391059094,
-    "mae": 0.7298098802566528,
-    "best_epoch": 82,
-    "best_valid_rmse_std": 0.5549478530883789,
+    "r2": 0.4908493757247925,
+    "rmse": 1.0195047075463195,
+    "mae": 0.7699130773544312,
+    "best_epoch": 96,
+    "best_valid_rmse_std": 0.648466944694519,
     "params": {
       "tag": "egfr_full",
       "model": "attentivefp",

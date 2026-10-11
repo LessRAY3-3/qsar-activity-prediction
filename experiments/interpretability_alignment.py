@@ -7,15 +7,17 @@ series (n=47) costs the RF more (1.60 vs 1.16). This experiment asks:
 do the two architectures attend to the same atoms?
 
 Molecule selection: within each family (RDKit substructure match; the two
-SMARTS below reproduce the documented 37 / 47 counts exactly), take the
-top-N molecules by |err_GIN - err_RF| - the largest disagreement is where
-"different parts" is most plausible.
+SMILES below, parsed with MolFromSmiles, reproduce the documented 37 / 47
+counts exactly), take the top-N molecules by |err_GIN - err_RF| - the largest
+disagreement is where "different parts" is most plausible.
 
-  GNN side: PyG GNNExplainer (node-mask attribution, explanation of the
-           model's own prediction) on the committed scaffold-split GIN
-           checkpoint. Per-atom scores rendered as contour maps.
-  RF side : RF retrained on the 4438 paired pool (deterministic, ~30 s),
-           SHAP TreeExplainer bit attributions; each top bit is decoded
+  GNN side: PyG GNNExplainer (edge-mask attribution aggregated per atom,
+           explanation of the model's own prediction) on the committed
+           scaffold-split GIN checkpoint. Per-atom scores rendered as
+           contour maps.
+  RF side : committed split RF checkpoint (models/rf_{split}_split_{tag}.joblib,
+           the model whose err_rf selected these molecules), SHAP
+           TreeExplainer bit attributions; each top bit is decoded
            to the set of atoms it covers via Morgan bitInfo spheres.
   Alignment: per molecule, what fraction of the GNN's top atoms falls
            inside the RF's top-bit atom coverage? Plus a core-vs-
@@ -119,8 +121,8 @@ def _make_wrapper(model):
 
 
 def explain_gnn_atoms(model, x, edge_index, device, epochs, seed):
-    """GNNExplainer node attribution for one molecule. Returns per-atom
-    scores (np.array, normalized to [0,1]) or None on failure."""
+    """GNNExplainer edge-mask attribution for one molecule, aggregated to
+    per-atom scores. Returns np.array normalized to [0,1] or None on failure."""
     import torch
     from torch_geometric.explain import Explainer, GNNExplainer
 
@@ -248,7 +250,7 @@ def main():
     df = pd.read_csv(err_csv)
     fp = np.load(os.path.join(BASE, "data", "processed",
                               f"{args.tag}_fingerprints.npz"))
-    X, y = fp["X"], fp["y"]
+    X = fp["X"]
     graphs = np.load(os.path.join(BASE, "data", "processed",
                                   f"{args.tag}_graphs.npz"))
     node_ptr = np.concatenate([[0], np.cumsum(graphs["n_nodes"])])
@@ -273,14 +275,12 @@ def main():
               f"selected top-{len(selections[fam])} by |err_gin - err_rf|")
 
     # ---- models
-    mj = json.load(open(os.path.join(BASE, "results", f"metrics_{args.tag}.json")))
-    bp = mj["best_params_random"]
-    rf_params = {k: bp[k] for k in ("n_estimators", "max_depth", "min_samples_split")}
-    from sklearn.ensemble import RandomForestRegressor
-    t0 = time.time()
-    rf = RandomForestRegressor(random_state=42, n_jobs=-1, **rf_params)
-    rf.fit(X[sp["train_idx"]], y[sp["train_idx"]])
-    print(f"RF retrained on paired pool ({time.time()-t0:.0f}s)")
+    import joblib
+    rf_path = os.path.join(BASE, "models",
+                           f"rf_{args.split}_split_{args.tag}.joblib")
+    rf = joblib.load(rf_path)
+    print(f"RF loaded from {os.path.relpath(rf_path, BASE)} (the model whose "
+          f"err_rf selected these molecules)")
     shap_exp = make_shap_explainer(rf, X[sp["train_idx"][:200]])
 
     gin = load_gin(args.tag, args.split, device)
@@ -473,9 +473,10 @@ def write_findings(records, path, args):
             "## Caveats",
             "- GNNExplainer attributions are post-hoc and approximate; read the",
             "  heatmaps as indicative, not causal.",
-            "- SHAP bit values are exact for the retrained RF (deterministic);",
-            "  the RF was retrained on the 4438 paired pool (no committed",
-            "  checkpoint existed for this pool).",
+            "- SHAP bit values are exact for the committed RF, loaded from",
+            f"  models/rf_{args.split}_split_{args.tag}.joblib (trained on the",
+            "  split's train+valid pool) - the same model whose err_rf",
+            "  selected these molecules.",
             "- Cross-model atom alignment is judged by set overlap of two",
             "  different attribution vocabularies; treat low overlap as",
             "  'attends differently', not as either model being wrong.",

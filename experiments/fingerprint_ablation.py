@@ -2,7 +2,8 @@
 fingerprint parameters?
 
 Grid: radius {2, 3} x n_bits {1024, 2048}. RF hyperparameters are frozen
-to the original grid-search winner and the FULL headline train pool
+to that split's grid-search winner (metrics_{tag}.json best_params_{split})
+and the FULL headline train pool
 (train_idx + valid_idx = the 80% the headline RF trained on) is used with
 the persisted test set. Seeds vary RF's random_state.
 
@@ -82,7 +83,8 @@ def make_figure(csv_path, fig_path, tag):
         for r, b in configs:
             g = df[(df["split"] == split) & (df["radius"] == r) & (df["n_bits"] == b)]
             means.append(g["r2"].mean())
-            stds.append(g["r2"].std())
+            # population std (ddof=0), consistent with the repo-wide convention
+            stds.append(g["r2"].std(ddof=0))
         ax.bar(x, means, yerr=stds, capsize=4,
                color=["tab:blue" if c == (2, 2048) else "tab:cyan" for c in configs])
         ax.set_xticks(x, labels, rotation=20)
@@ -111,9 +113,8 @@ def main():
                               f"{args.tag}_fingerprints.npz"))
     y, smiles = fp["y"], fp["smiles"]
     mj = json.load(open(os.path.join(BASE, "results", f"metrics_{args.tag}.json")))
-    bp = mj["best_params_random"]
-    rf_params = {k: bp[k] for k in ("n_estimators", "max_depth", "min_samples_split")}
     headline = {k: mj[k]["r2"] for k in ("random", "scaffold")}
+    rf_params_by_split = {}
 
     from sklearn.ensemble import RandomForestRegressor
     from sklearn.metrics import (mean_absolute_error, mean_squared_error,
@@ -135,6 +136,14 @@ def main():
                                   f"{args.tag}_{split}.npz"))
         pool = np.concatenate([sp["train_idx"], sp["valid_idx"]])
         test_idx = sp["test_idx"]
+        bp_key = f"best_params_{split}"
+        if bp_key not in mj:
+            print(f"  [{args.tag}/{split}] {bp_key} not found; "
+                  f"falling back to best_params_random")
+            bp_key = "best_params_random"
+        rf_params = {k: mj[bp_key][k]
+                     for k in ("n_estimators", "max_depth", "min_samples_split")}
+        rf_params_by_split[split] = rf_params
         print(f"[{args.tag}/{split}] pool={len(pool)} test={len(test_idx)}")
         for radius in radii:
             for n_bits in bits_list:
@@ -187,7 +196,7 @@ def main():
                       if split in anchor_means else None,
                       "runs": len(v)}
     json.dump({"tag": args.tag, "radii": radii, "bits": bits_list, "seeds": seeds,
-               "rf_params": rf_params, "headline_r2": headline,
+               "rf_params": rf_params_by_split, "headline_r2": headline,
                "anchor_failures": anchor_fail, "by_cell": summary},
               open(sum_path, "w"), indent=2)
     print(f"summary -> {os.path.relpath(sum_path, BASE)}")

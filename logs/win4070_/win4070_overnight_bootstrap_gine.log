@@ -1,0 +1,28 @@
+[a2a/random] n=274  mean3 dR2=-0.0462 CI[-0.1185, +0.0158]  frac_boot_gin_better=0.0908
+[a2a/scaffold] n=299  mean3 dR2=-0.0736 CI[-0.1210, -0.0278]  frac_boot_gin_better=0.0009
+[egfr/random] n=912  mean3 dR2=-0.0402 CI[-0.0742, -0.0070]  frac_boot_gin_better=0.0086
+[egfr/scaffold] n=912  mean3 dR2=-0.0218 CI[-0.0521, +0.0071]  frac_boot_gin_better=0.0699
+[egfr_full/random] n=2146  mean3 dR2=-0.0381 CI[-0.0566, -0.0203]  frac_boot_gin_better=0.0000
+[egfr_full/scaffold] n=2166  mean3 dR2=-0.0124 CI[-0.0338, +0.0082]  frac_boot_gin_better=0.1169
+[hivpr/random] n=515  mean3 dR2=-0.0277 CI[-0.0590, +0.0038]  frac_boot_gin_better=0.0444
+[hivpr/scaffold] n=524  mean3 dR2=-0.0510 CI[-0.0964, -0.0067]  frac_boot_gin_better=0.0118
+[mpro/random] n=682  mean3 dR2=-0.0299 CI[-0.0880, +0.0315]  frac_boot_gin_better=0.1654
+[mpro/scaffold] n=682  mean3 dR2=-0.0694 CI[-0.1298, -0.0120]  frac_boot_gin_better=0.0087
+
+=== Paired bootstrap significance: GINE vs RF ===
+  dR2 = R2_GINE - R2_RF (positive favours GINE); significant = 95% CI excludes 0
+
+  [seed42] 8/10 cells with CI excluding 0
+    RF significantly ahead (8): a2a/scaffold, egfr/random, egfr/scaffold, egfr_full/random, egfr_full/scaffold, hivpr/random, hivpr/scaffold, mpro/scaffold
+    dR2 point range: [-0.1148, -0.0357]
+
+  [mean3] 5/10 cells with CI excluding 0
+    RF significantly ahead (5): a2a/scaffold, egfr/random, egfr_full/random, hivpr/scaffold, mpro/scaffold
+    dR2 point range: [-0.0736, -0.0124]
+
+  mean3 (primary): RF significantly wins in 5/10 cells; GINE in 0/10; 5/10 inconclusive
+
+partial run (5 tag(s), n_boot=10000): campaign summary/figure left untouched -- only a full-tag run at the default --n-boot merges into them
+
+summary -> results/significance/summary_partial_gine.csv (20 rows)
+figure  -> figures/significance/ci_panel_partial_gine.png

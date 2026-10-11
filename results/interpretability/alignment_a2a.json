@@ -1,0 +1,16 @@
+{
+  "tag": "a2a",
+  "split": "scaffold",
+  "families": {
+    "chromone": "O=c1ccoc2ccccc12",
+    "thienopyrimidine": "c1ncc2ccsc2n1"
+  },
+  "selection": "top-5 per family by |err_gin - err_rf|",
+  "params": {
+    "top_bits": 5,
+    "top_atom_frac": 0.25,
+    "gnn_epochs": 100,
+    "seed": 42
+  },
+  "molecules": []
+}

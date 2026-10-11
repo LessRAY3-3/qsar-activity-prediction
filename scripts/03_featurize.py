@@ -8,6 +8,13 @@ Why Morgan fingerprints:
   (random forest / XGBoost) can learn from.
   Invalid SMILES (rare in ChEMBL, but they exist) make RDKit return None;
   those compounds are dropped.
+Why parent_smiles: 02 deduplicates by parent structure (salts/counter-ions
+  stripped, charges neutralized), so one compound = one row. Fingerprinting
+  the group's first canonical variant instead would embed salt bits and give
+  the same parent different fingerprints in different rows, while scaffold
+  splits (04, gnn_01) group on the exported smiles array - keeping the
+  fingerprint and split unit at parent_smiles closes the salt leak M1
+  opened. Old clean CSVs without the column fall back to canonical_smiles.
 Output: data/processed/egfr_fingerprints.npz  (X, y, smiles)
 """
 import os
@@ -32,11 +39,19 @@ def main():
     df = pd.read_csv(IN_CSV)
     print(f"Loaded {len(df)} cleaned compounds.")
 
+    if "parent_smiles" in df.columns:
+        smiles_col = "parent_smiles"
+    else:
+        # backward compat: clean CSVs from before the M1 fix have no parent column
+        smiles_col = "canonical_smiles"
+        print("No 'parent_smiles' column in input (older clean CSV); "
+              "falling back to 'canonical_smiles'.")
+
     X = np.zeros((len(df), FP_NBITS), dtype=np.uint8)
     y = df["pic50"].to_numpy(dtype=np.float32)
     valid_idx = []
 
-    for i, smi in enumerate(df["canonical_smiles"]):
+    for i, smi in enumerate(df[smiles_col]):
         mol = Chem.MolFromSmiles(smi)
         if mol is None:
             continue
@@ -46,7 +61,7 @@ def main():
     n_invalid = len(df) - len(valid_idx)
     X = X[valid_idx]
     y = y[valid_idx]
-    smiles = np.asarray(df["canonical_smiles"].to_numpy()[valid_idx], dtype=str)
+    smiles = np.asarray(df[smiles_col].to_numpy()[valid_idx], dtype=str)
     target = str(df["target"].iloc[0]) if "target" in df.columns else TAG
     print(f"Dropped {n_invalid} invalid SMILES -> X shape {X.shape}, y shape {y.shape}")
 

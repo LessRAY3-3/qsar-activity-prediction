@@ -88,6 +88,24 @@ def test_comparison_table_effect_sizes(gnn_compare):
     )
 
 
+def test_gin_n_seeds_counts_only_seeds_present_per_split(gnn_compare,
+                                                         tmp_path, capsys):
+    """A seed file missing one split must not inflate that split's n:
+    the row reports the seeds that actually contributed (and warns)."""
+    seed2 = tmp_path / "results" / "gnn_metrics_demo_seed2.json"
+    seed2.write_text(json.dumps({"random": GIN_SEED2["random"]}))
+
+    rows = gnn_compare.comparison_table()
+    by = {r["split"]: r for r in rows}
+    assert by["random"]["gin_n_seeds"] == 3
+    assert by["scaffold"]["gin_n_seeds"] == 2
+    # the scaffold mean/std use the same two seeds the count reports
+    assert by["scaffold"]["gin_r2_mean"] == pytest.approx(
+        float(np.mean([GIN_BASE["scaffold"]["r2"], GIN_SEED1["scaffold"]["r2"]]))
+    )
+    assert "gin_n_seeds reports" in capsys.readouterr().out
+
+
 def _summary_rows():
     """Rows shaped like multi_target_summary.load_tag's output."""
     return [
@@ -136,3 +154,18 @@ def test_verify_summary_csv_passes_then_fails_on_tamper(tmp_path, load_experimen
     df.loc[0, "d_r2_random (mean)"] = df.loc[0, "d_r2_random (mean)"] + 0.01
     df.to_csv(path, index=False)
     assert mod.verify_summary_csv(path) is False
+
+
+def test_verify_summary_csv_missing_split_round_trips(tmp_path, load_experiment):
+    """A tag with one absent split stays NaN on disk; the round-trip must
+    treat NaN == NaN as equal instead of failing the whole check."""
+    mod = load_experiment("multi_target_summary")
+
+    rows = _summary_rows()
+    for col in ("rf_r2_scaffold", "gin_r2_mean_scaffold", "gin_r2_std_scaffold",
+                "d_r2_scaffold", "d_r2_seed42_scaffold"):
+        rows[1][col] = float("nan")
+
+    path = tmp_path / "summary.csv"
+    mod.summary_frame(rows).to_csv(path, index=False)
+    assert mod.verify_summary_csv(path) is True

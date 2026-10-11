@@ -1,0 +1,33 @@
+[a2a/random] n=274  mean3 dR2=-0.1390 CI[-0.2305, -0.0632]  frac_boot_gin_better=0.0000
+[a2a/scaffold] n=299  mean3 dR2=-0.0450 CI[-0.0912, +0.0005]  frac_boot_gin_better=0.0264
+[abl1/random] n=424  mean3 dR2=-0.0913 CI[-0.1358, -0.0525]  frac_boot_gin_better=0.0000
+[abl1/scaffold] n=425  mean3 dR2=-0.0476 CI[-0.0889, -0.0108]  frac_boot_gin_better=0.0058
+[egfr/random] n=912  mean3 dR2=-0.0186 CI[-0.0515, +0.0133]  frac_boot_gin_better=0.1267
+[egfr/scaffold] n=912  mean3 dR2=-0.0051 CI[-0.0369, +0.0249]  frac_boot_gin_better=0.3737
+[egfr_full/random] n=2146  mean3 dR2=-0.0196 CI[-0.0358, -0.0027]  frac_boot_gin_better=0.0119
+[egfr_full/scaffold] n=2166  mean3 dR2=-0.0382 CI[-0.0631, -0.0132]  frac_boot_gin_better=0.0014
+[herg/random] n=1681  mean3 dR2=+0.0343 CI[+0.0022, +0.0648]  frac_boot_gin_better=0.9821
+[herg/scaffold] n=1682  mean3 dR2=+0.0617 CI[+0.0304, +0.0923]  frac_boot_gin_better=1.0000
+[hivpr/random] n=515  mean3 dR2=-0.0159 CI[-0.0624, +0.0299]  frac_boot_gin_better=0.2433
+[hivpr/scaffold] n=524  mean3 dR2=-0.0620 CI[-0.1228, -0.0025]  frac_boot_gin_better=0.0202
+[mpro/random] n=682  mean3 dR2=-0.0130 CI[-0.0650, +0.0434]  frac_boot_gin_better=0.3141
+[mpro/scaffold] n=682  mean3 dR2=-0.1163 CI[-0.1895, -0.0507]  frac_boot_gin_better=0.0002
+[vegfr2/random] n=1929  mean3 dR2=-0.0352 CI[-0.0573, -0.0136]  frac_boot_gin_better=0.0011
+[vegfr2/scaffold] n=1945  mean3 dR2=-0.0166 CI[-0.0412, +0.0078]  frac_boot_gin_better=0.0923
+
+=== Paired bootstrap significance: ATTENTIVEFP vs RF ===
+  dR2 = R2_ATTENTIVEFP - R2_RF (positive favours ATTENTIVEFP); significant = 95% CI excludes 0
+
+  [seed42] 13/16 cells with CI excluding 0
+    RF significantly ahead (13): a2a/random, a2a/scaffold, abl1/random, abl1/scaffold, egfr/random, egfr/scaffold, egfr_full/random, egfr_full/scaffold, hivpr/scaffold, mpro/random, mpro/scaffold, vegfr2/random, vegfr2/scaffold
+    dR2 point range: [-0.4547, +0.0148]
+
+  [mean3] 10/16 cells with CI excluding 0
+    RF significantly ahead (8): a2a/random, abl1/random, abl1/scaffold, egfr_full/random, egfr_full/scaffold, hivpr/scaffold, mpro/scaffold, vegfr2/random
+    ATTENTIVEFP significantly ahead (2): herg/random, herg/scaffold
+    dR2 point range: [-0.1390, +0.0617]
+
+  mean3 (primary): RF significantly wins in 8/16 cells; ATTENTIVEFP in 2/16; 6/16 inconclusive
+
+summary -> results/significance/summary_attentivefp.csv (32 rows)
+figure  -> figures/significance/ci_panel_attentivefp.png
