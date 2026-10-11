@@ -1,0 +1,24 @@
+Target: Epidermal growth factor receptor | Feature matrix: X=(10729, 2048), y range [1.60, 17.30]
+
+=== random split: train=8583, test=2146 ===
+Fitting 5 folds for each of 12 candidates, totalling 60 fits
+Best params: {'max_depth': None, 'min_samples_split': 2, 'n_estimators': 500}  (CV R2 = 0.701)
+[random]  R2 = 0.729   RMSE = 0.695   MAE = 0.504
+
+=== scaffold split: train=8563, test=2166 ===
+Fitting 5 folds for each of 12 candidates, totalling 60 fits
+Best params: {'max_depth': None, 'min_samples_split': 2, 'n_estimators': 500}  (CV R2 = 0.701)
+[scaffold]  R2 = 0.608   RMSE = 0.894   MAE = 0.689
+
+Metrics saved -> /home/lessray/qsar-activity-prediction/results/metrics_egfr_full.json
+default exit=0 2026年 10月 11日 星期日 06:48:38 CST
+Target: Epidermal growth factor receptor | Feature matrix: X=(10729, 2048), y range [1.60, 17.30]
+
+=== time split: train=6892, test=3043 ===
+Fitting 5 folds for each of 12 candidates, totalling 60 fits
+Best params: {'max_depth': None, 'min_samples_split': 2, 'n_estimators': 500}  (CV R2 = 0.730)
+[time]  R2 = -0.736   RMSE = 1.577   MAE = 1.337
+
+Metrics merged -> /home/lessray/qsar-activity-prediction/results/metrics_egfr_full.json
+time exit=0 2026年 10月 11日 星期日 07:37:28 CST
+EGFR_FULL_ALL_DONE 2026-10-11 07:37:28 (verified in rf_egfr_full2_driver.log: default_exit=0 06:48:38, time_exit=0 07:37:28; marker re-emitted here for orchestrator)

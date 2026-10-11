@@ -1,0 +1,28 @@
+
+=== AttentiveFP vs RF panel (8 targets x 2 splits) ===
+  tag        split       rf_r2            afp_r2     d_r2  95% CI (mean3)             sig
+  a2a        random     0.7100     0.5432±0.0356  -0.1668  [-0.2305, -0.0632]         yes
+  a2a        scaffold   0.7025     0.6197±0.0283  -0.0828  [-0.0912, +0.0005]         no
+  abl1       random     0.8222     0.6869±0.0174  -0.1353  [-0.1358, -0.0525]         yes
+  abl1       scaffold   0.7144     0.5682±0.2182  -0.1462  [-0.0889, -0.0108]         yes
+  egfr       random     0.7214     0.6558±0.0067  -0.0656  [-0.0515, +0.0133]         no
+  egfr       scaffold   0.6492     0.5990±0.0031  -0.0502  [-0.0369, +0.0249]         no
+  egfr_full  random     0.7289     0.6529±0.0115  -0.0760  [-0.0358, -0.0027]         yes
+  egfr_full  scaffold   0.6081     0.5008±0.0291  -0.1074  [-0.0631, -0.0132]         yes
+  herg       random     0.6067     0.5850±0.0179  -0.0217  [+0.0022, +0.0648]         yes
+  herg       scaffold   0.3845     0.4045±0.0414  +0.0200  [+0.0304, +0.0923]         yes
+  hivpr      random     0.6922     0.6363±0.0268  -0.0558  [-0.0624, +0.0299]         no
+  hivpr      scaffold   0.5380     0.3620±0.1260  -0.1760  [-0.1228, -0.0025]         yes
+  mpro       random     0.6017     0.5378±0.0171  -0.0639  [-0.0650, +0.0434]         no
+  mpro       scaffold   0.4332     0.2338±0.0037  -0.1994  [-0.1895, -0.0507]         yes
+  vegfr2     random     0.6695     0.5756±0.0138  -0.0939  [-0.0573, -0.0136]         yes
+  vegfr2     scaffold   0.5853     0.4831±0.0359  -0.1022  [-0.0412, +0.0078]         no
+
+  16/16 cells have a bootstrap CI; 10/16 exclude 0
+  AttentiveFP significantly ahead (2): herg/random, herg/scaffold
+  RF significantly ahead (8): a2a/random, abl1/random, abl1/scaffold, egfr_full/random, egfr_full/scaffold, hivpr/scaffold, mpro/scaffold, vegfr2/random
+  Verdict: AttentiveFP beats RF significantly in 2 cell(s); the attention readout is real somewhere.
+
+summary -> results/afp_panel/summary.csv (16 rows)
+figure  -> figures/afp_panel/panel_dR2.png
+combined -> figures/significance/ci_panel_with_afp.png

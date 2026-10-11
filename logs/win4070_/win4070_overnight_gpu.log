@@ -1,0 +1,208 @@
+[2026-10-11 15:36:35] START train_gine_a2a_random_s42
+[2026-10-11 15:36:43] END train_gine_a2a_random_s42 rc=0
+[2026-10-11 15:36:43] START train_gine_a2a_random_s1
+[2026-10-11 15:36:53] END train_gine_a2a_random_s1 rc=0
+[2026-10-11 15:36:53] START train_gine_a2a_random_s2
+[2026-10-11 15:37:01] END train_gine_a2a_random_s2 rc=0
+[2026-10-11 15:37:01] START train_gine_a2a_scaffold_s42
+[2026-10-11 15:37:08] END train_gine_a2a_scaffold_s42 rc=0
+[2026-10-11 15:37:08] START train_gine_a2a_scaffold_s1
+[2026-10-11 15:37:18] END train_gine_a2a_scaffold_s1 rc=0
+[2026-10-11 15:37:18] START train_gine_a2a_scaffold_s2
+[2026-10-11 15:37:25] END train_gine_a2a_scaffold_s2 rc=0
+[2026-10-11 15:37:25] START train_gine_mpro_random_s42
+[2026-10-11 15:37:42] END train_gine_mpro_random_s42 rc=0
+[2026-10-11 15:37:42] START train_gine_mpro_random_s1
+[2026-10-11 15:38:01] END train_gine_mpro_random_s1 rc=0
+[2026-10-11 15:38:01] START train_gine_mpro_random_s2
+[2026-10-11 15:38:18] END train_gine_mpro_random_s2 rc=0
+[2026-10-11 15:38:18] START train_gine_mpro_scaffold_s42
+[2026-10-11 15:38:36] END train_gine_mpro_scaffold_s42 rc=0
+[2026-10-11 15:38:36] START train_gine_mpro_scaffold_s1
+[2026-10-11 15:38:54] END train_gine_mpro_scaffold_s1 rc=0
+[2026-10-11 15:38:54] START train_gine_mpro_scaffold_s2
+[2026-10-11 15:39:13] END train_gine_mpro_scaffold_s2 rc=0
+[2026-10-11 15:39:13] START train_gine_hivpr_random_s42
+[2026-10-11 15:39:27] END train_gine_hivpr_random_s42 rc=0
+[2026-10-11 15:39:27] START train_gine_hivpr_random_s1
+[2026-10-11 15:39:42] END train_gine_hivpr_random_s1 rc=0
+[2026-10-11 15:39:42] START train_gine_hivpr_random_s2
+[2026-10-11 15:39:57] END train_gine_hivpr_random_s2 rc=0
+[2026-10-11 15:39:57] START train_gine_hivpr_scaffold_s42
+[2026-10-11 15:40:13] END train_gine_hivpr_scaffold_s42 rc=0
+[2026-10-11 15:40:13] START train_gine_hivpr_scaffold_s1
+[2026-10-11 15:40:29] END train_gine_hivpr_scaffold_s1 rc=0
+[2026-10-11 15:40:29] START train_gine_hivpr_scaffold_s2
+[2026-10-11 15:40:45] END train_gine_hivpr_scaffold_s2 rc=0
+[2026-10-11 15:40:45] START train_gine_abl1_random_s42
+[2026-10-11 15:40:55] END train_gine_abl1_random_s42 rc=0
+[2026-10-11 15:40:55] START train_gine_abl1_random_s1
+[2026-10-11 15:41:08] END train_gine_abl1_random_s1 rc=0
+[2026-10-11 15:41:08] START train_gine_abl1_random_s2
+[2026-10-11 15:41:20] END train_gine_abl1_random_s2 rc=0
+[2026-10-11 15:41:20] START train_gine_abl1_scaffold_s42
+[2026-10-11 15:41:29] END train_gine_abl1_scaffold_s42 rc=0
+[2026-10-11 15:41:29] START train_gine_abl1_scaffold_s1
+[2026-10-11 15:41:39] END train_gine_abl1_scaffold_s1 rc=0
+[2026-10-11 15:41:39] START train_gine_abl1_scaffold_s2
+[2026-10-11 15:41:50] END train_gine_abl1_scaffold_s2 rc=0
+[2026-10-11 15:41:50] START train_gine_vegfr2_random_s42
+[2026-10-11 15:42:36] END train_gine_vegfr2_random_s42 rc=0
+[2026-10-11 15:42:36] START train_gine_vegfr2_random_s1
+[2026-10-11 15:43:23] END train_gine_vegfr2_random_s1 rc=0
+[2026-10-11 15:43:23] START train_gine_vegfr2_random_s2
+[2026-10-11 15:44:11] END train_gine_vegfr2_random_s2 rc=0
+[2026-10-11 15:44:11] START train_gine_vegfr2_scaffold_s42
+[2026-10-11 15:44:57] END train_gine_vegfr2_scaffold_s42 rc=0
+[2026-10-11 15:44:57] START train_gine_vegfr2_scaffold_s1
+[2026-10-11 15:45:44] END train_gine_vegfr2_scaffold_s1 rc=0
+[2026-10-11 15:45:44] START train_gine_vegfr2_scaffold_s2
+[2026-10-11 15:46:32] END train_gine_vegfr2_scaffold_s2 rc=0
+[2026-10-11 15:46:32] START train_gine_egfr_random_s42
+[2026-10-11 15:46:56] END train_gine_egfr_random_s42 rc=0
+[2026-10-11 15:46:56] START train_gine_egfr_random_s1
+[2026-10-11 15:47:20] END train_gine_egfr_random_s1 rc=0
+[2026-10-11 15:47:20] START train_gine_egfr_random_s2
+[2026-10-11 15:47:37] END train_gine_egfr_random_s2 rc=0
+[2026-10-11 15:47:37] START train_gine_egfr_scaffold_s42
+[2026-10-11 15:48:00] END train_gine_egfr_scaffold_s42 rc=0
+[2026-10-11 15:48:00] START train_gine_egfr_scaffold_s1
+[2026-10-11 15:48:24] END train_gine_egfr_scaffold_s1 rc=0
+[2026-10-11 15:48:24] START train_gine_egfr_scaffold_s2
+[2026-10-11 15:48:43] END train_gine_egfr_scaffold_s2 rc=0
+[2026-10-11 15:48:43] START train_gine_egfr_full_random_s42
+[2026-10-11 15:49:36] END train_gine_egfr_full_random_s42 rc=0
+[2026-10-11 15:49:36] START train_gine_egfr_full_random_s1
+[2026-10-11 15:52:42] END train_gine_egfr_full_random_s1 rc=0
+[2026-10-11 15:52:42] START train_gine_egfr_full_random_s2
+[2026-10-11 15:56:28] END train_gine_egfr_full_random_s2 rc=0
+[2026-10-11 15:56:28] START train_gine_egfr_full_scaffold_s42
+[2026-10-11 15:59:04] END train_gine_egfr_full_scaffold_s42 rc=0
+[2026-10-11 15:59:04] START train_gine_egfr_full_scaffold_s1
+[2026-10-11 16:00:23] END train_gine_egfr_full_scaffold_s1 rc=0
+[2026-10-11 16:00:23] START train_gine_egfr_full_scaffold_s2
+[2026-10-11 16:01:18] END train_gine_egfr_full_scaffold_s2 rc=0
+[2026-10-11 16:01:18] START train_gine_herg_random_s42
+[2026-10-11 16:01:56] END train_gine_herg_random_s42 rc=0
+[2026-10-11 16:01:56] START train_gine_herg_random_s1
+[2026-10-11 16:02:39] END train_gine_herg_random_s1 rc=0
+[2026-10-11 16:02:39] START train_gine_herg_random_s2
+[2026-10-11 16:03:21] END train_gine_herg_random_s2 rc=0
+[2026-10-11 16:03:21] START train_gine_herg_scaffold_s42
+[2026-10-11 16:04:00] END train_gine_herg_scaffold_s42 rc=0
+[2026-10-11 16:04:00] START train_gine_herg_scaffold_s1
+[2026-10-11 16:04:42] END train_gine_herg_scaffold_s1 rc=0
+[2026-10-11 16:04:42] START train_gine_herg_scaffold_s2
+[2026-10-11 16:05:24] END train_gine_herg_scaffold_s2 rc=0
+[2026-10-11 16:05:24] START train_attentivefp_a2a_random_s42
+[2026-10-11 16:05:52] END train_attentivefp_a2a_random_s42 rc=0
+[2026-10-11 16:05:52] START train_attentivefp_a2a_random_s1
+[2026-10-11 16:06:20] END train_attentivefp_a2a_random_s1 rc=0
+[2026-10-11 16:06:20] START train_attentivefp_a2a_random_s2
+[2026-10-11 16:06:39] END train_attentivefp_a2a_random_s2 rc=0
+[2026-10-11 16:06:39] START train_attentivefp_a2a_scaffold_s42
+[2026-10-11 16:07:03] END train_attentivefp_a2a_scaffold_s42 rc=0
+[2026-10-11 16:07:03] START train_attentivefp_a2a_scaffold_s1
+[2026-10-11 16:07:30] END train_attentivefp_a2a_scaffold_s1 rc=0
+[2026-10-11 16:07:30] START train_attentivefp_a2a_scaffold_s2
+[2026-10-11 16:07:51] END train_attentivefp_a2a_scaffold_s2 rc=0
+[2026-10-11 16:07:51] START train_attentivefp_mpro_random_s42
+[2026-10-11 16:08:39] END train_attentivefp_mpro_random_s42 rc=0
+[2026-10-11 16:08:39] START train_attentivefp_mpro_random_s1
+[2026-10-11 16:09:40] END train_attentivefp_mpro_random_s1 rc=0
+[2026-10-11 16:09:40] START train_attentivefp_mpro_random_s2
+[2026-10-11 16:10:38] END train_attentivefp_mpro_random_s2 rc=0
+[2026-10-11 16:10:39] START train_attentivefp_mpro_scaffold_s42
+[2026-10-11 16:11:43] END train_attentivefp_mpro_scaffold_s42 rc=0
+[2026-10-11 16:11:43] START train_attentivefp_mpro_scaffold_s1
+[2026-10-11 16:12:47] END train_attentivefp_mpro_scaffold_s1 rc=0
+[2026-10-11 16:12:47] START train_attentivefp_mpro_scaffold_s2
+[2026-10-11 16:13:49] END train_attentivefp_mpro_scaffold_s2 rc=0
+[2026-10-11 16:13:49] START train_attentivefp_hivpr_random_s42
+[2026-10-11 16:14:39] END train_attentivefp_hivpr_random_s42 rc=0
+[2026-10-11 16:14:39] START train_attentivefp_hivpr_random_s1
+[2026-10-11 16:15:31] END train_attentivefp_hivpr_random_s1 rc=0
+[2026-10-11 16:15:31] START train_attentivefp_hivpr_random_s2
+[2026-10-11 16:16:23] END train_attentivefp_hivpr_random_s2 rc=0
+[2026-10-11 16:16:23] START train_attentivefp_hivpr_scaffold_s42
+[2026-10-11 16:17:14] END train_attentivefp_hivpr_scaffold_s42 rc=0
+[2026-10-11 16:17:14] START train_attentivefp_hivpr_scaffold_s1
+[2026-10-11 16:18:03] END train_attentivefp_hivpr_scaffold_s1 rc=0
+[2026-10-11 16:18:03] START train_attentivefp_hivpr_scaffold_s2
+[2026-10-11 16:18:54] END train_attentivefp_hivpr_scaffold_s2 rc=0
+[2026-10-11 16:18:54] START train_attentivefp_abl1_random_s42
+[2026-10-11 16:19:29] END train_attentivefp_abl1_random_s42 rc=0
+[2026-10-11 16:19:29] START train_attentivefp_abl1_random_s1
+[2026-10-11 16:19:57] END train_attentivefp_abl1_random_s1 rc=0
+[2026-10-11 16:19:57] START train_attentivefp_abl1_random_s2
+[2026-10-11 16:20:35] END train_attentivefp_abl1_random_s2 rc=0
+[2026-10-11 16:20:35] START train_attentivefp_abl1_scaffold_s42
+[2026-10-11 16:20:51] END train_attentivefp_abl1_scaffold_s42 rc=0
+[2026-10-11 16:20:51] START train_attentivefp_abl1_scaffold_s1
+[2026-10-11 16:21:32] END train_attentivefp_abl1_scaffold_s1 rc=0
+[2026-10-11 16:21:32] START train_attentivefp_abl1_scaffold_s2
+[2026-10-11 16:22:11] END train_attentivefp_abl1_scaffold_s2 rc=0
+[2026-10-11 16:22:11] START train_attentivefp_vegfr2_random_s42
+[2026-10-11 16:24:30] END train_attentivefp_vegfr2_random_s42 rc=0
+[2026-10-11 16:24:30] START train_attentivefp_vegfr2_random_s1
+[2026-10-11 16:27:13] END train_attentivefp_vegfr2_random_s1 rc=0
+[2026-10-11 16:27:13] START train_attentivefp_vegfr2_random_s2
+[2026-10-11 16:30:03] END train_attentivefp_vegfr2_random_s2 rc=0
+[2026-10-11 16:30:03] START train_attentivefp_vegfr2_scaffold_s42
+[2026-10-11 16:32:47] END train_attentivefp_vegfr2_scaffold_s42 rc=0
+[2026-10-11 16:32:47] START train_attentivefp_vegfr2_scaffold_s1
+[2026-10-11 16:34:47] END train_attentivefp_vegfr2_scaffold_s1 rc=0
+[2026-10-11 16:34:47] START train_attentivefp_vegfr2_scaffold_s2
+[2026-10-11 16:37:32] END train_attentivefp_vegfr2_scaffold_s2 rc=0
+[2026-10-11 16:37:32] START train_attentivefp_egfr_random_s42
+[2026-10-11 16:38:50] END train_attentivefp_egfr_random_s42 rc=0
+[2026-10-11 16:38:50] START train_attentivefp_egfr_random_s1
+[2026-10-11 16:40:03] END train_attentivefp_egfr_random_s1 rc=0
+[2026-10-11 16:40:03] START train_attentivefp_egfr_random_s2
+[2026-10-11 16:41:22] END train_attentivefp_egfr_random_s2 rc=0
+[2026-10-11 16:41:22] START train_attentivefp_egfr_scaffold_s42
+[2026-10-11 16:42:34] END train_attentivefp_egfr_scaffold_s42 rc=0
+[2026-10-11 16:42:34] START train_attentivefp_egfr_scaffold_s1
+[2026-10-11 16:43:52] END train_attentivefp_egfr_scaffold_s1 rc=0
+[2026-10-11 16:43:52] START train_attentivefp_egfr_scaffold_s2
+[2026-10-11 16:45:05] END train_attentivefp_egfr_scaffold_s2 rc=0
+[2026-10-11 16:45:05] START train_attentivefp_egfr_full_random_s42
+[2026-10-11 16:47:39] END train_attentivefp_egfr_full_random_s42 rc=0
+[2026-10-11 16:47:39] START train_attentivefp_egfr_full_random_s1
+[2026-10-11 16:50:23] END train_attentivefp_egfr_full_random_s1 rc=0
+[2026-10-11 16:50:23] START train_attentivefp_egfr_full_random_s2
+[2026-10-11 16:53:08] END train_attentivefp_egfr_full_random_s2 rc=0
+[2026-10-11 16:53:08] START train_attentivefp_egfr_full_scaffold_s42
+[2026-10-11 16:55:51] END train_attentivefp_egfr_full_scaffold_s42 rc=0
+[2026-10-11 16:55:51] START train_attentivefp_egfr_full_scaffold_s1
+[2026-10-11 16:58:57] END train_attentivefp_egfr_full_scaffold_s1 rc=0
+[2026-10-11 16:58:57] START train_attentivefp_egfr_full_scaffold_s2
+[2026-10-11 17:02:01] END train_attentivefp_egfr_full_scaffold_s2 rc=0
+[2026-10-11 17:02:01] START train_attentivefp_herg_random_s42
+[2026-10-11 17:04:25] END train_attentivefp_herg_random_s42 rc=0
+[2026-10-11 17:04:25] START train_attentivefp_herg_random_s1
+[2026-10-11 17:06:47] END train_attentivefp_herg_random_s1 rc=0
+[2026-10-11 17:06:47] START train_attentivefp_herg_random_s2
+[2026-10-11 17:09:16] END train_attentivefp_herg_random_s2 rc=0
+[2026-10-11 17:09:16] START train_attentivefp_herg_scaffold_s42
+[2026-10-11 17:11:24] END train_attentivefp_herg_scaffold_s42 rc=0
+[2026-10-11 17:11:24] START train_attentivefp_herg_scaffold_s1
+[2026-10-11 17:13:49] END train_attentivefp_herg_scaffold_s1 rc=0
+[2026-10-11 17:13:49] START train_attentivefp_herg_scaffold_s2
+[2026-10-11 17:16:16] END train_attentivefp_herg_scaffold_s2 rc=0
+[2026-10-11 17:16:16] STAGE1_TRAIN_DONE failures=0/96
+[2026-10-11 17:16:16] START bootstrap_gine
+[2026-10-11 17:16:18] END bootstrap_gine rc=0
+[2026-10-11 17:16:18] START bootstrap_afp
+[2026-10-11 17:16:22] END bootstrap_afp rc=0
+[2026-10-11 17:16:22] START gine_panel
+[2026-10-11 17:16:23] END gine_panel rc=0
+[2026-10-11 17:16:23] START afp_panel
+[2026-10-11 17:16:24] END afp_panel rc=0
+[2026-10-11 17:16:24] START fairness_vegfr2
+[2026-10-11 17:44:35] END fairness_vegfr2 rc=0
+[2026-10-11 17:44:35] START fairness_herg
+[2026-10-11 18:08:13] END fairness_herg rc=0
+[2026-10-11 18:08:13] START fairness_abl1
+[2026-10-11 18:12:54] END fairness_abl1 rc=0
+[2026-10-11 18:12:54] OVERNIGHT_ALL_DONE

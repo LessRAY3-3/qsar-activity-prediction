@@ -1,0 +1,27 @@
+/home/lessray/qsar-activity-prediction/.venv/lib/python3.12/site-packages/torch/jit/_script.py:1491: FutureWarning: `torch.jit.script` is deprecated. Please switch to `torch.compile` or `torch.export`.
+  warnings.warn(
+/home/lessray/qsar-activity-prediction/scripts/gnn_03_train_gin.py:210: UserWarning: Converting a tensor with requires_grad=True to a scalar may lead to unexpected behavior.
+Consider using tensor.detach() first. (Triggered internally at /__w/pytorch/pytorch/torch/csrc/autograd/generated/python_variable_methods.cpp:820.)
+  total += float(loss) * len(batch.y)
+[a2a/scaffold] device=cuda  y_mean=7.249 y_std=1.151
+  epoch   1  train_mse=0.9305  valid_rmse=1.0168  lr=1.0e-03 *
+  epoch   2  train_mse=0.7669  valid_rmse=0.9923  lr=1.0e-03 *
+  epoch   3  train_mse=0.6898  valid_rmse=0.9550  lr=1.0e-03 *
+  epoch   5  train_mse=0.5861  valid_rmse=0.8907  lr=1.0e-03 *
+  epoch   7  train_mse=0.5213  valid_rmse=0.7511  lr=1.0e-03 *
+  epoch   9  train_mse=0.5100  valid_rmse=0.7291  lr=1.0e-03 *
+  epoch  10  train_mse=0.4992  valid_rmse=0.7659  lr=1.0e-03
+  epoch  11  train_mse=0.4774  valid_rmse=0.7231  lr=1.0e-03 *
+  epoch  12  train_mse=0.4836  valid_rmse=0.7207  lr=1.0e-03 *
+  epoch  15  train_mse=0.4782  valid_rmse=0.7199  lr=1.0e-03 *
+  epoch  17  train_mse=0.4611  valid_rmse=0.6949  lr=1.0e-03 *
+  epoch  20  train_mse=0.4193  valid_rmse=0.8611  lr=1.0e-03
+  epoch  26  train_mse=0.3780  valid_rmse=0.6823  lr=5.0e-04 *
+  epoch  28  train_mse=0.3370  valid_rmse=0.6684  lr=5.0e-04 *
+  epoch  30  train_mse=0.3605  valid_rmse=0.6741  lr=5.0e-04
+  epoch  38  train_mse=0.3276  valid_rmse=0.6633  lr=2.5e-04 *
+  epoch  40  train_mse=0.2971  valid_rmse=0.6747  lr=2.5e-04
+  epoch  50  train_mse=0.2984  valid_rmse=0.6764  lr=1.3e-04
+  early stop at epoch 58 (best epoch 38)
+  TEST  R2=0.6215  RMSE=0.6370  MAE=0.4929  (4s)
+  saved -> results/gnn_models/a2a_gine_scaffold.pt, results/gnn_preds_a2a_gine_scaffold.npz, results/gnn_metrics_a2a_gine.json

@@ -1,0 +1,32 @@
+/home/lessray/qsar-activity-prediction/.venv/lib/python3.12/site-packages/torch/jit/_script.py:1491: FutureWarning: `torch.jit.script` is deprecated. Please switch to `torch.compile` or `torch.export`.
+  warnings.warn(
+/home/lessray/qsar-activity-prediction/scripts/gnn_03_train_gin.py:210: UserWarning: Converting a tensor with requires_grad=True to a scalar may lead to unexpected behavior.
+Consider using tensor.detach() first. (Triggered internally at /__w/pytorch/pytorch/torch/csrc/autograd/generated/python_variable_methods.cpp:820.)
+  total += float(loss) * len(batch.y)
+[egfr/scaffold] device=cuda  y_mean=6.484 y_std=1.339
+  epoch   1  train_mse=0.7829  valid_rmse=0.9644  lr=1.0e-03 *
+  epoch   3  train_mse=0.6055  valid_rmse=0.8175  lr=1.0e-03 *
+  epoch   5  train_mse=0.5397  valid_rmse=0.7847  lr=1.0e-03 *
+  epoch   7  train_mse=0.5112  valid_rmse=0.7621  lr=1.0e-03 *
+  epoch   9  train_mse=0.4818  valid_rmse=0.7256  lr=1.0e-03 *
+  epoch  10  train_mse=0.4597  valid_rmse=0.7745  lr=1.0e-03
+  epoch  11  train_mse=0.4465  valid_rmse=0.7134  lr=1.0e-03 *
+  epoch  14  train_mse=0.4153  valid_rmse=0.6731  lr=1.0e-03 *
+  epoch  20  train_mse=0.3909  valid_rmse=0.7067  lr=1.0e-03
+  epoch  22  train_mse=0.3798  valid_rmse=0.6656  lr=1.0e-03 *
+  epoch  27  train_mse=0.3540  valid_rmse=0.6604  lr=1.0e-03 *
+  epoch  30  train_mse=0.3330  valid_rmse=0.6435  lr=1.0e-03 *
+  epoch  34  train_mse=0.3377  valid_rmse=0.6332  lr=1.0e-03 *
+  epoch  40  train_mse=0.3067  valid_rmse=0.6649  lr=1.0e-03
+  epoch  44  train_mse=0.2775  valid_rmse=0.6210  lr=5.0e-04 *
+  epoch  49  train_mse=0.2669  valid_rmse=0.6184  lr=5.0e-04 *
+  epoch  50  train_mse=0.2634  valid_rmse=0.6319  lr=5.0e-04
+  epoch  57  train_mse=0.2594  valid_rmse=0.6091  lr=5.0e-04 *
+  epoch  60  train_mse=0.2514  valid_rmse=0.6403  lr=5.0e-04
+  epoch  70  train_mse=0.2290  valid_rmse=0.6225  lr=2.5e-04
+  epoch  74  train_mse=0.2224  valid_rmse=0.6087  lr=1.3e-04 *
+  epoch  80  train_mse=0.2175  valid_rmse=0.6121  lr=1.3e-04
+  epoch  90  train_mse=0.2073  valid_rmse=0.6129  lr=3.1e-05
+  early stop at epoch 94 (best epoch 74)
+  TEST  R2=0.5964  RMSE=1.0890  MAE=0.8593  (20s)
+  saved -> results/gnn_models/egfr_gine_scaffold.pt, results/gnn_preds_egfr_gine_scaffold.npz, results/gnn_metrics_egfr_gine.json

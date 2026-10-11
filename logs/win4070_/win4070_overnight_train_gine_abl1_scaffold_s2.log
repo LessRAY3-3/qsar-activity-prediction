@@ -1,0 +1,29 @@
+/home/lessray/qsar-activity-prediction/.venv/lib/python3.12/site-packages/torch/jit/_script.py:1491: FutureWarning: `torch.jit.script` is deprecated. Please switch to `torch.compile` or `torch.export`.
+  warnings.warn(
+/home/lessray/qsar-activity-prediction/scripts/gnn_03_train_gin.py:210: UserWarning: Converting a tensor with requires_grad=True to a scalar may lead to unexpected behavior.
+Consider using tensor.detach() first. (Triggered internally at /__w/pytorch/pytorch/torch/csrc/autograd/generated/python_variable_methods.cpp:820.)
+  total += float(loss) * len(batch.y)
+[abl1/scaffold] device=cuda  y_mean=7.041 y_std=1.481
+  epoch   1  train_mse=0.8841  valid_rmse=0.9426  lr=1.0e-03 *
+  epoch   2  train_mse=0.6527  valid_rmse=0.8906  lr=1.0e-03 *
+  epoch   3  train_mse=0.5526  valid_rmse=0.8421  lr=1.0e-03 *
+  epoch   4  train_mse=0.4722  valid_rmse=0.6928  lr=1.0e-03 *
+  epoch   7  train_mse=0.4266  valid_rmse=0.6251  lr=1.0e-03 *
+  epoch  10  train_mse=0.3876  valid_rmse=0.8857  lr=1.0e-03
+  epoch  16  train_mse=0.3172  valid_rmse=0.5891  lr=5.0e-04 *
+  epoch  17  train_mse=0.3102  valid_rmse=0.5848  lr=5.0e-04 *
+  epoch  20  train_mse=0.2956  valid_rmse=0.6104  lr=5.0e-04
+  epoch  21  train_mse=0.2742  valid_rmse=0.5682  lr=5.0e-04 *
+  epoch  22  train_mse=0.2742  valid_rmse=0.5591  lr=5.0e-04 *
+  epoch  28  train_mse=0.2622  valid_rmse=0.5573  lr=5.0e-04 *
+  epoch  30  train_mse=0.2635  valid_rmse=0.6361  lr=5.0e-04
+  epoch  32  train_mse=0.2546  valid_rmse=0.5428  lr=5.0e-04 *
+  epoch  40  train_mse=0.2567  valid_rmse=0.5617  lr=2.5e-04
+  epoch  50  train_mse=0.2118  valid_rmse=0.5517  lr=1.3e-04
+  epoch  52  train_mse=0.2098  valid_rmse=0.5404  lr=1.3e-04 *
+  epoch  58  train_mse=0.1992  valid_rmse=0.5382  lr=1.3e-04 *
+  epoch  60  train_mse=0.2098  valid_rmse=0.5472  lr=1.3e-04
+  epoch  70  train_mse=0.1961  valid_rmse=0.5475  lr=6.3e-05
+  early stop at epoch 78 (best epoch 58)
+  TEST  R2=0.7779  RMSE=0.5917  MAE=0.4504  (8s)
+  saved -> results/gnn_models/abl1_gine_scaffold_seed2.pt, results/gnn_preds_abl1_gine_scaffold_seed2.npz, results/gnn_metrics_abl1_gine_seed2.json

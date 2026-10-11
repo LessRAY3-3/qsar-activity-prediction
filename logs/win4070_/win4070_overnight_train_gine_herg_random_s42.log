@@ -1,0 +1,34 @@
+/home/lessray/qsar-activity-prediction/.venv/lib/python3.12/site-packages/torch/jit/_script.py:1491: FutureWarning: `torch.jit.script` is deprecated. Please switch to `torch.compile` or `torch.export`.
+  warnings.warn(
+/home/lessray/qsar-activity-prediction/scripts/gnn_03_train_gin.py:210: UserWarning: Converting a tensor with requires_grad=True to a scalar may lead to unexpected behavior.
+Consider using tensor.detach() first. (Triggered internally at /__w/pytorch/pytorch/torch/csrc/autograd/generated/python_variable_methods.cpp:820.)
+  total += float(loss) * len(batch.y)
+[herg/random] device=cuda  y_mean=5.422 y_std=0.946
+  epoch   1  train_mse=0.9248  valid_rmse=1.0706  lr=1.0e-03 *
+  epoch   2  train_mse=0.8607  valid_rmse=0.9690  lr=1.0e-03 *
+  epoch   3  train_mse=0.7991  valid_rmse=0.8917  lr=1.0e-03 *
+  epoch   6  train_mse=0.7224  valid_rmse=0.8786  lr=1.0e-03 *
+  epoch   9  train_mse=0.6677  valid_rmse=0.8434  lr=1.0e-03 *
+  epoch  10  train_mse=0.6474  valid_rmse=0.9035  lr=1.0e-03
+  epoch  12  train_mse=0.6130  valid_rmse=0.8096  lr=1.0e-03 *
+  epoch  16  train_mse=0.5920  valid_rmse=0.7934  lr=1.0e-03 *
+  epoch  19  train_mse=0.5688  valid_rmse=0.7776  lr=1.0e-03 *
+  epoch  20  train_mse=0.5469  valid_rmse=0.7887  lr=1.0e-03
+  epoch  26  train_mse=0.4909  valid_rmse=0.7766  lr=1.0e-03 *
+  epoch  28  train_mse=0.4943  valid_rmse=0.7716  lr=1.0e-03 *
+  epoch  30  train_mse=0.4731  valid_rmse=0.7291  lr=1.0e-03 *
+  epoch  38  train_mse=0.4420  valid_rmse=0.7168  lr=1.0e-03 *
+  epoch  39  train_mse=0.4459  valid_rmse=0.7081  lr=1.0e-03 *
+  epoch  40  train_mse=0.4349  valid_rmse=0.7217  lr=1.0e-03
+  epoch  49  train_mse=0.3829  valid_rmse=0.6860  lr=5.0e-04 *
+  epoch  50  train_mse=0.3828  valid_rmse=0.6826  lr=5.0e-04 *
+  epoch  53  train_mse=0.3651  valid_rmse=0.6802  lr=5.0e-04 *
+  epoch  54  train_mse=0.3647  valid_rmse=0.6795  lr=5.0e-04 *
+  epoch  59  train_mse=0.3566  valid_rmse=0.6715  lr=5.0e-04 *
+  epoch  60  train_mse=0.3624  valid_rmse=0.6931  lr=5.0e-04
+  epoch  67  train_mse=0.3452  valid_rmse=0.6708  lr=5.0e-04 *
+  epoch  70  train_mse=0.3478  valid_rmse=0.6897  lr=5.0e-04
+  epoch  80  train_mse=0.3043  valid_rmse=0.6711  lr=2.5e-04
+  early stop at epoch 87 (best epoch 67)
+  TEST  R2=0.6066  RMSE=0.5975  MAE=0.4390  (35s)
+  saved -> results/gnn_models/herg_gine_random.pt, results/gnn_preds_herg_gine_random.npz, results/gnn_metrics_herg_gine.json

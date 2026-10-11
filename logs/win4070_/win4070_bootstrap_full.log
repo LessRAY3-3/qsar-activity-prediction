@@ -1,0 +1,34 @@
+[a2a/random] n=274  mean3 dR2=-0.0727 CI[-0.1382, -0.0128]  frac_boot_gin_better=0.0064
+[a2a/scaffold] n=299  mean3 dR2=-0.0330 CI[-0.0806, +0.0148]  frac_boot_gin_better=0.0851
+[abl1/random] n=424  mean3 dR2=-0.0445 CI[-0.0756, -0.0160]  frac_boot_gin_better=0.0004
+[abl1/scaffold] n=425  mean3 dR2=+0.0375 CI[+0.0061, +0.0689]  frac_boot_gin_better=0.9899
+[egfr/random] n=912  mean3 dR2=-0.0440 CI[-0.0793, -0.0099]  frac_boot_gin_better=0.0059
+[egfr/scaffold] n=912  mean3 dR2=-0.0229 CI[-0.0529, +0.0056]  frac_boot_gin_better=0.0571
+[egfr_full/random] n=2146  mean3 dR2=-0.0394 CI[-0.0585, -0.0212]  frac_boot_gin_better=0.0000
+[egfr_full/scaffold] n=2166  mean3 dR2=+0.0028 CI[-0.0169, +0.0218]  frac_boot_gin_better=0.6157
+[herg/random] n=1681  mean3 dR2=+0.0381 CI[+0.0060, +0.0686]  frac_boot_gin_better=0.9901
+[herg/scaffold] n=1682  mean3 dR2=-0.0139 CI[-0.0466, +0.0172]  frac_boot_gin_better=0.1917
+[hivpr/random] n=515  mean3 dR2=-0.0478 CI[-0.0827, -0.0137]  frac_boot_gin_better=0.0021
+[hivpr/scaffold] n=524  mean3 dR2=-0.0385 CI[-0.0817, +0.0040]  frac_boot_gin_better=0.0379
+[mpro/random] n=682  mean3 dR2=-0.0110 CI[-0.0646, +0.0452]  frac_boot_gin_better=0.3415
+[mpro/scaffold] n=682  mean3 dR2=-0.0741 CI[-0.1334, -0.0176]  frac_boot_gin_better=0.0052
+[vegfr2/random] n=1929  mean3 dR2=-0.0445 CI[-0.0685, -0.0214]  frac_boot_gin_better=0.0001
+[vegfr2/scaffold] n=1945  mean3 dR2=+0.0235 CI[-0.0014, +0.0476]  frac_boot_gin_better=0.9677
+
+=== Paired bootstrap significance: GIN vs RF ===
+  dR2 = R2_GIN - R2_RF (positive favours GIN); significant = 95% CI excludes 0
+
+  [seed42] 10/16 cells with CI excluding 0
+    RF significantly ahead (9): a2a/random, abl1/random, egfr/random, egfr_full/random, egfr_full/scaffold, hivpr/random, hivpr/scaffold, mpro/scaffold, vegfr2/random
+    GIN significantly ahead (1): abl1/scaffold
+    dR2 point range: [-0.1760, +0.0596]
+
+  [mean3] 9/16 cells with CI excluding 0
+    RF significantly ahead (7): a2a/random, abl1/random, egfr/random, egfr_full/random, hivpr/random, mpro/scaffold, vegfr2/random
+    GIN significantly ahead (2): abl1/scaffold, herg/random
+    dR2 point range: [-0.0741, +0.0381]
+
+  mean3 (primary): RF significantly wins in 7/16 cells; GIN in 2/16; 7/16 inconclusive
+
+summary -> results/significance/summary.csv (32 rows)
+figure  -> figures/significance/ci_panel.png
