@@ -74,8 +74,8 @@ artifacts. Newest first. Maintained by M4 Air; results produced on M3 Max.
   - **GINE panel**: **0 of 10** bootstrapped cells favour GINE, 5
     significantly favour RF, 5 straddle 0; the other 6 cells
     (`abl1`/`herg`/`vegfr2`) have no per-seed GINE predictions yet and
-    are point estimates only (3 of them positive: `herg`/scaffold
-    +0.069, `vegfr2` +0.004/+0.009).
+    are point estimates only (2 of them positive: `abl1`/scaffold
+    +0.028, `herg`/random +0.006).
   - **AttentiveFP panel**: wins **2 of 16** (`herg`/scaffold +0.062
     [+0.030, +0.092], `herg`/random +0.034 [+0.002, +0.065]), 8 cells
     favour RF, 6 undecided; all 8 random point estimates negative.
@@ -96,8 +96,8 @@ artifacts. Newest first. Maintained by M4 Air; results produced on M3 Max.
     read from the refreshed `gnn_metrics_*`). `gnn_fairness` still
     saves no per-seed predictions, so those GINE cells remain point
     estimates without bootstrap CIs; `results/gine_panel/summary.csv`
-    still carries the earlier `gine_runs` vintage for these three tags
-    (rebuild pending).
+    was rebuilt from these refreshed `gine_runs` (10-11 19:35), so the
+    three tags now read the fairness numbers.
 - **In progress / not re-run**:
   - **`scripts/07_qc_checks.py` not re-run**: `figures/testset_hist_*.png`
     still predate the refresh (flagged in `docs/methodology.md`).

@@ -330,7 +330,7 @@ separable from resampling noise - analysis only, nothing is retrained:
   see `results/gine_panel/summary.csv`); **0 cells have CI > 0**, 5
   significantly favour RF (`a2a`/scaffold, `egfr`/random, `egfr_full`/random,
   `hivpr`/scaffold, `mpro`/scaffold), 5 straddle 0. Positive point
-  estimates: `herg`/scaffold +0.069 and `vegfr2` +0.004 / +0.009, none
+  estimates: `abl1`/scaffold +0.028 and `herg`/random +0.006, none
   carries a CI.
 - **AttentiveFP** (`--model attentivefp`, P8 phase 3): all 16 cells have a
   CI - 10 are significant: **8 favour RF, 2 favour AttentiveFP**

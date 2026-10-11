@@ -308,8 +308,8 @@ the 3-seed-mean convention stays the reference. Bond features change
 nothing - the refreshed GINE panel reads **0 of 10 bootstrapped cells
 with CI > 0** (5 cells significantly favour RF, 5 straddle 0); the
 other 6 cells (`abl1`/`herg`/`vegfr2`, whose GINE runs hold no
-per-seed predictions) carry no CI and read point estimates only, 3 of
-them positive (`herg`/scaffold +0.069, `vegfr2` +0.004 / +0.009) - see
+per-seed predictions) carry no CI and read point estimates only, 2 of
+them positive (`abl1`/scaffold +0.028, `herg`/random +0.006) - see
 the status note on that section. Tables
 `results/significance/summary.csv`,
 `results/significance/summary_partial_gine.csv`,
