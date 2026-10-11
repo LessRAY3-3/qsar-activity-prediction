@@ -24,3 +24,4 @@ data/processed/splits/*.npz
 # 系统垃圾
 .DS_Store
 release/
+.scratch/
