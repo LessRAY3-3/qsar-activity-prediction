@@ -37,6 +37,8 @@ def test_summary_csv_carries_delta_convention(tmp_path, monkeypatch, load_experi
                         lambda name: {"time": {"r2": 0.5, "rmse": 1.0}})
     monkeypatch.setattr(mod, "comparison_reference",
                         lambda tag: {"random": (0.7, 0.6), "scaffold": (0.6, 0.55)})
+    # constant_r2 reads data/processed/*.npz, which CI does not check out
+    monkeypatch.setattr(mod, "constant_r2", lambda tag: 0.0)
     sig = pd.DataFrame([SIG_ROW] * len(mod.TAGS), index=list(mod.TAGS))
     monkeypatch.setattr(mod, "time_significance", lambda: sig)
 
