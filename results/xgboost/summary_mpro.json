@@ -13,31 +13,43 @@
     "device": "cpu"
   },
   "xgboost_version": "3.4.1",
+  "fit_pool": {
+    "random": 2728,
+    "scaffold": 2728
+  },
+  "n_test": {
+    "random": 682,
+    "scaffold": 682
+  },
   "rf_control": {
     "random": {
       "r2_mean": 0.6016693541674416,
       "r2_std": null,
-      "source": "headline metrics json (full pool, not same-pool)"
+      "same_pool": true,
+      "xgb_n_train": 2728,
+      "source": "headline metrics json (full non-test pool)"
     },
     "scaffold": {
       "r2_mean": 0.43324947067186403,
       "r2_std": null,
-      "source": "headline metrics json (full pool, not same-pool)"
+      "same_pool": true,
+      "xgb_n_train": 2728,
+      "source": "headline metrics json (full non-test pool)"
     }
   },
   "by_split": {
     "random": {
-      "r2_mean": 0.5981598496437073,
+      "r2_mean": 0.6064052581787109,
       "r2_std": 0.0,
-      "rmse_mean": 0.6703775485472395,
-      "delta_vs_rf_control": -0.0035095045237343303,
+      "rmse_mean": 0.6634641307601552,
+      "delta_vs_rf_control": 0.004735904011269332,
       "runs": 3
     },
     "scaffold": {
-      "r2_mean": 0.41002970933914185,
+      "r2_mean": 0.4100450873374939,
       "r2_std": 0.0,
-      "rmse_mean": 0.7024440434932856,
-      "delta_vs_rf_control": -0.02321976133272219,
+      "rmse_mean": 0.7024348580712684,
+      "delta_vs_rf_control": -0.023204383334370138,
       "runs": 3
     }
   }
