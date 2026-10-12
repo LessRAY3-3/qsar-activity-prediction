@@ -5,7 +5,9 @@
 Predicting how potently a compound inhibits a target (pIC50) from
 structure, two ways under identical verified train/test conditions:
 classic QSAR (Morgan fingerprints -> RandomForest) and a GIN graph
-network, across eight ChEMBL targets plus a MoleculeNet fallback.
+network, across eight ChEMBL targets (EGFR is counted twice: every one
+of `egfr`'s 4,560 parents also sits in `egfr_full`, so the "7 of 8"
+tallies below double-count EGFR) plus a MoleculeNet fallback.
 Headline, an honest negative result: **the GIN does not beat the tuned
 fingerprint baseline on this panel**. Deep detail:
 [docs/methodology.md](docs/methodology.md); interview prep:
@@ -16,8 +18,13 @@ fingerprint baseline on this panel**. Deep detail:
 > dedup; review outcome: the 19-item
 > [fix checklist](docs/reviews/fixes-2026-10-11.md), label-policy
 > [sensitivity report](docs/reviews/h1-sensitivity-2026-10-10.md)).
-> The **GINE / AttentiveFP architecture panels**, the
-> **fingerprint-ablation** re-run (all 8 tags) and the **fairness
+> `egfr` was **re-pulled** in the same pass (commit `e37c572`,
+> "rebuild egfr (8k early-stop)" - raw 8,936 -> 8,000 rows), so its
+> 6,165 -> 4,560 compound change mixes a new early-stopped subset with
+> the label/parent fixes, and its 2016 document ceiling comes from that
+> pull rather than the label refresh (the other seven ChEMBL pulls kept
+> their row counts). The **GINE / AttentiveFP architecture panels**,
+> the **fingerprint-ablation** re-run (all 8 tags) and the **fairness
 > campaign** (`vegfr2`/`herg`/`abl1`) are refreshed against those
 > datasets (`experiments/LOG.md`).
 
@@ -84,10 +91,31 @@ pip install -r requirements.txt
 python scripts/fetch_artifacts.py --all   # 下载训练好的 models/ 和 data/raw/（GitHub Release）
 ```
 
-From here Phase 2 runs directly (`gnn_01_make_splits.py` onward): saved
-RF models and regenerated splits verify against the published metrics,
-no retraining. Full retraining, incl. phase 3:
-[methodology](docs/methodology.md).
+Python **>= 3.12** is required: the pinned numpy 2.5.3, scipy 1.18.1,
+xgboost 3.4.1 and shap 0.52.0 publish no 3.11 wheels, so the install
+fails on Python 3.11 by design.
+
+> ⚠️ **Stale until a refreshed release is published (2026-10-12).** The
+> only GitHub release, `artifacts-v1` (published 2026-10-08 from commit
+> 5b5d244), predates the 2026-10-11 data refresh: its raw CSVs lack the
+> `standard_relation` column, none of its 8 ChEMBL raw files matches
+> the refreshed `data/raw/sha256sums.txt`, and its RF models were
+> trained on pre-refresh data (old egfr RF scores 0.7466 / 0.5624 vs
+> refreshed 0.7214 / 0.6492, so `gnn_01_make_splits.py` aborts).
+> `scripts/fetch_artifacts.py` now verifies extracted raw files against
+> `data/raw/sha256sums.txt` and will stop with an error on this
+> release, and `scripts/02_clean_data.py` refuses ChEMBL-format raw
+> files without `standard_relation` (both fail closed by design). Until
+> a new release is published, use full retraining (methodology) instead
+> of this fast path — fetched models do **not** currently "verify
+> against the published metrics".
+
+The fast path is designed so that, once a refreshed release exists,
+Phase 2 runs directly (`gnn_01_make_splits.py` onward): saved RF models
+and regenerated splits then verify against the published metrics with
+no retraining - against today's `artifacts-v1` that promise does not
+hold (see the warning above), so full retraining is the supported route
+for now. Full retraining, incl. phase 3: [methodology](docs/methodology.md).
 
 `requirements.txt` is a **snapshot of the working environment at campaign
 time, not a hard boundary**: development ran the full test suite on
@@ -116,9 +144,12 @@ targets come from the same generic downloader
 | `vegfr2` | **VEGFR2 / KDR** | CHEMBL279 | 9643 | ChEMBL REST API (`01e`) |
 
 Counts are the post-refresh clean sizes (2026-10-11 label/parent
-rebuild; the raw pulls keep their original row counts - provenance and
-the pre-refresh superset check live in
-[data/README.md](data/README.md); what changed and why:
+rebuild; seven of the eight ChEMBL raw pulls kept their original row
+counts - **`egfr` was re-pulled** in the same pass (raw 8,936 -> 8,000
+data rows, commit `e37c572`, "rebuild egfr (8k early-stop)"), so its
+6,165 -> 4,560 change mixes a new early-stopped subset with the
+label/parent fixes - provenance and the pre-refresh superset check live
+in [data/README.md](data/README.md); what changed and why:
 [fix checklist](docs/reviews/fixes-2026-10-11.md) +
 [sensitivity report](docs/reviews/h1-sensitivity-2026-10-10.md)). The
 `vegfr2` dataset was formerly tagged `mapk14` (misnomer fixed
@@ -180,24 +211,26 @@ features, so every importance claim was cross-checked with
 
 ![mdi vs perm](figures/importance_mdi_vs_perm_egfr.png)
 
-Data QC (ultra-potent audit, censoring, test-set spreads): audited, no
-filtering rule - the audit is the deliverable
-([methodology](docs/methodology.md)).
+Data QC (ultra-potent audit, censoring, test-set spreads): censored
+bounds are dropped at cleaning time (`standard_relation == "="`, see
+[Data](#data)); the ultra-potent audit needs no filtering rule - the
+audit is the deliverable ([methodology](docs/methodology.md)).
 
 **Cross-model attribution alignment.**
 `experiments/interpretability_alignment.py` loads the committed RF and
 compares its top fingerprint bits (SHAP) with the GIN's GNNExplainer top
-atoms on the scaffold test split, molecule by molecule, for the
-dominant held-out chemotype of each tag. On the four tags where the
-family query returns molecules - `egfr`/`egfr_full` (thienopyrimidine)
-and `herg`/`mpro` (chromone), 5 molecules each - the mean share of GNN
-top atoms inside the RF's top-bit coverage runs **0.35-0.68**, and
-**0.21-0.74** of GNN top atoms sit on the scaffold core; per-family RF
-recurring bits are in `results/interpretability/{tag}/findings.md`.
-`a2a`, `abl1` and `hivpr` completed but analysed **zero molecules**
-(their queried family has no members in the held-out set) - no numbers
-to report; `vegfr2` was not run. GNNExplainer/SHAP caveats:
-[methodology](docs/methodology.md).
+atoms on the scaffold test split, molecule by molecule, on **two fixed
+EGFR-family chemotypes** - thienopyrimidine and chromone, the same two
+SMARTS queries applied to every tag, not each tag's dominant held-out
+chemotype. On the four tags where those queries return molecules -
+`egfr`/`egfr_full` (thienopyrimidine) and `herg`/`mpro` (chromone), 5
+molecules each - the mean share of GNN top atoms inside the RF's top-bit
+coverage runs **0.35-0.68**, and **0.21-0.74** of GNN top atoms sit on
+the scaffold core; per-family RF recurring bits are in
+`results/interpretability/{tag}/findings.md`. `a2a`, `abl1` and `hivpr`
+completed but analysed **zero molecules** (neither fixed family occurs
+in their held-out sets) - no numbers to report; `vegfr2` was not run.
+GNNExplainer/SHAP caveats: [methodology](docs/methodology.md).
 
 **Y-randomization (leakage sanity check).** Trained on permuted labels,
 every shuffled group mean collapses towards zero and stays far under the
@@ -208,7 +241,7 @@ still more than an order of magnitude under the 0.2 verdict threshold,
 every shuffled RF mean is ≤ −0.054, and each tag's
 `results/y_randomization/summary_*.json` verdict reads **`ok: all
 shuffled-label means < 0.2`**. Individual shuffled GIN seeds can still
-land slightly positive (up to +0.026) - that is why the check is on
+land slightly positive (up to **+0.047**) - that is why the check is on
 group means. The real-label control RF reads **0.7179** vs the headline
 **0.7214** (`egfr`/random). That ~0.003 gap is the control's training
 pool, not skipped tuning: `experiments/y_randomization.py` fits its RF
@@ -253,11 +286,14 @@ Same test molecules, coloured by scaffold:
 
 **Do the models fail on the same molecules?** Their worst test
 predictions overlap far above chance on both splits: many failures are
-**molecule-intrinsic** (noisy or assay-censored measurements), not
-model-specific - a data-quality conclusion, not a model-ranking one.
-Chemotypes still fail asymmetrically (chromones hurt the GIN,
-thienopyrimidines hurt RF; numbers, figure:
-[methodology](docs/methodology.md)).
+**molecule-intrinsic** (noisy measurements), not model-specific - a
+data-quality conclusion, not a model-ranking one. Chemotypes still fail
+asymmetrically: on the refreshed scaffold test set the thienopyrimidine
+series (47 molecules) costs the **RF** more (mean |err| 1.32 vs the
+GIN's 1.02), while the chromone query now matches **0 of 912** test
+molecules (37 pre-refresh), so the old "chromones hurt the GIN" claim
+no longer has a sample to stand on; numbers, figure:
+[methodology](docs/methodology.md).
 
 ## Cross-target generality & data scaling
 
@@ -269,7 +305,8 @@ random cell where the bootstrap significantly favours the GIN
 Six random cells significantly favour RF. With analogues leaking across
 the split, message passing buys nothing over circular substructure
 counts on seven of eight targets - the EGFR conclusion above is not an
-EGFR artefact.
+EGFR artefact. (Every "7 of 8" tally double-counts EGFR: all 4,560
+`egfr` parents are also inside `egfr_full`.)
 
 **Finding 2 - on scaffold splits one target flips positive, and the
 deficit's size is a property of the target, not of n.** Seven of eight
@@ -279,9 +316,11 @@ and it survives every convention - seed42 **+0.060 [+0.025, +0.096]**,
 3-seed ensemble **+0.037 [+0.006, +0.069]** (significantly GIN). This is
 a real flip, not the seed-42 mirage the pre-refresh data showed. What
 still varies is the *magnitude*: scaffold diversity and assay structure
-set how far behind the GIN falls - `mpro` (3,410 compounds) at −0.111
-vs `egfr_full` (10,729) at −0.020 is three times the data and
-one-fifth the deficit, so Δ does not follow n.
+set how far behind the GIN falls - `mpro` (3,410 compounds) sits at
+−0.111 with twice `a2a`'s data (1,366) yet more than twice its deficit
+(−0.049), and `herg` (8,403) and `vegfr2` (9,643) are within 15% of
+each other in n yet about 10x apart in deficit (−0.032 vs −0.003), so Δ
+does not follow n.
 
 **Significance, upgraded to bootstrap CIs (P8).** The Δ(mean) statements
 above are backed by a paired bootstrap (B = 10,000; test molecules
@@ -303,16 +342,17 @@ resampled with replacement, same indices for both models; CI on the
 `frac_boot_gin_better` is the
 fraction of the 10,000 bootstrap deltas above 0 - **not a p-value**; a
 `p < 0.05`-style filter would drop every GIN win. The seed-42 column
-still overstates leads (`abl1`/scaffold +0.060 vs +0.037 at mean3), so
-the 3-seed-mean convention stays the reference. Bond features change
-nothing - the refreshed GINE panel reads **0 of 10 bootstrapped cells
-with CI > 0** (5 cells significantly favour RF, 5 straddle 0); the
-other 6 cells (`abl1`/`herg`/`vegfr2`, whose GINE runs hold no
-per-seed predictions) carry no CI and read point estimates only, 2 of
-them positive (`abl1`/scaffold +0.028, `herg`/random +0.006) - see
-the status note on that section. Tables
-`results/significance/summary.csv`,
-`results/significance/summary_partial_gine.csv`,
+still overstates leads where it matters (`abl1`/scaffold +0.060 vs
++0.037 at mean3); elsewhere it reads below the mean3 value in 13 of 16
+cells (within 0.005 of it in the other two), so the 3-seed-mean
+convention stays the reference. Bond features move exactly one cell -
+the refreshed GINE panel bootstraps **all 16 cells** and reads **1 GINE
+win, 7 RF wins, 8 straddling 0**. The single win is `abl1`/scaffold,
+ensemble Δ **+0.058 [+0.028, +0.092]** - the same cell the frozen GIN
+already wins (+0.037 [+0.006, +0.069]) - and one significant cell in 16
+is within multiple-comparison noise, so the panel verdict stands.
+Tables `results/significance/summary.csv`,
+`results/significance/summary_gine.csv` (32 rows, all 16 cells),
 `results/gine_panel/summary.csv`; forest plots
 `figures/significance/ci_panel.png`,
 `figures/significance/ci_panel_with_gine.png`,
@@ -346,9 +386,9 @@ caveat, training-budget caveat, cross-target failure replication:
 > AttentiveFP panels and the fairness campaign (`vegfr2`/`herg`/`abl1`)
 > are retrained against the refreshed data (`experiments/LOG.md`), so
 > every number below is a single-vintage batch; the fairness table's RF
-> references equal the refreshed panel RF. `gnn_fairness.py` still
-> saves no per-seed predictions, hence its GINE cells are point
-> estimates without bootstrap CIs.
+> references equal the refreshed panel RF. The fairness tags' GINE
+> cells bootstrap from the frozen-recipe per-seed predictions committed
+> in `23e202a`; all 16 GINE panel cells carry bootstrap CIs.
 
 Sections above deliberately froze the GIN recipe - every Δ is a
 **frozen-recipe** Δ. `experiments/gnn_fairness.py` (36 runs/target) gives
@@ -358,7 +398,10 @@ scaffold Δ on the refreshed panel: `vegfr2` −0.003, `herg` −0.032,
 (hidden {128, 256} x layers {4, 5} x dropout {0.2, 0.3}) train **only on
 the scaffold split**, selected by **3-seed mean validation RMSE**, never a
 single seed. Winners: `vegfr2` 256/5L/0.2 (0.6937), `herg` 256/5L/0.2
-(0.6215), `abl1` 256/5L/0.2 (0.7833) - 256/5L/0.2 on all three. A **GINE**
+(0.6215), `abl1` 256/5L/0.2 (0.7833) - 256/5L/0.2 on all three, i.e.
+every winner sits on the grid's capacity corner (max hidden, max
+layers, min dropout), so these gains are lower bounds: the grid cannot
+show what a larger model would have found. A **GINE**
 variant adds a `BondEncoder` (`BOND_FEATURE_DIMS = [13, 7, 2]`); all else
 is `gnn_03`'s.
 
@@ -385,7 +428,9 @@ reference RF, equal to the refreshed panel RF):
 ![fairness abl1](figures/fairness/abl1.png)
 
 **(i) The frozen recipe really does understate the GIN - but only a
-little, and only on scaffold.** Bounded tuning lifts the scaffold Δ on
+little, and only on scaffold** - and "only a little" is itself a lower
+bound: all three winners are the grid's capacity corner, so a wider
+grid could only have found more. Bounded tuning lifts the scaffold Δ on
 all three targets: `vegfr2` crosses zero (−0.003 → **+0.015**), `herg`
 climbs to a tie (−0.032 → +0.000), and `abl1`, already positive under
 the frozen recipe (+0.022), widens to **+0.056** while its seed spread
@@ -401,15 +446,13 @@ random (+0.006, marginal), and hurt `vegfr2` on both splits
 (−0.070 / −0.022), `herg` scaffold (−0.033) and `abl1` random
 (−0.043) - edge features are not the missing ingredient. Panel-wide
 against the refreshed RF this holds with bootstrap CIs: the full GINE
-panel wins **0 of 10 bootstrapped cells** (5 significantly favour RF -
-`a2a`/scaffold, `egfr`/random, `egfr_full`/random, `hivpr`/scaffold,
-`mpro`/scaffold - and 5 straddle 0); the remaining 6 cells (`abl1`,
-`herg`, `vegfr2` - no per-seed GINE predictions) carry no CI and read
-point estimates only, 2 of them positive on the refreshed fairness
-runs (`abl1`/scaffold **+0.028**, `herg`/random +0.006). Tables
-`results/significance/summary_partial_gine.csv` +
-`results/gine_panel/summary.csv` (the 10 bootstrapped cells),
-`results/fairness/summary_{tag}.json` (the 3 no-CI tags); figures
+panel wins **1 of 16 cells - `abl1`/scaffold +0.058 [+0.028, +0.092]**;
+7 significantly favour RF (`a2a`/scaffold, `abl1`/random, `egfr`/random,
+`egfr_full`/random, `hivpr`/scaffold, `mpro`/scaffold, `vegfr2`/random),
+8 straddle 0 - and the lone GINE win is the same cell the frozen GIN
+already wins, one significant cell in 16. Tables
+`results/significance/summary_gine.csv` (all 16 cells) +
+`results/gine_panel/summary.csv`; figures
 `figures/gine_panel/panel_dR2.png`,
 `figures/significance/ci_panel_with_gine.png`.
 
@@ -432,19 +475,22 @@ mean3 paired bootstrap it wins **2 of 16 cells - `herg`/scaffold,
 ensemble Δ +0.062 [+0.030, +0.092], and `herg`/random, +0.034
 [+0.002, +0.065]** (per-seed point estimates +0.020 and −0.022; the
 two Δ conventions are defined in **Panel Δ conventions** in
-[methodology](docs/methodology.md)) - while **8 cells significantly
-favour RF** (`a2a`/random, `abl1` both splits, `egfr_full` both
-splits, `hivpr`/scaffold, `mpro`/scaffold, `vegfr2`/random) and 6 are
-undecided; on the random split all 8 point estimates are negative
+[methodology](docs/methodology.md)) - while **7 cells significantly
+favour RF** (`a2a`/random, `abl1`/random, `egfr_full` both
+splits, `hivpr`/scaffold, `mpro`/scaffold, `vegfr2`/random) and **7 are
+undecided** - `abl1`/scaffold moved to undecided after its stalled
+seed-42 run (best epoch 15 of 100, train MSE 0.57) was rerun with a
+60-epoch early-stop floor: ensemble Δ +0.020 [−0.018, +0.057]; on the
+random split all 8 point estimates are negative
 (−0.167 `a2a` to −0.022 `herg`), and `herg`/random is the one cell
 where the ensemble convention turns a negative point estimate into a
 significant AttentiveFP lead - the other 4 significant random cells
-favour RF. `herg`/scaffold is the friendliest cell for the enhanced
-variants (tuned GIN +0.000 tie, GINE −0.033, AttentiveFP +0.020
-per-seed) - only AttentiveFP reads positive there now, and it is the
-one that carries a lead across significance, as does `herg`/random for
-AttentiveFP alone; the frozen GIN reads −0.032 there on the refreshed
-panel. Tables `results/afp_panel/summary.csv`,
+favour RF. The friendliest cell depends on the variant: `abl1`/scaffold
+is friendliest for tuned GIN (+0.056) and for GINE (fairness table
++0.028; panel ensemble **+0.058 [+0.028, +0.092]**), while
+`herg`/scaffold is AttentiveFP's friendliest (+0.062 ensemble / +0.020
+per-seed; tuned GIN +0.000 tie, GINE −0.033 there, frozen GIN −0.032 on
+the refreshed panel). Tables `results/afp_panel/summary.csv`,
 `results/significance/summary_attentivefp.csv`; figures
 `figures/afp_panel/panel_dR2.png` and the three-model forest plot
 `figures/significance/ci_panel_with_afp.png` (gin / gine / afp side by
@@ -459,26 +505,29 @@ implementation - it is a data-scale / signal statement.
 ceiling an artefact of a weak tree ensemble? Same 2048-bit Morgan
 features, same splits, XGBoost 3.4.1 (`hist`, CPU) with fixed generic
 hyperparameters (500 trees, lr 0.05, depth 6); the control is the
-headline RF. Δ = XGB − RF per split (`results/xgboost/summary_*.json`,
-controls recomputed against the refreshed `results/metrics_*.json`):
+headline RF, and XGBoost is fit on the same full non-test pool as that
+RF (`same_pool: true` in every cell). Δ = XGB − RF per split
+(`results/xgboost/summary_*.json`, controls recomputed against the
+refreshed `results/metrics_*.json`):
 
 | Tag | Δ rand | Δ scaf |
 |---|---|---|
-| `a2a` | −0.022 | −0.022 |
-| `abl1` | −0.003 | −0.007 |
-| `egfr` | **+0.010** | −0.132 |
-| `egfr_full` | −0.053 | −0.038 |
-| `herg` | −0.037 | **+0.007** |
-| `hivpr` | −0.002 | −0.063 |
-| `mpro` | −0.004 | −0.023 |
-| `vegfr2` | −0.052 | **+0.004** |
+| `a2a` | −0.015 | −0.022 |
+| `abl1` | **+0.006** | −0.018 |
+| `egfr` | −0.011 | −0.045 |
+| `egfr_full` | −0.047 | −0.040 |
+| `herg` | −0.024 | **+0.032** |
+| `hivpr` | **+0.010** | −0.080 |
+| `mpro` | **+0.005** | −0.023 |
+| `vegfr2` | −0.045 | **+0.003** |
 
-**XGBoost does not beat the tuned RF**: 13 of 16 cells are ≤ RF, the
-three exceptions are hair-breadth (`egfr`/random +0.010,
-`herg`/scaffold +0.007, `vegfr2`/scaffold +0.004) while the worst cell
-is its classic failure mode - novel chemotypes (`egfr`/scaffold 0.517
-vs the RF's 0.649, Δ −0.132). The RF-vs-GIN verdict is not an artefact
-of a weak tree baseline.
+**XGBoost does not beat the tuned RF**: 11 of 16 cells are ≤ RF; the
+five exceptions are all modest (`abl1`/random +0.006, `herg`/scaffold
++0.032, `hivpr`/random +0.010, `mpro`/random +0.005, `vegfr2`/scaffold
++0.003 - four of the five ≤ +0.010), while the worst cell is its
+classic failure mode, novel chemotypes under scaffold split
+(`hivpr`/scaffold 0.458 vs the RF's 0.538, Δ −0.080). The RF-vs-GIN
+verdict is not an artefact of a weak tree baseline.
 
 **"3 seeds" here is a deterministic repeat, not an uncertainty
 estimate.** All three seeds are bit-identical on every cell
@@ -530,7 +579,7 @@ of that tag. What the eight tags say:
   is not universal (`a2a` +0.012 and `egfr_full` +0.007 prefer 1024
   at r=3; at r=2 `hivpr` gains +0.041 from halving the bits), so
   2048 bits is a strong default rather than a law.
-- **Radius 3 at 2048 bits buys nothing**: −0.011 … +0.003 on random,
+- **Radius 3 at 2048 bits buys nothing**: −0.011 … +0.002 on random,
   −0.027 … +0.007 on scaffold - r=2/2048 is also the radius default.
 
 Figures: `figures/fp_ablation/`; tables: `results/fp_ablation/`.
@@ -556,9 +605,9 @@ Test R2, 3-seed mean ± std (Δ = vs the single-task RF):
 | `vegfr2` | random | 0.670 | 0.605±0.004 (−0.064) | 0.309±0.057 (−0.361) | 0.510±0.010 (−0.160) |
 | `vegfr2` | scaffold | 0.585 | 0.583±0.002 (−0.003) | 0.240±0.006 (−0.345) | 0.533±0.014 (−0.052) |
 
-Columns from `results/multitask/summary.csv`; the `vegfr2` rows use the
-refreshed single-task RF (2026-10-11) for the ST-RF column and the four
-Δs (the summary file still carries the pre-refresh RF there).
+Columns from `results/multitask/summary.csv` (regenerated 2026-10-12:
+the `vegfr2` rows and all six of their Δs now come from the refreshed
+single-task RF, 0.670 random / 0.585 scaffold).
 
 ![multitask random](figures/multitask/random.png)
 ![multitask scaffold](figures/multitask/scaffold.png)
@@ -574,7 +623,7 @@ not better. Cross-split leakage can only *inflate* these numbers; the
 linear-head handicap does not decide the verdict - both in
 [methodology](docs/methodology.md).
 
-## Publication-year time split: mostly the GIN degrades less, neither model is dependable
+## Publication-year time split: mostly the GIN stays closer to the no-skill baseline, neither model is dependable
 
 Random and scaffold splits let the model train on molecules published
 *after* the molecules it is tested on. The deployment-honest cut
@@ -582,12 +631,15 @@ Random and scaffold splits let the model train on molecules published
 publication it appears in, from `data/raw/document_years.csv` - 4,147
 ChEMBL documents across the 8 tags) withholds the newest years:
 **test = newest publication years cumulating to ~21-28% of molecules,
-valid = newest ~10% of the rest**. Because one recent year can carry a
-lot of data, the test fraction runs over target on `a2a` (59%) and
-`mpro` (51%) - both datasets end in 2024/2025. (`egfr`'s window reads
-2013-2016: after the label refresh no `egfr` measurement is dated later
-than 2016.) RF trained via
-`scripts/04_train_and_evaluate.py --split time`, GIN as always
+valid = newest ~10% of the rest** (year granularity makes the
+validation share **17-39% of the non-test pool for 4 of 8 tags** -
+`a2a` 25%, `herg` 18%, `mpro` 39%, `vegfr2` 17%). Because one recent
+year can carry a lot of data, the test fraction runs over target on
+`a2a` (59%) and `mpro` (51%) - both datasets end in 2024/2025.
+(`egfr`'s window reads 2013-2016 because the re-pulled raw file
+(commit `e37c572`, "8k early-stop") contains no document dated after
+2016 - a property of the pull, not of the label refresh.) RF trained
+via `scripts/04_train_and_evaluate.py --split time`, GIN as always
 (3 seeds, same npz).
 
 Test R2 (random for reference; GIN = 3-seed mean; GIN ens = R2 of the
@@ -618,10 +670,11 @@ into `results/significance/summary_time.csv` (schema now carries
 `frac_boot_gin_better` and `n_boot`). **6 of 8 CIs exclude 0** - GIN
 ahead on `a2a`, `egfr_full`, `hivpr`, `mpro`, RF ahead on `abl1` and
 `vegfr2` - while `egfr` (+0.039 [−0.012, +0.093]) and `herg` (+0.032
-[−0.007, +0.073]) straddle 0. `herg` is the verdict that moved: the
-pre-refresh cell read +0.076 [0.034, 0.120] (significantly GIN), the
-refreshed predictions read +0.032 with the CI crossing zero, so it is now
-undecided (see `experiments/LOG.md`).
+[−0.007, +0.073]) straddle 0. **Five verdicts moved against the
+pre-refresh table** (pattern 5 GIN / 0 RF → 4 GIN / 2 RF): `egfr` and
+`herg` GIN → undecided (`herg`'s pre-refresh cell read +0.076 [0.034,
+0.120], now +0.032 with the CI crossing zero), `hivpr` undecided →
+GIN, and `abl1` and `vegfr2` undecided → RF (see `experiments/LOG.md`).
 
 **Reading the Δ column.** Δ is computed on the **3-seed ensemble
 prediction** (per-molecule mean of the three GIN runs; the `GIN ens`
@@ -646,9 +699,22 @@ outside `abl1` (0.560 / 0.324 ens) nothing on either model clears 0.17.
 At R2 ≈ 0 or below on future chemistry neither model is usable - the
 honest industrial number. And the one target where RF still works under
 drift (`abl1`, +0.560) is precisely where the GIN falls furthest behind:
-"the GIN degrades less" is the 6-of-8 pattern, not a law. Timelines per
-target: `figures/time_split/{tag}_timeline.png`; aggregate:
-`figures/time_split/panel_3splits.png`; details:
+"the GIN stays closer to the no-skill baseline" is the 6-of-8 pattern,
+not a law.
+
+**Against the no-skill baseline** (now a column in
+`results/time_split/summary.csv`: `constant_r2` = predicting the mean
+pIC50 of all non-test rows), RF scores below zero-skill on four
+targets - `a2a` (−0.301 vs −0.004), `egfr_full` (−0.736 vs −0.455),
+`herg` (−0.058 vs −0.003) and `hivpr` (−0.027 vs −0.006) - and the GIN
+ensemble is below it on `herg` (−0.026 vs −0.003). The GIN's time-split
+edge is largely shrinkage: 20 of 24 runs early-stop before epoch 24
+(median best epoch 80 on random/scaffold; `gin_best_epochs` column),
+compressing predictions toward the mean (ensemble pred std / y std
+0.22-0.66).
+
+Timelines per target: `figures/time_split/{tag}_timeline.png`;
+aggregate: `figures/time_split/panel_3splits.png`; details:
 [methodology](docs/methodology.md).
 
 ![3 splits](figures/time_split/panel_3splits.png)
@@ -658,25 +724,27 @@ target: `figures/time_split/{tag}_timeline.png`; aggregate:
 `experiments/uncertainty_ad.py` closes the loop from calibrated
 uncertainty to an actual screening decision (8 targets x random/scaffold,
 RF and GIN, plus the GINE ensemble; `results/uncertainty/`, figures
-under `figures/uncertainty/`). Calibration/AD numbers below cover the
-14 cells from the first 2026-10-11 refresh pass (7 tags x 2 splits);
-screening numbers (P@100, precision) cover all 16 cells:
+under `figures/uncertainty/`). Calibration, AD and screening numbers
+below all cover the refreshed **16 cells** (8 tags x 2 splits):
 
 - **RF tree-std calibrates**: monotone quintile calibration (RMSE rising
-  with predicted std) in **6 of 14** cells, Spearman(std, |err|)
-  averaging **0.345** (0.156-0.490) - usable as a per-molecule
+  with predicted std) in **8 of 16** cells, Spearman(std, |err|)
+  averaging **0.356** (0.156-0.490) - usable as a per-molecule
   confidence, imperfectly. The **GNN 3-seed ensemble std does not**
-  (rho **0.147**, 0.092-0.231; monotone in only 3 of 14): the seeds are
-  too close to each other to span the error. Any "GNN uncertainty" claim
-  in this repo would be noise.
-- **AD (max Tanimoto to train ≥ 0.4, coverage ~96.4%)**: in-AD test R2
-  averages **0.638** (0.392-0.825) vs out-of-AD **−0.367** (mean of the
-  12 cells with out-of-AD test mass; worst `egfr`/random **−1.451**) -
-  out-of-domain predictions are indeed bad.
+  (GIN rho **0.147**, 0.092-0.231, monotone in only **3 of 16**; GINE
+  rho **0.112**, −0.043-0.206, slope **0.809**, monotone in **5 of
+  16**): the seeds are too close to each other to span the error. Any
+  "GNN uncertainty" claim in this repo would be noise.
+- **AD (max Tanimoto to train ≥ 0.4, coverage ~96.7%)**: in-AD test R2
+  averages **0.638** (0.392-0.825) vs out-of-AD **−0.334** (mean of the
+  13 cells with at least two out-of-AD test molecules; worst
+  `egfr`/random **−1.451**) - out-of-domain predictions are indeed bad.
 - **The counter-intuitive part**: AD-filtering the screen changes P@100
   in **1 of 16 cells** (15/16 unchanged; the exception `herg`/random
-  0.65 → 0.66) - the RF ranking never puts an out-of-AD molecule in its
-  top 100; the ranking is itself an implicit AD filter, so a second AD
+  0.65 → 0.66) - the RF ranking puts an out-of-AD molecule in its top
+  100 in only **2 of 16 cells** (`a2a`/scaffold and `herg`/random, one
+  molecule each); the ranking is itself an almost-implicit AD filter, so
+  a second AD
   pass buys nothing on precision. What does help is slicing the
   report-positive set {pred ≥ 7} to its confident half (std ≤ median):
   mean precision **0.827 → 0.889** across the 16 cells. And confidence

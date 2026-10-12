@@ -7,7 +7,9 @@ Three checks:
   2. Ultra-potent outliers (pIC50 > 9, i.e. IC50 < 1 nM). Values like this are
      often assay detection limits, unit mislabels or cross-assay artefacts
      rather than true affinity. Group them by assay / document to see whether
-     a few suspicious sources dominate.
+     a few suspicious sources dominate. Only rows the label policy keeps
+     (standard_relation == "=") are counted - rows the H1 filter drops are
+     reported on a separate line, never mixed into the headline.
   3. Permutation importance vs MDI. RandomForest's built-in (MDI) importance
      is inflated for correlated features - and 2048 fingerprint bits contain
      many chemically equivalent ones. Permutation importance on the held-out
@@ -70,8 +72,32 @@ def check_ultra_potent():
     df = df.dropna(subset=["standard_value", "canonical_smiles"])
     df = df[df["standard_value"] > 0]
     df["pic50"] = -np.log10(df["standard_value"] * 1e-9)
-    hot = df[df["pic50"] > 9]
-    print(f"  {len(hot)} / {len(df)} raw rows ({len(hot)/len(df):.1%}) have pIC50 > 9")
+    hot_all = df[df["pic50"] > 9]
+    if "standard_relation" in df.columns:
+        # The label policy (scripts/02_clean_data.py) keeps only
+        # standard_relation == "=" rows; anything else ('<', '>', '>=',
+        # NaN) never reaches pic50, so counting it here would audit rows
+        # the model never saw. Headline = kept rows only; the dropped
+        # ones are reported on a separate line.
+        kept = df["standard_relation"] == "="
+        hot = hot_all[kept.loc[hot_all.index]]
+        dropped = hot_all[~kept.loc[hot_all.index]]
+        n_kept = int(kept.sum())
+        pct = f" ({len(hot) / n_kept:.1%})" if n_kept else ""
+        print(f"  {len(hot)} / {n_kept} labelled rows (standard_relation "
+              f"'='){pct} have pIC50 > 9")
+        if len(dropped):
+            rels = (dropped["standard_relation"].fillna("NaN")
+                    .value_counts().to_dict())
+            print(f"  {len(dropped)} further raw row(s) exceed pIC50 > 9 "
+                  f"but were dropped by the label policy "
+                  f"(relations: {rels}) - not counted above")
+    else:
+        # sources without a relation column (BACE): the label policy keeps
+        # every row, so the whole file is the kept set
+        hot = hot_all
+        print(f"  {len(hot)} / {len(df)} raw rows ({len(hot)/len(df):.1%}) "
+              "have pIC50 > 9")
     if len(hot) == 0:
         return
     for col in ["assay_description", "document_chembl_id"]:

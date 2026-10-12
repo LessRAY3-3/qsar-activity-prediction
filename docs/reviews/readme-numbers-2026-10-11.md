@@ -405,8 +405,8 @@
 - **XGB 3 seed 完全相同**（`r2_std = 0.0`）：seed 没传入模型（见 §3）。
 - **`a2a` learning curve 只有 1 个点**（n≥1000 全部 skipped，train pool 仅 982/960）。
 - **`mt_metrics.json` 的 `_run.outdir` = `/home/lessray/...`**（win4070 远端产物，经 `.scratch/pull_gpuwave.sh multitask` 拉回）——与本机产物混放，来源要写清。
-- **`results/_diag_tasks1/`**（10-04）与 `results/{afp_panel,fairness,fp_ablation,multi_target}` 等目录含更早的诊断/面板产物，引用前先看 mtime。
-- `results/metrics_bace.json`（10-10 12:02）与 `rf_preds_bace_*`（10-08）属 fallback 数据集，不在 8-tag 面板内。
+- **`results/_archive-2026-10-09/_diag_tasks1/`**（10-04；2026-10-12 随 re-review 整改从 `results/_diag_tasks1/` 移入归档目录，同批移入的还有 `egfr` tuneA/B 的 metrics/preds/ckpt）与 `results/{afp_panel,fairness,fp_ablation,multi_target}` 等目录含更早的诊断/面板产物，引用前先看 mtime。
+- `results/metrics_bace.json`（10-10 12:02）与 `rf_preds_bace_*`（原 10-08；**2026-10-12 重生成**，与 `metrics_bace.json` 复算一致）属 fallback 数据集，不在 8-tag 面板内。
 
 ---
 
@@ -439,7 +439,11 @@
 | hivpr | 2,799 | **2,573** | −226 |
 | mpro | 4,424 | **3,410** | −1,014 |
 | vegfr2 | 11,797 | **9,643** | −2,154 |
-| **合计** | 45,145 | **42,796** | −2,349 |
+| **合计** | 55,145 | **42,804** | −12,341 |
+
+（2026-10-12 更正：合计行原写 45,145 / 42,796 / −2,349，与本表逐行求和不符；
+新值 = 八行直接相加，且新 n 一列等于八个 ChEMBL tag 的
+`data/processed/*_pic50_clean.csv` 行数之和，不含 `bace`。）
 
 ---
 

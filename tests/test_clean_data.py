@@ -101,27 +101,45 @@ def test_censoring_filter_keeps_only_exact_rows(tmp_path, load_script, capsys):
 def test_parent_standardization_merges_salt_forms(tmp_path, load_script, capsys):
     pic50 = lambda ic50: -np.log10(ic50 * 1e-9)  # noqa: E731
     rows = [
-        # free base and sodium salt of the same parent (acetic acid)
-        _row("CHEMBL1", "CC(=O)O", 100.0, "=", pchembl=pic50(100.0)),
-        _row("CHEMBL2", "CC(=O)[O-].[Na+]", 400.0, "=", pchembl=pic50(400.0)),
+        # Three structural variants of one parent (acetic acid), 4 records:
+        # the free base is measured twice, plus the sodium salt and the
+        # deprotonated anion.  records (4) != variants (3) and median !=
+        # mean over the group, so both the "mean instead of median" and the
+        # "records instead of variants" mutants of the parent groupby fail.
+        _row("CHEMBL1", "CC(=O)O", 100.0, "=", pchembl=pic50(100.0)),       # 7.000
+        _row("CHEMBL2", "CC(=O)[O-].[Na+]", 400.0, "=", pchembl=pic50(400.0)),  # 6.398
+        _row("CHEMBL3", "CC(=O)[O-]", 10.0, "=", pchembl=pic50(10.0)),      # 8.000
+        _row("CHEMBL4", "CC(=O)O", 1000.0, "=", pchembl=pic50(1000.0)),     # 6.000
         # a distinct control compound that must stay separate
-        _row("CHEMBL3", "c1ccncc1", 10.0, "=", pchembl=pic50(10.0)),
+        _row("CHEMBL5", "c1ccncc1", 10.0, "=", pchembl=pic50(10.0)),
     ]
     clean, out = _run_02(tmp_path, load_script, rows, capsys)
 
-    assert len(clean) == 2  # salt pair collapses to one parent compound
+    assert len(clean) == 2  # salt/form group collapses to one parent compound
     parent_row = clean[clean["parent_smiles"] == "CC(=O)O"].iloc[0]
     assert parent_row["canonical_smiles"] == "CC(=O)O"  # first, for provenance
-    assert parent_row["n_measurements"] == 2
-    assert parent_row["n_structural_variants"] == 2
-    assert parent_row["pic50"] == pytest.approx(np.median([pic50(100.0), pic50(400.0)]))
+    assert parent_row["n_measurements"] == 4
+    assert parent_row["n_structural_variants"] == 3
+    # a "records instead of variants" mutant would report 4 here
+    assert parent_row["n_measurements"] != parent_row["n_structural_variants"]
+
+    record_values = [pic50(100.0), pic50(400.0), pic50(10.0), pic50(1000.0)]
+    expected_median = float(np.median(record_values))
+    expected_mean = float(np.mean(record_values))
+    # the fixture must discriminate median from mean at all
+    assert not np.isclose(expected_median, expected_mean, rtol=0.0, atol=1e-6)
+    # merged pic50 is the MEDIAN pIC50 over the parent group's records
+    assert parent_row["pic50"] == pytest.approx(expected_median, rel=1e-9)
+    # a "mean instead of median" mutant would land on expected_mean
+    assert parent_row["pic50"] != pytest.approx(expected_mean, rel=1e-6)
+
     pyridine_row = clean[clean["parent_smiles"] == "c1ccncc1"].iloc[0]
     assert pyridine_row["n_measurements"] == 1
     assert pyridine_row["n_structural_variants"] == 1
     # summary prints: multi-fragment input detected, duplicate group merged
     assert "multi-fragment inputs: 1" in out
-    assert "Removed 1 duplicate rows -> 2 unique parent compounds" in out
-    assert "1 held >1 distinct" in out  # merged group had two canonical SMILES
+    assert "Removed 3 duplicate rows -> 2 unique parent compounds" in out
+    assert "1 held >1 distinct" in out  # merged group held three canonical SMILES
 
 
 def test_uncharger_covers_charged_single_fragments(tmp_path, load_script, capsys):

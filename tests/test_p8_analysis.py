@@ -349,6 +349,45 @@ def test_summary_merge_accepts_legacy_campaign_file(load_experiment,
         mod.merge_summary(smoke, str(path), n_boot=300)
 
 
+def test_legacy_p_one_sided_renamed_on_kept_rows(load_experiment, tmp_path):
+    """The L1 rename must survive on KEPT legacy rows (rows the update does
+    not touch): a pre-rename schema summary carrying p_one_sided is loaded,
+    a different cell is merged in, and the untouched legacy row must come
+    back under frac_boot_gin_better -- not silently NaN."""
+    mod = load_experiment("paired_bootstrap")
+    legacy = pd.DataFrame([
+        {"tag": "legacy", "split": "random", "pair": "seed42", "d_r2": 0.1,
+         "ci_lo": 0.0, "ci_hi": 0.2, "significant": True, "winner": "gin",
+         "p_one_sided": 0.9, "d_rmse": -0.1, "d_rmse_ci_lo": -0.2,
+         "d_rmse_ci_hi": 0.0},
+    ])
+    path = tmp_path / "summary.csv"
+    legacy.to_csv(path, index=False)
+
+    # update touches ONLY another cell -> the legacy row survives as kept
+    update = pd.DataFrame([
+        {"tag": "fresh", "split": "scaffold", "pair": "mean3", "d_r2": 0.2,
+         "ci_lo": 0.1, "ci_hi": 0.3, "significant": True, "winner": "gin",
+         "frac_boot_gin_better": 0.95, "d_rmse": -0.2, "d_rmse_ci_lo": -0.3,
+         "d_rmse_ci_hi": -0.1, "n_boot": mod.N_BOOT},
+    ], columns=mod.SUMMARY_COLS)
+
+    merged = mod.merge_summary(update, str(path), n_boot=mod.N_BOOT)
+
+    assert "p_one_sided" not in merged.columns
+    assert list(merged.columns) == mod.SUMMARY_COLS
+    assert len(merged) == 2
+    kept = merged.set_index(list(mod.SUMMARY_KEYS)).loc[
+        ("legacy", "random", "seed42")]
+    # the retired column's value rides along under the current name
+    assert kept["frac_boot_gin_better"] == pytest.approx(0.9)
+    # pre-n_boot legacy rows are validated as B=N_BOOT on the way through
+    assert kept["n_boot"] == mod.N_BOOT
+    fresh = merged.set_index(list(mod.SUMMARY_KEYS)).loc[
+        ("fresh", "scaffold", "mean3")]
+    assert fresh["frac_boot_gin_better"] == pytest.approx(0.95)
+
+
 def test_is_campaign_run_flags_partial_invocations(load_experiment):
     mod = load_experiment("paired_bootstrap")
     assert mod.is_campaign_run(list(mod.TAGS), mod.N_BOOT)
