@@ -1,0 +1,19 @@
+[abl1/scaffold] n=425  mean3 dR2=+0.0202 CI[-0.0179, +0.0570]  frac_boot_gin_better=0.8565
+
+=== Paired bootstrap significance: ATTENTIVEFP vs RF ===
+  dR2 = R2_ATTENTIVEFP - R2_RF (positive favours ATTENTIVEFP); significant = 95% CI excludes 0
+
+  [seed42] 0/1 cells with CI excluding 0
+    no cell separates from zero
+    dR2 point range: [-0.0399, -0.0399]
+
+  [mean3] 0/1 cells with CI excluding 0
+    no cell separates from zero
+    dR2 point range: [+0.0202, +0.0202]
+
+  mean3 (primary): RF significantly wins in 0/1 cells; ATTENTIVEFP in 0/1; 1/1 inconclusive
+
+partial run (1 tag(s), n_boot=10000): campaign summary/figure left untouched -- only a full-tag run at the default --n-boot merges into them
+
+summary -> results/significance/summary_partial_attentivefp.csv (6 rows)
+figure  -> figures/significance/ci_panel_partial_attentivefp.png

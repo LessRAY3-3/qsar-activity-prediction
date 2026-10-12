@@ -1,10 +1,14 @@
 """XGBoost baseline: is the traditional-ML ceiling higher than RF suggests?
 
-Identical evaluation contract as the learning curve: same persisted
+Identical evaluation contract as the headline RF: same persisted
 2048-bit Morgan r=2 fingerprints (the headline featurization), same
-GNN-paired train pool (train_idx), same persisted test set, fixed
-hyperparameters, 3 seeds x 2 splits. The same-pool RF control values are
-read from the learning-curve results when available (not re-run).
+persisted test set, and the same training molecules - the full non-test
+pool (train + valid; the RF cross-validates, so it never carved out a
+validation set, while the GNN's 10% valid split is a subset of the RF's
+training rows). Fixed hyperparameters, 3 seeds x 2 splits. The RF
+control is read from results/metrics_{TAG}.json (the headline
+full-pool RF); learning-curve RFs are never used as controls - they fit
+at n_train far below the pool, so they are not same-pool either.
 
 Note: XGBoost runs on CPU (tree_method="hist") - deterministic for a
 fixed seed, and fast enough at this scale. libomp is required on macOS:
@@ -16,7 +20,6 @@ Outputs:
   figures/xgboost/xgboost_{TAG}.png
 """
 import argparse
-import csv
 import json
 import os
 import time
@@ -40,28 +43,48 @@ def parse_args():
     return p.parse_args()
 
 
-def load_rf_control(tag):
-    """Same-pool RF control from the learning curve (preferred) or headline."""
-    lc = os.path.join(BASE, "results", "learning_curve",
-                      f"learning_curve_{tag}.csv")
-    if os.path.exists(lc):
-        import pandas as pd
-        df = pd.read_csv(lc)
-        n_max = df["n_train"].max()
-        out = {}
-        for split in sorted(df["split"].unique()):
-            g = df[(df["split"] == split) & (df["model"] == "rf")
-                   & (df["n_train"] == n_max)]
-            out[split] = {"r2_mean": float(g["r2"].mean()),
-                          # ddof=0: population std, the repo-wide convention
-                          # (matches the JSON summaries' np.std)
-                          "r2_std": float(g["r2"].std(ddof=0)),
-                          "source": f"learning_curve rf n={n_max} (same pool)"}
-        return out
+def load_rf_control(tag, pool_sizes, test_sizes, n_total):
+    """Headline RF control per split, read from results/metrics_{tag}.json.
+
+    Learning-curve RFs are deliberately never used as a control: they fit
+    at n_train <= n_max rows - often far below the pool - so they are not
+    the headline RF even when a large n_max looks comparable.
+
+    same_pool is True only when the XGBoost fit pool holds exactly the
+    molecules the headline RF trains on: every non-test row (the RF's 80/20
+    split trains on the complement of the test set; the GNN valid carve-out
+    is a subset of it, so train+valid reproduces the RF's training rows).
+    """
     mj = json.load(open(os.path.join(BASE, "results", f"metrics_{tag}.json")))
-    return {split: {"r2_mean": mj[split]["r2"], "r2_std": None,
-                    "source": "headline metrics json (full pool, not same-pool)"}
-            for split in ("random", "scaffold")}
+    out = {}
+    for split in sorted(pool_sizes):
+        if split not in mj:
+            raise SystemExit(f"results/metrics_{tag}.json has no '{split}' entry")
+        rf_pool = n_total - test_sizes[split]
+        same_pool = int(pool_sizes[split]) == rf_pool
+        out[split] = {"r2_mean": float(mj[split]["r2"]),
+                      "r2_std": None,
+                      "same_pool": same_pool,
+                      "xgb_n_train": int(pool_sizes[split]),
+                      "source": ("headline metrics json (full non-test pool)"
+                                 if same_pool else
+                                 f"headline metrics json (RF trains {rf_pool} "
+                                 f"rows vs XGB {pool_sizes[split]} - "
+                                 "NOT same-pool)")}
+    return out
+
+
+def fit_pool(sp):
+    """XGBoost training rows: train + valid = every non-test molecule.
+
+    Matches the headline RF's training set exactly (it trains on the
+    complement of the test set and never splits off a validation set);
+    train_idx alone would be the GNN's 10%-carved pool instead.
+    """
+    parts = [sp["train_idx"]]
+    if "valid_idx" in sp.files:
+        parts.append(sp["valid_idx"])
+    return np.concatenate(parts)
 
 
 def make_figure(csv_path, fig_path, tag, control):
@@ -119,9 +142,26 @@ def main():
     from sklearn.metrics import (mean_absolute_error, mean_squared_error,
                                  r2_score)
 
-    control = load_rf_control(args.tag)
+    # load every split up front so the RF control can be size-checked
+    fit_idx, test_idx = {}, {}
+    for split in splits:
+        sp = np.load(os.path.join(BASE, "data", "processed", "splits",
+                                  f"{args.tag}_{split}.npz"))
+        fit_idx[split] = fit_pool(sp)
+        test_idx[split] = sp["test_idx"]
+
+    control = load_rf_control(
+        args.tag,
+        {s: len(fit_idx[s]) for s in splits},
+        {s: len(test_idx[s]) for s in splits},
+        len(X),
+    )
     print(f"[{args.tag}] RF control: "
           + json.dumps({k: v["r2_mean"] for k, v in control.items()}))
+    for split, c in control.items():
+        if not c["same_pool"]:
+            print(f"WARNING: [{args.tag}/{split}] control pool mismatch: "
+                  f"{c['source']}")
 
     rows = []
     csv_f = open(csv_path, "w")
@@ -136,21 +176,19 @@ def main():
           f"n_est={args.n_estimators} lr={args.lr} depth={args.max_depth} "
           f"device=cpu/hist (xgboost {xgb.__version__})")
     for split in splits:
-        sp = np.load(os.path.join(BASE, "data", "processed", "splits",
-                                  f"{args.tag}_{split}.npz"))
-        train_idx, test_idx = sp["train_idx"], sp["test_idx"]
-        print(f"[{args.tag}/{split}] pool={len(train_idx)} test={len(test_idx)}")
+        tr, te = fit_idx[split], test_idx[split]
+        print(f"[{args.tag}/{split}] fit_pool={len(tr)} test={len(te)}")
         for seed in seeds:
             t0 = time.time()
             model = xgb.XGBRegressor(
                 n_estimators=args.n_estimators, learning_rate=args.lr,
                 max_depth=args.max_depth, random_state=seed,
                 tree_method="hist", n_jobs=-1)
-            model.fit(X[train_idx], y[train_idx])
-            pred = model.predict(X[test_idx])
-            m = {"r2": float(r2_score(y[test_idx], pred)),
-                 "rmse": float(np.sqrt(mean_squared_error(y[test_idx], pred))),
-                 "mae": float(mean_absolute_error(y[test_idx], pred))}
+            model.fit(X[tr], y[tr])
+            pred = model.predict(X[te])
+            m = {"r2": float(r2_score(y[te], pred)),
+                 "rmse": float(np.sqrt(mean_squared_error(y[te], pred))),
+                 "mae": float(mean_absolute_error(y[te], pred))}
             dt = time.time() - t0
             print(f"  seed={seed} R2={m['r2']:.4f} RMSE={m['rmse']:.4f} ({dt:.0f}s)")
             emit({"split": split, "seed": seed, **m,
@@ -174,6 +212,8 @@ def main():
                               "max_depth": args.max_depth,
                               "tree_method": "hist", "device": "cpu"},
                "xgboost_version": xgb.__version__,
+               "fit_pool": {s: int(len(fit_idx[s])) for s in splits},
+               "n_test": {s: int(len(test_idx[s])) for s in splits},
                "rf_control": control, "by_split": summary},
               open(sum_path, "w"), indent=2)
     print(f"summary -> {os.path.relpath(sum_path, BASE)}")

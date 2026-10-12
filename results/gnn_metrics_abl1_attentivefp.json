@@ -20,11 +20,14 @@
     }
   },
   "scaffold": {
-    "r2": 0.25963646173477173,
-    "rmse": 1.0803812163912412,
-    "mae": 0.8672487735748291,
-    "best_epoch": 15,
-    "best_valid_rmse_std": 0.7369191646575928,
+    "r2": 0.6744612455368042,
+    "rmse": 0.7164004942351808,
+    "mae": 0.5357204079627991,
+    "best_epoch": 82,
+    "best_valid_rmse_std": 0.6076432466506958,
+    "convergence_flag": false,
+    "max_epochs": 100,
+    "train_mse": 0.3037706453292096,
     "params": {
       "tag": "abl1",
       "model": "attentivefp",
@@ -35,6 +38,7 @@
       "batch_size": 128,
       "epochs": 100,
       "patience": 20,
+      "min_epochs": 60,
       "seed": 42,
       "suffix": ""
     }

@@ -20,13 +20,22 @@ Notes on the choices:
 
 Early stopping on validation RMSE (patience configurable); the best
 checkpoint (in memory) is restored before the test evaluation.
+--min-epochs N defers the early-stop check until epoch N (default 0 =
+behaviour unchanged), so a stalled run cannot stop before epoch N.
+
+Convergence check: after training, a run whose best epoch is below 30%
+of --epochs while its train MSE is still > 0.5 (standardised y, i.e. it
+explains less than half the train variance) prints a prominent WARNING
+and records convergence_flag=true + best_epoch/max_epochs/train_mse in
+the metrics json (see convergence_flag()).
 
 Outputs (model name in the filename only when it is not the default gin,
 so existing gin artifacts and commands keep their exact names):
   results/gnn_models/{TAG}_{model}_{split}{suffix}.pt
   results/gnn_preds_{TAG}[_{model}]_{split}{suffix}.npz
   results/gnn_metrics_{TAG}[_{model}]{suffix}.json   updated
-      {split: {r2, rmse, mae, params, best_epoch}}
+      {split: {r2, rmse, mae, params, best_epoch,
+               convergence_flag, max_epochs, train_mse}}
 """
 import argparse
 import copy
@@ -64,6 +73,9 @@ def parse_args():
     p.add_argument("--batch-size", type=int, default=128)
     p.add_argument("--epochs", type=int, default=100)
     p.add_argument("--patience", type=int, default=20)
+    p.add_argument("--min-epochs", type=int, default=0,
+                   help="defer early stopping until this epoch (0 = off); "
+                        "a stalled run cannot stop before it")
     p.add_argument("--seed", type=int, default=42)
     p.add_argument("--suffix", default="",
                    help="suffix for model/preds/metrics files (used to keep "
@@ -193,6 +205,25 @@ def build_model(args):
     return MODELS[args.model](args.hidden, args.num_layers, args.dropout)
 
 
+# Convergence-warning thresholds (train MSE on standardised y, so 1.0 =
+# no-skill and 0.5 = half the train variance explained). Healthy runs in
+# the campaigns end near 0.24-0.31; the stalled abl1/scaffold seed-42 run
+# stopped at best_epoch 15/100 with train MSE 0.57.
+CONVERGENCE_EPOCH_FRAC = 0.3   # best epoch below this fraction of max epochs
+CONVERGENCE_TRAIN_MSE = 0.5    # train MSE still above this = fitting poorly
+
+
+def convergence_flag(best_epoch, max_epochs, train_mse):
+    """True when a run stopped far too early while still fitting poorly.
+
+    Both conditions must hold: best_epoch < 30% of max_epochs AND the
+    train MSE at early stop > 0.5. A run that trains to a late best epoch
+    is never flagged, no matter its train MSE.
+    """
+    return bool(best_epoch < CONVERGENCE_EPOCH_FRAC * max_epochs
+                and train_mse > CONVERGENCE_TRAIN_MSE)
+
+
 def run_epoch(model, loader, device, opt=None):
     train = opt is not None
     model.train() if train else model.eval()
@@ -264,6 +295,9 @@ def main():
         opt, mode="min", factor=0.5, patience=7, min_lr=1e-5)
 
     best = {"rmse": float("inf"), "state": None, "epoch": -1}
+    if args.min_epochs > 0:
+        print(f"  early stopping deferred until epoch {args.min_epochs} "
+              f"(--min-epochs {args.min_epochs})")
     t0 = time.time()
     for epoch in range(1, args.epochs + 1):
         tr_loss = run_epoch(model, train_ld, device, opt)
@@ -279,9 +313,22 @@ def main():
         if epoch % 10 == 0 or marker:
             print(f"  epoch {epoch:3d}  train_mse={tr_loss:.4f}  valid_rmse={v_rmse:.4f}"
                   f"  lr={lr_now:.1e}{marker}")
-        if epoch - best["epoch"] >= args.patience:
+        if epoch >= args.min_epochs and epoch - best["epoch"] >= args.patience:
             print(f"  early stop at epoch {epoch} (best epoch {best['epoch']})")
             break
+
+    final_train_mse = tr_loss
+    flagged = convergence_flag(best["epoch"], args.epochs, final_train_mse)
+    if flagged:
+        print("=" * 72)
+        print(f"WARNING: possible non-convergence for {args.tag}/{args.split} "
+              f"({args.model}, seed {args.seed}): best epoch {best['epoch']} is "
+              f"below {int(CONVERGENCE_EPOCH_FRAC * 100)}% of max "
+              f"{args.epochs} epochs while train MSE is still "
+              f"{final_train_mse:.4f} (> {CONVERGENCE_TRAIN_MSE}); the test "
+              f"score may be unreliable -- consider rerunning with a "
+              f"--min-epochs floor or longer patience")
+        print("=" * 72)
 
     model.load_state_dict(best["state"])
     tp_raw, ty_raw = predict(model, test_ld, device)
@@ -308,6 +355,9 @@ def main():
     all_m = json.load(open(mj)) if os.path.exists(mj) else {}
     all_m[args.split] = {**m, "best_epoch": best["epoch"],
                          "best_valid_rmse_std": best["rmse"],
+                         "convergence_flag": flagged,
+                         "max_epochs": args.epochs,
+                         "train_mse": final_train_mse,
                          "params": {k: v for k, v in vars(args).items() if k != "split"}}
     json.dump(all_m, open(mj, "w"), indent=2)
     print(f"  saved -> results/gnn_models/{pt_name}, "

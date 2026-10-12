@@ -8,7 +8,9 @@ description: Audit this QSAR repo (ChEMBL -> pIC50 -> Morgan-fingerprint RF vs G
 This skill re-runs the review that was done on 2026-10-10 and keeps its
 lessons. The findings of that review, with file:line anchors, evidence and
 suggested fixes, are in `references/findings-2026-10-10.md`. Start every
-review by reading that file and checking which items are still open.
+review by reading that file - first its dated amendment note, which points
+to the four claims the 2026-10-11 re-review corrected - and checking which
+items are still open.
 
 ## 0. Baseline (5 min)
 
@@ -19,9 +21,22 @@ pytest -q
 ```
 
 `requirements.txt` pins need Python >= 3.12 (numpy 2.5.x). On 3.11, install
-unpinned: the suite (81 tests) and ruff were verified to pass that way.
+unpinned: the suite (97 tests at the 2026-10-11 refresh; 117 when last run,
+2026-10-12) and ruff were verified to pass that way.
 Many checks below need only `data/processed/` and `results/`, which are
 tracked; `models/` and `data/raw/` come from `python scripts/fetch_artifacts.py --all`.
+
+> **Warning - artifacts-v1 predates the 2026-10-11 data refresh.** The only
+> published release (`artifacts-v1`, 2026-10-08, commit 5b5d244) holds
+> pre-refresh raw CSVs and models: its raw files lack `standard_relation`,
+> so running `02_clean_data.py` on them *silently skips the censoring
+> filter* (the H1 bug returns; 02 fails open when the column is missing),
+> and its RF models score differently against the refreshed clean CSVs.
+> `scripts/fetch_artifacts.py` verifies archives only against the release's
+> own checksum file, so nothing flags the staleness. Until a refreshed
+> release exists, treat the README fast path as stale, verify fetched raw
+> files against `data/raw/sha256sums.txt`, and compare against the
+> refreshed state tagged `data-refresh-2026-10-11`.
 
 ## 1. Review checklist
 
@@ -31,13 +46,19 @@ re-reading the code or by a number computed from the repo, never inferred.
 ### A. Data layer (highest leverage: every model inherits it)
 
 - **Censored activities.** ChEMBL stores "IC50 > 10000 nM" with
-  `standard_relation` `>`/`<`. The downloaders do not request that column,
-  and `pchembl_value` is empty for every censored record, so the pChEMBL
-  cross-check in `02_clean_data.py` silently covers uncensored rows only.
-  Quantify with `scripts/chembl_censoring_counts.py` (section 2).
-- **Salt forms and parents.** `canonical_smiles` keeps counter-ions; dedup
-  is on the raw string. Count parent-level duplicates, label conflicts and
-  train/test parent leakage with `scripts/qc_salts_censoring.py`.
+  `standard_relation` `>`/`<`. Since the 2026-10-11 refresh the downloaders
+  (01d/01e) request that column and `02_clean_data.py` keeps only
+  `standard_relation == "="` rows before aggregating labels (H1 fixed).
+  Residual risk: 02 fails open when the column is missing - legitimate only
+  for the known bace-style input; anything else should raise, not skip.
+  Quantify upstream censoring with `scripts/chembl_censoring_counts.py`
+  (live API) and audit the committed raw pulls with its `--overlap` mode
+  (section 2).
+- **Salt forms and parents.** `02_clean_data.py` standardizes every record
+  to `parent_smiles` (largest fragment + Uncharger) and deduplicates on it
+  (M1 fixed); `canonical_smiles` in the clean CSV is provenance only (the
+  first variant). Count parent-level duplicates, multi-fragment parents and
+  split overlap with `scripts/qc_salts_censoring.py`.
 - Unit filter (`nM` only), non-positive values, median aggregation and
   invalid-SMILES handling in `02`/`03`: confirm row counts against
   `data/README.md` and `data/raw/sha256sums.txt`.
@@ -46,8 +67,9 @@ re-reading the code or by a number computed from the repo, never inferred.
 
 - `valid_idx` must be carved from train only; `test_idx` must be asserted
   equal across RF and every GNN seed before any paired statistic.
-- Parent-level leakage (salt vs free base on both sides): random split is
-  expected to leak a little, scaffold should not.
+- Parent-level leakage (salt vs free base on both sides): rows are now
+  unique `parent_smiles`, so cross-split parent overlap must be exactly 0;
+  a non-zero count means split/CSV misalignment, not a leaky split.
 - `GridSearchCV(cv=5)` uses unshuffled `KFold`. Random-split train indices
   are shuffled, but scaffold-split ones are ordered by scaffold group size
   and time-split ones follow the SMILES-sorted clean CSV. Note it whenever
@@ -84,17 +106,26 @@ consistent between JSON summaries and figures.
 Recompute every README number from `results/` programmatically (pandas /
 json), at the README's rounding. Panel, significance, time split,
 multitask, fairness and uncertainty tables were all consistent on
-2026-10-10 except the items listed in the findings file.
+2026-10-10 except the items listed in the findings file. As a first pass
+run `scripts/verify_readme_tables.py` (section 2): it covers the markdown
+tables and exits non-zero on any mismatch; the prose sections
+(uncertainty-screening bullets, GINE panel verdicts, AttentiveFP notes)
+are not machine-checked and need manual recomputation.
 
 ## 2. Scripts in this skill
 
 | Script | What it does | Network |
 |---|---|---|
-| `scripts/qc_salts_censoring.py --tag TAG [--out f.json]` | multi-fragment SMILES, parent duplicates and their pIC50 spread, parent-level train/test leakage for every persisted split, censoring proxy from raw CSV | no |
-| `scripts/chembl_censoring_counts.py [--targets tag=CHEMBLID,...] [--overlap TAG]` | censored-record counts per target and assay type; with `--overlap`, how many cleaned compounds carry only censored labels | ChEMBL API |
+| `scripts/qc_salts_censoring.py --tag TAG [--out f.json]` | audits the committed `parent_smiles` (multi-fragment / duplicated parents must be 0, split overlap must be 0, recomputation from provenance with 02's own standardization), provenance salt context, raw-CSV censoring counts | no |
+| `scripts/chembl_censoring_counts.py [--targets tag=CHEMBLID,...] [--overlap TAG] [--skip-counts]` | censored-record counts per target and assay type (live ChEMBL); with `--overlap`, an offline raw-CSV audit: every modelled parent keeps ≥ 1 `=` record and `n_measurements` matches, mixed exact+censored parents are counted, and raw parents dropped by the H1 filter are reported | counts: ChEMBL API; `--overlap --skip-counts`: no |
+| `scripts/verify_readme_tables.py [--out report.json] [--dry-run]` | independently recomputes README table cells (panel, time split, XGBoost, multitask, fp ablation, EGFR/BACE detail, GIN-vs-RF, fairness incl. GINE rows, dataset sizes) from `results/`; **exits non-zero on any mismatch** (`--dry-run` reports without failing) | no |
+| `scripts/rf_h1_sensitivity.py [--out D] [--dry-run] [--baseline-ref REF]` | the historical (pre-refresh) H1 sensitivity RF re-run; inputs pinned in `.scratch/h1_sensitivity/`, primary baseline = published pre-refresh metrics as constants, refreshed-state baseline pinned to tag `data-refresh-2026-10-11` (never HEAD); refuses `results/`/`figures/`/`models/`/`data/` outputs | no (local `git show` for the ref) |
+| `scripts/reconcile_h1.py [--old-raw F] [--clean F] [--out D] [--dry-run]` | record-level historical-vs-fresh pull reconciliation for egfr_full; the pre-refresh inputs were clobbered by the refresh, so defaults are degenerate - run `--dry-run` first, it says what to pass; handles `standard_relation` suffixes that used to KeyError | no |
+| `scripts/regen_fp_ablation_figs.py [--out D] [--dry-run] [--force]` | regenerates missing (or, with `--force`, stale) `figures/fp_ablation/*.png` through `experiments/fingerprint_ablation.py:make_figure`; import-safe (writes only under `__main__`) | no |
 
-Both find the repo root on their own. Neither writes into `results/` or
-`data/` unless `--out` points there.
+All scripts find the repo root on their own. None writes into `results/`,
+`data/` or `models/` unless `--out` explicitly points there, and even then
+those directories are refused; `--dry-run` prints the plan without writing.
 
 ## 3. Report format
 

@@ -1,32 +1,58 @@
-# 2026-10-11 数据刷新战役用：README 表格 1-4 独立复算校验（逐格比对 results/ 源文件）；原 .scratch/verify_readme_tables.py。
-"""Final-batch spot check: independently recompute README tables 1-4 from
-results/ source files and compare cell-by-cell.
+# 2026-10-11 数据刷新战役用：README 表格逐格独立复算校验（results/ 源文件比对；含 fairness、数据规模、EGFR/BACE 明细、GIN 对照）；原 .scratch/verify_readme_tables.py。
+"""Independently recompute README tables from results/ source files and
+compare cell-by-cell; exit non-zero when any cell mismatches.
 
-Table 1 : eight-target panel   -- metrics_{tag}.json + gnn_metrics_{tag}[_seed1|_seed2].json
+Tables covered:
+  T1 : eight-target panel   -- metrics_{tag}.json + gnn_metrics_{tag}[_seed1|_seed2].json
                                    + significance/summary.csv (mean3 rows)
-Table 2 : time split           -- time_split/summary.csv; delta/CI from
+  T2 : time split           -- time_split/summary.csv; delta/CI from
                                    significance/summary_time.csv (mean3 rows);
                                    GIN ens recomputed from gnn_preds_{tag}_time*.npz
-Table 3 : XGBoost delta        -- xgboost/summary_{tag}.json r2_mean minus the
+  T3 : XGBoost delta        -- xgboost/summary_{tag}.json r2_mean minus the
                                    refreshed metrics_{tag}.json control
-Table 4 : multitask 6 rows     -- multitask/summary.csv (delta vs refreshed RF)
+  T4 : multitask 6 rows     -- multitask/summary.csv (delta vs refreshed RF)
          + fp ablation anchors -- fp_ablation/summary_{tag}.json by_cell
+  T5 : EGFR detail table    -- metrics_egfr.json (R2/RMSE/MAE per split)
+  T6 : BACE detail table    -- metrics_bace.json
+  T7 : GIN vs RF (EGFR)     -- metrics_egfr.json + gnn_metrics_egfr{,_seed1,_seed2}.json
+  T8 : fairness campaign    -- fairness/summary_{vegfr2,herg,abl1}.json
+                                   (RF row cross-checked against metrics_{tag}.json;
+                                    GINE rows verified from the same file)
+  T9 : dataset sizes        -- row counts of data/processed/{tag}_pic50_clean.csv
+
+Known limitations (not machine-checked here):
+  * The uncertainty-screening section, the GINE panel verdict bullets and the
+    AttentiveFP section are prose + figures, not markdown tables - their
+    numbers are NOT verified by this script (parse-fragile; verify manually).
+  * Narrative sentences outside tables (Δ discussions, ranges, counts in
+    text) are not verified either; only table cells are.
+  * Tolerance is 0.0005001, i.e. agreement at the README's 3-decimal
+    rounding.
+
+Flags:
+  --out PATH    write a JSON report (totals, per-table counts, failures)
+  --dry-run     report mismatches but always exit 0 (exploration mode)
+
+Usage:
+    python .claude/skills/qsar-review/scripts/verify_readme_tables.py
+    python .claude/skills/qsar-review/scripts/verify_readme_tables.py --out /tmp/report.json
 """
+import argparse
 import json
 import os
 import re
+import sys
 from collections import defaultdict
 
 import numpy as np
 
 BASE = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..", ".."))
 TAGS = ["a2a", "abl1", "egfr", "egfr_full", "herg", "hivpr", "mpro", "vegfr2"]
+FAIRNESS_TAGS = ["vegfr2", "herg", "abl1"]
 TOL = 0.0005001
 
-readme = open(os.path.join(BASE, "README.md"), encoding="utf-8").read()
-lines = readme.splitlines()
-
-results = []  # (table, cell_id, displayed, computed, ok)
+lines = []      # README lines, bound in main()
+results = []    # (table, cell_id, displayed, computed, ok)
 
 
 def add(table, cell, disp, comp, ok=None):
@@ -35,16 +61,20 @@ def add(table, cell, disp, comp, ok=None):
     results.append((table, cell, disp, comp, bool(ok)))
 
 
-def find_table(header_fragment):
+def find_table(header_fragment, occurrence=1):
+    seen = 0
     for i, ln in enumerate(lines):
         if ln.startswith("|") and header_fragment in ln:
+            seen += 1
+            if seen != occurrence:
+                continue
             rows = []
             j = i + 2  # skip separator
             while j < len(lines) and lines[j].startswith("|"):
                 rows.append([c.strip() for c in lines[j].strip().strip("|").split("|")])
                 j += 1
             return rows
-    raise SystemExit(f"table not found: {header_fragment}")
+    raise SystemExit(f"table not found: {header_fragment} (occurrence {occurrence})")
 
 
 def num(s):
@@ -60,14 +90,6 @@ def split_pm(s):
     return float(a.strip().lstrip("+")), float(b.strip())
 
 
-def r3(x):
-    return round(x + 0.0, 3)
-
-
-def fmt3(x):
-    return f"{x:+.3f}" if False else f"{x:.3f}"
-
-
 def gin_stats(tag):
     vals = []
     for suf in ("", "_seed1", "_seed2"):
@@ -81,62 +103,53 @@ def gin_stats(tag):
     return out
 
 
-# ---------------------------------------------------------------- table 1
-sig_rows = {}
-with open(f"{BASE}/results/significance/summary.csv") as f:
-    hdr = f.readline().strip().split(",")
-    for ln in f:
-        r = dict(zip(hdr, ln.strip().split(",")))
-        if r["pair"] == "mean3":
-            sig_rows[(r["tag"], r["split"])] = r
+def gin_seed42(tag, split):
+    d = json.load(open(f"{BASE}/results/gnn_metrics_{tag}.json"))
+    return d[split]["r2"], d[split]["rmse"]
 
-t1 = find_table("| Tag | Target (ChEMBL id) | Family | n | RF rand | GIN rand |")
-assert len(t1) == 8, len(t1)
-for row in t1:
-    tag = row[0].strip("`")
-    assert tag in TAGS, tag
-    mj = json.load(open(f"{BASE}/results/metrics_{tag}.json"))
-    gs = gin_stats(tag)
-    n_total = None
-    for ln in open(f"{BASE}/results/time_split/summary.csv"):
-        parts = ln.strip().split(",")
-        if parts[0] == tag:
-            n_total = int(parts[3])
-    add("T1", f"{tag}/n", num(row[3].replace(",", "")), n_total)
-    for k, split in ((4, "random"), (8, "scaffold")):
-        rf = mj[split]["r2"]
-        gin_mean, gin_std = gs[split]
-        srow = sig_rows[(tag, split)]
-        winner = ("RF" if srow["winner"] == "rf"
-                  else "GIN" if srow["winner"] == "gin" else "ns")
-        if srow["significant"] == "False":
-            winner = "ns"
-        add("T1", f"{tag}/{split}/RF", num(row[k]), rf)
-        d_mean, d_std = split_pm(row[k + 1])
-        add("T1", f"{tag}/{split}/GIN_mean", d_mean, gin_mean)
-        add("T1", f"{tag}/{split}/GIN_std", d_std, gin_std)
-        add("T1", f"{tag}/{split}/delta", num(row[k + 2]), gin_mean - rf)
-        disp_sig = row[k + 3].replace("**", "").strip()
-        add("T1", f"{tag}/{split}/sig", disp_sig, winner,
-            ok=disp_sig == winner)
+
+# ---------------------------------------------------------------- table 1
+def check_t1():
+    sig_rows = {}
+    with open(f"{BASE}/results/significance/summary.csv") as f:
+        hdr = f.readline().strip().split(",")
+        for ln in f:
+            r = dict(zip(hdr, ln.strip().split(",")))
+            if r["pair"] == "mean3":
+                sig_rows[(r["tag"], r["split"])] = r
+
+    t1 = find_table("| Tag | Target (ChEMBL id) | Family | n | RF rand | GIN rand |")
+    assert len(t1) == 8, len(t1)
+    for row in t1:
+        tag = row[0].strip("`")
+        assert tag in TAGS, tag
+        mj = json.load(open(f"{BASE}/results/metrics_{tag}.json"))
+        gs = gin_stats(tag)
+        n_total = None
+        for ln in open(f"{BASE}/results/time_split/summary.csv"):
+            parts = ln.strip().split(",")
+            if parts[0] == tag:
+                n_total = int(parts[3])
+        add("T1", f"{tag}/n", num(row[3].replace(",", "")), n_total)
+        for k, split in ((4, "random"), (8, "scaffold")):
+            rf = mj[split]["r2"]
+            gin_mean, gin_std = gs[split]
+            srow = sig_rows[(tag, split)]
+            winner = ("RF" if srow["winner"] == "rf"
+                      else "GIN" if srow["winner"] == "gin" else "ns")
+            if srow["significant"] == "False":
+                winner = "ns"
+            add("T1", f"{tag}/{split}/RF", num(row[k]), rf)
+            d_mean, d_std = split_pm(row[k + 1])
+            add("T1", f"{tag}/{split}/GIN_mean", d_mean, gin_mean)
+            add("T1", f"{tag}/{split}/GIN_std", d_std, gin_std)
+            add("T1", f"{tag}/{split}/delta", num(row[k + 2]), gin_mean - rf)
+            disp_sig = row[k + 3].replace("**", "").strip()
+            add("T1", f"{tag}/{split}/sig", disp_sig, winner,
+                ok=disp_sig == winner)
+
 
 # ---------------------------------------------------------------- table 2
-ts = {}
-with open(f"{BASE}/results/time_split/summary.csv") as f:
-    hdr = f.readline().strip().split(",")
-    for ln in f:
-        r = dict(zip(hdr, ln.strip().split(",")))
-        ts[r["tag"]] = r
-
-st_rows = {}
-with open(f"{BASE}/results/significance/summary_time.csv") as f:
-    hdr = f.readline().strip().split(",")
-    for ln in f:
-        r = dict(zip(hdr, ln.strip().split(",")))
-        if r["pair"] == "mean3":
-            st_rows[r["tag"]] = r
-
-
 def gin_ens_time(tag):
     preds = []
     y = None
@@ -150,108 +163,258 @@ def gin_ens_time(tag):
     return 1.0 - ss_res / ss_tot
 
 
-t2 = find_table("| Tag | RF rand | GIN rand | RF time | GIN time | GIN ens |")
-assert len(t2) == 8, len(t2)
-for row in t2:
-    tag = row[0].strip("`")
-    s = ts[tag]
-    st = st_rows[tag]
-    add("T2", f"{tag}/RF_rand", num(row[1]), float(s["rf_random_r2"]))
-    add("T2", f"{tag}/GIN_rand_mean", num(row[2]),
-        float(s["gin_random_r2_mean"]))
-    add("T2", f"{tag}/RF_time", num(row[3]), float(s["rf_time_r2"]))
-    d_mean, d_std = split_pm(row[4])
-    add("T2", f"{tag}/GIN_time_mean", d_mean, float(s["gin_time_r2_mean"]))
-    add("T2", f"{tag}/GIN_time_std", d_std, float(s["gin_time_r2_std"]))
-    add("T2", f"{tag}/GIN_ens", num(row[5]), gin_ens_time(tag))
-    delta_disp = row[6].replace("**", "")
-    add("T2", f"{tag}/delta", num(delta_disp), float(st["d_r2"]))
-    # delta consistency: ens - rf_time
-    add("T2", f"{tag}/delta_vs_ens-rf", float(st["d_r2"]),
-        gin_ens_time(tag) - float(s["rf_time_r2"]))
-    bold = "**" in row[6]
-    ci_sig = st["significant"] == "True"
-    add("T2", f"{tag}/bold==sig", bold, ci_sig, ok=bold == ci_sig)
-    m = re.match(r"\[(.+?), (.+?)\]", row[7].replace("**", ""))
-    add("T2", f"{tag}/ci_lo", num(m.group(1)), float(st["ci_lo"]))
-    add("T2", f"{tag}/ci_hi", num(m.group(2)), float(st["ci_hi"]))
+def check_t2():
+    ts = {}
+    with open(f"{BASE}/results/time_split/summary.csv") as f:
+        hdr = f.readline().strip().split(",")
+        for ln in f:
+            r = dict(zip(hdr, ln.strip().split(",")))
+            ts[r["tag"]] = r
+
+    st_rows = {}
+    with open(f"{BASE}/results/significance/summary_time.csv") as f:
+        hdr = f.readline().strip().split(",")
+        for ln in f:
+            r = dict(zip(hdr, ln.strip().split(",")))
+            if r["pair"] == "mean3":
+                st_rows[r["tag"]] = r
+
+    t2 = find_table("| Tag | RF rand | GIN rand | RF time | GIN time | GIN ens |")
+    assert len(t2) == 8, len(t2)
+    for row in t2:
+        tag = row[0].strip("`")
+        s = ts[tag]
+        st = st_rows[tag]
+        add("T2", f"{tag}/RF_rand", num(row[1]), float(s["rf_random_r2"]))
+        add("T2", f"{tag}/GIN_rand_mean", num(row[2]),
+            float(s["gin_random_r2_mean"]))
+        add("T2", f"{tag}/RF_time", num(row[3]), float(s["rf_time_r2"]))
+        d_mean, d_std = split_pm(row[4])
+        add("T2", f"{tag}/GIN_time_mean", d_mean, float(s["gin_time_r2_mean"]))
+        add("T2", f"{tag}/GIN_time_std", d_std, float(s["gin_time_r2_std"]))
+        add("T2", f"{tag}/GIN_ens", num(row[5]), gin_ens_time(tag))
+        delta_disp = row[6].replace("**", "")
+        add("T2", f"{tag}/delta", num(delta_disp), float(st["d_r2"]))
+        # delta consistency: ens - rf_time
+        add("T2", f"{tag}/delta_vs_ens-rf", float(st["d_r2"]),
+            gin_ens_time(tag) - float(s["rf_time_r2"]))
+        bold = "**" in row[6]
+        ci_sig = st["significant"] == "True"
+        add("T2", f"{tag}/bold==sig", bold, ci_sig, ok=bold == ci_sig)
+        m = re.match(r"\[(.+?), (.+?)\]", row[7].replace("**", ""))
+        add("T2", f"{tag}/ci_lo", num(m.group(1)), float(st["ci_lo"]))
+        add("T2", f"{tag}/ci_hi", num(m.group(2)), float(st["ci_hi"]))
+
 
 # ---------------------------------------------------------------- table 3
-t3 = find_table("| Tag | Δ rand | Δ scaf |")
-assert len(t3) == 8, len(t3)
-xgb_rows = 0
-for row in t3:
-    tag = row[0].strip("`")
-    sj = json.load(open(f"{BASE}/results/xgboost/summary_{tag}.json"))
-    mj = json.load(open(f"{BASE}/results/metrics_{tag}.json"))
-    for k, split in ((1, "random"), (2, "scaffold")):
-        xgb_rows += 1
-        xgb_r2 = sj["by_split"][split]["r2_mean"]
-        # control as stored vs refreshed metrics
-        ctrl = sj["rf_control"][split]["r2_mean"]
-        add("T3", f"{tag}/{split}/ctrl==metrics", ctrl, mj[split]["r2"],
-            ok=abs(ctrl - mj[split]["r2"]) <= TOL)
-        add("T3", f"{tag}/{split}/delta", num(row[k]), xgb_r2 - mj[split]["r2"])
-        add("T3", f"{tag}/{split}/delta_stored", num(row[k]),
-            sj["by_split"][split]["delta_vs_rf_control"])
+def check_t3():
+    t3 = find_table("| Tag | Δ rand | Δ scaf |")
+    assert len(t3) == 8, len(t3)
+    for row in t3:
+        tag = row[0].strip("`")
+        sj = json.load(open(f"{BASE}/results/xgboost/summary_{tag}.json"))
+        mj = json.load(open(f"{BASE}/results/metrics_{tag}.json"))
+        for k, split in ((1, "random"), (2, "scaffold")):
+            xgb_r2 = sj["by_split"][split]["r2_mean"]
+            # control as stored vs refreshed metrics
+            ctrl = sj["rf_control"][split]["r2_mean"]
+            add("T3", f"{tag}/{split}/ctrl==metrics", ctrl, mj[split]["r2"],
+                ok=abs(ctrl - mj[split]["r2"]) <= TOL)
+            add("T3", f"{tag}/{split}/delta", num(row[k]), xgb_r2 - mj[split]["r2"])
+            add("T3", f"{tag}/{split}/delta_stored", num(row[k]),
+                sj["by_split"][split]["delta_vs_rf_control"])
+
 
 # ---------------------------------------------------------------- table 4a
-mt = {}
-with open(f"{BASE}/results/multitask/summary.csv") as f:
-    hdr = f.readline().strip().split(",")
-    for ln in f:
-        r = dict(zip(hdr, ln.strip().split(",")))
-        mt[(r["task"], r["split"], r["method"])] = r
+def check_t4():
+    mt = {}
+    with open(f"{BASE}/results/multitask/summary.csv") as f:
+        hdr = f.readline().strip().split(",")
+        for ln in f:
+            r = dict(zip(hdr, ln.strip().split(",")))
+            mt[(r["task"], r["split"], r["method"])] = r
 
-t4 = find_table("| Task | Split | ST-RF | ST-GIN | pooled | MT-GIN |")
-assert len(t4) == 6, len(t4)
-for row in t4:
-    task, split = row[0].strip("`"), row[1]
-    mj = json.load(open(f"{BASE}/results/metrics_{task}.json"))
-    st_rf = mj[split]["r2"]
-    add("T4mt", f"{task}/{split}/st_rf", num(row[2]), st_rf)
-    for k, method in ((3, "st_gin"), (4, "pooled_st"), (5, "mt_gin")):
-        rec = mt[(task, split, method)]
-        r2 = float(rec["r2_mean"])
-        std = float(rec["r2_std"])
-        d_mean, d_std = split_pm(row[k].split("(")[0].strip())
-        add("T4mt", f"{task}/{split}/{method}/mean", d_mean, r2)
-        add("T4mt", f"{task}/{split}/{method}/std", d_std, std)
-        m = re.search(r"\((.+?)\)", row[k])
-        add("T4mt", f"{task}/{split}/{method}/delta", num(m.group(1)), r2 - st_rf)
+    t4 = find_table("| Task | Split | ST-RF | ST-GIN | pooled | MT-GIN |")
+    assert len(t4) == 6, len(t4)
+    for row in t4:
+        task, split = row[0].strip("`"), row[1]
+        mj = json.load(open(f"{BASE}/results/metrics_{task}.json"))
+        st_rf = mj[split]["r2"]
+        add("T4mt", f"{task}/{split}/st_rf", num(row[2]), st_rf)
+        for k, method in ((3, "st_gin"), (4, "pooled_st"), (5, "mt_gin")):
+            rec = mt[(task, split, method)]
+            r2 = float(rec["r2_mean"])
+            std = float(rec["r2_std"])
+            d_mean, d_std = split_pm(row[k].split("(")[0].strip())
+            add("T4mt", f"{task}/{split}/{method}/mean", d_mean, r2)
+            add("T4mt", f"{task}/{split}/{method}/std", d_std, std)
+            m = re.search(r"\((.+?)\)", row[k])
+            add("T4mt", f"{task}/{split}/{method}/delta", num(m.group(1)), r2 - st_rf)
 
-# ---------------------------------------------------------------- table 4b
-fp = {}
-for tag in TAGS:
-    fp[tag] = json.load(open(f"{BASE}/results/fp_ablation/summary_{tag}.json"))
+    # fp ablation anchors
+    fp = {}
+    for tag in TAGS:
+        fp[tag] = json.load(open(f"{BASE}/results/fp_ablation/summary_{tag}.json"))
 
-t5 = find_table("| Tag | random anchor R² | random Δ range | scaffold anchor R² |")
-assert len(t5) == 8, len(t5)
-for row in t5:
-    tag = row[0].strip("`")
-    bc = fp[tag]["by_cell"]
-    for k, split in ((1, "random"), (3, "scaffold")):
-        anchor = bc[f"{split}/r=2/bits=2048"]["r2_mean"]
-        add("T4fp", f"{tag}/{split}/anchor", num(row[k]), anchor)
-        deltas = [bc[f"{split}/r={r}/bits={b}"]["delta_vs_anchor"]
-                  for (r, b) in ((2, 1024), (3, 1024), (3, 2048))]
-        lo, hi = min(deltas), max(deltas)
-        parts = [p for p in row[k + 1].replace("**", "").split("…")]
-        add("T4fp", f"{tag}/{split}/range_lo", num(parts[0]), lo)
-        add("T4fp", f"{tag}/{split}/range_hi", num(parts[1]), hi)
+    t5 = find_table("| Tag | random anchor R² | random Δ range | scaffold anchor R² |")
+    assert len(t5) == 8, len(t5)
+    for row in t5:
+        tag = row[0].strip("`")
+        bc = fp[tag]["by_cell"]
+        for k, split in ((1, "random"), (3, "scaffold")):
+            anchor = bc[f"{split}/r=2/bits=2048"]["r2_mean"]
+            add("T4fp", f"{tag}/{split}/anchor", num(row[k]), anchor)
+            deltas = [bc[f"{split}/r={r}/bits={b}"]["delta_vs_anchor"]
+                      for (r, b) in ((2, 1024), (3, 1024), (3, 2048))]
+            lo, hi = min(deltas), max(deltas)
+            parts = [p for p in row[k + 1].replace("**", "").split("…")]
+            add("T4fp", f"{tag}/{split}/range_lo", num(parts[0]), lo)
+            add("T4fp", f"{tag}/{split}/range_hi", num(parts[1]), hi)
 
-# ---------------------------------------------------------------- report
 
-by_tab = defaultdict(lambda: [0, 0, []])
-for table, cell, disp, comp, ok in results:
-    by_tab[table][0] += 1
-    if not ok:
-        by_tab[table][1] += 1
-        by_tab[table][2].append((cell, disp, comp))
+# ---------------------------------------------------------------- T5/T6: per-split detail tables
+def check_detail(tag, table_id):
+    mj = json.load(open(f"{BASE}/results/metrics_{tag}.json"))
+    rows = find_table("| Split | R2 | RMSE | MAE |",
+                      occurrence=1 if tag == "egfr" else 2)
+    assert len(rows) == 2, len(rows)
+    for row in rows:
+        split = row[0].strip()
+        add(table_id, f"{tag}/{split}/r2", num(row[1]), mj[split]["r2"])
+        add(table_id, f"{tag}/{split}/rmse", num(row[2]), mj[split]["rmse"])
+        add(table_id, f"{tag}/{split}/mae", num(row[3]), mj[split]["mae"])
 
-print(f"total cells: {len(results)}, mismatches: {sum(v[1] for v in by_tab.values())}")
-for t in sorted(by_tab):
-    n, bad, items = by_tab[t]
-    print(f"  {t:6s} cells={n:3d} mismatch={bad}")
-    for cell, disp, comp in items:
-        print(f"      FAIL {cell}: readme={disp!r} source={comp!r}")
+
+# ---------------------------------------------------------------- T7: GIN vs RF (EGFR)
+def check_t7():
+    rows = find_table("| Split | RF R2 / RMSE | GIN R2 / RMSE (seed 42) | "
+                      "GIN R2 mean +- std (3 seeds) |")
+    assert len(rows) == 2, len(rows)
+    mj = json.load(open(f"{BASE}/results/metrics_egfr.json"))
+    gs = gin_stats("egfr")
+    for row in rows:
+        split = row[0].strip()
+        rf_r2, rf_rmse = [float(x) for x in row[1].split("/")]
+        add("T7", f"RF/{split}/r2", rf_r2, mj[split]["r2"])
+        add("T7", f"RF/{split}/rmse", rf_rmse, mj[split]["rmse"])
+        g42_r2, g42_rmse = gin_seed42("egfr", split)
+        s42_r2, s42_rmse = [float(x) for x in row[2].split("/")]
+        add("T7", f"GIN42/{split}/r2", s42_r2, g42_r2)
+        add("T7", f"GIN42/{split}/rmse", s42_rmse, g42_rmse)
+        m_mean, m_std = split_pm(row[3])
+        add("T7", f"GIN3/{split}/mean", m_mean, gs[split][0])
+        add("T7", f"GIN3/{split}/std", m_std, gs[split][1])
+
+
+# ---------------------------------------------------------------- T8: fairness campaign
+def check_t8():
+    rows = find_table("| Target | Model | random R2 | Δ rand | scaffold R2 | Δ scaf |")
+    model_key = {"baseline GIN": "baseline_gin", "tuned GIN": "tuned_gin",
+                 "GINE": "gine"}
+    target = None
+    for row in rows:
+        if row[0].strip():
+            m = re.match(r"`(\w+)`", row[0])
+            assert m, row[0]
+            target = m.group(1)
+            assert target in FAIRNESS_TAGS, target
+        model = row[1].strip()
+        fj = json.load(open(f"{BASE}/results/fairness/summary_{target}.json"))
+        if model == "RF":
+            mj = json.load(open(f"{BASE}/results/metrics_{target}.json"))
+            add("T8", f"{target}/rf==metrics/random",
+                fj["rf"]["random"]["r2"], mj["random"]["r2"],
+                ok=abs(fj["rf"]["random"]["r2"] - mj["random"]["r2"]) <= TOL)
+            add("T8", f"{target}/rf==metrics/scaffold",
+                fj["rf"]["scaffold"]["r2"], mj["scaffold"]["r2"],
+                ok=abs(fj["rf"]["scaffold"]["r2"] - mj["scaffold"]["r2"]) <= TOL)
+            add("T8", f"{target}/RF/random", num(row[2]), mj["random"]["r2"])
+            add("T8", f"{target}/RF/scaffold", num(row[4]), mj["scaffold"]["r2"])
+            continue
+        key = model_key[model]
+        for k, split in ((2, "random"), (4, "scaffold")):
+            res = fj["results"][key][split]
+            mean, std = split_pm(row[k])
+            add("T8", f"{target}/{key}/{split}/mean", mean, res["r2_mean"])
+            add("T8", f"{target}/{key}/{split}/std", std, res["r2_std"])
+            add("T8", f"{target}/{key}/{split}/delta",
+                num(row[k + 1]), fj["delta_r2_gin_minus_rf"][key][split])
+
+
+# ---------------------------------------------------------------- T9: dataset sizes
+def check_t9():
+    import pandas as pd
+    rows = find_table("| Dataset tag | Target | ChEMBL id | Unique compounds | Source |")
+    assert len(rows) == 9, len(rows)
+    for row in rows:
+        m = re.match(r"`(\w+)`", row[0])
+        assert m, row[0]
+        tag = m.group(1)
+        n = len(pd.read_csv(f"{BASE}/data/processed/{tag}_pic50_clean.csv"))
+        add("T9", f"{tag}/n", num(row[3].replace(",", "")), n)
+
+
+def run_checks():
+    check_t1()
+    check_t2()
+    check_t3()
+    check_t4()
+    check_detail("egfr", "T5")
+    check_detail("bace", "T6")
+    check_t7()
+    check_t8()
+    check_t9()
+
+
+def parse_args(argv=None):
+    p = argparse.ArgumentParser(description=__doc__,
+                                formatter_class=argparse.RawDescriptionHelpFormatter)
+    p.add_argument("--out", default=None, help="optional JSON report path")
+    p.add_argument("--dry-run", action="store_true",
+                   help="report mismatches but do not fail the exit code")
+    return p.parse_args(argv)
+
+
+def main(argv=None):
+    global lines
+    args = parse_args(argv)
+    readme = open(os.path.join(BASE, "README.md"), encoding="utf-8").read()
+    lines = readme.splitlines()
+    run_checks()
+
+    by_tab = defaultdict(lambda: [0, 0, []])
+    for table, cell, disp, comp, ok in results:
+        by_tab[table][0] += 1
+        if not ok:
+            by_tab[table][1] += 1
+            by_tab[table][2].append((cell, disp, comp))
+
+    n_bad = sum(v[1] for v in by_tab.values())
+    print(f"total cells: {len(results)}, mismatches: {n_bad}")
+    for t in sorted(by_tab):
+        n, bad, items = by_tab[t]
+        print(f"  {t:6s} cells={n:3d} mismatch={bad}")
+        for cell, disp, comp in items:
+            print(f"      FAIL {cell}: readme={disp!r} source={comp!r}")
+
+    if args.out:
+        report = {
+            "total_cells": len(results),
+            "mismatches": n_bad,
+            "tables": {t: {"cells": v[0], "mismatches": v[1],
+                           "failures": [{"cell": c, "readme": d, "source": s}
+                                        for c, d, s in v[2]]}
+                       for t, v in sorted(by_tab.items())},
+        }
+        os.makedirs(os.path.dirname(os.path.abspath(args.out)), exist_ok=True)
+        with open(args.out, "w") as f:
+            json.dump(report, f, indent=2, default=float)
+        print(f"report -> {args.out}")
+
+    if n_bad and not args.dry_run:
+        return 1
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

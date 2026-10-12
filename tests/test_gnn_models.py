@@ -89,9 +89,12 @@ def test_train_artifacts_per_model(tmp_path, monkeypatch, load_script, model):
     payload = json.loads(mj.read_text())
     assert set(payload) == {"random"}  # top-level keys stay split names
     m = payload["random"]
-    assert {"r2", "rmse", "mae", "params", "best_epoch"} <= set(m)
+    assert {"r2", "rmse", "mae", "params", "best_epoch",
+            "convergence_flag", "max_epochs", "train_mse"} <= set(m)
     assert np.isfinite([m["r2"], m["rmse"], m["mae"]]).all()
     assert m["params"]["model"] == model
+    # a 2-epoch run can never satisfy best_epoch < 30% of max epochs (0.6)
+    assert m["convergence_flag"] is False
 
 
 def test_default_model_keeps_legacy_gin_names(tmp_path, monkeypatch, load_script):
@@ -104,3 +107,74 @@ def test_default_model_keeps_legacy_gin_names(tmp_path, monkeypatch, load_script
     assert not (res / f"gnn_preds_{TAG}_gin_random.npz").exists()
     assert (res / f"gnn_metrics_{TAG}.json").exists()
     assert not (res / f"gnn_metrics_{TAG}_gin.json").exists()
+
+
+def test_convergence_flag_rule(load_script):
+    """Both conditions required; anchored on the real stalled run (N3).
+
+    abl1/scaffold seed 42 stopped at best_epoch 15/100 with train MSE
+    0.5706 (flagged); its siblings ended at 93/97 with train MSE ~0.28-0.31
+    (never flagged).
+    """
+    mod = load_script("gnn_03_train_gin")
+    assert mod.convergence_flag(15, 100, 0.5706) is True   # stalled run
+    assert mod.convergence_flag(15, 100, 0.6652) is True   # train MSE at best epoch
+    assert mod.convergence_flag(93, 100, 0.2768) is False  # healthy sibling
+    assert mod.convergence_flag(97, 100, 0.3092) is False  # healthy sibling
+    assert mod.convergence_flag(15, 100, 0.30) is False    # early but well fit
+    assert mod.convergence_flag(68, 100, 0.60) is False    # late but poorly fit
+    assert mod.convergence_flag(29, 100, 0.51) is True     # boundary: 29 < 30
+    assert mod.convergence_flag(30, 100, 0.99) is False    # boundary: 30 not < 30
+
+
+def test_convergence_flag_fires_on_degenerate_early_stop(
+        tmp_path, monkeypatch, load_script, capsys):
+    """End-to-end: a run that never learns early-stops before 30% of max
+    epochs with train MSE stuck high -> prominent WARNING + json flag."""
+    _build_cache(tmp_path)
+    mod = load_script("gnn_03_train_gin")
+    monkeypatch.setattr(mod, "BASE", str(tmp_path))
+    monkeypatch.setattr(torch.backends.mps, "is_available", lambda: False)
+    monkeypatch.setattr(torch.cuda, "is_available", lambda: False)
+    # degenerate trainer: loss never decreases, the model never improves
+    # its validation RMSE, so best stays at epoch 1 and patience=3 stops
+    # at epoch 4 (4 < 30% of 20) with train MSE stuck at 0.9 (> 0.5)
+    monkeypatch.setattr(mod, "run_epoch",
+                        lambda model, loader, device, opt=None: 0.9)
+    monkeypatch.setattr(sys, "argv",
+                        ["gnn_03_train_gin.py", "--tag", TAG, "--split", "random",
+                         "--epochs", "20", "--patience", "3", "--batch-size", "2",
+                         "--hidden", "16", "--num-layers", "2"])
+    mod.main()
+
+    out = capsys.readouterr().out
+    assert "early stop at epoch 4 (best epoch 1)" in out
+    assert "WARNING: possible non-convergence" in out
+
+    m = json.loads((tmp_path / "results" / f"gnn_metrics_{TAG}.json").read_text())
+    m = m["random"]
+    assert m["convergence_flag"] is True
+    assert m["best_epoch"] == 1
+    assert m["max_epochs"] == 20
+    assert m["train_mse"] == pytest.approx(0.9)
+
+
+def test_min_epochs_defers_early_stopping(tmp_path, monkeypatch, load_script, capsys):
+    """--min-epochs suppresses a stop that would otherwise fire earlier."""
+    _build_cache(tmp_path)
+    mod = load_script("gnn_03_train_gin")
+    monkeypatch.setattr(mod, "BASE", str(tmp_path))
+    monkeypatch.setattr(torch.backends.mps, "is_available", lambda: False)
+    monkeypatch.setattr(torch.cuda, "is_available", lambda: False)
+    monkeypatch.setattr(mod, "run_epoch",
+                        lambda model, loader, device, opt=None: 0.9)
+    monkeypatch.setattr(sys, "argv",
+                        ["gnn_03_train_gin.py", "--tag", TAG, "--split", "random",
+                         "--epochs", "20", "--patience", "3", "--min-epochs", "10",
+                         "--batch-size", "2", "--hidden", "16", "--num-layers", "2"])
+    mod.main()
+
+    out = capsys.readouterr().out
+    assert "early stopping deferred until epoch 10" in out
+    # patience is satisfied from epoch 4 but the floor defers the stop
+    assert "early stop at epoch 10 (best epoch 1)" in out

@@ -1,9 +1,13 @@
 #!/usr/bin/env python3
 """Download trained models and raw data from the `artifacts-v1` GitHub Release.
 
-Assets are cached in <repo>/.artifacts_cache/, verified against
-sha256sums.txt, then unpacked into the repo root (the archives already
-contain the models/ and data/raw/ prefixes).
+Assets are cached in <repo>/.artifacts_cache/, verified against the
+release's own sha256sums.txt, then unpacked into the repo root (the archives
+already contain the models/ and data/raw/ prefixes). Extracted raw files are
+additionally verified against the repo's data/raw/sha256sums.txt (the
+release manifest only proves the download is intact; the repo sums prove the
+files are the current, refreshed data) and the script aborts loudly on any
+mismatch — e.g. a release that predates the 2026-10-11 data refresh.
 
 Usage:
     python scripts/fetch_artifacts.py [--models | --raw | --all]
@@ -85,11 +89,15 @@ def download(url: str, dest: Path, label: str = "") -> None:
 
 
 def parse_sha256sums(text: str) -> dict:
-    """Parse `shasum -a 256` output: '<hex>  <filename>' (or '<hex> *<filename>')."""
+    """Parse checksum output: '<hex>  <filename>' / '<hex> *<filename>'.
+
+    The repo's data/raw/sha256sums.txt is '<hex>  <rows>  <filename>' with a
+    leading '#' comment line; both shapes are handled (filename = last token).
+    """
     sums = {}
     for line in text.splitlines():
         line = line.strip()
-        if not line:
+        if not line or line.startswith("#"):
             continue
         parts = line.split()
         if len(parts) < 2:
@@ -176,6 +184,45 @@ def missing_key_files(repo_root: Path, key_files) -> list:
     return [k for k in key_files if not (repo_root / k).exists()]
 
 
+def verify_extracted_raw(repo_root: Path) -> None:
+    """Fail closed: check every file in the repo's data/raw/sha256sums.txt.
+
+    The release's own manifest only proves the archives downloaded intact;
+    the repo's sums file pins the CURRENT refreshed raw data. Verifying both
+    means a release that predates the data refresh (e.g. artifacts-v1, whose
+    raw CSVs predate the 2026-10-11 standard_relation refresh) aborts loudly
+    instead of silently installing stale files.
+    """
+    repo_root = Path(repo_root)
+    sums_path = repo_root / "data" / "raw" / SUMS_NAME
+    if not sums_path.exists():
+        raise SystemExit(
+            f"cannot verify extracted raw data: {sums_path} is missing "
+            "(it ships with the repo and pins the refreshed raw files)"
+        )
+    expected = parse_sha256sums(sums_path.read_text())
+    if not expected:
+        raise SystemExit(f"{sums_path} contains no checksums; cannot verify raw data")
+    problems = []
+    for name, digest in sorted(expected.items()):
+        path = repo_root / "data" / "raw" / name
+        if not path.exists():
+            problems.append(f"missing {name}")
+            continue
+        actual = sha256_file(path)
+        if actual != digest:
+            problems.append(f"{name}: sha256 {actual} != expected {digest}")
+    if problems:
+        raise SystemExit(
+            "raw data does not match data/raw/sha256sums.txt after extraction "
+            "(the release likely predates the 2026-10-11 data refresh):\n  "
+            + "\n  ".join(problems)
+            + "\nRemove data/raw/ and .artifacts_cache/ and re-run once a "
+            "refreshed release is published."
+        )
+    print(f"repo checksums ok: {len(expected)} files match data/raw/{SUMS_NAME}")
+
+
 def run(asset_keys, repo_root: Path = REPO_ROOT, api_url: str = API_URL,
         fetch_assets=None, downloader=None) -> None:
     """Download/verify/extract the selected assets into `repo_root`.
@@ -201,6 +248,8 @@ def run(asset_keys, repo_root: Path = REPO_ROOT, api_url: str = API_URL,
         archive_name, key_files = ASSETS[key]
         if not missing_key_files(repo_root, key_files):
             print(f"already extracted, skipping: {archive_name}")
+            if key == "raw":
+                verify_extracted_raw(repo_root)
             continue
         if sums is None:
             cache_dir.mkdir(parents=True, exist_ok=True)
@@ -213,6 +262,10 @@ def run(asset_keys, repo_root: Path = REPO_ROOT, api_url: str = API_URL,
                 f"extraction of {archive_name} did not produce: {', '.join(still_missing)}"
             )
         print(f"verified extracted files for {archive_name}")
+        if key == "raw":
+            # release-manifest check (above) + repo checksums: fail closed on
+            # a release whose raw files predate the data refresh (N5)
+            verify_extracted_raw(repo_root)
     print("done.")
 
 

@@ -8,8 +8,11 @@ artifact that already exists on disk.
 
 Inputs (per tag):
   data/processed/splits/{tag}_time.npz               sizes + test years
+  data/processed/{tag}_fingerprints.npz              y for the constant
+                                                     (no-skill) baseline
   results/metrics_{tag}.json                         RF "time" r2/rmse
-  results/gnn_metrics_{tag}{,_seed1,_seed2}.json     GIN "time" r2 (3 seeds)
+  results/gnn_metrics_{tag}{,_seed1,_seed2}.json     GIN "time" r2 +
+                                                     best_epoch (3 seeds)
   results/comparison_{tag}.csv                       RF/GIN random+scaffold R2
   results/significance/summary_time.csv              paired bootstrap (mean3)
 
@@ -18,7 +21,13 @@ Outputs:
                                            reported as-is (a2a 0.62 and
                                            mpro 0.51 exceed 0.5 because the
                                            test set cumulates the newest
-                                           years to reach ~20%)
+                                           years to reach ~20%);
+                                           constant_r2 is the test R2 of
+                                           predicting the mean pIC50 of all
+                                           non-test rows, gin_best_epochs
+                                           the comma-joined time-split
+                                           early-stop epochs of the 3 GIN
+                                           seeds (N4)
   figures/time_split/panel_3splits.png     2 facets (RF | GIN), 3 bars per
                                            tag: random / scaffold / time
 Console: headline conclusions.
@@ -50,6 +59,7 @@ SUMMARY_COLS = [
     "frac_boot_gin_better",
     "rf_random_r2", "gin_random_r2_mean",
     "rf_scaffold_r2", "gin_scaffold_r2_mean",
+    "constant_r2", "gin_best_epochs",
     "delta_convention",
 ]
 
@@ -87,6 +97,37 @@ def gin_time_r2(tag):
     vals = np.array([_load_json(f"gnn_metrics_{tag}{suf}.json")["time"]["r2"]
                      for suf in SEED_SUFFIXES], dtype=np.float64)
     return float(vals.mean()), float(vals.std(ddof=0))
+
+
+def constant_r2(tag):
+    """Test R2 of the no-skill baseline (N4): predict the mean pIC50 of
+    every non-test row (train+valid) for all test rows."""
+    y = np.asarray(np.load(os.path.join(BASE, "data", "processed",
+                                        f"{tag}_fingerprints.npz"))["y"],
+                   dtype=np.float64)
+    sp = np.load(os.path.join(BASE, "data", "processed", "splits",
+                              f"{tag}_time.npz"))
+    test = np.asarray(sp["test_idx"])
+    if len(y) != len(sp["year"]):
+        raise ValueError(f"{tag}: y and split index spaces differ")
+    pool = np.ones(len(y), dtype=bool)
+    pool[test] = False
+    yt = y[test]
+    pred = np.full_like(yt, y[pool].mean())
+    return float(1.0 - np.sum((yt - pred) ** 2) / np.sum((yt - yt.mean()) ** 2))
+
+
+def gin_best_epochs(tag):
+    """Time-split early-stop epochs of the 3 committed GIN seeds, as a
+    comma-joined string. Read directly (not via _load_json) so callers
+    that stub the metrics payload for r2/rmse are not forced to carry
+    best_epoch too."""
+    epochs = []
+    for suf in SEED_SUFFIXES:
+        with open(os.path.join(BASE, "results",
+                               f"gnn_metrics_{tag}{suf}.json")) as fh:
+            epochs.append(int(json.load(fh)["time"]["best_epoch"]))
+    return ",".join(str(e) for e in epochs)
 
 
 def comparison_reference(tag):
@@ -137,6 +178,8 @@ def build_summary():
             "rf_time_rmse": float(rf["rmse"]),
             "gin_time_r2_mean": gin_mean,
             "gin_time_r2_std": gin_std,
+            "constant_r2": constant_r2(tag),
+            "gin_best_epochs": gin_best_epochs(tag),
             "d_r2_mean3": float(s["d_r2"]),
             "ci_lo": float(s["ci_lo"]),
             "ci_hi": float(s["ci_hi"]),
@@ -224,6 +267,11 @@ def print_conclusion(df):
     rf_neg = df.loc[df["rf_time_r2"] < 0, "tag"].tolist()
     gin_neg = df.loc[df["gin_time_r2_mean"] < 0, "tag"].tolist()
     print(f"  negative time R²: RF {rf_neg or 'none'}; GIN {gin_neg or 'none'}")
+    rf_const = df.loc[df["rf_time_r2"] < df["constant_r2"],
+                      ["tag", "rf_time_r2", "constant_r2"]]
+    cells = ", ".join(f"{r.tag} {r.rf_time_r2:+.3f} < {r.constant_r2:+.3f}"
+                      for r in rf_const.itertuples())
+    print(f"  RF below constant baseline: {cells or 'none'}")
 
     sig = df[df["significant"]]
     rf_wins = sig.loc[sig["winner"] == "rf", "tag"].tolist()

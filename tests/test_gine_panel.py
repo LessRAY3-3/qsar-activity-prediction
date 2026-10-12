@@ -2,8 +2,12 @@
 
 Loads experiments/gine_panel.py by path (import-safe: matplotlib is
 imported inside the figure functions only) and checks the panel-row
-contract on synthetic inputs with a known ground truth.
+contract on synthetic inputs with a known ground truth. The all-8-tags
+bootstrap invariant is checked against the committed significance files:
+every cell must carry a mean3 CI, no point-only rows.
 """
+import os
+
 import numpy as np
 import pandas as pd
 import pytest
@@ -32,17 +36,30 @@ def test_make_row_delta_and_bootstrap_note(load_experiment):
     assert row["d_r2_mean"] == pytest.approx(0.62 - 0.70)
     assert row["ci_lo"] == -0.05 and row["ci_hi"] == -0.01
     assert row["significant"] is True
-    assert "mean3" in row["note"]
-    assert row["note"] != mod.NOTE_POINT_ONLY
+    assert row["note"] == mod.NOTE_BOOTSTRAP
 
 
-def test_make_row_without_ci_is_point_estimate_only(load_experiment):
+def test_make_row_rejects_missing_ci(load_experiment):
+    """A cell without a bootstrap CI is an error, never a point-only row."""
     mod = load_experiment("gine_panel")
-    row = mod.make_row("vegfr2", "scaffold", 0.60, [0.55, 0.58, 0.61])
-    assert row["d_r2_mean"] == pytest.approx(np.mean([0.55, 0.58, 0.61]) - 0.60)
-    assert np.isnan(row["ci_lo"]) and np.isnan(row["ci_hi"])
-    assert row["significant"] is None
-    assert row["note"] == mod.NOTE_POINT_ONLY
+    with pytest.raises(ValueError, match="missing bootstrap CI"):
+        mod.make_row("vegfr2", "scaffold", 0.60, [0.55, 0.58, 0.61], ci=None)
+
+
+def test_all_eight_tags_carry_bootstrap_cis(load_experiment):
+    """build_panel over the committed files: all 16 cells have a mean3 CI."""
+    mod = load_experiment("gine_panel")
+    sig_dir = os.path.join(mod.BASE, "results", "significance")
+    panel = mod.build_panel(sig_dir)
+
+    assert len(panel) == len(mod.TAGS) * len(mod.SPLITS)
+    assert set(panel["tag"]) == set(mod.TAGS)
+    assert (panel["gine_n_seeds"] == 3).all()
+    assert panel["ci_lo"].notna().all() and panel["ci_hi"].notna().all()
+    assert (panel["ci_lo"] < panel["ci_hi"]).all()
+    assert (panel["note"] == mod.NOTE_BOOTSTRAP).all()
+    assert panel["significant"].map(
+        lambda v: isinstance(v, (bool, np.bool_))).all()
 
 
 def test_summary_csv_carries_delta_convention(tmp_path, monkeypatch, load_experiment):
@@ -51,7 +68,8 @@ def test_summary_csv_carries_delta_convention(tmp_path, monkeypatch, load_experi
     monkeypatch.setattr(mod, "load_rf_r2", lambda tag, split: 0.70)
     monkeypatch.setattr(mod, "load_gine_seed_r2",
                         lambda tag, split: [0.60, 0.62, 0.64])
-    monkeypatch.setattr(mod, "load_gine_ci", lambda tag, split, sig_dir: None)
+    monkeypatch.setattr(mod, "load_gine_ci",
+                        lambda tag, split, sig_dir: (0.01, 0.03, True))
 
     panel = mod.build_panel("unused")
     out = tmp_path / "summary.csv"

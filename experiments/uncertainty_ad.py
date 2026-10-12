@@ -10,15 +10,18 @@ existing result file is touched.
 
 Run:
   python experiments/uncertainty_ad.py                 # --model gin (default)
-  python experiments/uncertainty_ad.py --model gine    # cells skip cleanly
-                                                       # when the gine .pt
-                                                       # set is absent OR
-                                                       # partial (recorded as
-                                                       # RF-only, n_gnn_seeds)
+  python experiments/uncertainty_ad.py --model gine    # all 8 tags have a
+                                                       # full 3-seed gine
+                                                       # checkpoint set;
+                                                       # cells still skip
+                                                       # cleanly if a .pt set
+                                                       # is absent or partial
+                                                       # (recorded as RF-only,
+                                                       # n_gnn_seeds)
 
 Inputs (per tag x split):
   results/rf_preds_{tag}_{split}.npz / models/rf_{split}_split_{tag}.joblib
-  results/gnn_models/{tag}_{gin}_{split}[_seedN].pt     3-seed checkpoints
+  results/gnn_models/{tag}_{gin|gine}_{split}[_seedN].pt  3-seed checkpoints
   results/gnn_preds_{tag}[_gin]_{split}*.npz            cross-check only
   data/processed/{tag}_fingerprints.npz, {tag}_graphs.npz
   data/processed/splits/{tag}_{split}.npz

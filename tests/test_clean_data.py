@@ -1,10 +1,13 @@
-"""Unit tests for scripts/02_clean_data.py: censoring filter (H1) and parent
-standardization / deduplication by parent_smiles (M1).
+"""Unit tests for scripts/02_clean_data.py: censoring filter (H1), fail-closed
+behaviour when standard_relation is missing (N5), and parent standardization /
+deduplication by parent_smiles (M1).
 
-Inputs are small inline CSVs in both supported raw shapes: the ChEMBL download
+Inputs are small inline CSVs in the supported raw shapes: the ChEMBL download
 format (with standard_relation, as 01d/01e now write it) and the bace download
-format (no standard_relation column, where the censoring filter must be skipped
-so bace behaviour is unchanged).
+format (no standard_relation column). The missing column is only tolerated for
+genuine non-ChEMBL inputs (TAG == 'bace' or non-CHEMBL-prefixed molecule IDs);
+a CHEMBL-prefixed file without it predates the 2026-10-11 refresh and must
+abort instead of silently skipping the censoring filter.
 """
 import numpy as np
 import pandas as pd
@@ -47,7 +50,8 @@ def _row(chembl_id, smiles, ic50_nm, relation="=", pchembl=None):
     return row
 
 
-def _run_02(tmp_path, load_script, rows, capsys):
+def _prepare_02(tmp_path, load_script, rows, tag=None):
+    """Write rows to a raw CSV and return (module, clean_csv_path)."""
     raw_csv = tmp_path / "raw_activities.csv"
     columns = list(rows[0])
     pd.DataFrame(rows, columns=columns).to_csv(raw_csv, index=False)
@@ -56,6 +60,13 @@ def _run_02(tmp_path, load_script, rows, capsys):
     # patch via monkeypatch-free setattr: each test loads its own module instance
     mod02.IN_CSV = str(raw_csv)
     mod02.OUT_CSV = str(clean_csv)
+    if tag is not None:
+        mod02.TAG = tag
+    return mod02, clean_csv
+
+
+def _run_02(tmp_path, load_script, rows, capsys, tag=None):
+    mod02, clean_csv = _prepare_02(tmp_path, load_script, rows, tag=tag)
     mod02.main()
     out = capsys.readouterr().out
     clean = pd.read_csv(clean_csv)
@@ -121,19 +132,53 @@ def test_uncharger_covers_charged_single_fragments(tmp_path, load_script, capsys
     assert clean["parent_smiles"].iloc[0] == "CC(=O)O"
 
 
-def test_bace_style_input_without_relation_column_is_unchanged(tmp_path, load_script, capsys):
-    # no standard_relation column at all -> filter skipped, everything kept,
-    # including rows whose values would look censored in the ChEMBL format
+def test_bace_tag_input_without_relation_column_is_unchanged(tmp_path, load_script, capsys):
+    # QSAR_TAG=bace: no standard_relation column at all -> filter skipped,
+    # everything kept (bace behaviour unchanged even with CHEMBL-style IDs)
     rows = [
         _row("CHEMBL1", "c1ccncc1", 100.0, relation=None, pchembl=-np.log10(100.0 * 1e-9)),
         _row("CHEMBL2", "c1ccoc1", 200.0, relation=None, pchembl=-np.log10(200.0 * 1e-9)),
         _row("CHEMBL3", "C1CCCCC1", 50.0, relation=None, pchembl=-np.log10(50.0 * 1e-9)),
     ]
-    clean, out = _run_02(tmp_path, load_script, rows, capsys)
+    clean, out = _run_02(tmp_path, load_script, rows, capsys, tag="bace")
 
     assert len(clean) == 3  # nothing filtered, nothing merged
     assert "skipping censoring filter" in out
     assert "Censoring filter:" not in out
+
+
+def test_non_chembl_ids_without_relation_column_skip_under_default_tag(tmp_path, load_script, capsys):
+    # genuine non-ChEMBL input (bace-style molecule IDs like BACE_1) under the
+    # default TAG: the skip is still allowed
+    rows = [
+        _row("BACE_1", "c1ccncc1", 100.0, relation=None, pchembl=-np.log10(100.0 * 1e-9)),
+        _row("BACE_2", "c1ccoc1", 200.0, relation=None, pchembl=-np.log10(200.0 * 1e-9)),
+    ]
+    clean, out = _run_02(tmp_path, load_script, rows, capsys)
+
+    assert len(clean) == 2
+    assert "skipping censoring filter" in out
+
+
+def test_chembl_input_without_relation_column_fails_closed(tmp_path, load_script, capsys):
+    # ChEMBL-format file (CHEMBL IDs, standard_value present) but NO
+    # standard_relation column: this is the stale artifacts-v1 release shape.
+    # It must abort with a non-zero exit (N5), not silently skip censoring —
+    # otherwise 'IC50 > 10000 nM' would be kept as exact pIC50 5.0 (H1 again).
+    rows = [
+        _row("CHEMBL1", "c1ccncc1", 100.0, relation=None, pchembl=-np.log10(100.0 * 1e-9)),
+        _row("CHEMBL2", "c1ccoc1", 10000.0, relation=None, pchembl=-np.log10(10000.0 * 1e-9)),
+    ]
+    mod02, clean_csv = _prepare_02(tmp_path, load_script, rows)
+
+    with pytest.raises(SystemExit) as excinfo:
+        mod02.main()
+
+    msg = str(excinfo.value)
+    assert "predates the 2026-10-11 data refresh" in msg
+    assert "cannot be verified" in msg
+    assert "standard_relation" in msg
+    assert not clean_csv.exists()  # fail closed: no output written
 
 
 def test_invalid_smiles_falls_back_to_raw_string(tmp_path, load_script, capsys):

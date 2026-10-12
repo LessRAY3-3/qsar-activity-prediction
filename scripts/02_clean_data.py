@@ -16,8 +16,13 @@ What / why:
      pchembl_value.notna() instead would be wrong in both directions: exact
      rows can have an empty pChEMBL ("Outside typical range"), and bounded
      rows can carry a pChEMBL value. If the input CSV has no
-     standard_relation column (bace download format), the filter is skipped
-     with a printed note; bace behaviour is unchanged.
+     standard_relation column, the filter is skipped (with a printed note)
+     ONLY for genuine non-ChEMBL inputs: TAG == 'bace' or molecule IDs that
+     are not CHEMBL-prefixed (e.g. bace download format, BACE_1 ids). A
+     CHEMBL-prefixed file without the column predates the 2026-10-11 data
+     refresh (e.g. raw files from the artifacts-v1 release); censoring
+     cannot be verified on it, so the script aborts with a non-zero exit
+     instead of silently reintroducing the H1 censored-label bug.
   6. Sanity cross-check against ChEMBL's own pchembl_value (should match),
      over ALL retained rows, and explicitly report the retained rows whose
      pchembl_value is empty (exact measurements ChEMBL could not convert,
@@ -100,6 +105,27 @@ def main():
         for rel, n in removed_rel.value_counts(dropna=False).items():
             print(f"    {rel!r}: {n}" if pd.notna(rel) else f"    (empty): {n}")
     else:
+        # Fail closed (review finding N5): skipping the filter is only safe for
+        # genuine non-ChEMBL inputs. A CHEMBL-prefixed file without the column
+        # predates the 2026-10-11 refresh (artifacts-v1 release raw files), and
+        # running the filter-less would keep censored bounds as exact labels.
+        if "molecule_chembl_id" in df.columns:
+            ids = df["molecule_chembl_id"].fillna("").astype(str).str.upper()
+            n_chembl = int(ids.str.startswith("CHEMBL").sum())
+        else:
+            n_chembl = len(df)  # cannot verify IDs -> treat as ChEMBL-style
+        if TAG != "bace" and n_chembl > 0:
+            raise SystemExit(
+                f"ERROR: {IN_CSV} has no standard_relation column, but this is not a "
+                f"non-ChEMBL input (TAG={TAG!r}, {n_chembl} CHEMBL-prefixed molecule IDs "
+                f"of {len(df)}). This raw file predates the 2026-10-11 data refresh "
+                "(e.g. a download from the artifacts-v1 release), so the censoring "
+                "filter (H1: keep only standard_relation == '=') cannot be verified and "
+                "censored rows such as 'IC50 > 10000 nM' would be kept as exact pIC50 "
+                "labels. Re-fetch raw data that matches data/raw/sha256sums.txt "
+                "(scripts/fetch_artifacts.py verifies it after extraction); for a "
+                "genuine non-ChEMBL source run with QSAR_TAG=bace."
+            )
         print("No standard_relation column in input (bace-style download format); skipping censoring filter.")
 
     # 6. sanity cross-check against ChEMBL's own pchembl_value (should match),

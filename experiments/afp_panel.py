@@ -220,10 +220,11 @@ def make_combined_forest(sig_dir, fig_path):
     """gin vs gine vs attentivefp mean3 CIs side by side, one row per cell.
 
     Reads the phase-0 gin summary (results/significance/summary.csv), the
-    phase-1 gine summary (summary_gine.csv; the 6 fairness cells fall back
-    to their point estimate from results/gine_panel/summary.csv) and the
-    phase-3 attentivefp summary (summary_attentivefp.csv). Writes a NEW
-    file -- ci_panel.png / ci_panel_gine.png are never touched.
+    phase-1 gine summary (summary_gine.csv -- all 16 cells carry a mean3
+    CI after the full-panel run; results/gine_panel/summary.csv only as
+    a fallback point) and the phase-3 attentivefp summary
+    (summary_attentivefp.csv). Writes a NEW file -- ci_panel.png /
+    ci_panel_gine.png are never touched.
     """
     import matplotlib
     matplotlib.use("Agg")
@@ -298,9 +299,6 @@ def make_combined_forest(sig_dir, fig_path):
                    label="GIN mean3 (phase 0)"),
         plt.Line2D([], [], marker="o", ls="", color=colors["gine"],
                    label="GINE mean3 (phase 1)"),
-        plt.Line2D([], [], marker="o", ls="", markerfacecolor="white",
-                   markeredgecolor=colors["gine"], markeredgewidth=1.4,
-                   label="GINE point estimate only (fairness)"),
         plt.Line2D([], [], marker="o", ls="", color=colors["attentivefp"],
                    label="AttentiveFP mean3 (phase 3)"),
     ]
