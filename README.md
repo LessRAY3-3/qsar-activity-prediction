@@ -95,27 +95,15 @@ Python **>= 3.12** is required: the pinned numpy 2.5.3, scipy 1.18.1,
 xgboost 3.4.1 and shap 0.52.0 publish no 3.11 wheels, so the install
 fails on Python 3.11 by design.
 
-> ⚠️ **Stale until a refreshed release is published (2026-10-12).** The
-> only GitHub release, `artifacts-v1` (published 2026-10-08 from commit
-> 5b5d244), predates the 2026-10-11 data refresh: its raw CSVs lack the
-> `standard_relation` column, none of its 8 ChEMBL raw files matches
-> the refreshed `data/raw/sha256sums.txt`, and its RF models were
-> trained on pre-refresh data (old egfr RF scores 0.7466 / 0.5624 vs
-> refreshed 0.7214 / 0.6492, so `gnn_01_make_splits.py` aborts).
-> `scripts/fetch_artifacts.py` now verifies extracted raw files against
-> `data/raw/sha256sums.txt` and will stop with an error on this
-> release, and `scripts/02_clean_data.py` refuses ChEMBL-format raw
-> files without `standard_relation` (both fail closed by design). Until
-> a new release is published, use full retraining (methodology) instead
-> of this fast path — fetched models do **not** currently "verify
-> against the published metrics".
+The fetched assets are verified twice: each archive against the release's
+own `sha256sums.txt` (download integrity), and the extracted raw files
+against the repo's `data/raw/sha256sums.txt` — the script aborts loudly
+on any release whose raw data predates the 2026-10-11 refresh.
 
-The fast path is designed so that, once a refreshed release exists,
-Phase 2 runs directly (`gnn_01_make_splits.py` onward): saved RF models
-and regenerated splits then verify against the published metrics with
-no retraining - against today's `artifacts-v1` that promise does not
-hold (see the warning above), so full retraining is the supported route
-for now. Full retraining, incl. phase 3: [methodology](docs/methodology.md).
+The fast path is designed so that Phase 2 runs directly
+(`gnn_01_make_splits.py` onward): saved RF models and regenerated
+splits verify against the published metrics with no retraining.
+Full retraining, incl. phase 3: [methodology](docs/methodology.md).
 
 `requirements.txt` is a **snapshot of the working environment at campaign
 time, not a hard boundary**: development ran the full test suite on

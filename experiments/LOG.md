@@ -929,3 +929,8 @@ header, so the "newest first" order holds only for the older entries.
   the S3 mirror's return to HTTP 200, `docs/interview.md` was re-stamped
   against the refreshed numbers, and the fixes doc's open-issue list and
   M4 test records were brought up to date (2026-10-12 addendum).
+  2026-10-12 (later): `artifacts-v2` release published (refreshed raw CSVs +
+  26 RF models + `document_years.csv`); `scripts/fetch_artifacts.py` now
+  points at it, and the README fast-path staleness warning was removed —
+  the release manifest + repo `data/raw/sha256sums.txt` double verification
+  stays in place.

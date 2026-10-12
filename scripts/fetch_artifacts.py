@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Download trained models and raw data from the `artifacts-v1` GitHub Release.
+"""Download trained models and raw data from the `artifacts-v2` GitHub Release.
 
 Assets are cached in <repo>/.artifacts_cache/, verified against the
 release's own sha256sums.txt, then unpacked into the repo root (the archives
@@ -32,7 +32,7 @@ CACHE_DIR_NAME = ".artifacts_cache"
 SUMS_NAME = "sha256sums.txt"
 API_URL = (
     "https://api.github.com/repos/LessRAY3-3/qsar-activity-prediction"
-    "/releases/tags/artifacts-v1"
+    "/releases/tags/artifacts-v2"
 )
 USER_AGENT = "qsar-activity-prediction-fetch-artifacts"
 
@@ -271,7 +271,7 @@ def run(asset_keys, repo_root: Path = REPO_ROOT, api_url: str = API_URL,
 
 def main(argv=None) -> int:
     parser = argparse.ArgumentParser(
-        description="Fetch models/raw-data artifacts from the artifacts-v1 GitHub release."
+        description="Fetch models/raw-data artifacts from the artifacts-v2 GitHub release."
     )
     group = parser.add_mutually_exclusive_group()
     group.add_argument("--models", action="store_true", help="fetch models.tar.xz only")

@@ -26,17 +26,15 @@ unpinned: the suite (97 tests at the 2026-10-11 refresh; 117 when last run,
 Many checks below need only `data/processed/` and `results/`, which are
 tracked; `models/` and `data/raw/` come from `python scripts/fetch_artifacts.py --all`.
 
-> **Warning - artifacts-v1 predates the 2026-10-11 data refresh.** The only
-> published release (`artifacts-v1`, 2026-10-08, commit 5b5d244) holds
-> pre-refresh raw CSVs and models: its raw files lack `standard_relation`,
-> so running `02_clean_data.py` on them *silently skips the censoring
-> filter* (the H1 bug returns; 02 fails open when the column is missing),
-> and its RF models score differently against the refreshed clean CSVs.
-> `scripts/fetch_artifacts.py` verifies archives only against the release's
-> own checksum file, so nothing flags the staleness. Until a refreshed
-> release exists, treat the README fast path as stale, verify fetched raw
-> files against `data/raw/sha256sums.txt`, and compare against the
-> refreshed state tagged `data-refresh-2026-10-11`.
+> **Release status.** `artifacts-v2` (2026-10-12) publishes the refreshed
+> raw CSVs and RF models; `fetch_artifacts.py` points at it. The superseded
+> `artifacts-v1` (2026-10-08, commit 5b5d244) predates the 2026-10-11 data
+> refresh — its raw files lack `standard_relation` and its models were
+> trained on pre-refresh data. `scripts/fetch_artifacts.py` now verifies
+> extracted raw files against the repo's `data/raw/sha256sums.txt` and
+> fails closed on any stale release, and `scripts/02_clean_data.py`
+> refuses ChEMBL-format raw files without `standard_relation` (H1 cannot
+> silently return).
 
 ## 1. Review checklist
 
