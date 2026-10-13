@@ -221,7 +221,12 @@ def make_combined_forest(panel_df, sig_dir, fig_path):
     when it carries the cell, otherwise both fall back to the panel
     summary (results/gine_panel/summary.csv) -- the old code took the
     whisker from the per-cell bootstrap CSVs and the centre from
-    summary_gine. Writes a NEW file -- ci_panel.png is never touched.
+    summary_gine. A fallback row is drawn as a HOLLOW marker and the
+    legend says so: its centre is the panel summary's per-seed-mean
+    d_r2_mean while its whisker is that same row's mean3 bootstrap CI --
+    the two conventions differ slightly by design (DELTA_CONVENTION), so
+    the row is annotated, never mixed with another file. Writes a NEW
+    file -- ci_panel.png is never touched.
     """
     import matplotlib
     matplotlib.use("Agg")
@@ -241,6 +246,7 @@ def make_combined_forest(panel_df, sig_dir, fig_path):
     fig, ax = plt.subplots(figsize=(9.5, 7.0))
     off = 0.19
     colors = {"gin": "tab:orange", "gine": "tab:green"}
+    drew_fallback = False
 
     for y, cell in zip(y_pos, cells):
         g = gin.loc[cell]
@@ -252,7 +258,8 @@ def make_combined_forest(panel_df, sig_dir, fig_path):
         # one source per row: campaign gine summary carries both the
         # whisker and the centre; the panel summary is the same-file
         # fallback when the cell is absent from summary_gine
-        if gine is not None and cell in gine.index:
+        is_fallback = gine is None or cell not in gine.index
+        if not is_fallback:
             r = gine.loc[cell]
             lo, hi = float(r["ci_lo"]), float(r["ci_hi"])
             point = float(r["d_r2"])
@@ -261,9 +268,17 @@ def make_combined_forest(panel_df, sig_dir, fig_path):
                            & (panel_df["split"] == cell[1])].iloc[0]
             lo, hi = row["ci_lo"], row["ci_hi"]
             point = row["d_r2_mean"]
+            drew_fallback = True
         ax.hlines(y - off, lo, hi, color=colors["gine"], linewidth=1.6)
-        ax.plot([point], [y - off], "o", color=colors["gine"],
-                markersize=5)
+        if is_fallback:
+            # hollow marker = panel-summary fallback (per-seed-mean
+            # centre on that row's ensemble CI whisker -- see docstring)
+            ax.plot([point], [y - off], "o", markerfacecolor="white",
+                    markeredgecolor=colors["gine"], markeredgewidth=1.4,
+                    markersize=6)
+        else:
+            ax.plot([point], [y - off], "o", color=colors["gine"],
+                    markersize=5)
 
     ax.axvline(0, color="black", linestyle="--", linewidth=1)
     ax.set_yticks(y_pos)
@@ -276,6 +291,12 @@ def make_combined_forest(panel_df, sig_dir, fig_path):
         plt.Line2D([], [], marker="o", ls="", color=colors["gine"],
                    label="GINE mean3 (phase 1)"),
     ]
+    if drew_fallback:
+        handles.append(
+            plt.Line2D([], [], marker="o", ls="", color=colors["gine"],
+                       markerfacecolor="white", markeredgewidth=1.4,
+                       label="hollow = panel-summary fallback (per-seed-"
+                             "mean centre, ensemble CI whisker)"))
     ax.legend(handles=handles, loc="lower right", fontsize=8, frameon=False)
     ax.set_title("Paired bootstrap ΔR² (model − RF): GIN vs GINE, "
                  "mean3 convention", fontsize=11)

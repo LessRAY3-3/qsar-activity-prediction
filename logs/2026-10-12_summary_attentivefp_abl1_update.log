@@ -16,6 +16,22 @@ which dragged the cell to RF-significant -0.048.  On 2026-10-12 the run
 was redone with the new --min-epochs floor and the cell was
 re-bootstrapped, then the campaign summary was updated.
 
+ANNOTATION (2026-10-13, PR #6 finding R1/P1 -- correcting the paragraph
+above, which is left as written):
+  * "had stopped at epoch 15" conflates two things: the original CUDA
+    run EARLY-STOPPED AT EPOCH 35 with best epoch 15 and train MSE 0.57
+    (logs/win4070_/win4070_overnight_train_attentivefp_abl1_scaffold_s42.log,
+    device=cuda; README.md and docs/methodology.md now say this).
+  * "redone with the new --min-epochs floor" misattributes the flip.
+    The flip came from the independent rerun ITSELF -- fresh randomness
+    on another device (device=mps, printed at line 6 of the stdout log
+    cited in Step 1 below); the two runs already diverge at epoch 2.
+    The --min-epochs 60 floor never bound: the rerun's longest
+    non-improving stretch is 46 -> 62, below patience 20, so it reaches
+    100 epochs with or without the floor (README.md, docs/methodology.md).
+  * The numbers below (0.6745 / best epoch 82 / +0.020 [-0.018, +0.057])
+    are unaffected; only the attribution changes.
+
 --------------------------------------------------------------------------------
 1. Step 1 -- retrain the one run (completed 2026-10-12 09:40)
 --------------------------------------------------------------------------------

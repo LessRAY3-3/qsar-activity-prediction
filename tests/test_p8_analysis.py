@@ -462,6 +462,70 @@ def test_campaign_coverage_guard_refuses_subset(load_experiment, tmp_path):
     mod.guard_campaign_coverage(str(path), ["t1", "t2"], ["random"], force=True)
 
 
+def test_check_cell_csv_refuses_stored_seed_mismatch(load_experiment, tmp_path):
+    """Guard key is (n_boot, boot_seed): same-B different-seed is refused.
+
+    Mutant killed: check_cell_csv ignoring boot_seed -- a --seed 7 rerun
+    would silently replace campaign cells whose CIs were drawn from the
+    seed-42 resample matrices (PR #5 Low: "it ignores the bootstrap seed").
+    """
+    mod = load_experiment("paired_bootstrap")
+    cell = tmp_path / "tiny_random.csv"
+    cell.write_text("tag,split,model_pair,n_boot,boot_seed\n"
+                    "tiny,random,mean3,300,42\n")
+
+    with pytest.raises(SystemExit, match="boot_seed"):
+        mod.check_cell_csv(str(cell), 300, seed=7)
+    assert "300,42" in cell.read_text()              # refusal leaves it alone
+    mod.check_cell_csv(str(cell), 300, seed=42)      # same (B, seed): allowed
+    mod.check_cell_csv(str(cell), 300, seed=7, force=True)   # --force: allowed
+
+    # a pre-boot_seed cell validates as the campaign seed (BOOT_SEED)
+    legacy = tmp_path / "legacy.csv"
+    legacy.write_text("tag,split,model_pair,n_boot\ntiny,random,mean3,10000\n")
+    mod.check_cell_csv(str(legacy), mod.N_BOOT, seed=mod.BOOT_SEED)
+    with pytest.raises(SystemExit, match="boot_seed"):
+        mod.check_cell_csv(str(legacy), mod.N_BOOT, seed=7)
+
+
+def test_main_preflights_every_cell_before_writing_any(
+        load_experiment, tmp_path, monkeypatch
+):
+    """The per-cell guard runs BEFORE the write loop, never inside it.
+
+    A two-cell run whose SECOND cell carries a stored mismatch must abort
+    with the FIRST cell's file byte-for-byte untouched. Mutant killed: the
+    old in-loop check aborted only after the first cell had been rewritten
+    (PR #5 Low: "a later mismatch aborts after earlier cells were
+    rewritten").
+    """
+    mod = load_experiment("paired_bootstrap")
+    _write_cell(tmp_path, "tiny1", "random")
+    _write_cell(tmp_path, "tiny2", "random")
+    monkeypatch.setattr(mod, "BASE", str(tmp_path))
+    out = tmp_path / "out"
+    out.mkdir()
+    # tiny1 matches the run's (n_boot, boot_seed): the write loop would
+    # rewrite it; tiny2 carries a stored B=10000 the run must refuse
+    ok_cell = out / "tiny1_random.csv"
+    ok_cell.write_text("tag,split,model_pair,n_boot,boot_seed\n"
+                       "tiny1,random,mean3,300,42\n")
+    bad_cell = out / "tiny2_random.csv"
+    bad_cell.write_text("tag,split,model_pair,n_boot,boot_seed\n"
+                        "tiny2,random,mean3,10000,42\n")
+    ok_sentinel = ok_cell.read_text()
+    bad_sentinel = bad_cell.read_text()
+
+    with pytest.raises(SystemExit):
+        mod.main(["--tags", "tiny1,tiny2", "--splits", "random",
+                  "--n-boot", "300", "--out-dir", str(out),
+                  "--fig", str(tmp_path / "fig.png")])
+
+    # the OK cell was never reached by a write: preflight refused first
+    assert ok_cell.read_text() == ok_sentinel
+    assert bad_cell.read_text() == bad_sentinel
+
+
 @pytest.mark.filterwarnings("ignore:invalid value encountered in subtract")
 def test_bootstrap_records_requested_n_boot_with_degenerate_resamples(
         load_experiment

@@ -11,7 +11,9 @@ Three checks:
      counted: 02's nM-unit and non-empty-SMILES filters apply first, then
      only rows the label policy keeps (standard_relation == "=") - rows the
      H1 filter drops are reported on a separate line, never mixed into the
-     headline.
+     headline. Inputs 02 refuses or runs without that policy (non-ChEMBL
+     TAGs bace/esol; ChEMBL-style files missing the relation column) are
+     skipped with an explanation instead of being audited.
   3. Permutation importance vs MDI. RandomForest's built-in (MDI) importance
      is inflated for correlated features - and 2048 fingerprint bits contain
      many chemically equivalent ones. Permutation importance on the held-out
@@ -69,6 +71,16 @@ def check_testset_distributions(X, y, smiles):
 
 def check_ultra_potent():
     print("\n== 2. ultra-potent records (pIC50 > 9, IC50 < 1 nM) ==")
+    # Skip the audit for non-ChEMBL campaigns: 02_clean_data runs bace
+    # without the standard_relation censoring policy (and esol never goes
+    # through 02 at all), so a relation-based "labelled rows" headline
+    # would misstate what the model saw (Low, PR #6).
+    if TAG in ("bace", "esol"):
+        print(f"  skipped: QSAR_TAG={TAG!r} is not a ChEMBL campaign "
+              "dataset - 02_clean_data applies the standard_relation "
+              "censoring policy only to ChEMBL inputs, so the labelled-"
+              "rows audit below does not apply here")
+        return
     df = pd.read_csv(RAW)
     df["standard_value"] = pd.to_numeric(df["standard_value"], errors="coerce")
     # Mirror 02's filters BEFORE counting: a row with a non-nM unit or an
@@ -109,9 +121,27 @@ def check_ultra_potent():
                   f"but were dropped by the label policy "
                   f"(relations: {rels}) - not counted above")
     else:
-        # sources without a relation column (BACE): the label policy keeps
-        # every row that survived 02's unit/SMILES filters above, so that
-        # filtered set is the kept set
+        # Skip what 02 refuses: a ChEMBL-style file without the relation
+        # column is rejected outright by 02 (N5: censoring cannot be
+        # verified), so no label policy was ever applied to build the
+        # model from it -- auditing it here would assert a kept-set that
+        # does not exist (Low, PR #6). Non-ChEMBL sources without the
+        # column (bace-style IDs): 02 keeps every row that survived the
+        # unit/SMILES filters above, so that filtered set IS the kept set.
+        if "molecule_chembl_id" in df.columns:
+            ids = (df["molecule_chembl_id"].fillna("").astype(str)
+                   .str.strip().str.upper())
+            n_chembl_style = int(
+                (ids.str.startswith("CHEMBL") | ids.str.fullmatch(r"\d+")
+                 | ids.str.fullmatch(r"\d+\.0+")).sum())
+        else:
+            n_chembl_style = 0
+        if n_chembl_style:
+            print(f"  skipped: {n_chembl_style} ChEMBL-style molecule ID(s) "
+                  "but no standard_relation column - 02_clean_data refuses "
+                  "such inputs (the censoring filter cannot be verified), "
+                  "so there is no label policy to audit")
+            return
         hot = hot_all
         print(f"  {len(hot)} / {len(df)} rows after 02's unit/SMILES filters "
               f"({len(hot)/len(df):.1%}) have pIC50 > 9")

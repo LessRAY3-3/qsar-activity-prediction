@@ -5,15 +5,17 @@ description: Audit this QSAR repo (ChEMBL -> pIC50 -> Morgan-fingerprint RF vs G
 
 # QSAR pipeline review
 
-This skill re-runs the reviews done on 2026-10-10, 2026-10-11 and
-2026-10-12 and keeps their lessons. The findings, with file:line anchors,
-evidence and suggested fixes, are in `references/findings-2026-10-10.md`,
-`references/findings-2026-10-11.md` (N1-N14, the data-refresh re-review)
-and `references/findings-2026-10-12.md` (P1-P8 plus Low, reviewing the
-N1-N14 remediation). Start every review by reading the newest file, then
-the earlier ones - on the 2026-10-10 file, first its dated amendment note,
-which points to the four claims the 2026-10-11 re-review corrected - and
-checking which items are still open.
+This skill re-runs the reviews done on 2026-10-10, 2026-10-11, 2026-10-12
+and 2026-10-13 and keeps their lessons. The findings, with file:line
+anchors, evidence and suggested fixes, are in
+`references/findings-2026-10-10.md`, `references/findings-2026-10-11.md`
+(N1-N14, the data-refresh re-review), `references/findings-2026-10-12.md`
+(P1-P8 plus Low, reviewing the N1-N14 remediation) and
+`references/findings-2026-10-13.md` (R1-R5 plus Low, reviewing the
+commit-6c1e3bb remediation of PR #5). Start every review by reading the
+newest file, then the earlier ones - on the 2026-10-10 file, first its
+dated amendment note, which points to the four claims the 2026-10-11
+re-review corrected - and checking which items are still open.
 
 ## 0. Baseline (5 min)
 
@@ -26,19 +28,32 @@ pytest -q
 `requirements.txt` pins need Python >= 3.12 (numpy 2.5.x). On 3.11, install
 unpinned: the suite (97 tests at the 2026-10-11 refresh; 135 at the 2026-10-12
 PR #4 head reviewed in findings-2026-10-12) and ruff were verified to pass
-that way.
+that way; the current head runs 205 tests, verified under the pinned
+Python 3.12 environment (findings-2026-10-13 recorded 165 at 6c1e3bb).
 Many checks below need only `data/processed/` and `results/`, which are
-tracked; `models/` and `data/raw/` come from `python scripts/fetch_artifacts.py --all`.
+tracked; `models/`, `data/raw/` and the gitignored
+`data/processed/*_fingerprints.npz` caches come from
+`python scripts/fetch_artifacts.py --all`.
 
-> **Release status.** `artifacts-v2` (2026-10-12) publishes the refreshed
-> raw CSVs and RF models; `fetch_artifacts.py` points at it. The superseded
-> `artifacts-v1` (2026-10-08, commit 5b5d244) predates the 2026-10-11 data
-> refresh — its raw files lack `standard_relation` and its models were
-> trained on pre-refresh data. `scripts/fetch_artifacts.py` now verifies
-> extracted raw files against the repo's `data/raw/sha256sums.txt` and
-> fails closed on any stale release, and `scripts/02_clean_data.py`
-> refuses ChEMBL-format raw files without `standard_relation` (H1 cannot
-> silently return).
+> **Release status.** `artifacts-v2` (2026-10-12; assets re-uploaded
+> 2026-10-13 with `processed_cache.tar.gz`) publishes the refreshed raw
+> CSVs, the RF models and the fingerprint caches `--all` installs;
+> `fetch_artifacts.py` points at it. The superseded `artifacts-v1`
+> (2026-10-08, commit 5b5d244) predates the 2026-10-11 data refresh — its
+> raw files lack `standard_relation` and its models were trained on
+> pre-refresh data. Extraction is verified (P3): the repo's tracked
+> `data/raw/sha256sums.txt` is read into memory as the trust anchor before
+> any archive is downloaded or unpacked; archives unpack into
+> `.artifacts_cache/<tag>/_extract_tmp/`, never the working tree; an
+> archive member named `data/raw/sha256sums.txt` is refused; every file
+> the in-memory manifest names is sha256-checked inside the temp dir and
+> only a fully verified tree is moved into place, so a failed check leaves
+> nothing half-installed and the tracked manifest is never replaced by
+> release content (assets with no repo-side manifest, `models/` and the
+> processed cache, pass by key-file existence only). Each archive is
+> additionally checked against the release's own `sha256sums.txt`, and
+> `scripts/02_clean_data.py` refuses ChEMBL-format raw files without
+> `standard_relation` (H1 cannot silently return).
 
 ## 1. Review checklist
 
@@ -54,7 +69,7 @@ re-reading the code or by a number computed from the repo, never inferred.
   02 now fails closed on ChEMBL-format input that lacks the column
   (N5 fixed, findings-2026-10-11; re-verified in findings-2026-10-12) -
   the skip is limited to the known bace-style non-ChEMBL input; residual
-  fail-open edge cases are tracked in findings-2026-10-12 (Low, code).
+  fail-open edge cases are tracked in findings-2026-10-13 (Low, code).
   Quantify upstream censoring with `scripts/chembl_censoring_counts.py`
   (live API) and audit the committed raw pulls with its `--overlap` mode
   (section 2).
@@ -106,10 +121,9 @@ Check that every column, label and table header names the convention it
 actually holds, that no table invites subtracting columns of one
 convention to get a Δ of the other, that the win-fraction column is named
 `frac_boot_gin_better` (legacy files still say `p_one_sided` and are
-renamed on read; the old `2*min(p, 1-p)` statistic was wrong and was
-retired - L1 fixed, amendment in findings-2026-10-10) and is read as the
-bootstrap fraction of replicates with ΔR² > 0, not as a p-value for a GIN
-win, and that std ddof is consistent between JSON summaries and figures.
+renamed on read - L1 fixed) and is read as the bootstrap fraction of
+replicates with ΔR² > 0, not as a p-value for a GIN win, and that std
+ddof is consistent between JSON summaries and figures.
 
 ### E. README vs results
 
@@ -126,7 +140,7 @@ are not machine-checked and need manual recomputation.
 
 | Script | What it does | Network |
 |---|---|---|
-| `scripts/qc_salts_censoring.py --tag TAG [--out f.json]` | audits the committed `parent_smiles` (multi-fragment / duplicated parents must be 0, split overlap must be 0, recomputation from provenance with 02's own standardization) and **exits 1 when any must-be-0 invariant is violated**, provenance salt context, raw-CSV censoring counts with 02's own inclusion rule (`standard_relation != "="`); skips the parent-level checks with a note on clean CSVs that predate them (bace) | no |
+| `scripts/qc_salts_censoring.py --tag TAG [--out f.json] [--allow-skip]` | audits the committed `parent_smiles` (multi-fragment / duplicated parents must be 0, split overlap must be 0, recomputation from provenance with 02's own standardization) and **exits 1 when any must-be-0 invariant is violated, when a split file is misaligned with the clean CSV (same count, different smiles), or when a split check cannot run** (missing split file, count mismatch, or no `parent_smiles` column — a SKIP note is printed and the default is exit 1; `--allow-skip` accepts the skips, e.g. for the bace clean CSV that predates the parent column), provenance salt context, raw-CSV censoring counts with 02's own inclusion rule (`standard_relation != "="`) | no |
 | `scripts/chembl_censoring_counts.py [--targets tag=CHEMBLID,...] [--overlap TAG] [--skip-counts]` | censored-record counts per target and assay type (live ChEMBL); with `--overlap`, an offline raw-CSV audit: every modelled parent keeps ≥ 1 `=` record and `n_measurements` matches, mixed exact+censored parents are counted, and raw parents dropped by the H1 filter are reported | counts: ChEMBL API; `--overlap --skip-counts`: no |
 | `scripts/verify_readme_tables.py [--out report.json] [--dry-run]` | independently recomputes README table cells (panel, time split, XGBoost, multitask, fp ablation, EGFR/BACE detail, GIN-vs-RF, fairness incl. GINE rows, dataset sizes) from `results/`; **exits non-zero on any mismatch** (`--dry-run` reports without failing) | no |
 | `scripts/rf_h1_sensitivity.py [--out D] [--dry-run] [--baseline-ref REF]` | the historical (pre-refresh) H1 sensitivity RF re-run; inputs pinned in `.scratch/h1_sensitivity/`, primary baseline = published pre-refresh metrics as constants, refreshed-state baseline pinned to tag `data-refresh-2026-10-11` (never HEAD); refuses `results/`/`figures/`/`models/`/`data/` outputs | no (local `git show` for the ref) |

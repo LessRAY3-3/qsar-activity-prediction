@@ -25,7 +25,13 @@ What / why:
      ids). A ChEMBL-style file without the column predates the 2026-10-11 data
      refresh (e.g. raw files from the artifacts-v1 release); censoring
      cannot be verified on it, so the script aborts with a non-zero exit
-     instead of silently reintroducing the H1 censored-label bug.
+     instead of silently reintroducing the H1 censored-label bug. Relation
+     values are compared after strip(), so a padded "=" counts as exact
+     (a raw-column comparison would drop every padded row and write a
+     header-only CSV with exit 0). Degenerate ID columns also fail
+     closed: a pandas float-coerced number column ("4069737.0") is still
+     ChEMBL-style, and an all-empty ID column (or blank cells mixed with
+     numeric IDs) cannot certify a non-ChEMBL input.
   6. Sanity cross-check against ChEMBL's own pchembl_value (should match),
      over ALL retained rows, and explicitly report the retained rows whose
      pchembl_value is empty (exact measurements ChEMBL could not convert,
@@ -113,8 +119,14 @@ def main():
                 "(scripts/01e_download_chembl.py already writes that column)."
             )
         n_in = len(df)
-        removed_rel = df.loc[df["standard_relation"] != "=", "standard_relation"]
-        df = df[df["standard_relation"] == "="].copy()
+        # Compare the STRIPPED value: a padded "=" (" = ", "= ") is an
+        # exact measurement, and comparing the raw column would drop every
+        # padded row -- another header-only-with-exit-0 fail-open (Low,
+        # PR #6).
+        keep = (df["standard_relation"].fillna("").astype(str).str.strip()
+                == "=")
+        removed_rel = df.loc[~keep, "standard_relation"]
+        df = df[keep].copy()
         n_removed = n_in - len(df)
         print(f"Censoring filter: {n_in} rows in, removed {n_removed} non-exact rows, {len(df)} remain.")
         print("  removed rows by standard_relation:")
@@ -127,19 +139,29 @@ def main():
         # running the filter-less would keep censored bounds as exact labels.
         # IDs are checked after strip()+upper() so padded (" CHEMBL4069737 ")
         # and bare numeric ChEMBL numbers cannot slip through as "non-ChEMBL".
+        # Degenerate ID columns fail closed the same way (Low, PR #6): a
+        # pandas float-coerced number column ("4069737.0") is still a
+        # ChEMBL-style ID, and an all-empty column (or blank cells mixed
+        # with numeric IDs) cannot certify a non-ChEMBL input either --
+        # only uniformly non-ChEMBL IDs (e.g. BACE_1) may skip the filter.
         if "molecule_chembl_id" in df.columns:
             ids = (df["molecule_chembl_id"].fillna("").astype(str)
                    .str.strip().str.upper())
             is_chembl = (ids.str.startswith("CHEMBL")
-                         | ids.str.fullmatch(r"\d+").fillna(False))
+                         | ids.str.fullmatch(r"\d+")
+                         | ids.str.fullmatch(r"\d+\.0+"))
             n_chembl = int(is_chembl.sum())
+            n_blank = int((ids == "").sum())
         else:
             n_chembl = len(df)  # cannot verify IDs -> treat as ChEMBL-style
-        if TAG != "bace" and n_chembl > 0:
+            n_blank = 0
+        if TAG != "bace" and (n_chembl > 0 or n_blank > 0):
             raise SystemExit(
                 f"ERROR: {IN_CSV} has no standard_relation column, but this is "
                 f"not a non-ChEMBL input (TAG={TAG!r}, {n_chembl} ChEMBL-style "
-                f"molecule IDs of {len(df)}). This raw file predates the "
+                f"molecule IDs of {len(df)}"
+                + (f", {n_blank} blank ID cell(s)" if n_blank else "")
+                + "). This raw file predates the "
                 "2026-10-11 data refresh (e.g. a download from the artifacts-v1 "
                 "release), so the censoring filter (H1: keep only "
                 "standard_relation == '=') cannot be verified and censored rows "

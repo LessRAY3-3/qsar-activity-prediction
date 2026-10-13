@@ -1,0 +1,55 @@
+# R2 time-split MSE decomposition (PR #6 finding R2 + correction 2)
+# date: 2026-10-13 13:50:51  python: Python 3.12.14
+#
+# Question: replace the P2-era mechanism labels in README with the exact
+# decomposition of GIN-ens-minus-RF R2 on the committed time splits.
+#
+# Method: SSE/n = (ybar-pbar)^2 + sigma_y^2 * f(s,r), f = s^2+1-2rs,
+#   s = sigma_pred/sigma_y, r = corr(pred, y). Level has no interaction
+#   with (s,r); the spread/correlation pair shares the r*s cross-term, so
+#   their allocation is the 2-player Shapley split (level direct).
+#   Contribution to dR2 = -(d SSE/n)/sigma_y^2; residual = dR2 - sum.
+#
+# Inputs (committed): results/rf_preds_{tag}_time.npz +
+#   results/gnn_preds_{tag}_time{,_seed1,_seed2}.npz; constant_r2 from
+#   results/time_split/summary.csv.
+#
+# Note on the one 3rd-decimal difference vs the PR #6 reference table:
+#   egfr correlation is -0.044479 at full precision -> -0.044 at 3dp;
+#   the review's -0.045 appears to be a double-rounding of -0.04448.
+#   Current committed data wins; README writes -0.044.
+#
+# Command:
+#   .venv/bin/python /tmp/r2_time_decomp.py
+# ------------------------------------------------------------------
+R2 time-split MSE decomposition, Shapley split of the spread/correlation cross-term
+inputs: results/rf_preds_{tag}_time.npz + results/gnn_preds_{tag}_time{,_seed1,_seed2}.npz (committed)
+
+tag            dR2    level   spread     corr   residual   vs PR #6 reference
+-----------------------------------------------------------------------------------------------------
+a2a         +0.326   +0.580   +0.008   -0.263  -8.88e-16   MATCH
+abl1        -0.236   -0.002   -0.115   -0.119  -2.50e-16   MATCH
+egfr        +0.039   +0.005   +0.079   -0.044   1.80e-16   differs corr: mine -0.044 vs ref -0.045 (full precision -0.044479)
+egfr_full   +0.592   +0.392   +0.032   +0.168  -8.88e-16   MATCH
+herg        +0.032   +0.005   -0.016   +0.044   1.53e-16   MATCH
+hivpr       +0.115   -0.000   -0.008   +0.123  -2.64e-16   MATCH
+mpro        +0.084   +0.025   +0.027   +0.032  -2.78e-16   MATCH
+vegfr2      -0.052   +0.035   +0.002   -0.089  -4.86e-17   MATCH
+
+max |residual| over 8 tags: 8.88e-16
+
+per-tag moments (RF vs GIN ensemble) and supporting numbers:
+  a2a        test mean 7.35 | pred means RF 6.51 GIN 7.60 | std/y RF 0.69 GIN 0.22 | r RF 0.59 GIN 0.30 | slope(p~y) RF 0.41 GIN 0.07 | R2 RF -0.301 GIN ens +0.024 | constant_r2 -0.004 | RF re-centred to non-test mean R2 +0.335
+  abl1       test mean 7.65 | pred means RF 7.25 GIN 7.25 | std/y RF 0.63 GIN 0.39 | r RF 0.81 GIN 0.70 | slope(p~y) RF 0.51 GIN 0.27 | R2 RF +0.560 GIN ens +0.324 | constant_r2 -0.132 | RF re-centred to non-test mean R2 +0.495
+  egfr       test mean 6.73 | pred means RF 6.61 GIN 6.65 | std/y RF 0.81 GIN 0.66 | r RF 0.49 GIN 0.45 | slope(p~y) RF 0.39 GIN 0.30 | R2 RF +0.123 GIN ens +0.162 | constant_r2 -0.063 | RF re-centred to non-test mean R2 +0.069
+  egfr_full  test mean 7.50 | pred means RF 6.62 GIN 7.04 | std/y RF 0.57 GIN 0.52 | r RF 0.11 GIN 0.26 | slope(p~y) RF 0.06 GIN 0.14 | R2 RF -0.736 GIN ens -0.144 | constant_r2 -0.455 | RF re-centred to non-test mean R2 -0.656
+  herg       test mean 5.46 | pred means RF 5.38 GIN 5.41 | std/y RF 0.41 GIN 0.44 | r RF 0.14 GIN 0.19 | slope(p~y) RF 0.06 GIN 0.09 | R2 RF -0.058 GIN ens -0.026 | constant_r2 -0.003 | RF re-centred to non-test mean R2 -0.054
+  hivpr      test mean 7.23 | pred means RF 6.99 GIN 7.48 | std/y RF 0.53 GIN 0.54 | r RF 0.26 GIN 0.37 | slope(p~y) RF 0.13 GIN 0.20 | R2 RF -0.027 GIN ens +0.088 | constant_r2 -0.006 | RF re-centred to non-test mean R2 -0.014
+  mpro       test mean 6.16 | pred means RF 5.97 GIN 6.07 | std/y RF 0.46 GIN 0.31 | r RF 0.27 GIN 0.31 | slope(p~y) RF 0.12 GIN 0.10 | R2 RF +0.006 GIN ens +0.090 | constant_r2 -0.000 | RF re-centred to non-test mean R2 +0.038
+  vegfr2     test mean 6.85 | pred means RF 6.56 GIN 6.69 | std/y RF 0.47 GIN 0.45 | r RF 0.46 GIN 0.36 | slope(p~y) RF 0.22 GIN 0.16 | R2 RF +0.160 GIN ens +0.108 | constant_r2 -0.002 | RF re-centred to non-test mean R2 +0.211
+
+PR #6 spot checks:
+  a2a: RF predicts 0.83 log units low (mean 6.51 vs test 7.35) while ranking better (r 0.59 vs 0.30); RF re-centred to the non-test mean scores +0.335, above the GIN ensemble's +0.024
+  herg: GIN spread ratio 0.44 is NOT smaller than RF's 0.41
+  egfr: spread +0.079 carries the only 'less over-dispersion' edge (dR2 +0.039); full-precision corr -0.044479 -> -0.044 at 3dp
+  hivpr: correlation +0.123 dominates; slopes RF 0.13 vs GIN 0.20

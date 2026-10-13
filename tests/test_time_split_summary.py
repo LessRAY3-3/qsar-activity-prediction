@@ -295,38 +295,60 @@ def test_gin_best_epochs_reads_time_metric(load_experiment):
             assert got != wrong, f"{tag}: time epochs equal {split} epochs"
 
 
-def test_build_summary_writes_correct_baseline_columns(tmp_path, monkeypatch,
-                                                       load_experiment):
-    """Mutant killed: column present but filled with the wrong value.
-
-    build_summary runs the REAL constant_r2 / gin_best_epochs (nothing is
-    stubbed for them): constant_r2 must equal the non-test-pool R2 (never 0,
-    never another pool) and gin_best_epochs must join the time best_epoch of
-    each seed -- a decoy random.best_epoch sits in every json to catch a
-    wrong-metric read at plumbing level too.
-    """
-    mod = load_experiment("time_split_summary")
-
+def _write_per_tag_tree(tmp_path, mod):
+    """Per-tag synthetic tree: every tag's y differs, so one tag's
+    constant stored for all tags cannot pass."""
     rng = np.random.default_rng(0)
-    y_all = rng.normal(6.0, 1.5, size=100)
     test_idx = np.arange(40, 100)
-    y_all[test_idx] = rng.normal(8.0, 1.0, size=len(test_idx))  # drift
     (tmp_path / "data" / "processed" / "splits").mkdir(parents=True)
-    expected_epochs = {}
+    (tmp_path / "results").mkdir(exist_ok=True)
+    per_tag_y = {}
     for i, tag in enumerate(mod.TAGS):
+        y_tag = rng.normal(6.0 + 0.7 * i, 1.5, size=100)
+        y_tag[test_idx] = rng.normal(9.0 + 0.5 * i, 1.0, size=len(test_idx))
+        per_tag_y[tag] = y_tag
         np.savez(tmp_path / "data" / "processed" / "splits" / f"{tag}_time.npz",
                  year=rng.integers(1990, 2026, size=100).astype(np.float64),
                  train_idx=np.arange(0, 20), valid_idx=np.arange(20, 40),
                  test_idx=test_idx)
         np.savez(tmp_path / "data" / "processed" / f"{tag}_fingerprints.npz",
-                 y=y_all)
+                 y=y_tag)
         epochs = (i * 10 + 1, i * 10 + 2, i * 10 + 3)
-        expected_epochs[tag] = ",".join(str(e) for e in epochs)
-        (tmp_path / "results").mkdir(exist_ok=True)
         for suf, e in zip(("", "_seed1", "_seed2"), epochs):
             (tmp_path / "results" / f"gnn_metrics_{tag}{suf}.json").write_text(
                 json.dumps({"time": {"best_epoch": e, "r2": 0.5},
                             "random": {"best_epoch": 99, "r2": 0.9}}))
+    return per_tag_y, test_idx
+
+
+def _expected_constants(per_tag_y, test_idx):
+    """Per-tag expected constant_r2 (pool = all non-test rows)."""
+    pool_mask = np.ones(len(next(iter(per_tag_y.values()))), dtype=bool)
+    pool_mask[test_idx] = False
+    pool_idx = np.where(pool_mask)[0]
+    return {tag: _baseline_r2(np.asarray(y, dtype=np.float64), test_idx,
+                              pool_idx)
+            for tag, y in per_tag_y.items()}
+
+
+def test_build_summary_writes_correct_baseline_columns(tmp_path, monkeypatch,
+                                                       load_experiment):
+    """Mutant killed: column present but filled with the wrong value.
+
+    build_summary runs the REAL constant_r2 / gin_best_epochs (nothing is
+    stubbed for them): constant_r2 must equal each tag's own non-test-pool
+    R2. The tree carries a different y per tag and the expected constants
+    are pairwise distinct, so storing ONE tag's constant for every tag --
+    the shared-fixture gap the 2026-10-13 review found here -- fails.
+    gin_best_epochs must join the time best_epoch of each seed -- a decoy
+    random.best_epoch sits in every json to catch a wrong-metric read at
+    plumbing level too.
+    """
+    mod = load_experiment("time_split_summary")
+    per_tag_y, test_idx = _write_per_tag_tree(tmp_path, mod)
+    expected_const = _expected_constants(per_tag_y, test_idx)
+    # the fixture must discriminate per-tag constants at all
+    assert len({round(v, 9) for v in expected_const.values()}) == len(mod.TAGS)
 
     # everything else build_summary reads is canned (see test 1)
     monkeypatch.setattr(mod, "time_split_stats", lambda tag: {
@@ -345,11 +367,121 @@ def test_build_summary_writes_correct_baseline_columns(tmp_path, monkeypatch,
     df = mod.build_summary().set_index("tag")
     assert "constant_r2" in df.columns and "gin_best_epochs" in df.columns
 
-    y = np.asarray(y_all, dtype=np.float64)
-    pool = np.ones(len(y), dtype=bool)
-    pool[test_idx] = False
-    expected_const = _baseline_r2(y, test_idx, np.where(pool)[0])
-    assert not np.isclose(expected_const, 0.0, atol=1e-9)
-    np.testing.assert_allclose(df["constant_r2"], expected_const,
-                               rtol=0, atol=1e-12)
+    for tag in mod.TAGS:
+        assert not np.isclose(expected_const[tag], 0.0, atol=1e-9)
+        assert float(df.loc[tag, "constant_r2"]) == pytest.approx(
+            expected_const[tag], abs=1e-12)
+        # ...and NOT any other tag's constant (shared-fixture mutant)
+        others = [expected_const[t] for t in mod.TAGS if t != tag]
+        assert not any(
+            np.isclose(float(df.loc[tag, "constant_r2"]), o, atol=1e-9)
+            for o in others), f"{tag}: constant_r2 matches another tag's pool"
+
+    expected_epochs = {
+        tag: ",".join(str(i * 10 + k) for k in (1, 2, 3))
+        for i, tag in enumerate(mod.TAGS)}
     assert df["gin_best_epochs"].to_dict() == expected_epochs
+
+
+def test_stored_constant_r2_matches_recomputed_baseline(tmp_path, monkeypatch,
+                                                        load_experiment):
+    """results/time_split/summary.csv: constant_r2 = recomputed no-skill R2.
+
+    Dual path. When the committed data/processed npz files are checked out
+    (local full repo; CI does not check them out), every stored tag value
+    must equal an INDEPENDENT recomputation from
+    {tag}_fingerprints.npz + {tag}_time.npz (pool = all non-test rows).
+    Without the npz (CI) the same recomputation contract is enforced on a
+    synthetic committed-style tree through the real build_summary, and the
+    committed summary.csv must still carry a finite constant_r2 for every
+    tag.
+    """
+    mod = load_experiment("time_split_summary")
+    repo = Path(__file__).resolve().parent.parent
+    results = repo / "results"
+    proc = repo / "data" / "processed"
+    stored = pd.read_csv(results / "time_split" / "summary.csv").set_index("tag")
+    assert set(stored.index) == set(mod.TAGS)
+    assert stored["constant_r2"].notna().all()
+
+    def _recompute(tag, root):
+        y = np.asarray(
+            np.load(root / "data" / "processed" / f"{tag}_fingerprints.npz")["y"],
+            dtype=np.float64)
+        sp = np.load(root / "data" / "processed" / "splits" / f"{tag}_time.npz")
+        test = np.asarray(sp["test_idx"])
+        pool = np.ones(len(y), dtype=bool)
+        pool[test] = False
+        return _baseline_r2(y, test, np.where(pool)[0])
+
+    have_npz = all(
+        (proc / f"{tag}_fingerprints.npz").exists()
+        and (proc / "splits" / f"{tag}_time.npz").exists()
+        for tag in mod.TAGS)
+    if have_npz:
+        for tag in mod.TAGS:
+            assert float(stored.loc[tag, "constant_r2"]) == pytest.approx(
+                _recompute(tag, repo), abs=1e-9)
+        return
+
+    # CI path: no committed npz -- enforce the same contract on a synthetic
+    # committed-style tree through the real build_summary
+    per_tag_y, test_idx = _write_per_tag_tree(tmp_path, mod)
+    expected_const = _expected_constants(per_tag_y, test_idx)
+    monkeypatch.setattr(mod, "time_split_stats", lambda tag: {
+        "test_year_start": 2020, "test_year_end": 2021,
+        "n_total": 100, "n_train": 20, "n_valid": 20, "n_test": 60,
+        "test_frac": 0.6})
+    monkeypatch.setattr(mod, "_load_json",
+                        lambda name: {"time": {"r2": 0.5, "rmse": 1.0}})
+    monkeypatch.setattr(mod, "comparison_reference",
+                        lambda tag: {"random": (0.7, 0.6),
+                                     "scaffold": (0.6, 0.55)})
+    monkeypatch.setattr(mod, "time_significance", lambda: pd.DataFrame(
+        [SIG_ROW] * len(mod.TAGS), index=list(mod.TAGS)))
+    monkeypatch.setattr(mod, "BASE", str(tmp_path))
+    df = mod.build_summary().set_index("tag")
+    for tag in mod.TAGS:
+        assert float(df.loc[tag, "constant_r2"]) == pytest.approx(
+            expected_const[tag], abs=1e-12)
+        assert float(df.loc[tag, "constant_r2"]) == pytest.approx(
+            _recompute(tag, tmp_path), abs=1e-12)
+
+
+def test_print_conclusion_labels_drift_conditionally(load_experiment, capsys):
+    """Conditional drift wording (6c1e3bb; condition corrected per PR #6).
+
+    Mutant killed: the unconditional label -- every negative RF time R2
+    announced as "genuine temporal drift" regardless of the constant
+    baseline. Final polarity: 'holder' (negative RF that holds at/above a
+    negative constant) reads as genuine temporal drift; 'undercut'
+    (RF below the constant) is below no-skill, not drift. The two must
+    land in different note lines, never in one shared drift line.
+    """
+    mod = load_experiment("time_split_summary")
+    df = pd.DataFrame([
+        {"tag": "undercut", "rf_time_r2": -0.30, "constant_r2": -0.05,
+         "gin_time_r2_mean": -0.10, "rf_random_r2": 0.70,
+         "gin_random_r2_mean": 0.65, "significant": False, "winner": "tie",
+         "test_frac": 0.2},
+        {"tag": "holder", "rf_time_r2": -0.05, "constant_r2": -0.40,
+         "gin_time_r2_mean": 0.10, "rf_random_r2": 0.70,
+         "gin_random_r2_mean": 0.65, "significant": False, "winner": "tie",
+         "test_frac": 0.2},
+        {"tag": "positive", "rf_time_r2": 0.40, "constant_r2": -0.01,
+         "gin_time_r2_mean": 0.35, "rf_random_r2": 0.70,
+         "gin_random_r2_mean": 0.65, "significant": False, "winner": "tie",
+         "test_frac": 0.2},
+    ])
+    mod.print_conclusion(df)
+    out = capsys.readouterr().out
+
+    note_lines = [ln for ln in out.splitlines() if "note:" in ln]
+    drift = [ln for ln in note_lines
+             if "genuine temporal drift" in ln and "not claimed" not in ln]
+    non_drift = [ln for ln in note_lines
+                 if "not claimed as genuine temporal drift" in ln]
+    assert len(drift) == 1, f"expected one drift note, got {drift}"
+    assert "holder" in drift[0] and "undercut" not in drift[0]
+    assert len(non_drift) == 1, f"expected one non-drift note, got {non_drift}"
+    assert "undercut" in non_drift[0] and "holder" not in non_drift[0]

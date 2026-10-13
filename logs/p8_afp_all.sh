@@ -44,7 +44,7 @@ if [ "${QSAR_ALLOW_GIT_PUSH:-0}" = "1" ]; then
     git -c user.name="$(git config user.name || echo leisirui)" \
         -c user.email="$(git config user.email || echo leisirui@users.noreply.github.com)" \
         commit -m "results: P8 AttentiveFP panel (8 targets x 2 splits x 3 seeds)"
-    git push origin main 2>&1 | tail -2
+    git push origin HEAD 2>&1 | tail -2
   fi
 else
   echo "commit+push skipped - export QSAR_ALLOW_GIT_PUSH=1 to commit/push explicitly"

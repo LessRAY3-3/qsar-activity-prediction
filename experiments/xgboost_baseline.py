@@ -7,8 +7,12 @@ pool (train + valid; the RF cross-validates, so it never carved out a
 validation set, while the GNN's 10% valid split is a subset of the RF's
 training rows). Fixed hyperparameters, 3 seeds x 2 splits. The RF
 control is read from results/metrics_{TAG}.json (the headline
-full-pool RF); learning-curve RFs are never used as controls - they fit
-at n_train far below the pool, so they are not same-pool either.
+full-pool RF); the RF training pool behind the same_pool fingerprint is
+rederived from the RF's own predictions artifact
+(results/rf_preds_{TAG}_{SPLIT}.npz test_idx), not from the same split
+file the XGB pool uses, so the check compares two independent artifacts.
+Learning-curve RFs are never used as controls - they fit at n_train far
+below the pool, so they are not same-pool either.
 
 Note: XGBoost runs on CPU (tree_method="hist") - deterministic for a
 fixed seed, and fast enough at this scale. libomp is required on macOS:
@@ -58,19 +62,40 @@ def pool_fingerprint(idx):
     return hashlib.sha256(arr.tobytes()).hexdigest()
 
 
-def rf_train_pool(split, sp, n_total):
-    """Rows the headline RF trains on for `split`, rebuilt from the split npz.
+def load_rf_test_idx(tag, split):
+    """Test indices from the RF's own predictions artifact, or None.
 
-    random/scaffold: the complement of the test set - 04 fits everything
-    outside the test fold (5-fold CV, no validation carve-out), so
-    train+valid from the split file reproduces it row for row.
+    results/rf_preds_{tag}_{split}.npz is written by the run that FIT the
+    headline RF, so its test_idx -- not the split file's -- is the
+    independent ground truth for which rows the RF never trained on.
+    Rebuilding the RF pool from the same split npz the XGB pool uses would
+    make the same_pool check vacuous for random/scaffold (the two pools
+    could never disagree).
+    """
+    path = os.path.join(BASE, "results", f"rf_preds_{tag}_{split}.npz")
+    if not os.path.exists(path):
+        return None
+    return np.load(path)["test_idx"]
+
+
+def rf_train_pool(split, sp, n_total, rf_test_idx=None):
+    """Rows the headline RF trains on for `split`.
+
+    random/scaffold: the complement of the RF's own test set -- taken from
+    rf_test_idx (results/rf_preds_{tag}_{split}.npz, see
+    load_rf_test_idx) when available, falling back to the split file's
+    test_idx only when the preds artifact is missing (main() warns: the
+    fallback is self-referential and cannot disagree with the XGB pool).
+    04 fits everything outside the test fold (5-fold CV, no validation
+    carve-out), so the complement reproduces the RF's training rows.
     time: train_idx only - the time RF is fit on the training window and
     never sees the valid carve-out, so the XGB train+valid pool is a
     different (larger) pool and must not be labelled same-pool.
     """
     if split == "time":
         return np.asarray(sp["train_idx"])
-    return np.setdiff1d(np.arange(n_total), np.asarray(sp["test_idx"]))
+    test = np.asarray(sp["test_idx"] if rf_test_idx is None else rf_test_idx)
+    return np.setdiff1d(np.arange(n_total), test)
 
 
 def load_rf_control(tag, xgb_pools, rf_pools, test_sizes, n_total):
@@ -90,7 +115,8 @@ def load_rf_control(tag, xgb_pools, rf_pools, test_sizes, n_total):
     Args:
         xgb_pools: {split: index array XGBoost fits on (train + valid)}
         rf_pools: {split: index array the headline RF trains on, or None
-            when it cannot be rebuilt from the split npz}
+            when it cannot be rebuilt (rf_preds_{tag}_{split}.npz absent;
+            see rf_train_pool)}
         test_sizes: {split: test-set size}, used only by the size fallback
         n_total: total fingerprint rows
     """
@@ -202,14 +228,21 @@ def main():
                                  r2_score)
 
     # load every split up front so the RF control can be pool-checked
-    # against a rebuilt RF training pool (composition, not just size)
+    # against the RF's OWN test set (rf_preds npz), not just size
     fit_idx, test_idx, rf_idx = {}, {}, {}
     for split in splits:
         sp = np.load(os.path.join(BASE, "data", "processed", "splits",
                                   f"{args.tag}_{split}.npz"))
         fit_idx[split] = fit_pool(sp)
         test_idx[split] = sp["test_idx"]
-        rf_idx[split] = rf_train_pool(split, sp, len(X))
+        rf_test = (None if split == "time"
+                   else load_rf_test_idx(args.tag, split))
+        if split != "time" and rf_test is None:
+            print(f"WARNING: [{args.tag}/{split}] results/rf_preds_"
+                  f"{args.tag}_{split}.npz not found - RF pool rebuilt from "
+                  "the split file (self-referential: it cannot disagree "
+                  "with the XGB pool)")
+        rf_idx[split] = rf_train_pool(split, sp, len(X), rf_test_idx=rf_test)
 
     control = load_rf_control(
         args.tag,

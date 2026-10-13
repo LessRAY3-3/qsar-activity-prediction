@@ -26,11 +26,12 @@ Exit code 1 + no figure if the anchor fails (caller must stop and report).
 years excluded) while this script trains on train+valid like
 random/scaffold, so the r2/2048 anchor could never reproduce it. The
 old behaviour was a KeyError at the anchor AFTER the CSV had already
-been truncated and partly rewritten. Likewise a split-subset run (e.g.
---splits random only) never rewrites the stored two-split outputs: if
-the committed CSV already covers splits this run does not, the script
-aborts before any training or write unless --force explicitly redraws
-the CSV/summary/figure from the subset.
+been truncated and partly rewritten. Likewise a subset run -- covering
+fewer splits, radii, n_bits values or seeds than the stored CSV --
+never rewrites the stored full-grid outputs: if the committed CSV
+carries any grid value this run does not, the script aborts before any
+training or write unless --force explicitly redraws the
+CSV/summary/figure from the subset.
 """
 import argparse
 import json
@@ -59,9 +60,10 @@ def parse_args():
     p.add_argument("--out", default=os.path.join(BASE, "results", "fp_ablation"))
     p.add_argument("--fig-dir", default=os.path.join(BASE, "figures", "fp_ablation"))
     p.add_argument("--force", action="store_true",
-                   help="allow a split-subset run to rewrite the stored "
-                        "CSV/summary/figure, dropping the splits it does "
-                        "not cover (default: refuse)")
+                   help="allow a subset run (fewer splits, radii, n_bits "
+                        "or seeds than the stored CSV) to rewrite the "
+                        "stored CSV/summary/figure, dropping the grid "
+                        "values it does not cover (default: refuse)")
     return p.parse_args()
 
 
@@ -172,22 +174,35 @@ def main():
                 f"{os.path.relpath(sp_path, BASE)} (run gnn_01_make_splits"
                 " first). No output file was written.")
 
-    # Split-coverage guard (same contract as paired_bootstrap's campaign
-    # coverage guard): the stored CSV/summary/figure cover every split they
-    # were built from, so a split-subset rerun must not rewrite them with
-    # fewer rows. Checked BEFORE any training, so a refusal costs nothing
-    # and leaves every output file untouched.
+    # Coverage guard (same contract as paired_bootstrap's campaign
+    # coverage guard): the stored CSV/summary/figure cover every split,
+    # radius, n_bits and seed they were built from, so a SUBSET run --
+    # any of the four grid dimensions -- must not rewrite them with
+    # fewer rows. Checked BEFORE any training, so a refusal costs
+    # nothing and leaves every output file untouched.
     if not args.force and os.path.exists(csv_path):
-        stored_splits = set(pd.read_csv(csv_path)["split"].astype(str))
+        stored = pd.read_csv(csv_path)
+        dropped = []
+        stored_splits = set(stored["split"].astype(str))
         missing = sorted(stored_splits - set(splits))
         if missing:
+            dropped.append(f"split(s) {missing}")
+        for col, run_vals, label in (("radius", set(radii), "radius value(s)"),
+                                     ("n_bits", set(bits_list),
+                                      "n_bits value(s)"),
+                                     ("seed", set(seeds), "seed(s)")):
+            stored_vals = set(stored[col].tolist())
+            gone = sorted(stored_vals - run_vals)
+            if gone:
+                dropped.append(f"{label} {gone}")
+        if dropped:
             raise SystemExit(
                 f"[{args.tag}] {os.path.relpath(csv_path, BASE)} stores "
-                f"split(s) {missing} from a previous run, but this run only "
-                f"covers {sorted(set(splits))} and would drop them from the "
-                "CSV/summary/figure. Rerun with every stored split, or pass "
-                "--force to redraw the outputs from this subset. No output "
-                "file was written.")
+                + " and ".join(dropped)
+                + " from a previous run that this run would drop from the "
+                "CSV/summary/figure. Rerun with every stored grid value, or "
+                "pass --force to redraw the outputs from this subset. No "
+                "output file was written.")
 
     from sklearn.ensemble import RandomForestRegressor
     from sklearn.metrics import (mean_absolute_error, mean_squared_error,

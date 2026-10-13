@@ -27,9 +27,9 @@ status in [`docs/reviews/fixes-2026-10-11.md`](reviews/fixes-2026-10-11.md)):
   is the single inclusion rule and the pChEMBL cross-check now runs over
   all retained rows. Disclosure: only that one direction occurs - across
   every ChEMBL raw pull in `data/raw/` there are **0** censored IC50
-  records carrying a pChEMBL value, so the `02` docstring's "wrong in
-  both directions" phrasing overstates the case (the 263-row
-  exact-but-empty direction is the real one). BACE and ESOL raw files
+  records carrying a pChEMBL value, so the asymmetry is one-sided: the
+  263-row exact-but-empty direction is the only observed failure mode
+  (the `02` docstring now states exactly this). BACE and ESOL raw files
   carry no relation column: the filter is skipped for them with a
   printed note, and bace labels are unchanged.
 - **Parent standardization before dedup.** Each canonical SMILES is
@@ -284,17 +284,32 @@ cached as one CSR-style npz (`scripts/gnn_02_build_graphs.py`).
 Model: GIN (Graph Isomorphism Network), the canonical MoleculeNet baseline:
 AtomEncoder (sum of per-feature embeddings) -> 4 x [GINConv -> BatchNorm
 -> ReLU -> dropout, residual] -> global mean pool -> MLP head. PyTorch
-Geometric. Training device: the committed GIN/GINE/AttentiveFP panel
-campaigns trained on the CUDA host win4070 (their per-run logs under
-`logs/win4070_/` print `device=cuda`); the single 2026-10-12 N3 re-run
-of the stalled `abl1`/scaffold AttentiveFP seed-42 (Statistical
-significance below) ran locally on the Mac under MPS
-(`logs/review11_n3_afp_abl1_scaffold_s42_min60.log`). From that fix
-onward `scripts/gnn_03_train_gin.py` records the device it actually
-used as `device` in the split block of `results/gnn_metrics_*.json`;
-metrics files written before that fix carry no `device` field, so the
-device of historical runs is recoverable only from the committed logs,
-not from the old json. The default `gin` does not use
+Geometric. Training device - scoped to the runs whose logs are
+committed: the non-egfr GIN panel cells (7 tags x random/scaffold/time
+x 3 seeds) and the GINE and AttentiveFP panel campaigns trained on the
+CUDA host win4070 (per-run logs under `logs/win4070_/` print
+`device=cuda`); the 2026-10-12 N3 re-run of the stalled
+`abl1`/scaffold AttentiveFP seed-42 (Statistical significance below)
+ran locally on this Mac under MPS
+(`logs/review11_n3_afp_abl1_scaffold_s42_min60.log`), and so did the
+2026-10-11 auxiliary batches - learning curves, y-randomization and
+multitask (`logs/aux_m4_*.log`; `logs/multitask.log` prints
+`device=mps`). The refreshed `egfr` GIN cells behind the headline
+comparison (random 0.6694 / 0.6608 / 0.6636, scaffold 0.6308 / 0.6074 /
+0.5991, time 0.0404 / 0.0325 / 0.1913) are the exception: their
+training logs were not committed, and they are **not** the `egfr` runs
+recorded in `logs/win4070_/win4070_gin_c.log` - that log's egfr block
+reports pre-re-pull values (random 0.7055 / 0.6989 / 0.7124, scaffold
+0.4931 / 0.5102 / 0.5092; its `y_mean=6.238` does not match the
+refreshed random-split train mean 6.491). Treat those nine cells as
+products of the 2026-10-11 refresh campaign with the training device
+unrecorded - not as documented CUDA runs. The current
+`scripts/gnn_03_train_gin.py` records the device it actually used as
+`device` in the split block of `results/gnn_metrics_*.json`, but every
+metrics json committed so far predates that addition (none of the 73
+`gnn_metrics_*.json` files carries the field - not even the N3 rerun's
+`gnn_metrics_abl1_attentivefp.json`), so the device of any historical
+run is recoverable only from committed logs. The default `gin` does not use
 bond features (plain GINConv aggregates node features only), but the
 cached 3-dim bond features are no longer "stored but unused":
 `scripts/gnn_03_train_gin.py --model {gin, gine, attentivefp}` - all three
@@ -362,7 +377,9 @@ separable from resampling noise - analysis only, nothing is retrained:
   runs are order-independent).
 - **Results (random/scaffold, gin, 16 cells)** - under `mean3`, 9 of 16
   cells have a CI excluding 0: **7 favour RF, 2 favour the GIN**
-  (`abl1`/scaffold, `herg`/random); the other 7 straddle 0:
+  (`abl1`/scaffold, `herg`/random - both *conditional* on at least one
+  training seed, per the single-seed-dependence standard below); the
+  other 7 straddle 0:
 
   | cell | ΔR2 (mean3) | 95% CI | winner |
   |---|---|---|---|
@@ -385,17 +402,40 @@ separable from resampling noise - analysis only, nothing is retrained:
   +0.038). This is the single-seed-is-noise convention (Panel Δ
   conventions above) promoted from a heuristic to a bootstrap result: a
   lone seed can manufacture a "significant" verdict, and it inflates
-  the one real GIN lead by ~0.023.
+  the `abl1`/scaffold GIN lead - *conditional*, see the next bullet -
+  by ~0.023.
+- **Single-seed dependence - one standard for every model.** Every
+  verdict above is the paired-bootstrap CI of the 3-seed ensemble; a
+  verdict that changes when any one training seed is dropped is
+  *conditional* on that seed. Recomputing the same B = 10,000 bootstrap
+  over all 48 random/scaffold GIN, GINE and AttentiveFP cells with each
+  seed omitted in turn (ensemble = mean of the two kept seeds):
+  **14 of 48 cells are conditional** - 4 of the 5 GNN wins (all but
+  GINE `abl1`/scaffold), 1 of the 21 RF wins (AFP `hivpr`/scaffold:
+  drop seed 42 -> −0.013 [−0.076, +0.046]), and 9 ties that become
+  RF-significant. Of the GNN wins: GIN `abl1`/scaffold is conditional
+  on seed 42 (+0.037 [+0.006, +0.069]; drop seed 42 -> +0.015
+  [−0.017, +0.046]); GIN `herg`/random on seeds 1/2 (drop seed 1 ->
+  +0.027 [−0.007, +0.058]); AFP `herg`/random on seed 42 (drop seed
+  42 -> +0.003 [−0.031, +0.035]) and on seed 1; AFP `herg`/scaffold on
+  seed 1 (drop seed 1 -> +0.031 [−0.002, +0.063]). Only GINE
+  `abl1`/scaffold survives every drop (worst +0.047 [+0.017, +0.080]).
+  The asymmetry strengthens the headline: 20 of the RF's 21 wins
+  survive every drop, while 4 of the 5 GNN wins do not - the GNN wins
+  are mostly seed-sensitive, the RF wins are not.
 - **GINE** (`--model gine`, `results/significance/summary_gine.csv`):
   **all 16 cells have a CI** (frozen-recipe per-seed predictions for
   every tag, incl. `abl1`/`herg`/`vegfr2`): **1 favours GINE**
-  (`abl1`/scaffold **+0.058 [+0.028, +0.092]**), **7 favour RF**
+  (`abl1`/scaffold **+0.058 [+0.028, +0.092]** - the only GNN win of
+  the 48 that survives every drop-one-seed recompute), **7 favour RF**
   (`a2a`/scaffold, `abl1`/random, `egfr`/random, `egfr_full`/random,
   `hivpr`/scaffold, `mpro`/scaffold, `vegfr2`/random), **8 contain 0**.
 - **AttentiveFP** (`--model attentivefp`, P8 phase 3): all 16 cells have a
   CI - 9 are significant: **7 favour RF, 2 favour AttentiveFP**
   (`herg`/scaffold +0.062 [+0.030, +0.092], `herg`/random +0.034
-  [+0.002, +0.065]), 7 contain 0; summary in
+  [+0.002, +0.065]; both *conditional* - each loses its CI on at least
+  one drop-one-seed recompute, per the standard above), 7 contain 0;
+  summary in
   `results/significance/summary_attentivefp.csv` (details: the
   "AttentiveFP control" write-up under supplementary experiments).
 - **Outputs**: `results/significance/summary.csv`,
@@ -485,15 +525,18 @@ only already-known chemistry predicts genuinely newer compounds.
   not adopted: recomputed over all 8 tags, that rule would change split
   membership for **4 of 8 tags - egfr 1, egfr_full 19, herg 5, vegfr2
   31** molecules (0 on `a2a`, `abl1`, `hivpr`, `mpro`) - and the
-  committed split files are pinned by the recomputation of **194**
-  prediction files under `results/`: every committed `*preds*.npz` that
-  has a committed clean CSV re-derives its `test_idx` from its split
-  npz and its `y_true` from `{TAG}_pic50_clean.csv` (only the 2 `esol`
-  prediction files have no committed clean CSV and fall outside that
-  count), so changing the year rule would invalidate 194 committed
-  prediction files rather than merely edit a split. The current rule -
-  first report from **all** raw records - is therefore kept, and this
-  is where it is disclosed.
+  committed prediction files are pinned by a recomputation check over
+  `results/` (every committed `*preds*.npz` that has a committed clean
+  CSV re-derives its `test_idx` from its split npz and its `y_true`
+  from `{TAG}_pic50_clean.csv`; only the 2 `esol` prediction files have
+  no committed clean CSV and fall outside that check). Directly
+  dependent on the year rule, however, are only the **time-split**
+  predictions: **32** committed files (8 tags x (1 RF + 3 GIN); **16**
+  of them for the 4 affected tags), so changing the year rule would
+  invalidate those 32 files rather than merely edit a split -
+  random/scaffold predictions never read the time splits. The current
+  rule - first report from **all** raw records - is therefore kept, and
+  this is where it is disclosed.
 - **Training**: RF via `scripts/04_train_and_evaluate.py --split time`,
   GIN unchanged (`gnn_03` reads the same `{TAG}_time.npz`; 3 seeds).
   Asymmetry disclosure: RF random/scaffold fits the full 80% pool, but on
@@ -521,35 +564,77 @@ only already-known chemistry predicts genuinely newer compounds.
   column and works `egfr` as its example (its displayed columns subtract
   to 0.088 − 0.123 = **−0.035** while the ensemble Δ is **+0.039** -
   opposite signs from the same three runs).
-- **Reading (per tag)**: the GIN *stays closer to the no-skill
-  baseline* under temporal drift on most targets - what the flipped
-  significance table measures - but what that proximity means differs by
-  target; "largely shrinkage" was wrong as a blanket claim. All numbers
-  below recomputed from the committed files
+- **Reading (per tag, via an exact MSE decomposition)**: two different
+  questions must not be conflated here. "Closer to the no-skill
+  baseline" is a statement about *absolute* performance versus the
+  constant predictor (the RF falls below it on 4 tags); the flipped
+  significance table above measures *GIN-vs-RF separability* per cell.
+  Neither implies the other - on `herg` both models sit at/below the
+  constant while the GIN-vs-RF CI straddles 0. What the GIN's edge (or
+  deficit) is *made of* differs by target; "largely shrinkage" was
+  wrong as a blanket claim, and so are one-word mechanism labels. All
+  numbers below recomputed from the committed files
   (`results/rf_preds_{tag}_time.npz` +
-  `results/gnn_preds_{tag}_time{,_seed1,_seed2}.npz`; `constant_r2` /
-  `gin_best_epochs` from `results/time_split/summary.csv`; the constant
+  `results/gnn_preds_{tag}_time{,_seed1,_seed2}.npz` ensemble;
+  `constant_r2` / `gin_best_epochs` from `results/time_split/summary.csv`;
+  the constant
   predicts the mean pIC50 of **all** non-test rows - train *and*
   validation, i.e. partly the years the time RF itself never trains
-  on):
+  on). The decomposition splits ΔR² (GIN ensemble − RF) exactly into a
+  **level** term (bias² difference), a **spread** term and a
+  **correlation** term; the three sum to ΔR² with residual ~1e-15 on
+  every row (σ̂, σ_y and r computed on the test
+  set; slope = OLS slope of prediction on truth). The level term and
+  the total Δ are convention-free; the spread/correlation pair shares
+  the σ̂-r cross-term inside the MSE identity, so that cross-term is
+  split **Shapley-wise** - the single convention used by the README's
+  decomposition table and by the PR #6 review, recomputed from the
+  committed predictions in
+  `logs/2026-10-13_time_split_mse_decomposition.log` (max |residual|
+  8.9e-16; one 3rd-decimal note there: `egfr`'s correlation is
+  −0.04448 at full precision, hence −0.044, not the review's −0.045):
 
-  | time cell | constant R2 | RF R2 | GIN ens R2 | pred std / y std (RF vs GIN) | slope on truth (RF vs GIN) | reading |
-  |---|---|---|---|---|---|---|
-  | `a2a` | −0.004 | −0.301 | +0.024 | 0.69 vs 0.22 | 0.41 vs 0.07 | GIN win is shrinkage toward the mean |
-  | `abl1` | −0.132 | +0.560 | +0.324 | 0.63 vs 0.39 | 0.51 vs 0.27 | RF ahead |
-  | `egfr` | −0.063 | +0.123 | +0.162 | 0.81 vs 0.66 | 0.39 vs 0.30 | small GIN edge, CI straddles 0 |
-  | `egfr_full` | −0.455 | −0.736 | −0.144 | 0.57 vs 0.52 | 0.06 vs 0.14 | GIN win is a level shift, not spread |
-  | `herg` | −0.003 | −0.058 | −0.026 | 0.41 vs 0.44 | 0.06 vs 0.09 | both models sit at/below no-skill |
-  | `hivpr` | −0.006 | −0.027 | +0.088 | 0.53 vs 0.54 | 0.13 vs 0.20 | genuine extra GIN signal |
-  | `mpro` | −0.000 | +0.006 | +0.090 | 0.46 vs 0.32 | 0.12 vs 0.10 | genuine extra GIN signal |
-  | `vegfr2` | −0.002 | +0.160 | +0.108 | 0.47 vs 0.45 | 0.22 vs 0.16 | RF ahead |
+  | time cell | constant R2 | RF R2 | GIN ens R2 | level | spread | correlation | pred std / y std (RF vs GIN) | slope (RF vs GIN) | r (RF vs GIN) |
+  |---|---|---|---|---|---|---|---|---|---|
+  | `a2a` | −0.004 | −0.301 | +0.024 | +0.580 | +0.008 | −0.263 | 0.69 vs 0.22 | 0.41 vs 0.07 | 0.59 vs 0.30 |
+  | `abl1` | −0.132 | +0.560 | +0.324 | −0.002 | −0.115 | −0.119 | 0.63 vs 0.39 | 0.51 vs 0.27 | 0.81 vs 0.70 |
+  | `egfr` | −0.063 | +0.123 | +0.162 | +0.005 | +0.079 | −0.044 | 0.81 vs 0.66 | 0.39 vs 0.30 | 0.49 vs 0.45 |
+  | `egfr_full` | −0.455 | −0.736 | −0.144 | +0.392 | +0.032 | +0.168 | 0.57 vs 0.52 | 0.06 vs 0.14 | 0.11 vs 0.26 |
+  | `herg` | −0.003 | −0.058 | −0.026 | +0.005 | −0.016 | +0.044 | 0.41 vs 0.44 | 0.06 vs 0.09 | 0.14 vs 0.19 |
+  | `hivpr` | −0.006 | −0.027 | +0.088 | −0.000 | −0.008 | +0.123 | 0.53 vs 0.54 | 0.13 vs 0.20 | 0.26 vs 0.37 |
+  | `mpro` | −0.000 | +0.006 | +0.090 | +0.025 | +0.027 | +0.032 | 0.46 vs 0.31 | 0.12 vs 0.10 | 0.27 vs 0.31 |
+  | `vegfr2` | −0.002 | +0.160 | +0.108 | +0.035 | +0.002 | −0.089 | 0.47 vs 0.45 | 0.22 vs 0.16 | 0.46 vs 0.36 |
 
-  - **Shrinkage on `a2a` (and `herg`)**: the ensemble compresses to
-    0.22 of y's spread with a slope of 0.07 (RF: 0.69 / 0.41) - the GIN
-    is closer to no-skill mostly because it regresses toward the mean,
-    and on `herg` both models are at/below the constant anyway
-    (GIN −0.026 vs constant −0.003).
-  - **Level shift on `egfr_full`** (means and stds, same recomputation):
+  - **`a2a` - the GIN "win" is RF failing on level, not the GIN
+    tracking molecules.** The RF predicts 0.83 log units too low on
+    average (mean 6.51 versus test 7.35) while ranking *better* than
+    the GIN (r 0.59 versus 0.30; slope 0.41 versus 0.07), and the GIN's
+    spread is compressed to 0.22 of y's std (RF 0.69). An RF re-centred
+    on the non-test mean scores **+0.335**, well above the GIN's
+    **+0.024**: the entire ensemble Δ of +0.326 is carried by the level
+    term **+0.580**, while the correlation term is **−0.263** (the GIN
+    ranks worse still) and spread is ≈ 0 (+0.008).
+  - **`abl1` / `vegfr2` - RF ahead, different reasons.** On `abl1` the
+    level terms cancel (−0.002) and RF wins **spread and correlation in
+    about equal measure**: −0.115 (the GIN matches y's spread at 0.39
+    versus RF's 0.63) and −0.119 (ranking r 0.70 versus 0.81). On
+    `vegfr2` the GIN gains a little level (+0.035) and spread is
+    negligible (+0.002), but the correlation term dominates at
+    **−0.089** (r 0.36 versus 0.46).
+  - **`egfr` - the one cell where spread carries the edge.** Small GIN
+    edge (+0.039), CI straddles 0: spread **+0.079** ("less
+    over-dispersion" fits only this cell - GIN std/y 0.66 versus RF
+    0.81) against correlation **−0.044** (r 0.45 versus 0.49), with
+    level ≈ 0 (+0.005).
+  - **`egfr_full` - mostly a level shift, but not *only* level.** The
+    GIN's spread essentially matches the RF's (0.52 vs 0.57 of y std)
+    and its prediction *level* sits 0.42 closer to the newer test mean
+    than the RF's (gap 0.46 vs 0.88) - that supplies the level term
+    **+0.392** of the +0.592 ensemble Δ. But "the win does not come
+    from tracking individual molecules" would be wrong: the correlation
+    term contributes **+0.168**, with both ranking and slope roughly
+    doubling (r 0.26 vs 0.11, slope 0.14 vs 0.06). Means and stds
+    (same recomputation):
 
     | egfr_full / time | mean pIC50 | std |
     |---|---|---|
@@ -558,19 +643,28 @@ only already-known chemistry predicts genuinely newer compounds.
     | RF predictions | 6.62 | 0.68 |
     | GIN ensemble predictions | 7.04 | 0.62 |
 
-    The GIN's spread is essentially RF's (0.52 vs 0.57 of y std), but
-    its prediction *level* sits 0.42 closer to the newer test mean than
-    the RF's (gap 0.46 vs 0.88) - that is where the +0.592 ensemble Δ
-    comes from, not from tracking individual molecules (slope 0.14 vs
-    0.06, both nearly flat). The asymmetry above offers the plausible
-    mechanism: the GIN selects its checkpoint on the newest pre-test
-    years, which the time RF never trains on.
-  - **Genuine signal on `hivpr` and `mpro`**: on `hivpr` the GIN has
-    slightly *more* spread than RF (0.54 vs 0.53) and a higher slope
-    (0.20 vs 0.13) while RF sits below the constant; on `mpro` the GIN
-    beats the constant outright (+0.090 vs RF +0.006 against a constant
-    of −0.000) at roughly RF's slope - in both cells the GIN adds
-    ranking signal rather than only compressing.
+    The asymmetry above offers the plausible
+    mechanism for the level part: the GIN selects its checkpoint on the
+    newest pre-test years, which the time RF never trains on.
+  - **`herg` - nothing to explain.** All three decomposition terms are
+    within ±0.05 (level +0.005, spread −0.016, correlation +0.044);
+    both models sit at/below the constant anyway (GIN −0.026 versus
+    constant −0.003, RF −0.058), the GIN is slightly *more* spread
+    than RF (0.44 versus 0.41 - the negative spread term says exactly
+    that), and "compression" describes neither model.
+  - **`hivpr` - a correlation gain.** Ranking improves clearly (r 0.37
+    versus 0.26; slope 0.20 versus 0.13) at essentially matched spread
+    (0.54 versus 0.53) and level; the correlation term **+0.123**
+    carries the whole +0.115, while RF itself sits below the constant
+    (−0.027 versus −0.006).
+  - **`mpro` - small balanced gains against an RF that adds nothing.**
+    All three terms contribute small positives (**+0.025 / +0.027 /
+    +0.032**) - no single mechanism dominates. The GIN beats the
+    constant outright (+0.090 versus RF +0.006 against a constant of
+    −0.000), so it adds signal above no-skill while the RF barely
+    clears it; convention-free context: GIN narrower spread (0.31
+    versus 0.46 of y std) but slightly better ranking (r 0.31 versus
+    0.27).
 
   Supporting facts (`results/time_split/summary.csv`): 20 of the 24
   time-split GIN runs have their **best epoch** before epoch 24 (median
@@ -674,7 +768,15 @@ number. Tuning artifacts (pre-refresh, 2026-10-09) are kept under
   is dropped: herg keeps chromone with 30 matches, mpro 17;
   a2a/abl1/hivpr fall back to their own two most frequent Murcko
   scaffolds), and across the 7 tags the GNN-vs-RF atom-overlap fraction
-  spans 0.32-0.68 (core attribution 0.21-0.96). Fingerprints and
+  spans 0.32-0.68. Core-attribution fractions must **not** be pooled
+  across the two family types: a documented query family (chromone,
+  thienopyrimidine) is a small substructure, while a Murcko-scaffold
+  fallback covers a large fraction of each molecule by construction, so
+  its "share of top-attributed atoms on the core" is high even for a
+  chance allocation - the Murcko-fallback numbers need a chance-level
+  baseline before being read as attribution. Per-tag readings live in
+  the `results/interpretability/by_tag/{tag}/` outputs, keyed by family
+  type. Fingerprints and
   message passing generalize differently across scaffold space.
 
 ![error analysis](../figures/error_analysis_egfr_scaffold.png)
@@ -837,7 +939,10 @@ GRU readout over the same atom/bond encoders, frozen recipe otherwise)
 ran 8 targets x 2 splits x 3 seeds = 48 runs. Under the mean3 paired
 bootstrap **9 of 16 CIs exclude 0 - 7 favour RF, 2 favour
 AttentiveFP** (`herg`/scaffold **+0.062 [+0.030, +0.092]** and
-`herg`/random **+0.034 [+0.002, +0.065]**; the points and the CIs
+`herg`/random **+0.034 [+0.002, +0.065]**; both *conditional* on at
+least one training seed under the single-seed-dependence standard in
+"Statistical significance" - e.g. `herg`/random drops to +0.003
+[−0.031, +0.035] without seed 42; the points and the CIs
 follow different conventions, per-seed mean vs mean3 ensemble, see
 `experiments/afp_panel.py`), 7 CIs contain 0, and all 8 random-split
 point Δ are negative (−0.167 to −0.022). `abl1`/scaffold moved from
@@ -849,7 +954,8 @@ device=cuda) was independently re-run on this Mac
 ensemble Δ **+0.020 [−0.018, +0.057]**. The flip is a fresh random
 draw on another device - the two runs already diverge at epoch 2
 (valid 0.9411 vs 0.9546) - **not** the `--min-epochs 60` floor added
-with the re-run: in the re-run the improving epochs run 1-11, 15, 24,
+with the re-run: in the re-run the improving epochs run 1-7, 9-11,
+15, 24,
 ..., 69-71, 82, and no stretch without improvement reaches patience 20
 (longest 46 -> 62), so the stop rule never fires and the floor never
 binds - the run reaches 100 epochs with or without it. The `seed42` convention

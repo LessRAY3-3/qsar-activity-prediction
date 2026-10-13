@@ -64,22 +64,26 @@ Test R2; GIN = 3-seed mean +- std; **Δ = 3-seed mean GIN − RF**, the
 effect size every verdict below uses. **sig** = which model's paired
 bootstrap 95% CI excludes 0 (B = 10,000, mean3 *ensemble* convention;
 `results/significance/summary.csv`); `ns` = CI straddles 0.
+**conditional** = the verdict changes when any one training seed is
+dropped (single-seed standard, see *Conditional verdicts* under
+*Significance* below).
 
-| Tag | Target (ChEMBL id) | Family | n | RF rand | GIN rand | Δ rand (mean) | sig | RF scaf | GIN scaf | Δ scaf (mean) | sig |
-|---|---|---|---|---|---|---|---|---|---|---|---|
-| `a2a` | A2a adenosine receptor (CHEMBL251) | GPCR | 1,366 | 0.710 | 0.621±0.009 | −0.089 | RF | 0.702 | 0.654±0.025 | −0.049 | ns |
-| `abl1` | ABL1 tyrosine kinase (CHEMBL1862) | kinase | 2,120 | 0.822 | 0.767±0.010 | −0.055 | RF | 0.714 | 0.737±0.027 | **+0.022** | GIN |
-| `egfr` | EGFR (CHEMBL203) | kinase | 4,560 | 0.721 | 0.665±0.004 | −0.057 | RF | 0.649 | 0.612±0.013 | −0.037 | ns |
-| `egfr_full` | EGFR, full B/F pull (CHEMBL203) | kinase | 10,729 | 0.729 | 0.667±0.006 | −0.062 | RF | 0.608 | 0.588±0.006 | −0.020 | ns |
-| `herg` | hERG / KCNH2 channel (CHEMBL240) | ion channel | 8,403 | 0.607 | 0.619±0.009 | **+0.012** | GIN | 0.384 | 0.352±0.038 | −0.032 | ns |
-| `hivpr` | HIV-1 protease (CHEMBL243) | viral protease | 2,573 | 0.692 | 0.632±0.003 | −0.061 | RF | 0.538 | 0.457±0.010 | −0.081 | ns |
-| `vegfr2` | **VEGFR2 / KDR** (CHEMBL279) | kinase | 9,643 | 0.670 | 0.605±0.004 | −0.064 | RF | 0.585 | 0.583±0.002 | −0.003 | ns |
-| `mpro` | Replicase polyprotein 1ab / Mpro (CHEMBL4523582) | viral protease | 3,410 | 0.602 | 0.572±0.015 | −0.029 | ns | 0.433 | 0.322±0.049 | **−0.111** | RF |
+| Tag | Target (ChEMBL id) | Family | n | RF rand | GIN rand | Δ rand (mean) | sig | RF scaf | GIN scaf | Δ scaf (mean) | sig | conditional |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| `a2a` | A2a adenosine receptor (CHEMBL251) | GPCR | 1,366 | 0.710 | 0.621±0.009 | −0.089 | RF | 0.702 | 0.654±0.025 | −0.049 | ns | scaf |
+| `abl1` | ABL1 tyrosine kinase (CHEMBL1862) | kinase | 2,120 | 0.822 | 0.767±0.010 | −0.055 | RF | 0.714 | 0.737±0.027 | **+0.022** | GIN | scaf |
+| `egfr` | EGFR (CHEMBL203) | kinase | 4,560 | 0.721 | 0.665±0.004 | −0.057 | RF | 0.649 | 0.612±0.013 | −0.037 | ns | scaf |
+| `egfr_full` | EGFR, full B/F pull (CHEMBL203) | kinase | 10,729 | 0.729 | 0.667±0.006 | −0.062 | RF | 0.608 | 0.588±0.006 | −0.020 | ns | — |
+| `herg` | hERG / KCNH2 channel (CHEMBL240) | ion channel | 8,403 | 0.607 | 0.619±0.009 | **+0.012** | GIN | 0.384 | 0.352±0.038 | −0.032 | ns | rand+scaf |
+| `hivpr` | HIV-1 protease (CHEMBL243) | viral protease | 2,573 | 0.692 | 0.632±0.003 | −0.061 | RF | 0.538 | 0.457±0.010 | −0.081 | ns | scaf |
+| `vegfr2` | **VEGFR2 / KDR** (CHEMBL279) | kinase | 9,643 | 0.670 | 0.605±0.004 | −0.064 | RF | 0.585 | 0.583±0.002 | −0.003 | ns | — |
+| `mpro` | Replicase polyprotein 1ab / Mpro (CHEMBL4523582) | viral protease | 3,410 | 0.602 | 0.572±0.015 | −0.029 | ns | 0.433 | 0.322±0.049 | **−0.111** | RF | — |
 
 BACE is not in the table (RF baseline only). Columns from
 `results/multi_target/summary.csv`; Δ computed at full precision, then
 rounded. Significance: **RF significantly wins 7 of 16 cells, the GIN 2
-(`abl1`/scaffold and `herg`/random), 7 are undecided** - bootstrap CIs
+(`abl1`/scaffold and `herg`/random - both *conditional*), 7 are
+undecided** - bootstrap CIs
 quoted under *Significance* below. The CI is computed on the *ensemble*
 Δ, so it can differ from the per-seed-mean Δ shown here (reading rule:
 [Panel Δ conventions](docs/methodology.md)).
@@ -296,8 +300,11 @@ no longer has a sample to stand on; numbers, figure:
 target.** Δ(mean) runs from **+0.012** (`herg`) down to −0.089 (`a2a`):
 7 of 8 targets are negative, and the single positive is also the one
 random cell where the bootstrap significantly favours the GIN
-(`herg`/random, ensemble Δ **+0.038 [+0.006, +0.069]**, small but real).
-Six random cells significantly favour RF. With analogues leaking across
+(`herg`/random, ensemble Δ **+0.038 [+0.006, +0.069]** - *conditional*:
+like 4 of the 5 GNN wins across the three panels, its CI exclusion
+disappears when any one training seed is dropped, see *Conditional
+verdicts*). Six random cells significantly favour RF. With analogues
+leaking across
 the split, message passing buys nothing over circular substructure
 counts on seven of eight targets - the EGFR conclusion above is not an
 EGFR artefact. (Every "7 of 8" tally double-counts EGFR: all 4,560
@@ -307,9 +314,11 @@ EGFR artefact. (Every "7 of 8" tally double-counts EGFR: all 4,560
 deficit's size is a property of the target, not of n.** Seven of eight
 Δ(mean) are negative: closest to parity `vegfr2` at **−0.003**, worst
 `mpro` at **−0.111**. The exception is `abl1`: **+0.022** per-seed mean,
-and it survives every convention - seed42 **+0.060 [+0.025, +0.096]**,
-3-seed ensemble **+0.037 [+0.006, +0.069]** (significantly GIN). This is
-a real flip, not the seed-42 mirage the pre-refresh data showed. What
+and it survives every Δ convention - seed42 **+0.060 [+0.025, +0.096]**,
+3-seed ensemble **+0.037 [+0.006, +0.069]** (significantly GIN) - so
+not the seed-42 mirage the pre-refresh data showed, but a
+*conditional* verdict: dropping seed 42 alone halves it to +0.015
+[−0.017, +0.046], a tie (see *Conditional verdicts*). What
 still varies is the *magnitude*: scaffold diversity and assay structure
 set how far behind the GIN falls - `mpro` (3,410 compounds) sits at
 −0.111 with twice `a2a`'s data (1,366) yet more than twice its deficit
@@ -327,12 +336,37 @@ resampled with replacement, same indices for both models; CI on the
   −0.044 [−0.076, −0.016], `egfr`/random −0.044 [−0.079, −0.010],
   `egfr_full`/random −0.039 [−0.059, −0.021], `hivpr`/random −0.048
   [−0.083, −0.014], `mpro`/scaffold −0.074 [−0.133, −0.018],
-  `vegfr2`/random −0.044 [−0.068, −0.021].
+  `vegfr2`/random −0.044 [−0.068, −0.021] - none of the 7 changes
+  verdict under a seed drop.
 - **2 favour the GIN**: `abl1`/scaffold +0.037 [+0.006, +0.069] and
   `herg`/random +0.038 [+0.006, +0.069] - both read
-  `frac_boot_gin_better` ≈ 0.99.
+  `frac_boot_gin_better` ≈ 0.99, and both are *conditional* under the
+  single-seed standard below.
 - **7 are undecided** (CI straddles 0); the near-miss is
-  `vegfr2`/scaffold, +0.024 with `frac_boot_gin_better` = 0.97.
+  `vegfr2`/scaffold, +0.024 with `frac_boot_gin_better` = 0.97. Four
+  of the 7 (`a2a`/scaffold, `egfr`/scaffold, `herg`/scaffold,
+  `hivpr`/scaffold) turn RF-significant when any one training seed is
+  dropped.
+
+**Conditional verdicts - one standard for every model (2026-10-13).**
+Every verdict in this README comes from the paired-bootstrap CI of the
+**3-seed ensemble**; a verdict that changes when **any one training
+seed** is dropped (kept-seed mean as the ensemble, same B = 10,000
+bootstrap) is marked *conditional* - in the panel table by its
+`conditional` column, in prose by the word itself. The check recomputes
+all **48** GIN/GINE/AttentiveFP random/scaffold cells x 3 drops from the
+committed predictions (`logs/2026-10-13_single_seed_dependence.log`):
+**14 of 48 cells are conditional - 4 of the 5 GNN wins (all but GINE
+`abl1`/scaffold), 1 of the 21 RF wins (`AttentiveFP` `hivpr`/scaffold),
+and 9 ties that turn RF-significant** (frozen GIN `a2a`/scaffold,
+`egfr`/scaffold, `herg`/scaffold, `hivpr`/scaffold; GINE `egfr`/
+scaffold, `egfr_full`/scaffold, `hivpr`/random; AttentiveFP
+`a2a`/scaffold, `vegfr2`/scaffold). **This strengthens the headline**:
+of the RF's 21 significant wins across the three panels only that one
+AttentiveFP cell depends on a single training seed, while 4 of the 5
+GNN wins do - the only GNN win that survives every drop, GINE
+`abl1`/scaffold (worst drop +0.047 [+0.017, +0.080]), still leaves the
+panel at 1 GNN win against 7 RF wins.
 
 `frac_boot_gin_better` is the
 fraction of the 10,000 bootstrap deltas above 0 - **not a p-value**; a
@@ -348,8 +382,10 @@ frozen GIN's win → undecided): they add **no new win** and give up the
 GIN's `herg`/random win. The refreshed GINE panel bootstraps **all 16
 cells** and reads **1 GINE win, 7 RF wins, 8 straddling 0**. The single
 win is `abl1`/scaffold, ensemble Δ **+0.058 [+0.028, +0.092]** - the
-same cell the frozen GIN already wins (+0.037 [+0.006, +0.069]); held
-to the same CI standard that calls those GIN wins real, it is a genuine
+same cell the frozen GIN already wins (+0.037 [+0.006, +0.069], itself
+*conditional*) - and the only GNN win in all 48 cells that survives
+every single-seed drop (worst drop +0.047 [+0.017, +0.080]); held to
+the same CI standard it is a genuine
 cell-level win, but 1 win against 7 RF wins leaves the panel verdict
 standing.
 Tables `results/significance/summary.csv`,
@@ -423,20 +459,26 @@ reference RF, equal to the refreshed panel RF):
 | | tuned GIN | 0.765±0.024 | −0.058 | 0.770±0.014 | **+0.056** |
 | | GINE | 0.779±0.009 | −0.043 | 0.742±0.015 | **+0.028** |
 
+(The frozen-recipe cells in this table that are *conditional* under the
+single-seed standard - `herg`/random and `abl1`/scaffold - see
+*Conditional verdicts* under *Significance* above.)
+
 ![fairness vegfr2](figures/fairness/vegfr2.png)
 ![fairness herg](figures/fairness/herg.png)
 ![fairness abl1](figures/fairness/abl1.png)
 
-**(i) The frozen recipe really does understate the GIN - but only a
-little, and only on scaffold.** Bounded tuning lifts the scaffold Δ on
-all three targets: `vegfr2` crosses zero (−0.003 → **+0.015**), `herg`
-climbs to a tie (−0.032 → +0.000), and `abl1`, already positive under
-the frozen recipe (+0.022), widens to **+0.056** while its seed spread
-shrinks (0.027 → 0.014). Treat that lift as run-sensitive: the same
+**(i) The frozen recipe understates the GIN on scaffold - clearly on
+two of three targets.** Bounded tuning lifts the scaffold Δ on `vegfr2`,
+which crosses zero (−0.003 → **+0.015**), and on `herg`, which climbs to
+a tie (−0.032 → +0.000). On `abl1` - already positive under the frozen
+recipe (+0.022) - the tuned run widens to **+0.056** while its seed
+spread shrinks (0.027 → 0.014), but count that as run noise, not a
+tuning lift: the same
 256/5L/0.2 config with the same three seeds was trained twice by
-`gnn_fairness.py` - tuning phase **0.734** (+0.019 vs RF) vs final
+`gnn_fairness.py` - tuning phase **0.734** (**+0.019** vs RF, i.e.
+*below* the frozen recipe's +0.022) vs final
 phase **0.770** (+0.056), a **0.036** run-to-run gap between identical
-trainings, comparable to the lift itself (`results/fairness/abl1_tuning.csv`
+trainings, larger than the +0.034 lift itself (`results/fairness/abl1_tuning.csv`
 vs `results/fairness/summary_abl1.json`). Random flips
 on none of the three: tuned `vegfr2` and `abl1` stay negative (−0.050 /
 −0.058, `abl1`/random the one cell where tuning costs a little and the
@@ -453,24 +495,29 @@ the same recipe; same-seed test R² between them differs by up to
 **0.066** - e.g. `herg`/scaffold seed 2 - so do not read the two sets
 of GINE numbers as replicates of each other.) Panel-wide
 against the refreshed RF this holds with bootstrap CIs: the full GINE
-panel wins **1 of 16 cells - `abl1`/scaffold +0.058 [+0.028, +0.092]**;
-7 significantly favour RF (`a2a`/scaffold, `abl1`/random, `egfr`/random,
+panel wins **1 of 16 cells - `abl1`/scaffold +0.058 [+0.028, +0.092]**
+(the one GNN win in 48 cells that survives every single-seed drop); 7
+significantly favour RF (`a2a`/scaffold, `abl1`/random, `egfr`/random,
 `egfr_full`/random, `hivpr`/scaffold, `mpro`/scaffold, `vegfr2`/random),
-8 straddle 0 - and the lone GINE win is the same cell the frozen GIN
-already wins, one significant cell in 16. Tables
+8 straddle 0 - of which `egfr`/scaffold, `egfr_full`/scaffold and
+`hivpr`/random turn RF-significant when any one seed is dropped - and
+the lone GINE win is the same cell the frozen GIN already wins, one
+significant cell in 16. Tables
 `results/significance/summary_gine.csv` (all 16 cells) +
 `results/gine_panel/summary.csv`; figures
 `figures/gine_panel/panel_dR2.png`,
 `figures/significance/ci_panel_with_gine.png`.
 
-**(iii) Boundary, not a reversal.** The frozen recipe itself now shows
-two significant leads (`abl1`/scaffold and `herg`/random - the two GIN
-cells in *Significance* above); bounded tuning crosses zero on scaffold
-and nowhere else - `vegfr2` −0.003 → **+0.015** is inside seed-noise
-range, `herg` only ties (+0.000), and `abl1` widens its already-positive
-lead to **+0.056** (own-replicate spread 0.036, see (i)) - while no
-random-split cell flips. Three widened or
-new positive cells out of six tuned ones move the boundary; they do not
+**(iii) Boundary, not a reversal.** The frozen recipe itself shows two
+significant - but *conditional* - leads (`abl1`/scaffold and
+`herg`/random, the two GIN cells in *Significance* above); bounded
+tuning crosses zero on scaffold and nowhere else - `vegfr2` −0.003 →
+**+0.015** is inside seed-noise range, `herg` only ties (+0.000), and
+`abl1`'s nominal widening to **+0.056** sits inside its own replicate
+spread (0.036, see (i)) - while no
+random-split cell flips. Two widened or
+new positive cells out of six tuned ones move the boundary (plus the
+within-noise `abl1` widening); they do not
 reverse the panel verdict.
 
 **AttentiveFP control: attention + GRU + bond features, still no
@@ -481,13 +528,16 @@ targets x 2 splits x 3 seeds = 48 runs (`experiments/afp_panel.py`,
 `--model attentivefp`), retrained against the refreshed data. Under the
 mean3 paired bootstrap it wins **2 of 16 cells - `herg`/scaffold,
 ensemble Δ +0.062 [+0.030, +0.092], and `herg`/random, +0.034
-[+0.002, +0.065]** (per-seed point estimates +0.020 and −0.022; the
+[+0.002, +0.065]** - both *conditional* under the single-seed standard
+(dropping seed 1 alone moves each CI to straddle 0). Per-seed point
+estimates are +0.020 and −0.022 (the
 two Δ conventions are defined in **Panel Δ conventions** in
-[methodology](docs/methodology.md)) - while **7 cells significantly
+[methodology](docs/methodology.md)); meanwhile **7 cells significantly
 favour RF** (`a2a`/random, `abl1`/random, `egfr_full` both splits,
-`hivpr`/scaffold - single-seed-dependent, see below - `mpro`/scaffold,
+`hivpr`/scaffold - *conditional*, see below - `mpro`/scaffold,
 `vegfr2`/random) and **7 are
-undecided**. `abl1`/scaffold moved to undecided when its stalled
+undecided** (2 of them, `a2a`/scaffold and `vegfr2`/scaffold, turn
+RF-significant when any one seed is dropped). `abl1`/scaffold moved to undecided when its stalled
 seed-42 run (early-stopped at epoch 35, best epoch 15, train MSE 0.57,
 on the campaign's CUDA machine) was replaced by an **independent rerun
 with fresh randomness on another device (MPS)**:
@@ -497,9 +547,10 @@ between improvement epochs reaches patience 20, so the run would have
 gone the distance with or without the floor); the cell flipped because
 of the rerun itself, not the floor: ensemble Δ +0.020 [−0.018,
 +0.057]. The `hivpr`/scaffold RF win likewise rests on one seed -
-AFP per-seed R² **0.201 / 0.509 / 0.377** against the RF's 0.538 - drop
+AFP per-seed R² **0.201 / 0.508 / 0.377** (seed 42 / 1 / 2) against the
+RF's 0.538 - drop
 seed 42 and the ensemble Δ is −0.013 with a CI straddling 0
-(−0.074 to +0.047), a tie, so read that cell as conditional on seed 42.
+(−0.076 to +0.046), a tie, so that cell is *conditional* on seed 42.
 On the random split all 8 point estimates are negative
 (−0.167 `a2a` to −0.022 `herg`), and `herg`/random is the one cell
 where the ensemble convention turns a negative point estimate into a
@@ -561,10 +612,11 @@ seed - a property of the algorithm as configured, not a data or split
 uncertainty (full note in [methodology](docs/methodology.md)).
 
 **Version pin matters when reproducing.** Under the pinned xgboost
-3.4.1 all 16 cells reproduce bit-exactly; under 3.2.0 only
-`egfr_full`/random moves (0.68950 vs 0.68144, ~0.008 R² - the other 15
-cells are identical across the two versions), so pin the version when
-re-checking (`logs/review12_p5_xgb_egfr_full_xgb_3.2.0.log`).
+3.4.1 all 16 cells reproduce bit-exactly; under 3.2.0 `egfr_full`/random
+moves (0.68950 vs 0.68144, ~0.008 R²) while `egfr_full`/scaffold stays
+put - committed 3.2.0 evidence covers `egfr_full` only, the other 14
+cells were not re-run under 3.2.0 - so pin the version when re-checking
+(`logs/review12_p5_xgb_egfr_full_xgb_3.2.0.log`).
 
 Figures: `figures/xgboost/`.
 
@@ -614,8 +666,9 @@ of that tag. What the eight tags say:
   1024 at r=3; at r=2 `hivpr` gains +0.041 from halving the bits), so
   2048 bits is a strong default rather than a law.
 - **Radius 3 at 2048 bits buys nothing**: −0.011 … +0.002 on random,
-  −0.027 … +0.007 on scaffold (average effect −0.015) - r=2/2048 is
-  also the radius default.
+  −0.027 … +0.007 on scaffold (those 8 scaffold cells average −0.009;
+  the −0.015 above is the radius main effect over both bit widths) -
+  r=2/2048 is also the radius default.
 
 Figures: `figures/fp_ablation/`; tables: `results/fp_ablation/`.
 
@@ -734,13 +787,15 @@ outside `abl1` (0.560 / 0.324 ens) nothing on either model clears 0.17.
 At R2 ≈ 0 or below on future chemistry neither model is usable - the
 honest industrial number. And the one target where RF still works under
 drift (`abl1`, +0.560) is precisely where the GIN falls furthest behind.
-Note the two patterns are **different quantities**: "ensemble Δ > 0"
-(GIN vs RF) holds on 6 of 8 tags, while "stays closer to the no-skill
-baseline" (each model's R² nearer `constant_r2`) is a separate
-comparison holding on only 4 of 8 - `a2a`, `abl1`, `herg`, `vegfr2` (on
-`egfr_full`, for instance, the RF prediction is the *closer* one to the
-very negative constant, even though the GIN's Δ there is the panel's
-largest) - so the first must not be read as the second.
+Note these are **three different counts**: the significance table (CI
+excludes 0) holds on 6 of 8 tags, the point estimate "ensemble Δ > 0"
+also on 6 of 8, while "stays closer to the no-skill baseline" (each
+model's R² nearer `constant_r2`) holds on only 4 of 8 - `a2a`, `abl1`,
+`herg`, `vegfr2`. None may be read as another: on `abl1` and `vegfr2`
+the significance table favours RF while the constant-proximity check
+favours the GIN, and on `egfr_full` the RF prediction is the *closer*
+one to the very negative constant even though the GIN's Δ there is the
+panel's largest.
 
 **Against the no-skill baseline** (now a column in
 `results/time_split/summary.csv`: `constant_r2` = predicting the mean
@@ -756,24 +811,57 @@ ignores `valid_idx` on time splits), while the GIN selects its
 checkpoints on exactly those years - the RF is scored against a
 baseline that saw data the RF did not.
 
-**How the GIN's edge arises differs by tag** - a panel-wide "largely
-shrinkage" reading does not hold. (Slope below = OLS slope of prediction
-on truth.) On `a2a` and `herg` the edge is **shrinkage**: predictions
-compress toward the mean instead of tracking it (`a2a` pred std/y std
-**0.22** vs the RF's 0.69, slope 0.07 vs 0.41; `herg` never clears its
-own constant - GIN −0.026 vs `constant_r2` −0.003 - with both models
-nearly flat, slopes 0.09 vs 0.06), and 20 of the 24 time runs have
-their best epoch before epoch 24 (`gin_best_epochs` column). On
-`egfr_full` the gain is a **level shift**, not shrinkage: the GIN's
-spread matches the RF's (pred std/y std **0.52** vs **0.57**, slope
-0.14 vs 0.06) and its prediction mean sits at **7.04** (RF **6.62**) -
-moved toward the newer test set's mean pIC50 **7.50** from the non-test
-pool's **6.69**, which the RF never closes. On `hivpr` and `mpro` the
-gain is **genuine extra signal**: both ensembles clear the no-skill
-constant by ~+0.09 (`hivpr` +0.088 vs −0.006; `mpro` +0.090 vs −0.000)
-and hold slopes comparable to or above the RF's (0.20 vs 0.14; 0.10 vs
-0.12) - compression cannot produce that. Across all 8 time cells the
-ensemble pred std / y std runs 0.22-0.66.
+**How the GIN's edge arises differs by tag - the exact decomposition
+(2026-10-13).** In place of mechanism labels: GIN-ensemble-minus-RF R²
+splits exactly (residual 0) into a **level**, a **spread** and a
+**correlation** term - Shapley split of the MSE decomposition (the
+level term is exact; the spread/correlation `2σ_pσ_y·r` cross-term is
+split Shapley-wise), recomputed from the committed time predictions
+(`logs/2026-10-13_time_split_mse_decomposition.log`). Δ = the ensemble
+Δ of the table above; the three components are rounded independently:
+
+| Tag | Δ (GIN ens − RF) | level | spread | correlation |
+|---|---|---|---|---|
+| `a2a` | +0.326 | +0.580 | +0.008 | −0.263 |
+| `abl1` | −0.236 | −0.002 | −0.115 | −0.119 |
+| `egfr` | +0.039 | +0.005 | +0.079 | −0.044 |
+| `egfr_full` | +0.592 | +0.392 | +0.032 | +0.168 |
+| `herg` | +0.032 | +0.005 | −0.016 | +0.044 |
+| `hivpr` | +0.115 | −0.000 | −0.008 | +0.123 |
+| `mpro` | +0.084 | +0.025 | +0.027 | +0.032 |
+| `vegfr2` | −0.052 | +0.035 | +0.002 | −0.089 |
+
+One clause per tag, straight from the table:
+
+- `a2a`: the entire edge is **level** - the RF predicts **0.83** log
+  units below the test mean (6.51 vs 7.35) while ranking *better*
+  (r 0.59 vs 0.30); re-centred on the non-test mean the RF would score
+  **+0.335**, above the GIN's **+0.024** - the GIN "wins" a
+  broken-baseline cell, and its −0.263 correlation term says it ranks
+  worse still.
+- `abl1`: RF wins on **both** spread (−0.115) and correlation (−0.119),
+  not level (−0.002).
+- `egfr`: the only cell where **spread** carries the edge (+0.079 of
+  +0.039, correlation −0.044) - "less over-dispersion" fits only here.
+- `egfr_full`: mostly **level** (+0.392 of +0.592 - GIN mean 7.04 and
+  RF 6.62 against the test mean 7.50, from the non-test pool's 6.69,
+  which the RF never closes), but **not** level alone: correlation
+  contributes +0.168 (slopes 0.14 GIN vs 0.06 RF).
+- `herg`: nothing to explain - level +0.005 and correlation +0.044 are
+  tiny, the spread term is *negative* (−0.016: the GIN is **not** less
+  dispersed than the RF, pred std/y std 0.44 vs 0.41), and both models
+  sit at/below the constant anyway (GIN −0.026 vs `constant_r2` −0.003,
+  RF −0.058).
+- `hivpr`: the edge is **correlation** (+0.123 of +0.115; OLS slope of
+  prediction on truth 0.20 GIN vs 0.13 RF, std/y 0.54 vs 0.53) -
+  genuine ranking signal.
+- `mpro`: small positive contributions from all three terms
+  (+0.025 / +0.027 / +0.032).
+- `vegfr2`: a level edge (+0.035) outweighed by correlation (−0.089).
+
+Supporting facts from the same recomputation: across the 8 time cells
+the ensemble pred std / y std runs 0.22-0.66, and 20 of the 24 time
+runs have their best epoch before epoch 24 (`gin_best_epochs` column).
 
 Timelines per target: `figures/time_split/{tag}_timeline.png`;
 aggregate: `figures/time_split/panel_3splits.png`; details:

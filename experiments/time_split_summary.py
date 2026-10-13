@@ -34,10 +34,11 @@ Console: headline conclusions.
 
 Caveats documented in the log/report, not in the numbers: targets whose
 RF time R² drops below 0 are flagged from the data, conditionally --
-"genuine temporal drift" only when the RF also undercuts the constant
-baseline (e.g. egfr_full, herg); a negative RF R² that does not undercut
-it is only labelled below no-skill (R² < 0), not drift. Neither label is
-a bug claim.
+"genuine temporal drift" is a TASK-level claim and only applies when
+the constant (no-skill) baseline is itself negative on the time test
+window (constant_r2 < 0) with the RF holding at/above it; an RF that
+undercuts the constant baseline is labelled below no-skill instead
+(model failure, not a drift claim). Neither label is a bug claim.
 """
 import json
 import os
@@ -290,25 +291,34 @@ def print_conclusion(df):
     extreme = df.loc[df["rf_time_r2"] < 0,
                      ["tag", "rf_time_r2", "constant_r2"]]
     if len(extreme):
-        # Conditional labels (Low, PR #5): "genuine temporal drift" is only
-        # claimed when the RF undercuts the constant baseline -- a negative
-        # R2 that still holds at/above it is labelled below no-skill, not
-        # drift. On the committed data every negative RF cell undercuts the
-        # constant, so the campaign text is unchanged.
-        drift = extreme[extreme["rf_time_r2"] < extreme["constant_r2"]]
-        mild = extreme[extreme["rf_time_r2"] >= extreme["constant_r2"]]
+        # Conditional labels (Low, PR #5; condition corrected per PR #6):
+        # the two claims are distinct. "genuine temporal drift" is a
+        # TASK-level claim: it needs the constant (no-skill) baseline
+        # itself negative on the time test window (constant_r2 < 0) with
+        # the RF holding at/above it. An RF that undercuts the constant
+        # baseline is labelled below no-skill instead -- model failure,
+        # not a drift claim (PR #5 objected to calling those cells
+        # drift). On the committed data every negative RF cell undercuts
+        # the constant, so they all read below-no-skill and none claims
+        # drift.
+        drift = extreme[(extreme["constant_r2"] < 0)
+                        & (extreme["rf_time_r2"] >= extreme["constant_r2"])]
+        below = extreme[extreme["rf_time_r2"] < extreme["constant_r2"]]
         if len(drift):
             cells = ", ".join(f"{r.tag} RF {r.rf_time_r2:+.3f}"
                               for r in drift.itertuples())
             print(f"  note: negative time-split R² ({cells}) reads as genuine "
-                  "temporal drift, not a bug")
-        if len(mild):
-            cells = ", ".join(f"{r.tag} RF {r.rf_time_r2:+.3f} "
-                              f"(constant {r.constant_r2:+.3f})"
-                              for r in mild.itertuples())
+                  "temporal drift - the constant (no-skill) baseline is "
+                  "itself negative on the time test window - not a bug")
+        if len(below):
+            cells = ", ".join(f"{r.tag} RF {r.rf_time_r2:+.3f}"
+                              for r in below.itertuples())
+            consts = ", ".join(f"{r.tag} {r.constant_r2:+.3f}"
+                               for r in below.itertuples())
             print(f"  note: negative time-split R² ({cells}) is below "
-                  "no-skill (R² < 0) while holding at/above the constant "
-                  "baseline -- not claimed as genuine temporal drift")
+                  "no-skill: the RF undercuts the constant (no-skill) "
+                  f"baseline ({consts}); not claimed as genuine temporal "
+                  "drift")
 
 
 def main():

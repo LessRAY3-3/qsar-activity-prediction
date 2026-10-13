@@ -224,3 +224,137 @@ def test_sanity_check_reports_empty_pchembl_rows(tmp_path, load_script, capsys):
     assert len(clean) == 3  # empty-pChEMBL exact rows are KEPT (policy: relation, not pchembl)
     assert "Retained rows with empty pchembl_value: 1" in out
     assert "pIC50 matches for 100.0%" in out
+
+
+def test_all_empty_relation_column_fails_closed(tmp_path, load_script, capsys):
+    """A present-but-entirely-empty standard_relation column must abort.
+
+    Mutant killed (6c1e3bb, PR #5 Low): without the fail-closed guard every
+    row fails the '=' filter, a header-only clean CSV is written and the
+    run still exits 0 -- silently 'cleaning' the dataset to nothing.
+    """
+    rows = [
+        _row("CHEMBL1", "c1ccncc1", 100.0, relation=np.nan, pchembl=7.0),
+        _row("CHEMBL2", "c1ccoc1", 200.0, relation=np.nan, pchembl=6.7),
+    ]
+    mod02, clean_csv = _prepare_02(tmp_path, load_script, rows)
+
+    with pytest.raises(SystemExit) as excinfo:
+        mod02.main()
+
+    msg = str(excinfo.value)
+    assert "standard_relation" in msg
+    assert "header-only" in msg
+    assert not clean_csv.exists()  # fail closed: no output written
+
+
+def test_padded_chembl_ids_without_relation_column_fail_closed(
+        tmp_path, load_script, capsys
+):
+    """Whitespace-padded CHEMBL IDs still count as ChEMBL-style input.
+
+    Mutant killed (6c1e3bb, PR #5 Low): ID detection without strip() --
+    " CHEMBL1 " would look non-ChEMBL, the censoring filter would be
+    silently skipped and censored bounds kept as exact labels.
+    """
+    rows = [
+        # BOTH ids carry a LEADING space: without the strip() the prefix
+        # check fails on each of them and the mutant slips through
+        _row(" CHEMBL1 ", "c1ccncc1", 100.0, relation=None, pchembl=7.0),
+        _row(" CHEMBL2 ", "c1ccoc1", 200.0, relation=None, pchembl=6.7),
+    ]
+    mod02, clean_csv = _prepare_02(tmp_path, load_script, rows)
+
+    with pytest.raises(SystemExit) as excinfo:
+        mod02.main()
+
+    assert "predates the 2026-10-11 data refresh" in str(excinfo.value)
+    assert not clean_csv.exists()
+
+
+def test_numeric_chembl_ids_without_relation_column_fail_closed(
+        tmp_path, load_script, capsys
+):
+    """Bare numeric ChEMBL numbers (e.g. 4069737) count as ChEMBL-style.
+
+    Mutant killed (6c1e3bb, PR #5 Low): ID detection without the
+    fullmatch(r"\\d+") arm -- a numeric-ID raw file would skip the
+    censoring filter and reintroduce the H1 censored-label bug.
+    """
+    rows = [
+        _row("4069737", "c1ccncc1", 100.0, relation=None, pchembl=7.0),
+        _row("233", "c1ccoc1", 200.0, relation=None, pchembl=6.7),
+    ]
+    mod02, clean_csv = _prepare_02(tmp_path, load_script, rows)
+
+    with pytest.raises(SystemExit) as excinfo:
+        mod02.main()
+
+    assert "predates the 2026-10-11 data refresh" in str(excinfo.value)
+    assert not clean_csv.exists()
+
+
+def test_float_coerced_numeric_ids_without_relation_fail_closed(
+        tmp_path, load_script, capsys
+):
+    """A pandas float-coerced ID column ("4069737.0") is still ChEMBL-style.
+
+    Mutant killed (6c1e3bb extension, PR #6 Low): without the
+    fullmatch(r"\\d+\\.0+") arm the float round-trip of a numeric ID
+    column would look non-ChEMBL and skip the censoring filter.
+    """
+    rows = [
+        _row("4069737.0", "c1ccncc1", 100.0, relation=None, pchembl=7.0),
+        _row("233.0", "c1ccoc1", 200.0, relation=None, pchembl=6.7),
+    ]
+    mod02, clean_csv = _prepare_02(tmp_path, load_script, rows)
+
+    with pytest.raises(SystemExit) as excinfo:
+        mod02.main()
+
+    assert "predates the 2026-10-11 data refresh" in str(excinfo.value)
+    assert not clean_csv.exists()
+
+
+def test_blank_id_column_without_relation_fail_closed(
+        tmp_path, load_script, capsys
+):
+    """An all-empty molecule_chembl_id column cannot certify non-ChEMBL.
+
+    Mutant killed (6c1e3bb extension, PR #6 Low): the old check counted
+    only CHEMBL-style IDs, so an all-blank ID column (n_chembl == 0)
+    silently skipped the censoring filter.
+    """
+    rows = [
+        _row("", "c1ccncc1", 100.0, relation=None, pchembl=7.0),
+        _row("", "c1ccoc1", 200.0, relation=None, pchembl=6.7),
+    ]
+    mod02, clean_csv = _prepare_02(tmp_path, load_script, rows)
+
+    with pytest.raises(SystemExit) as excinfo:
+        mod02.main()
+
+    assert "blank ID cell" in str(excinfo.value)
+    assert not clean_csv.exists()
+
+
+def test_padded_relation_values_still_count_as_exact(
+        tmp_path, load_script, capsys
+):
+    """Relation values are compared AFTER strip(): " = " is an exact row.
+
+    Mutant killed (6c1e3bb extension, PR #6 Low): a raw-column comparison
+    would drop every padded-equal row, writing a header-only clean CSV
+    with exit 0.
+    """
+    pic50 = lambda ic50: -np.log10(ic50 * 1e-9)  # noqa: E731
+    rows = [
+        _row("CHEMBL1", "c1ccncc1", 100.0, " = ", pchembl=pic50(100.0)),
+        _row("CHEMBL2", "c1ccoc1", 50.0, "= ", pchembl=pic50(50.0)),
+        _row("CHEMBL3", "c1ccsc1", 200.0, " > ", pchembl=pic50(200.0)),
+    ]
+    clean, out = _run_02(tmp_path, load_script, rows, capsys)
+
+    assert len(clean) == 2  # the two padded-equals rows survive
+    assert set(clean["parent_smiles"]) == {"c1ccncc1", "c1ccoc1"}
+    assert "removed 1 non-exact rows" in out

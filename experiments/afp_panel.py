@@ -223,7 +223,10 @@ def make_combined_forest(sig_dir, fig_path):
     phase-1 gine summary (summary_gine.csv -- all 16 cells carry a mean3
     CI after the full-panel run; when a cell were missing,
     results/gine_panel/summary.csv is the fallback, carrying that row's
-    centre AND whisker together so a row never mixes the two files) and
+    centre AND whisker together so a row never mixes the two files; the
+    fallback marker is hollow and the legend says so, because its centre
+    is the panel summary's per-seed-mean d_r2_mean while its whisker is
+    that same row's mean3 bootstrap CI -- annotated, never mixed) and
     the phase-3 attentivefp summary (summary_attentivefp.csv). Writes a
     NEW file -- ci_panel.png / ci_panel_gine.png are never touched.
     """
@@ -264,6 +267,7 @@ def make_combined_forest(sig_dir, fig_path):
     colors = {"gin": "tab:orange", "gine": "tab:green",
               "attentivefp": "tab:purple"}
     offsets = {"gin": off, "gine": 0.0, "attentivefp": -off}
+    drew_fallback = False
 
     for y, cell in zip(y_pos, cells):
         g = gin.loc[cell]
@@ -281,7 +285,11 @@ def make_combined_forest(sig_dir, fig_path):
         elif gine_pts is not None and cell in gine_pts.index:
             # fallback row: whisker AND centre both from the gine panel
             # campaign summary (results/gine_panel/summary.csv) -- a row
-            # never mixes summary_gine with the panel summary
+            # never mixes summary_gine with the panel summary. The hollow
+            # marker is annotated in the legend: its centre is the panel
+            # summary's per-seed-mean d_r2_mean while its whisker is that
+            # same row's mean3 bootstrap CI (conventions differ slightly
+            # by design; DELTA_CONVENTION) -- annotate, never mix files.
             r = gine_pts.loc[cell]
             if np.isfinite(r["ci_lo"]) and np.isfinite(r["ci_hi"]):
                 ax.hlines(y + offsets["gine"], r["ci_lo"], r["ci_hi"],
@@ -289,6 +297,7 @@ def make_combined_forest(sig_dir, fig_path):
             ax.plot([r["d_r2_mean"]], [y + offsets["gine"]], "o",
                     markerfacecolor="white", markeredgecolor=colors["gine"],
                     markeredgewidth=1.4, markersize=6)
+            drew_fallback = True
 
         a = afp.loc[cell]
         ax.hlines(y + offsets["attentivefp"], a["ci_lo"], a["ci_hi"],
@@ -309,6 +318,12 @@ def make_combined_forest(sig_dir, fig_path):
         plt.Line2D([], [], marker="o", ls="", color=colors["attentivefp"],
                    label="AttentiveFP mean3 (phase 3)"),
     ]
+    if drew_fallback:
+        handles.append(
+            plt.Line2D([], [], marker="o", ls="", color=colors["gine"],
+                       markerfacecolor="white", markeredgewidth=1.4,
+                       label="hollow = panel-summary fallback (per-seed-"
+                             "mean centre, ensemble CI whisker)"))
     ax.legend(handles=handles, loc="lower right", fontsize=8, frameon=False)
     ax.set_title("Paired bootstrap ΔR² (model − RF): GIN vs GINE vs "
                  "AttentiveFP, mean3 convention", fontsize=11)

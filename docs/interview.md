@@ -32,8 +32,10 @@ pull that the refresh replaced and should be quoted only as history.
    scaffolds (refreshed RF 0.7214 -> 0.6492, GIN 0.665 -> 0.612;
    pre-refresh the drop was ~0.2 R2, 0.747 -> 0.562).
 6. **Negative results reported** - a scheduler/dropout tuning pass
-   (**pre-refresh**: the archived 2026-10-09 tuning run, artifacts under
-   `results/_archive-2026-10-09/`; see `docs/methodology.md`,
+   (**pre-refresh**: the tuning run of **2026-09-24** — it was compared
+   against the 2026-09-24 reference baseline's seed-42 scaffold R² 0.544;
+   the folder name `results/_archive-2026-10-09/` records the archive
+   date, not the run date; see `docs/methodology.md`,
    "Hyperparameters: an honest negative result") improved validation but
    degraded test (validation-set selection noise); the simplest recipe
    was kept. GIN scaffold-split R2 varies +-0.02

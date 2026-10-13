@@ -30,10 +30,14 @@ What / why:
 
 Exit code: the "must be 0" invariants are real checks - multi-fragment
 parent_smiles, duplicated parent_smiles, and cross-split parent overlap each
-make the script exit 1 when violated (skipped splits/inputs do not).  A
-clean CSV without a ``parent_smiles`` column (bace, which predates the M1
-parent standardization) skips the parent-level checks with a printed note
-instead of crashing, and does not fail on its own.
+make the script exit 1 when violated.  A split check that cannot run prints
+an explicit SKIP note and exits 1 by default - never "OK" for checks that
+did not run: no ``parent_smiles`` column (bace, which predates the M1
+parent standardization), a missing split file, or a split file whose
+molecule count differs from the clean CSV.  Pass ``--allow-skip`` to accept
+skipped checks (exit 0, SKIP notes still printed).  A split file with the
+right count but smiles that do not align with the clean CSV's
+``parent_smiles`` is a misalignment and always exits 1.
 
 Nothing is filtered or rewritten - like ``07_qc_checks.py`` the audit is the
 deliverable.  Output: console, plus a JSON summary when --out is given
@@ -43,6 +47,7 @@ Usage (from anywhere; the repo root is found by walking up to
 scripts/qsar_common.py, or pass --repo):
     QSAR_TAG=egfr python .claude/skills/qsar-review/scripts/qc_salts_censoring.py
     python .claude/skills/qsar-review/scripts/qc_salts_censoring.py --tag herg --out /tmp/herg.json
+    python .claude/skills/qsar-review/scripts/qc_salts_censoring.py --tag bace --allow-skip
 """
 import argparse
 import json
@@ -167,28 +172,46 @@ def check_salts(df):
 
 
 def check_split_leakage(parents):
-    """Cross-split parent overlap. Must be 0: each parent is exactly one clean-CSV row."""
+    """Cross-split parent overlap. Must be 0: each parent is exactly one clean-CSV row.
+
+    Returns ``(results, skips)``.  ``results`` maps split -> outcome for
+    checks that actually ran, plus a ``split_matches_clean_order: False``
+    record for a split file whose smiles do not align with the clean CSV
+    (a misalignment: always a failure).  ``skips`` lists the split checks
+    that could not run at all; each is printed as SKIP and makes main()
+    exit 1 unless --allow-skip is given - a skipped check never counts as
+    "OK".
+    """
     print("\n== 2. parent-level train/test leakage ==")
-    out = {}
+    out, skips = {}, []
     if parents is None:
-        print("  skipped: no parent_smiles column to check against (see section 1)")
-        return out
+        reason = "no parent_smiles column to check against (see section 1)"
+        print(f"  SKIP: {reason} - leakage check not run")
+        skips.append(f"all splits: {reason}")
+        return out, skips
     for split in ("random", "scaffold", "time"):
         path = os.path.join(SPLIT_DIR, f"{TAG}_{split}.npz")
         if not os.path.exists(path):
-            print(f"  {split:9s} no split file ({os.path.relpath(path, BASE)}), skipped")
+            reason = f"no split file ({os.path.relpath(path, BASE)})"
+            print(f"  {split:9s} SKIP: {reason} - leakage check not run")
+            skips.append(f"{split}: {reason}")
             continue
         d = np.load(path)
         smiles = np.asarray(d["smiles"], dtype=object)
         if len(smiles) != len(parents):
-            print(f"  {split:9s} split file has {len(smiles)} molecules, "
-                  f"clean CSV has {len(parents)} - skipped")
+            reason = (f"split file has {len(smiles)} molecules, clean CSV has "
+                      f"{len(parents)} (split/CSV out of sync?)")
+            print(f"  {split:9s} SKIP: {reason} - leakage check not run")
+            skips.append(f"{split}: {reason}")
             continue
         order_mismatch = int(np.sum(smiles != parents))
         if order_mismatch:
-            print(f"  {split:9s} WARNING: split smiles differ from clean parent_smiles "
-                  f"in {order_mismatch} / {len(parents)} positions - leakage numbers "
-                  "are not interpretable (split file predates the clean CSV?)")
+            out[split] = {"split_matches_clean_order": False,
+                          "n_smiles_differing_from_parents": order_mismatch}
+            print(f"  {split:9s} MISALIGNED: split smiles differ from clean "
+                  f"parent_smiles in {order_mismatch} / {len(parents)} positions "
+                  "- leakage numbers are not interpretable (split file predates "
+                  "the clean CSV?) - FAIL")
             continue
         train = set(parents[d["train_idx"]])
         if "valid_idx" in d.files:
@@ -202,7 +225,7 @@ def check_split_leakage(parents):
         out[split] = {"n_test": int(len(test_parents)),
                       "n_test_with_parent_in_train": n_leak,
                       "split_matches_clean_order": True}
-    return out
+    return out, skips
 
 
 def check_censoring():
@@ -267,6 +290,9 @@ def parse_args(argv=None):
     p.add_argument("--tag", default=os.environ.get("QSAR_TAG", "egfr"))
     p.add_argument("--repo", default=None, help="repo root (default: auto-detect)")
     p.add_argument("--out", default=None, help="optional JSON summary path")
+    p.add_argument("--allow-skip", action="store_true",
+                   help="exit 0 even when a split check was skipped "
+                        "(default: skipped split checks exit 1)")
     return p.parse_args(argv)
 
 
@@ -286,10 +312,12 @@ def main(argv=None):
     df = pd.read_csv(CLEAN_CSV)
     print(f"[{TAG}] {len(df)} cleaned compounds")
     parents, salts = check_salts(df)
-    leakage = check_split_leakage(parents)
+    leakage, split_skips = check_split_leakage(parents)
     censoring = check_censoring()
 
-    # the "must be 0" invariants are real checks: any violation exits 1
+    # the "must be 0" invariants are real checks: any violation exits 1.
+    # Skipped split checks never pass as OK (exit 1 unless --allow-skip),
+    # and a split file misaligned with the clean CSV always fails.
     violations = []
     if salts.get("parent_column_present"):
         if salts["n_parent_multifragment"]:
@@ -299,24 +327,42 @@ def main(argv=None):
             violations.append(
                 f"{salts['n_parents_duplicated']} duplicated parent_smiles (must be 0)")
     for split, info in leakage.items():
-        if info.get("split_matches_clean_order") and info["n_test_with_parent_in_train"]:
+        if not info.get("split_matches_clean_order", True):
+            violations.append(
+                f"{split}: split smiles differ from clean parent_smiles in "
+                f"{info['n_smiles_differing_from_parents']} positions "
+                "(misaligned - leakage not interpretable)")
+        elif info["n_test_with_parent_in_train"]:
             violations.append(
                 f"{split}: {info['n_test_with_parent_in_train']} test parents also in train "
                 "(expected 0)")
     if violations:
+        status = "FAIL"
         print("\nFAIL - 'must be 0' invariants violated:")
         for v in violations:
             print(f"  - {v}")
+        for s in split_skips:
+            print(f"  - (skipped check: {s})")
+    elif split_skips and not args.allow_skip:
+        status = "SKIP"
+        print("\nSKIP - split checks did not run, so this is not OK "
+              "(exit 1; pass --allow-skip to accept):")
+        for s in split_skips:
+            print(f"  - {s}")
     else:
+        status = "OK"
         print("\nOK - all checked 'must be 0' invariants hold")
+        for s in split_skips:
+            print(f"  - skipped check accepted via --allow-skip: {s}")
 
     if args.out:
         os.makedirs(os.path.dirname(os.path.abspath(args.out)), exist_ok=True)
         with open(args.out, "w") as f:
             json.dump({"tag": TAG, "salts": salts, "split_leakage": leakage,
-                       "censoring": censoring, "violations": violations}, f, indent=2)
+                       "split_skips": split_skips, "censoring": censoring,
+                       "violations": violations, "status": status}, f, indent=2)
         print(f"saved -> {args.out}")
-    return 1 if violations else 0
+    return 0 if status == "OK" else 1
 
 
 if __name__ == "__main__":

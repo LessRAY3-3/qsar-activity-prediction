@@ -8,8 +8,8 @@
 
 ## 6-run 对比表
 
-R2_ep300 / best_epoch_ep300 取自 `results/gnn_metrics_egfr_full{,_seed1,_seed2}_ep300.json`（可由 results/ 复算）；
-R2_base / best_epoch_base 取自 `results/gnn_metrics_egfr_full{,_seed1,_seed2}.json`。
+R2_ep300 / best_epoch_ep300 取自 `results/_archive-2026-10-09/scaling_ep300/gnn_metrics_egfr_full{,_seed1,_seed2}_ep300.json`（2026-10-13 归档，与本文同目录）；
+R2_base / best_epoch_base 取自 `results/gnn_metrics_egfr_full{,_seed1,_seed2}.json`（仍在 results/）。
 
 | split | seed | R2_base | R2_ep300 | Δ | material? | best_epoch_base | best_epoch_ep300 |
 |---|---|---|---|---|---|---|---|

@@ -16,14 +16,29 @@
 - `vegfr2` RF 已于 2026-10-11 15:31 落盘（0.670/0.585），全表 "PENDING/旧"
   的 vegfr2 RF/panel/time/multitask/xgb 对照列已随之刷新；
 - **release 状态**：`artifacts-v2` 已于 2026-10-12 发布（刷新 raw × 10 +
-  `document_years.csv` + 26 个 RF 模型），`scripts/fetch_artifacts.py` 指向它，
-  README 快速上手的 stale 警告块已撤（当前 `README.md` 中 `stale` 0 命中）；
-- 仍开放：QC `figures/testset_hist_*.png`、vegfr2 y-randomization / learning
-  curve / interpretability、`permutation_importance_vegfr2.csv`（旧 RF）。
+  `document_years.csv` + 26 个 RF 模型），2026-10-13 原位重传补入
+  `processed_cache.tar.gz`（P4 快速路径，`--all`/`--cache` 可取）；
+  `scripts/fetch_artifacts.py` 指向它，README 快速上手的 stale 警告块已撤
+  （当前 `README.md` 中 `stale` 0 命中）；
+- **2026-10-13（PR #6 复查 R1-R5 整改批次）**：R1 单 seed 依赖分析见
+  `logs/2026-10-13_single_seed_dependence.log`（48 格 14 格条件性：5 个 GNN
+  胜中 4 个、21 个 RF 胜中 1 个 = AFP hivpr/scaffold、9 个平局转 RF-significant）；
+  R2 时间切分误差分解见 `logs/2026-10-13_time_split_mse_decomposition.log`
+  （level/spread/correlation，残差 ≤9e-16，替代机制标签）；批次记录见
+  `experiments/LOG.md` 末节 "2026-10-13 PR #6 review-remediation"；
+  本文件状态行、`docs/reviews/fixes-2026-10-11.md` 测试数、
+  `docs/interview.md` 调参日期（更正为 2026-09-24）同批同步；
+- 仍开放（2026-10-13 复核后收窄）：vegfr2 y-randomization / learning
+  curve / interpretability（PR #6 仍列其为 pre-refresh）。原先列在此的
+  QC `figures/testset_hist_*.png` 与 `permutation_importance_vegfr2.csv`
+  已刷新落盘（07 全 8 tag 重跑：7 tag 10-11、bace 10-12、vegfr2 10-13，
+  `logs/2026-10-13_art_refresh.log`），7 张 `figures/learning_curve/*.png`
+  已于 10-13 重绘为 ddof=0 窄带。
 
 本底稿正文保持生成时原貌；批次级运行记录见 `experiments/LOG.md` **末节**
-"2026-10-12 review-remediation campaign (PR #3 follow-up)"（该日志
-newest-first，最新条目在文件底部）。
+"2026-10-13 PR #6 review-remediation"（其下为 "2026-10-12
+review-remediation campaign (PR #3 follow-up)"；该日志 newest-first，
+最新条目在文件底部）。
 
 **统一口径**（与 `experiments/time_split_summary.py`、`scripts/gnn_04_compare.py` 一致）：
 

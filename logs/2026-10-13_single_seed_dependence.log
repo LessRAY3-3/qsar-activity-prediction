@@ -1,0 +1,100 @@
+# R1 single-seed dependence analysis (PR #6 finding R1)
+# date: 2026-10-13 13:31:37  python: Python 3.12.14
+# repo: branch fix/review-2026-10-11, HEAD 6c1e3bb
+#
+# Question: of the 48 GIN/GINE/AttentiveFP random/scaffold cells, which
+# verdicts (paired-bootstrap CI of the 3-seed ensemble, B=10000, seed=42)
+# change when any ONE training seed is dropped (ensemble = mean of the
+# kept 2 seeds, same bootstrap)?
+#
+# Method: experiments/paired_bootstrap.py used verbatim (load_cell +
+# paired_bootstrap), i.e. the repo's own bootstrap code path; inputs are
+# the committed results/rf_preds_{tag}_{split}.npz and
+# results/gnn_preds_{tag}{,_gine,_attentivefp}_{split}{,_seed1,_seed2}.npz.
+#
+# Command:
+#   .venv/bin/python /tmp/r1_single_seed.py  (scratch analysis script, repo files untouched)
+# ------------------------------------------------------------------
+R1 single-seed dependence -- repo paired bootstrap (B=10000, seed=42, ensemble=mean of kept seeds)
+committed mean3 rows reproduced: max |dev| = 9.71e-17 (48 cells x d_r2/ci_lo/ci_hi)
+
+model         cell               full verdict      dR2                     CI  drops
+------------------------------------------------------------------------------------
+gin           a2a/random         rf             -0.073 [-0.138,-0.013]  s42 -0.070 [-0.134,-0.011]->rf | s1 -0.081 [-0.147,-0.019]->rf | s2 -0.080 [-0.146,-0.019]->rf
+gin           a2a/scaffold       tie            -0.033 [-0.081,+0.015]  s42 -0.048 [-0.092,-0.003]->rf | s1 -0.019 [-0.069,+0.035]->tie | s2 -0.044 [-0.096,+0.007]->tie  CONDITIONAL
+gin           abl1/random        rf             -0.044 [-0.076,-0.016]  s42 -0.055 [-0.087,-0.026]->rf | s1 -0.043 [-0.075,-0.015]->rf | s2 -0.043 [-0.075,-0.014]->rf
+gin           abl1/scaffold      gnn            +0.037 [+0.006,+0.069]  s42 +0.015 [-0.017,+0.046]->tie | s1 +0.046 [+0.014,+0.080]->gnn | s2 +0.040 [+0.007,+0.073]->gnn  CONDITIONAL
+gin           egfr/random        rf             -0.044 [-0.079,-0.010]  s42 -0.049 [-0.084,-0.015]->rf | s1 -0.045 [-0.081,-0.011]->rf | s2 -0.047 [-0.083,-0.012]->rf
+gin           egfr/scaffold      tie            -0.023 [-0.053,+0.006]  s42 -0.035 [-0.066,-0.006]->rf | s1 -0.024 [-0.056,+0.006]->tie | s2 -0.020 [-0.050,+0.008]->tie  CONDITIONAL
+gin           egfr_full/random   rf             -0.039 [-0.059,-0.021]  s42 -0.042 [-0.062,-0.023]->rf | s1 -0.047 [-0.067,-0.028]->rf | s2 -0.046 [-0.065,-0.028]->rf
+gin           egfr_full/scaffold tie            +0.003 [-0.017,+0.022]  s42 +0.002 [-0.018,+0.022]->tie | s1 -0.005 [-0.025,+0.015]->tie | s2 -0.006 [-0.026,+0.013]->tie
+gin           herg/random        gnn            +0.038 [+0.006,+0.069]  s42 +0.035 [+0.004,+0.064]->gnn | s1 +0.027 [-0.007,+0.058]->tie | s2 +0.033 [-0.001,+0.066]->tie  CONDITIONAL
+gin           herg/scaffold      tie            -0.014 [-0.047,+0.017]  s42 -0.025 [-0.059,+0.007]->tie | s1 +0.005 [-0.027,+0.036]->tie | s2 -0.035 [-0.070,-0.002]->rf  CONDITIONAL
+gin           hivpr/random       rf             -0.048 [-0.083,-0.014]  s42 -0.054 [-0.091,-0.018]->rf | s1 -0.047 [-0.082,-0.012]->rf | s2 -0.053 [-0.086,-0.019]->rf
+gin           hivpr/scaffold     tie            -0.038 [-0.082,+0.004]  s42 -0.052 [-0.098,-0.006]->rf | s1 -0.034 [-0.077,+0.011]->tie | s2 -0.061 [-0.107,-0.018]->rf  CONDITIONAL
+gin           mpro/random        tie            -0.011 [-0.065,+0.045]  s42 -0.023 [-0.079,+0.035]->tie | s1 -0.005 [-0.057,+0.051]->tie | s2 -0.019 [-0.073,+0.039]->tie
+gin           mpro/scaffold      rf             -0.074 [-0.133,-0.018]  s42 -0.063 [-0.122,-0.007]->rf | s1 -0.080 [-0.141,-0.021]->rf | s2 -0.108 [-0.172,-0.047]->rf
+gin           vegfr2/random      rf             -0.044 [-0.068,-0.021]  s42 -0.047 [-0.071,-0.024]->rf | s1 -0.052 [-0.077,-0.029]->rf | s2 -0.049 [-0.074,-0.025]->rf
+gin           vegfr2/scaffold    tie            +0.024 [-0.001,+0.048]  s42 +0.018 [-0.007,+0.042]->tie | s1 +0.016 [-0.011,+0.041]->tie | s2 +0.017 [-0.008,+0.042]->tie
+gine          a2a/random         tie            -0.046 [-0.119,+0.016]  s42 -0.045 [-0.114,+0.015]->tie | s1 -0.055 [-0.130,+0.009]->tie | s2 -0.045 [-0.119,+0.018]->tie
+gine          a2a/scaffold       rf             -0.074 [-0.121,-0.028]  s42 -0.079 [-0.128,-0.033]->rf | s1 -0.075 [-0.122,-0.029]->rf | s2 -0.075 [-0.123,-0.029]->rf
+gine          abl1/random        rf             -0.040 [-0.069,-0.013]  s42 -0.041 [-0.072,-0.014]->rf | s1 -0.043 [-0.072,-0.016]->rf | s2 -0.043 [-0.071,-0.016]->rf
+gine          abl1/scaffold      gnn            +0.058 [+0.028,+0.092]  s42 +0.047 [+0.017,+0.080]->gnn | s1 +0.068 [+0.037,+0.103]->gnn | s2 +0.048 [+0.018,+0.082]->gnn
+gine          egfr/random        rf             -0.040 [-0.074,-0.007]  s42 -0.051 [-0.087,-0.016]->rf | s1 -0.043 [-0.077,-0.011]->rf | s2 -0.039 [-0.074,-0.005]->rf
+gine          egfr/scaffold      tie            -0.022 [-0.052,+0.007]  s42 -0.016 [-0.047,+0.013]->tie | s1 -0.033 [-0.064,-0.004]->rf | s2 -0.028 [-0.059,+0.003]->tie  CONDITIONAL
+gine          egfr_full/random   rf             -0.038 [-0.057,-0.020]  s42 -0.046 [-0.065,-0.027]->rf | s1 -0.038 [-0.057,-0.020]->rf | s2 -0.047 [-0.066,-0.029]->rf
+gine          egfr_full/scaffold tie            -0.012 [-0.034,+0.008]  s42 -0.016 [-0.038,+0.004]->tie | s1 -0.026 [-0.049,-0.005]->rf | s2 -0.013 [-0.035,+0.008]->tie  CONDITIONAL
+gine          herg/random        tie            +0.027 [-0.004,+0.058]  s42 +0.021 [-0.012,+0.053]->tie | s1 +0.027 [-0.004,+0.057]->tie | s2 +0.016 [-0.016,+0.047]->tie
+gine          herg/scaffold      tie            +0.014 [-0.021,+0.048]  s42 +0.016 [-0.021,+0.051]->tie | s1 +0.013 [-0.023,+0.046]->tie | s2 -0.003 [-0.038,+0.030]->tie
+gine          hivpr/random       tie            -0.028 [-0.059,+0.004]  s42 -0.037 [-0.069,-0.005]->rf | s1 -0.038 [-0.072,-0.004]->rf | s2 -0.022 [-0.053,+0.009]->tie  CONDITIONAL
+gine          hivpr/scaffold     rf             -0.051 [-0.096,-0.007]  s42 -0.054 [-0.098,-0.011]->rf | s1 -0.087 [-0.141,-0.036]->rf | s2 -0.048 [-0.094,-0.003]->rf
+gine          mpro/random        tie            -0.030 [-0.088,+0.031]  s42 -0.029 [-0.088,+0.033]->tie | s1 -0.030 [-0.088,+0.031]->tie | s2 -0.044 [-0.103,+0.019]->tie
+gine          mpro/scaffold      rf             -0.069 [-0.130,-0.012]  s42 -0.070 [-0.132,-0.011]->rf | s1 -0.079 [-0.140,-0.021]->rf | s2 -0.083 [-0.146,-0.023]->rf
+gine          vegfr2/random      rf             -0.047 [-0.072,-0.024]  s42 -0.048 [-0.073,-0.023]->rf | s1 -0.058 [-0.083,-0.034]->rf | s2 -0.054 [-0.079,-0.031]->rf
+gine          vegfr2/scaffold    tie            +0.007 [-0.015,+0.029]  s42 -0.001 [-0.024,+0.021]->tie | s1 -0.008 [-0.032,+0.016]->tie | s2 +0.008 [-0.015,+0.030]->tie
+attentivefp   a2a/random         rf             -0.139 [-0.231,-0.063]  s42 -0.155 [-0.252,-0.074]->rf | s1 -0.161 [-0.253,-0.083]->rf | s2 -0.122 [-0.211,-0.049]->rf
+attentivefp   a2a/scaffold       tie            -0.045 [-0.091,+0.000]  s42 -0.082 [-0.140,-0.027]->rf | s1 -0.046 [-0.094,-0.000]->rf | s2 -0.035 [-0.075,+0.005]->tie  CONDITIONAL
+attentivefp   abl1/random        rf             -0.091 [-0.136,-0.052]  s42 -0.096 [-0.143,-0.056]->rf | s1 -0.097 [-0.141,-0.058]->rf | s2 -0.114 [-0.164,-0.072]->rf
+attentivefp   abl1/scaffold      tie            +0.020 [-0.018,+0.057]  s42 +0.024 [-0.016,+0.063]->tie | s1 +0.005 [-0.038,+0.044]->tie | s2 +0.010 [-0.030,+0.049]->tie
+attentivefp   egfr/random        tie            -0.019 [-0.051,+0.013]  s42 -0.030 [-0.063,+0.002]->tie | s1 -0.028 [-0.063,+0.006]->tie | s2 -0.034 [-0.071,+0.002]->tie
+attentivefp   egfr/scaffold      tie            -0.005 [-0.037,+0.025]  s42 -0.021 [-0.055,+0.011]->tie | s1 -0.020 [-0.052,+0.012]->tie | s2 -0.009 [-0.041,+0.021]->tie
+attentivefp   egfr_full/random   rf             -0.020 [-0.036,-0.003]  s42 -0.041 [-0.059,-0.022]->rf | s1 -0.024 [-0.041,-0.006]->rf | s2 -0.036 [-0.054,-0.017]->rf
+attentivefp   egfr_full/scaffold rf             -0.038 [-0.063,-0.013]  s42 -0.072 [-0.101,-0.042]->rf | s1 -0.050 [-0.076,-0.025]->rf | s2 -0.044 [-0.069,-0.020]->rf
+attentivefp   herg/random        gnn            +0.034 [+0.002,+0.065]  s42 +0.003 [-0.031,+0.035]->tie | s1 +0.023 [-0.011,+0.056]->tie | s2 +0.035 [+0.001,+0.066]->gnn  CONDITIONAL
+attentivefp   herg/scaffold      gnn            +0.062 [+0.030,+0.092]  s42 +0.052 [+0.017,+0.085]->gnn | s1 +0.031 [-0.002,+0.063]->tie | s2 +0.071 [+0.040,+0.101]->gnn  CONDITIONAL
+attentivefp   hivpr/random       tie            -0.016 [-0.062,+0.030]  s42 -0.039 [-0.091,+0.010]->tie | s1 -0.007 [-0.056,+0.041]->tie | s2 -0.031 [-0.075,+0.012]->tie
+attentivefp   hivpr/scaffold     rf             -0.062 [-0.123,-0.003]  s42 -0.013 [-0.076,+0.046]->tie | s1 -0.175 [-0.255,-0.100]->rf | s2 -0.083 [-0.145,-0.023]->rf  CONDITIONAL
+attentivefp   mpro/random        tie            -0.013 [-0.065,+0.043]  s42 -0.029 [-0.086,+0.033]->tie | s1 -0.027 [-0.083,+0.030]->tie | s2 -0.021 [-0.073,+0.033]->tie
+attentivefp   mpro/scaffold      rf             -0.116 [-0.189,-0.051]  s42 -0.143 [-0.222,-0.072]->rf | s1 -0.129 [-0.198,-0.066]->rf | s2 -0.139 [-0.220,-0.066]->rf
+attentivefp   vegfr2/random      rf             -0.035 [-0.057,-0.014]  s42 -0.056 [-0.081,-0.031]->rf | s1 -0.050 [-0.074,-0.028]->rf | s2 -0.044 [-0.067,-0.021]->rf
+attentivefp   vegfr2/scaffold    tie            -0.017 [-0.041,+0.008]  s42 -0.036 [-0.062,-0.010]->rf | s1 -0.051 [-0.081,-0.022]->rf | s2 -0.027 [-0.051,-0.002]->rf  CONDITIONAL
+
+cells: 48  conditional (any drop changes verdict): 14
+  gnn verdicts 5: conditional 4 -- gin abl1/scaffold, gin herg/random, attentivefp herg/random, attentivefp herg/scaffold
+    stable GNN wins: gine abl1/scaffold
+  rf verdicts 21: conditional 1 -- attentivefp hivpr/scaffold
+  tie verdicts 22: conditional 9 -- gin a2a/scaffold, gin egfr/scaffold, gin herg/scaffold, gin hivpr/scaffold, gine egfr/scaffold, gine egfr_full/scaffold, gine hivpr/random, attentivefp a2a/scaffold, attentivefp vegfr2/scaffold
+    tie change: gin a2a/scaffold -> ['rf']
+    tie change: gin egfr/scaffold -> ['rf']
+    tie change: gin herg/scaffold -> ['rf']
+    tie change: gin hivpr/scaffold -> ['rf']
+    tie change: gine egfr/scaffold -> ['rf']
+    tie change: gine egfr_full/scaffold -> ['rf']
+    tie change: gine hivpr/random -> ['rf']
+    tie change: attentivefp a2a/scaffold -> ['rf']
+    tie change: attentivefp vegfr2/scaffold -> ['rf']
+
+spot checks against PR #6 examples:
+  gin abl1/scaffold: full +0.037 [+0.006,+0.069] -> gnn; drop s42: +0.015 [-0.017,+0.046] tie; drop s1: +0.046 [+0.014,+0.080] gnn; drop s2: +0.040 [+0.007,+0.073] gnn
+  gin herg/random: full +0.038 [+0.006,+0.069] -> gnn; drop s42: +0.035 [+0.004,+0.064] gnn; drop s1: +0.027 [-0.007,+0.058] tie; drop s2: +0.033 [-0.001,+0.066] tie
+  attentivefp herg/random: full +0.034 [+0.002,+0.065] -> gnn; drop s42: +0.003 [-0.031,+0.035] tie; drop s1: +0.023 [-0.011,+0.056] tie; drop s2: +0.035 [+0.001,+0.066] gnn
+  attentivefp herg/scaffold: full +0.062 [+0.030,+0.092] -> gnn; drop s42: +0.052 [+0.017,+0.085] gnn; drop s1: +0.031 [-0.002,+0.063] tie; drop s2: +0.071 [+0.040,+0.101] gnn
+  gine abl1/scaffold: full +0.058 [+0.028,+0.092] -> gnn; drop s42: +0.047 [+0.017,+0.080] gnn; drop s1: +0.068 [+0.037,+0.103] gnn; drop s2: +0.048 [+0.018,+0.082] gnn
+  attentivefp hivpr/scaffold: full -0.062 [-0.123,-0.003] -> rf; drop s42: -0.013 [-0.076,+0.046] tie; drop s1: -0.175 [-0.255,-0.100] rf; drop s2: -0.083 [-0.145,-0.023] rf
+
+AFP hivpr/scaffold per-seed R2 (suffix order: '' = seed42, _seed1, _seed2):
+  suffix '(none)': R2 = 0.200813
+  suffix '_seed1': R2 = 0.508463
+  suffix '_seed2': R2 = 0.376838
+  RF R2 = 0.538035
+  n_test = 524

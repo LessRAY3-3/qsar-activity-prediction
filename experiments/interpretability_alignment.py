@@ -41,12 +41,14 @@ disagreement is where "different parts" is most plausible.
            inside the RF's top-bit atom coverage? Plus a core-vs-
            substituent split (do attentions sit on the scaffold core?).
 
-Outputs (schema unchanged):
-  <fig-dir>/<family>_<i>_<short>_{gnn,rf}.png   (fig-dir e.g.
-      figures/interpretability/by_tag/<tag>/ for the per-tag panel)
+Outputs (schema unchanged). Both directories default to the per-tag
+by_tag layout (a bare run must not write into the flat folder); pass
+--out / --fig-dir to override:
+  <fig-dir>/<family>_<i>_<short>_{gnn,rf}.png   (default
+      figures/interpretability/by_tag/<tag>/)
   <fig-dir>/alignment_summary.png
-  <out>/alignment.json   (tag, split, families, selection, params,
-      molecules)
+  <out>/alignment.json   (default results/interpretability/by_tag/<tag>/;
+      tag, split, families, selection, params, molecules)
   <out>/findings.md
 
 Partial success is allowed: a molecule that fails one method is recorded
@@ -165,9 +167,20 @@ def parse_args():
     p.add_argument("--top-atom-frac", type=float, default=0.25)
     p.add_argument("--gnn-epochs", type=int, default=100)
     p.add_argument("--seed", type=int, default=42)
-    p.add_argument("--out", default=os.path.join(BASE, "results", "interpretability"))
-    p.add_argument("--fig-dir", default=os.path.join(BASE, "figures", "interpretability"))
-    return p.parse_args()
+    p.add_argument("--out", default=None,
+                   help="where alignment.json/findings.md are written "
+                        "(default: results/interpretability/by_tag/<tag>)")
+    p.add_argument("--fig-dir", default=None,
+                   help="where the per-molecule/summary figures are written "
+                        "(default: figures/interpretability/by_tag/<tag>)")
+    args = p.parse_args()
+    if args.out is None:
+        args.out = os.path.join(BASE, "results", "interpretability",
+                                "by_tag", args.tag)
+    if args.fig_dir is None:
+        args.fig_dir = os.path.join(BASE, "figures", "interpretability",
+                                    "by_tag", args.tag)
+    return args
 
 
 # ---------------------------------------------------------------- helpers
