@@ -40,7 +40,7 @@ def _write_uncertainty_tree(base):
     train_idx = np.arange(train_n)
     test_idx = np.arange(train_n, n)
     np.savez(split_dir / "tiny_random.npz", train_idx=train_idx,
-             test_idx=test_idx)
+             valid_idx=np.array([], dtype=int), test_idx=test_idx)
 
     y_all = rng.normal(6.0, 1.0, n)
     forest = RandomForestRegressor(n_estimators=12, random_state=0).fit(
@@ -215,4 +215,5 @@ def test_time_split_conclusion_follows_the_data(load_experiment, capsys):
     assert "RF below constant baseline: t1 -0.400 < +0.100" in out
     assert "GIN ahead: ['t2']; RF ahead: none" in out
     assert "caveat: t1 test_frac=0.60 > 0.5" in out
-    assert "note: negative time-split R² (t1 RF -0.400)" in out
+    assert "t1 RF -0.400, constant +0.100: below the constant baseline" in out
+    assert "do not establish temporal drift" in out

@@ -9,6 +9,10 @@ figures in the README and the run ledger in `experiments/LOG.md`.
 Numbers are the refreshed (2026-10-11 refresh / 2026-10-12 re-run)
 values; anything marked **pre-refresh** is from the 6,165-compound `egfr`
 pull that the refresh replaced and should be quoted only as history.
+The time-split results are also **legacy audit artifacts**: their all-year
+labels included future measurements. Versioned as-of labels are implemented,
+but the 8 RF + 24 GIN time campaign has not been rerun. Do not quote the old
+time table as prospective validation or evidence for deployment/model choice.
 
 1. **Why pIC50** - order-of-magnitude target standardisation.
 2. **Why scaffold split** - random splits leak analogues across
@@ -43,11 +47,20 @@ pull that the refresh replaced and should be quoted only as history.
 7. **Failure-mode analysis** - the two models' 50 worst molecules overlap
    ~9x more than chance (refreshed: 25 random / 25 scaffold shared of 50,
    vs 2.7 expected; per-molecule |error| Spearman 0.50 random / 0.59
-   scaffold; **pre-refresh**: 25 / 21, Spearman ~0.52): many failures are
-   molecule-intrinsic (assay noise - censored records are filtered out of
-   the labels now), yet specific chemotypes still fail asymmetrically
+   scaffold; **pre-refresh**: 25 / 21, Spearman ~0.52). This identifies
+   shared difficult examples, not the cause: assay noise, common model
+   limitations and distribution shift remain possible. Specific chemotypes
+   still fail asymmetrically
    (thienopyrimidines hurt RF more: 47 scaffold-test molecules at mean
    |error| 1.32 vs the GIN's 1.02; the chromone series that hurt the GIN
    **pre-refresh** - n=37 at 1.12 vs 0.64 - is gone from the refreshed
    test set, its query matches 0 of 912) - fingerprints and graphs
    extrapolate differently.
+
+8. **Inference limits** - scaffold CIs depend on the resampling unit; ABL1
+   and Mpro GIN verdicts cross zero when whole scaffold groups are resampled.
+   Seed sensitivity and scaffold dependence are different checks. RF tree std
+   ranks error better than the tested GNN seed std, but ranking does not prove
+   probabilistic calibration. The multi-task runs perform worse under their
+   tested configurations; unmatched heads and cross-target molecule overlap
+   prevent attributing that difference solely to sharing.

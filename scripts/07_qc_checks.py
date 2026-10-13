@@ -33,7 +33,7 @@ import joblib
 from sklearn.metrics import r2_score
 from sklearn.model_selection import train_test_split
 
-from qsar_common import scaffold_split
+from qsar_common import exact_relation_mask, scaffold_split
 
 BASE = os.path.join(os.path.dirname(__file__), "..")
 TAG = os.environ.get("QSAR_TAG", "egfr")
@@ -107,7 +107,7 @@ def check_ultra_potent():
         # NaN) never reaches pic50, so counting it here would audit rows
         # the model never saw. Headline = kept rows only; the dropped
         # ones are reported on a separate line.
-        kept = df["standard_relation"] == "="
+        kept = exact_relation_mask(df["standard_relation"])
         hot = hot_all[kept.loc[hot_all.index]]
         dropped = hot_all[~kept.loc[hot_all.index]]
         n_kept = int(kept.sum())

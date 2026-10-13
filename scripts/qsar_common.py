@@ -19,6 +19,11 @@ FP_NBITS = 2048
 _MORGAN_GEN = None
 
 
+def exact_relation_mask(values):
+    """Shared label policy for cleaning, QC and dated measurements."""
+    return values.fillna("").astype(str).str.strip().eq("=")
+
+
 def get_morgan_generator():
     global _MORGAN_GEN
     if _MORGAN_GEN is None:

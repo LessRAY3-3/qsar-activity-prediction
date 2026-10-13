@@ -51,6 +51,7 @@ import time
 
 import numpy as np
 import torch
+from time_labels import load_time_split
 import torch.nn as nn
 from torch_geometric.loader import DataLoader
 from torch_geometric.nn import AttentiveFP, GINEConv, GINConv, global_mean_pool
@@ -274,20 +275,27 @@ def main():
     np.random.seed(args.seed)
     device = select_device()
 
-    split = np.load(os.path.join(BASE, "data", "processed", "splits",
-                                 f"{args.tag}_{args.split}.npz"))
+    split_dir = os.path.join(BASE, "data", "processed", "splits")
     graphs = os.path.join(BASE, "data", "processed", f"{args.tag}_graphs.npz")
-
-    y_all = np.load(graphs)["y"]
+    with np.load(graphs) as graph_cache:
+        y_all = graph_cache["y"]
+        if args.split == "time":
+            split = load_time_split(split_dir, args.tag, graph_cache["smiles"], y_all)
+            if split is None:
+                return
+            y_all = split["y"]
+        else:
+            split = dict(np.load(os.path.join(split_dir, f"{args.tag}_{args.split}.npz")))
+    label_meta = {"label_id": str(split["label_id"])} if args.split == "time" else {}
     y_mean, y_std = float(y_all[split["train_idx"]].mean()), float(y_all[split["train_idx"]].std())
     print(f"[{args.tag}/{args.split}] device={device}  y_mean={y_mean:.3f} y_std={y_std:.3f}")
 
     train_ds = MoleculeGraphDataset(graphs, indices=split["train_idx"])
     valid_ds = MoleculeGraphDataset(graphs, indices=split["valid_idx"])
     test_ds = MoleculeGraphDataset(graphs, indices=split["test_idx"])
-    # standardise targets in-place (cache arrays are copies loaded per dataset)
-    for ds, mean, std in ((train_ds, y_mean, y_std), (valid_ds, y_mean, y_std), (test_ds, y_mean, y_std)):
-        ds.y = (ds.y - y_mean) / y_std
+    # Replace cached all-year targets before standardizing any temporal pool.
+    for ds in (train_ds, valid_ds, test_ds):
+        ds.y = (y_all.copy() - y_mean) / y_std
 
     g = torch.Generator().manual_seed(args.seed)
     train_ld = DataLoader(train_ds, batch_size=args.batch_size, shuffle=True, generator=g)
@@ -350,15 +358,15 @@ def main():
 
     os.makedirs(os.path.join(BASE, "results", "gnn_models"), exist_ok=True)
     torch.save({"state_dict": best["state"], "args": vars(args),
-                "y_mean": y_mean, "y_std": y_std},
+                "y_mean": y_mean, "y_std": y_std, **label_meta},
                os.path.join(BASE, "results", "gnn_models", pt_name))
     np.savez(os.path.join(BASE, "results", preds_name),
-             test_idx=split["test_idx"], y_true=ty, y_pred=tp)
+             test_idx=split["test_idx"], y_true=ty, y_pred=tp, **label_meta)
 
     mj = os.path.join(BASE, "results",
                       f"gnn_metrics_{args.tag}{model_infix}{args.suffix}.json")
     all_m = json.load(open(mj)) if os.path.exists(mj) else {}
-    all_m[args.split] = {**m, "best_epoch": best["epoch"],
+    all_m[args.split] = {**m, **label_meta, "best_epoch": best["epoch"],
                          "best_valid_rmse_std": best["rmse"],
                          "convergence_flag": flagged,
                          "device": device,

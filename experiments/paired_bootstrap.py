@@ -100,11 +100,14 @@ cells where RF (or GIN/GINE) wins significantly.
 """
 import argparse
 import os
+import sys
 
 import numpy as np
 import pandas as pd
 
 BASE = os.path.join(os.path.dirname(__file__), "..")
+sys.path.insert(0, os.path.join(BASE, "scripts"))
+from time_labels import load_time_split, require_prediction_version  # noqa: E402
 
 TAGS = ("a2a", "abl1", "egfr", "egfr_full", "herg", "hivpr", "mpro", "vegfr2")
 SPLITS = ("random", "scaffold")
@@ -202,6 +205,17 @@ def load_cell(tag, split, model="gin"):
     if not np.array_equal(rf["test_idx"], sp["test_idx"]):
         raise ValueError(f"{tag}/{split}: rf test_idx != split test_idx")
 
+    if split == "time":
+        marker = os.path.join(BASE, "data", "processed", "splits", f"{tag}_time_NA.json")
+        if os.path.exists(marker):
+            raise ValueError(f"{tag}: time split is NA; stale predictions cannot be analysed")
+        if "label_policy" in sp or "label_id" in sp:
+            sp = load_time_split(os.path.dirname(marker), tag)
+        if "label_id" in sp or "label_id" in rf:
+            require_prediction_version(rf, sp)
+        else:
+            print(f"[{tag}/time] historical all-year labels; not prospective validation")
+
     gins = []
     for suf in SEED_SUFFIXES:
         g = _npz(gnn_preds_name(tag, split, suf, model))
@@ -211,6 +225,8 @@ def load_cell(tag, split, model="gin"):
         if not np.allclose(g["y_true"], rf["y_true"], atol=1e-4):
             raise ValueError(f"{tag}/{split}: gnn{suffix_label(suf)} y_true "
                              f"!= rf y_true")
+        if split == "time" and ("label_id" in sp or "label_id" in g):
+            require_prediction_version(g, sp)
         gins.append(np.asarray(g["y_pred"], dtype=np.float64))
 
     return {
@@ -219,6 +235,7 @@ def load_cell(tag, split, model="gin"):
         "gin42": gins[0],
         "gin_mean3": np.mean(np.stack(gins), axis=0),
         "n_test": int(len(rf["test_idx"])),
+        "label_id": str(sp.get("label_id", "")),
     }
 
 
@@ -298,6 +315,7 @@ def cell_rows(tag, split, n_boot=N_BOOT, seed=BOOT_SEED, model="gin"):
         rows.append({
             "tag": tag,
             "split": split,
+            **({"label_id": cell["label_id"]} if split == "time" else {}),
             "model_pair": pair,
             "n_test": cell["n_test"],
             "r2_gin": r2(cell["y"], pred_gin),
@@ -693,7 +711,8 @@ def main(args=None):
     # records the resamples its CIs were drawn from (SUMMARY_COLS itself
     # stays the stable merge schema; legacy rows default to BOOT_SEED)
     summary = pd.DataFrame(summary_rows,
-                           columns=SUMMARY_COLS + ["boot_seed"])
+                           columns=SUMMARY_COLS + ["boot_seed"]
+                           + (["label_id"] if "time" in splits else []))
     merged = merge_summary(summary, summary_path, n_boot=args.n_boot,
                            force=args.force)
     merged.to_csv(summary_path, index=False)

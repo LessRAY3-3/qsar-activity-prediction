@@ -3,7 +3,7 @@
 ![CI](https://github.com/LessRAY3-3/qsar-activity-prediction/actions/workflows/ci.yml/badge.svg)
 
 Predicting how potently a compound inhibits a target (pIC50) from
-structure, two ways under identical verified train/test conditions:
+structure, two ways with verified test alignment:
 classic QSAR (Morgan fingerprints -> RandomForest) and a GIN graph
 network, across eight ChEMBL targets (EGFR is counted twice: every one
 of `egfr`'s 4,560 parents also sits in `egfr_full`, so the "7 of 8"
@@ -27,6 +27,15 @@ fingerprint baseline on this panel**. Deep detail:
 > the **fingerprint-ablation** re-run (all 8 tags) and the **fairness
 > campaign** (`vegfr2`/`herg`/`abl1`) are refreshed against those
 > datasets (`experiments/LOG.md`).
+
+> **2026-10-13 audit correction — time results remain legacy.** The committed
+> time predictions, tables and figures used labels aggregated across all years,
+> including measurements published after the training cutoff. They are retained
+> as an audit record and **do not support prospective temporal validation**,
+> time-based model selection or deployment claims. The code now uses versioned
+> as-of labels, rejects legacy training inputs and prevents mixed time versions; the full **8 RF + 24 GIN**
+> time campaign and downstream summaries still require regeneration. Random and
+> scaffold labels/results are unaffected. See [time policy](#publication-year-time-split-legacy-results-and-corrected-policy).
 
 ## Results
 
@@ -67,6 +76,14 @@ bootstrap 95% CI excludes 0 (B = 10,000, mean3 *ensemble* convention;
 **conditional** = the verdict changes when any one training seed is
 dropped (single-seed standard, see *Conditional verdicts* under
 *Significance* below).
+These CIs resample molecules, not scaffold groups. A separate **24-cell
+scaffold-cluster sensitivity analysis** (8 targets × 3 GNN architectures;
+`results/significance/scaffold_cluster_sensitivity.csv`, B = 10,000) resamples
+whole held-out Murcko groups. For GIN, ABL1/scaffold changes to
+**[−0.003, +0.249]** and Mpro/scaffold to **[−0.175, +0.010]**, both crossing
+zero. Thus their molecule-level verdicts are not robust to this resampling
+unit. This addresses dependence within scaffolds, separately from training-seed
+sensitivity; few held-out groups also limit the cluster analysis.
 
 | Tag | Target (ChEMBL id) | Family | n | RF rand | GIN rand | Δ rand (mean) | sig | RF scaf | GIN scaf | Δ scaf (mean) | sig | conditional |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|
@@ -179,12 +196,9 @@ the opposite).** `scaffold_split` (`scripts/qsar_common.py`) groups
 molecules by Bemis-Murcko scaffold and assigns groups to the **test**
 set **largest-first** until ~20%; DeepChem/MoleculeNet's
 `ScaffoldSplitter` convention is the reverse - largest groups fill
-*train*, leftovers become test. Consequence: our test set contains the
-dominant chemotype families (members mutually similar), so scaffold
-scores are **slightly optimistic** relative to a DeepChem-style split
-and absolute scaffold R2 is **not comparable across the two
-implementations**; the conclusions hold either way - random and
-scaffold both read GIN ≤ RF on 7 of 8 targets. Chosen deliberately: big
+*train*, leftovers become test. The two conventions test different chemotype populations, so absolute scaffold
+R2 is not directly comparable. The direction and size of the effect, including
+whether model rankings would persist, have not been tested here. Chosen deliberately: big
 families in test enable
 chemotype-level error analysis (`scripts/gnn_05_error_analysis.py`);
 the cost: campaigns already run stay as-is, and aligning with
@@ -284,9 +298,9 @@ Same test molecules, coloured by scaffold:
 ![compare scatter](figures/compare_pred_vs_actual_egfr_scaffold.png)
 
 **Do the models fail on the same molecules?** Their worst test
-predictions overlap far above chance on both splits: many failures are
-**molecule-intrinsic** (noisy measurements), not model-specific - a
-data-quality conclusion, not a model-ranking one. Chemotypes still fail
+predictions overlap far above chance on both splits. These are shared
+difficult examples; the overlap does not identify their cause. Assay noise,
+common model limitations and distribution shift remain possible explanations. Chemotypes still fail
 asymmetrically: on the refreshed scaffold test set the thienopyrimidine
 series (47 molecules) costs the **RF** more (mean |err| 1.32 vs the
 GIN's 1.02), while the chromone query now matches **0 of 912** test
@@ -700,43 +714,54 @@ single-task RF, 0.670 random / 0.585 scaffold).
 ![multitask random](figures/multitask/random.png)
 ![multitask scaffold](figures/multitask/scaffold.png)
 
-**Pooling loses on every cell.** Neither pooling arm beats the
-single-task RF in any of the 6 cells, and both are *worse* than the
-single-task GIN in every cell: MT-GIN trails RF by **−0.022 to −0.238**,
-pooled by **−0.045 to −0.361**, vs **−0.064 to +0.022** for single-task
-GIN. One cell does flip - `abl1`/scaffold, where the **single-task** GIN
-beats the RF by +0.022 - and pooling drags it straight back below the RF
-(MT-GIN −0.022): more molecules from more targets made the model worse,
-not better. Cross-split leakage can only *inflate* these numbers; the
-linear-head handicap does not decide the verdict - both in
-[methodology](docs/methodology.md).
+**Both pooling configurations underperform in this experiment.** Neither
+beats the single-task RF or GIN in any of the six cells: MT-GIN trails
+RF by **−0.022 to −0.238**, pooled by **−0.045 to −0.361**, versus
+**−0.064 to +0.022** for single-task GIN. This describes the tested
+configurations; it does not isolate a causal effect of sharing. Cross-target
+train/test molecule overlap and the linear-versus-MLP head difference remain
+confounders. Establishing negative transfer requires a common molecule split
+and matched head capacity; the overlap's effect has no guaranteed direction.
+See [methodology](docs/methodology.md).
 
-## Publication-year time split: ensemble Δ favours the GIN on 6 of 8 targets, neither model is dependable
+## Publication-year time split: legacy results and corrected policy
 
-Random and scaffold splits let the model train on molecules published
-*after* the molecules it is tested on. The deployment-honest cut
-(`scripts/gnn_08_time_splits.py`; a molecule's year = the earliest
-publication it appears in, from `data/raw/document_years.csv` - 4,147
-ChEMBL documents across the 8 tags) withholds the newest years:
-**test = newest publication years cumulating to ~21-28% of molecules,
-valid = newest ~10% of the rest** (year granularity makes the
-validation share **17-39% of the non-test pool for 4 of 8 tags** -
-`a2a` 25%, `herg` 18%, `mpro` 39%, `vegfr2` 17%). Because one recent
-year can carry a lot of data, the test fraction runs over target on
-`a2a` (59%) and `mpro` (51%) - both datasets end in 2024/2025.
-(`egfr`'s window reads 2013-2016 because the re-pulled raw file
-(commit `e37c572`, "8k early-stop") contains no document dated after
-2016 - a property of the pull, not of the label refresh.) RF trained
-via `scripts/04_train_and_evaluate.py --split time`, GIN as always
-(3 seeds, same npz).
+**The tables and figures in this section are historical audit artifacts, not
+valid prospective time-test evidence.** First-report splitting did not stop
+future measurements from entering a training molecule's all-year median label.
+For example, `egfr_full` has 413 training parents with measurements in 2019 or
+later, including 279 with measurements in 2021 or later. `CHEMBL266995` has a
+1999-only median pIC50 of 6.898, but its old training label is 8.097 after a
+2024 measurement is included. The previous claims about time-based model wins,
+robustness under drift and deployability are withdrawn pending a full rerun.
 
-Test R2 (random for reference; GIN = 3-seed mean; GIN ens = R2 of the
-3-seed ensemble prediction; **Δ = GIN ens − RF**, recomputed from the
-committed per-seed prediction files, with its paired-bootstrap **95% CI**
-(B = 10,000, mean3 ensemble convention,
-`results/significance/summary_time.csv`); split sizes, years and the
-RF/GIN columns from `results/time_split/summary.csv`; **bold Δ** = the CI
-excludes 0):
+**Corrected policy (`exact-dated-asof-v1`).** First-report group assignment is
+unchanged: earliest dated activity across raw records determines the molecule's
+year, with newest years held out. Labels are now built from exact (`=`), valid
+nM measurements with known document years: train uses years **before the
+validation cutoff**, validation uses years **before the test cutoff**, and
+test uses years **at or after the test cutoff**. A molecule without an eligible
+measurement for its assigned pool is excluded; undated measurements cannot
+supply labels. `scripts/time_labels.py` verifies the dataset signature and
+`label_id`; RF and GNN training reject legacy or mismatched inputs. Temporal
+analysis validates new-version provenance and can still inspect an entirely
+legacy campaign with an explicit warning, but cannot mix campaign versions.
+RF fits the training pool; GNN uses that pool and selects checkpoints on
+validation. The new constant baseline also uses
+training labels only.
+
+**Rerun status:** implementation and regression tests are complete; full
+training is not. Regenerate all eight time splits, fit 8 RF models and 24 GIN
+runs (3 seeds per target), then regenerate predictions, significance, summaries,
+and figures together. Until then, the following values retain their original
+all-year-label provenance. Random/scaffold results require no retraining for
+this label correction.
+
+**Legacy test R2 and paired molecule-bootstrap CI** (B = 10,000).
+GIN time is the per-seed mean; GIN ens is R2 of the averaged prediction;
+Δ = GIN ens − RF. Files: `results/time_split/summary.csv` and
+`results/significance/summary_time.csv`. Bold entries indicate only that the
+legacy molecule-bootstrap CI excludes zero.
 
 | Tag | RF rand | GIN rand | RF time | GIN time | GIN ens | Δ time (ensemble) | 95% CI |
 |---|---|---|---|---|---|---|---|
@@ -749,76 +774,18 @@ excludes 0):
 | `mpro` | 0.602 | 0.572 | +0.006 | +0.055±0.019 | +0.090 | **+0.084** | [+0.043, +0.128] |
 | `vegfr2` | 0.670 | 0.605 | +0.160 | +0.068±0.033 | +0.108 | **−0.052** | [−0.077, −0.026] |
 
-Panel means: RF **0.694 (random) → −0.034 (time)**, GIN **0.643 →
-+0.032** (time, per-seed mean; ensemble **+0.078**).
+The legacy ensemble Δ is positive on six targets; four positive and two negative
+CIs exclude zero. These counts describe old prediction files only and are not
+model-selection evidence for the corrected temporal protocol. The old
+`constant_r2` uses all non-test labels, including validation, unlike the corrected
+training-only baseline. A negative constant R2 is not itself evidence of drift:
+for any constant c, R2 = −(c − mean(y_test))² / Var(y_test).
 
-**CI column restored (2026-10-11).** The paired bootstrap was re-run
-against the refreshed time predictions: all 8 tags at B = 10,000 merged
-into `results/significance/summary_time.csv` (schema now carries
-`frac_boot_gin_better` and `n_boot`). **6 of 8 CIs exclude 0** - GIN
-ahead on `a2a`, `egfr_full`, `hivpr`, `mpro`, RF ahead on `abl1` and
-`vegfr2` - while `egfr` (+0.039 [−0.012, +0.093]) and `herg` (+0.032
-[−0.007, +0.073]) straddle 0. **Five verdicts moved against the
-pre-refresh table** (pattern 5 GIN / 0 RF → 4 GIN / 2 RF): `egfr` and
-`herg` GIN → undecided (`herg`'s pre-refresh cell read +0.076 [0.034,
-0.120], now +0.032 with the CI crossing zero), `hivpr` undecided →
-GIN, and `abl1` and `vegfr2` undecided → RF (see `experiments/LOG.md`).
-
-**Reading the Δ column.** Δ is computed on the **3-seed ensemble
-prediction** (per-molecule mean of the three GIN runs; the `GIN ens`
-column is that prediction's R2), not from subtracting the two displayed
-columns - ensemble Δ and per-seed-mean Δ are two different conventions
-(see **Panel Δ conventions** in [methodology](docs/methodology.md)) and
-the ensemble is systematically ≥ the per-seed mean. `egfr` is the worked
-example: GIN time mean − RF time = 0.088 − 0.123 = **−0.035** (GIN
-looks worse) while the ensemble Δ is **+0.039** (GIN better) - opposite
-signs from the same three runs.
-
-**Point estimates under drift.** The ensemble Δ favours the GIN on **6
-of 8** targets and RF on `abl1` (−0.236) and `vegfr2` (−0.052); with the
-CIs in the table, **4 of those 6** GIN cells hold up (`egfr` and `herg`
-straddle 0) and both RF cells do too - **6 of 8** CIs exclude 0. Some of
-those GIN "wins" are just RF collapsing faster (`egfr_full` +0.592,
-`a2a` +0.326 - both models near or below zero), so read the absolute
-level next: RF time is negative on 4 of 8 targets (worst `egfr_full`
-**−0.736**, then `a2a` −0.301, `herg` −0.058, `hivpr` −0.027); the GIN
-ensemble is negative on `egfr_full` (−0.144) and `herg` (−0.026), and
-outside `abl1` (0.560 / 0.324 ens) nothing on either model clears 0.17.
-At R2 ≈ 0 or below on future chemistry neither model is usable - the
-honest industrial number. And the one target where RF still works under
-drift (`abl1`, +0.560) is precisely where the GIN falls furthest behind.
-Note these are **three different counts**: the significance table (CI
-excludes 0) holds on 6 of 8 tags, the point estimate "ensemble Δ > 0"
-also on 6 of 8, while "stays closer to the no-skill baseline" (each
-model's R² nearer `constant_r2`) holds on only 4 of 8 - `a2a`, `abl1`,
-`herg`, `vegfr2`. None may be read as another: on `abl1` and `vegfr2`
-the significance table favours RF while the constant-proximity check
-favours the GIN, and on `egfr_full` the RF prediction is the *closer*
-one to the very negative constant even though the GIN's Δ there is the
-panel's largest.
-
-**Against the no-skill baseline** (now a column in
-`results/time_split/summary.csv`: `constant_r2` = predicting the mean
-pIC50 of all non-test rows), RF scores below zero-skill on four
-targets - `a2a` (−0.301 vs −0.004), `egfr_full` (−0.736 vs −0.455),
-`herg` (−0.058 vs −0.003) and `hivpr` (−0.027 vs −0.006) - and the GIN
-ensemble is below it on `herg` (−0.026 vs −0.003). Caveat on this
-comparison, previously spelled out only in
-[methodology](docs/methodology.md): the constant uses the mean of
-**all non-test rows, i.e. it includes the validation years the
-time-split RF never trains on** (`04_train_and_evaluate.py` deliberately
-ignores `valid_idx` on time splits), while the GIN selects its
-checkpoints on exactly those years - the RF is scored against a
-baseline that saw data the RF did not.
-
-**How the GIN's edge arises differs by tag - the exact decomposition
-(2026-10-13).** In place of mechanism labels: GIN-ensemble-minus-RF R²
-splits exactly (residual 0) into a **level**, a **spread** and a
-**correlation** term - Shapley split of the MSE decomposition (the
-level term is exact; the spread/correlation `2σ_pσ_y·r` cross-term is
-split Shapley-wise), recomputed from the committed time predictions
-(`logs/2026-10-13_time_split_mse_decomposition.log`). Δ = the ensemble
-Δ of the table above; the three components are rounded independently:
+**Legacy MSE decomposition, retained for arithmetic audit.** The level,
+spread and correlation components sum to ΔR2 (spread/correlation use a Shapley
+allocation of their cross-term). This identity describes the stored predictions;
+it establishes neither a causal mechanism nor temporal generalization.
+Source: `logs/2026-10-13_time_split_mse_decomposition.log`.
 
 | Tag | Δ (GIN ens − RF) | level | spread | correlation |
 |---|---|---|---|---|
@@ -831,78 +798,38 @@ split Shapley-wise), recomputed from the committed time predictions
 | `mpro` | +0.084 | +0.025 | +0.027 | +0.032 |
 | `vegfr2` | −0.052 | +0.035 | +0.002 | −0.089 |
 
-One clause per tag, straight from the table:
+Legacy timelines and panel: `figures/time_split/{tag}_timeline.png` and
+`figures/time_split/panel_3splits.png`. These figures have not been regenerated
+under the as-of policy.
 
-- `a2a`: the entire edge is **level** - the RF predicts **0.83** log
-  units below the test mean (6.51 vs 7.35) while ranking *better*
-  (r 0.59 vs 0.30); re-centred on the non-test mean the RF would score
-  **+0.335**, above the GIN's **+0.024** - the GIN "wins" a
-  broken-baseline cell, and its −0.263 correlation term says it ranks
-  worse still.
-- `abl1`: RF wins on **both** spread (−0.115) and correlation (−0.119),
-  not level (−0.002).
-- `egfr`: the only cell where **spread** carries the edge (+0.079 of
-  +0.039, correlation −0.044) - "less over-dispersion" fits only here.
-- `egfr_full`: mostly **level** (+0.392 of +0.592 - GIN mean 7.04 and
-  RF 6.62 against the test mean 7.50, from the non-test pool's 6.69,
-  which the RF never closes), but **not** level alone: correlation
-  contributes +0.168 (slopes 0.14 GIN vs 0.06 RF).
-- `herg`: nothing to explain - level +0.005 and correlation +0.044 are
-  tiny, the spread term is *negative* (−0.016: the GIN is **not** less
-  dispersed than the RF, pred std/y std 0.44 vs 0.41), and both models
-  sit at/below the constant anyway (GIN −0.026 vs `constant_r2` −0.003,
-  RF −0.058).
-- `hivpr`: the edge is **correlation** (+0.123 of +0.115; OLS slope of
-  prediction on truth 0.20 GIN vs 0.13 RF, std/y 0.54 vs 0.53) -
-  genuine ranking signal.
-- `mpro`: small positive contributions from all three terms
-  (+0.025 / +0.027 / +0.032).
-- `vegfr2`: a level edge (+0.035) outweighed by correlation (−0.089).
+![Legacy time results; as-of retraining pending](figures/time_split/panel_3splits.png)
 
-Supporting facts from the same recomputation: across the 8 time cells
-the ensemble pred std / y std runs 0.22-0.66, and 20 of the 24 time
-runs have their best epoch before epoch 24 (`gin_best_epochs` column).
+## Uncertainty & applicability domain: error ranking and screening checks
 
-Timelines per target: `figures/time_split/{tag}_timeline.png`;
-aggregate: `figures/time_split/panel_3splits.png`; details:
-[methodology](docs/methodology.md).
+`experiments/uncertainty_ad.py` evaluates 8 targets × random/scaffold, for RF
+and GIN/GINE (`results/uncertainty/`, `figures/uncertainty/`).
 
-![3 splits](figures/time_split/panel_3splits.png)
-
-## Uncertainty & applicability domain: RF confidence is usable, GNN confidence is not
-
-`experiments/uncertainty_ad.py` closes the loop from calibrated
-uncertainty to an actual screening decision (8 targets x random/scaffold,
-RF and GIN, plus the GINE ensemble; `results/uncertainty/`, figures
-under `figures/uncertainty/`). Calibration, AD and screening numbers
-below all cover the refreshed **16 cells** (8 tags x 2 splits):
-
-- **RF tree-std calibrates**: monotone quintile calibration (RMSE rising
-  with predicted std) in **8 of 16** cells, Spearman(std, |err|)
-  averaging **0.356** (0.156-0.490) - usable as a per-molecule
-  confidence, imperfectly. The **GNN 3-seed ensemble std does not**
-  (GIN rho **0.147**, 0.092-0.231, monotone in only **3 of 16**; GINE
-  rho **0.112**, −0.043-0.206, slope **0.809**, monotone in **5 of
-  16**): the seeds are too close to each other to span the error. Any
-  "GNN uncertainty" claim in this repo would be noise.
-- **AD (max Tanimoto to train ≥ 0.4, coverage ~96.7%)**: in-AD test R2
-  averages **0.638** (0.392-0.825) vs out-of-AD **−0.334** (mean of the
-  13 cells with at least two out-of-AD test molecules; worst
-  `egfr`/random **−1.451**) - out-of-domain predictions are indeed bad.
-- **The counter-intuitive part**: AD-filtering the screen changes P@100
-  in **1 of 16 cells** (15/16 unchanged; the exception `herg`/random
-  0.65 → 0.66) - the RF ranking puts an out-of-AD molecule in its top
-  100 in only **2 of 16 cells** (`a2a`/scaffold and `herg`/random, one
-  molecule each); the ranking is itself an almost-implicit AD filter, so
-  a second AD
-  pass buys nothing on precision. What does help is slicing the
-  report-positive set {pred ≥ 7} to its confident half (std ≤ median):
-  mean precision **0.827 → 0.889** across the 16 cells. And confidence
-  must stay a *filter*, not a sort key: re-ranking the library by low
-  std first destroys P@100 (**0.602 vs 0.913** mean).
-- Caveat: these conclusions are only as good as the std estimate, so
-  they apply to the RF today; the GNN arm has no calibrated std to
-  screen with.
+- **RF tree std ranks error imperfectly.** Quintile RMSE rises monotonically
+  with predicted std in **8/16 cells**, and Spearman(std, |error|) averages
+  **0.356** (0.156–0.490). These are error-ranking diagnostics, not proof of
+  probabilistic calibration or reliable prediction-interval coverage. GIN and
+  GINE 3-seed std rank errors more weakly (mean rho **0.147** and **0.112**;
+  monotonicity **3/16** and **5/16**); these experiments do not establish a
+  calibrated uncertainty estimate for any model.
+- **AD uses each model's actual fit pool.** For random/scaffold, RF references
+  train + valid, while GNN references train only; max Morgan Tanimoto ≥ 0.4
+  defines in-domain. Recomputed RF coverage averages **96.96%**, with in-AD
+  R2 averaging **0.638** (0.390–0.825). Out-of-AD R2 averages **−0.418** over
+  the 13 scorable cells (worst `egfr`/random **−1.417**). These aggregates
+  describe this panel and threshold, not a guaranteed reliability boundary.
+- **Screening:** AD filtering changes RF P@100 in **1/16 cells**
+  (`herg`/random 0.65 → 0.66). Filtering report-positive molecules
+  ({prediction ≥ 7}) by std ≤ the **whole test library's median std** raises
+  mean precision **0.827 → 0.889**. It does not retain half of the positives:
+  retention varies from **26% to 75%** across cells. Sorting the whole library
+  by lowest std instead lowers mean P@100 to **0.602**, versus **0.913** when sorting by prediction.
+  These retrospective screening checks support evaluating std as a filter;
+  they do not validate it as a probability of correctness.
 
 ## Repository layout
 

@@ -57,6 +57,7 @@ import pandas as pd
 from rdkit import Chem
 from rdkit import RDLogger
 from rdkit.Chem.MolStandardize import rdMolStandardize
+from qsar_common import exact_relation_mask
 
 RDLogger.DisableLog("rdApp.*")  # per-molecule parse issues are counted and printed instead
 
@@ -123,8 +124,7 @@ def main():
         # exact measurement, and comparing the raw column would drop every
         # padded row -- another header-only-with-exit-0 fail-open (Low,
         # PR #6).
-        keep = (df["standard_relation"].fillna("").astype(str).str.strip()
-                == "=")
+        keep = exact_relation_mask(df["standard_relation"])
         removed_rel = df.loc[~keep, "standard_relation"]
         df = df[keep].copy()
         n_removed = n_in - len(df)

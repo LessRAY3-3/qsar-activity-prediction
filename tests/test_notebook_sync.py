@@ -149,16 +149,15 @@ def test_all_code_cells_parse(code_cells):
 def test_02_cell_censoring_filter_then_parent_median_dedup(code_cells):
     tree = ast.parse(_cell_with(code_cells, STEP2))
 
-    # censoring filter: an equality compare keeping standard_relation == "="
+    # Shared normalized policy must be called on standard_relation before
+    # parent deduplication. Its value semantics are exercised by clean/QC tests.
     eq_nodes = [
-        n
-        for n in ast.walk(tree)
-        if isinstance(n, ast.Compare)
-        and any(isinstance(op, ast.Eq) for op in n.ops)
-        and any(_mentions(o, "standard_relation") for o in (n.left, *n.comparators))
-        and any(_mentions(o, "=") for o in (n.left, *n.comparators))
+        n for n in ast.walk(tree)
+        if isinstance(n, ast.Call) and isinstance(n.func, ast.Name)
+        and n.func.id == "exact_relation_mask"
+        and n.args and _mentions(n.args[0], "standard_relation")
     ]
-    assert eq_nodes, "02 cell must keep only standard_relation == '=' (censoring filter)"
+    assert eq_nodes, "02 cell must call the shared exact-relation policy"
 
     parent_grp = _groupby_calls(tree, "parent_smiles")
     assert parent_grp, "02 cell must deduplicate with groupby('parent_smiles')"

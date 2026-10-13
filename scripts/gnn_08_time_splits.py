@@ -11,11 +11,10 @@ Year assignment
   One molecule can appear in many documents.  Its year is the MINIMUM
   document_year over all of its activity rows: the earliest publication
   in which it was measured ("known since").  Rows whose document has no
-  year are ignored; a molecule with no joinable year stays out of the
-  year-ranked pools (it ends up in train).  If more than 1% of the
-  fingerprints' SMILES cannot be joined to a year at all, the split is
-  refused (SystemExit) - silent shrinkage of the dataset would make
-  downstream metrics incomparable.
+  year are ignored. At least 95% year coverage is required. Sparse
+  undated molecules may provisionally occupy the train side during cutoff
+  selection, but are excluded from every model pool if they lack a dated
+  exact measurement; this exclusion is explicitly recorded.
 
   The year join runs on 02's standardized parent SMILES (largest
   fragment + uncharge), not on raw strings: the fingerprint npz exports
@@ -31,8 +30,11 @@ Split (n = molecule count)
           slightly above 0.2 (a note is printed).
   valid : same procedure inside the remaining pool (year < cutoff_t),
           target = 0.1 * pool size; valid = year >= cutoff_v.
-  train : everything else, verified disjoint+exhaustive via
-          gnn_01_make_splits.check_disjoint.
+  train : everything else before label filtering. Each pool then receives
+          median exact nM labels from eligible dated records: train strictly
+          before cutoff_v; valid strictly before cutoff_t; test at/after
+          cutoff_t. Missing eligible labels are excluded. The three pools
+          plus excluded_idx partition the original dataset.
 
 Guards (write {TAG}_time_NA.json instead of an npz, exit 0)
   * year span max(year)-min(year) < 8  -> too few time points to cut on
@@ -46,7 +48,9 @@ Guards (write {TAG}_time_NA.json instead of an npz, exit 0)
 Outputs
   data/processed/splits/{TAG}_time.npz   train_idx/valid_idx/test_idx
       (int, row order of {TAG}_fingerprints.npz == {TAG}_pic50_clean.csv),
-      scaffold_smiles, smiles, year (float32, per molecule)
+      excluded_idx, y (as-of; NaN for exclusions), original_y,
+      scaffold_smiles, smiles, year (float32, per molecule), cutoffs,
+      label_policy, source/data signatures and label_id
   data/processed/splits/{TAG}_time_NA.json   guard marker (tag, reason,
       year_min, year_max, n_in_latest_year, n_in_busiest_year)
   figures/time_split/{TAG}_timeline.png  year histogram with both cutoffs
@@ -57,6 +61,7 @@ trainers read the npz (or skip on the NA marker).
 CLI: --tag (default QSAR_TAG env, then "egfr"), style of 02_clean_data.py.
 """
 import argparse
+import hashlib
 import importlib
 import json
 import os
@@ -69,7 +74,8 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
 from gnn_01_make_splits import check_disjoint
-from qsar_common import murcko_scaffold_list
+from qsar_common import exact_relation_mask, murcko_scaffold_list
+from time_labels import LABEL_POLICY, dataset_signature, label_signature
 
 # 02's parent standardization (LargestFragmentChooser + Uncharger), reused
 # verbatim so the year join keys on exactly the same unit 02/03 export.
@@ -87,7 +93,7 @@ TEST_FRAC = 0.2        # target size of the test set (fraction of all molecules)
 VALID_FRAC = 0.1       # target size of the valid set (fraction of the pool)
 MIN_YEAR_COVERAGE = 0.99   # above this fraction of dated SMILES, split as-is
 FILL_YEAR_COVERAGE = 0.95  # between this and MIN: undated SMILES are pinned to
-                           # year_min (train side); below: refuse to split
+                           # year_min for cutoff selection; no dated label -> excluded
 MIN_YEAR_SPAN = 8          # max(year) - min(year) below this -> NA marker
 MIN_N_BUSIEST_YEAR = 100   # busiest year must hold at least this many molecules
 
@@ -176,12 +182,58 @@ def assign_years(smiles, activities, years):
     return np.array(out, dtype=float, copy=True)  # writable copy: ensure_coverage fills NaNs in place
 
 
+def asof_labels(smiles, activities, years, pools, cutoff_v, cutoff_t):
+    """Median of dated exact nM measurements available to each pool.
+
+    Train uses years < cutoff_v; validation uses years < cutoff_t; test
+    uses dated measurements >= cutoff_t. Undated records never become
+    historical labels. Molecules without an eligible label are excluded,
+    never assigned a later measurement or silently moved to another pool.
+    """
+    required = {"standard_value", "standard_units", "standard_relation",
+                "canonical_smiles", "document_chembl_id"}
+    if not required.issubset(activities.columns):
+        raise ValueError(f"as-of labels require columns: {sorted(required - set(activities.columns))}")
+    acts = activities.copy()
+    acts["standard_value"] = pd.to_numeric(acts["standard_value"], errors="coerce")
+    keep = (exact_relation_mask(acts["standard_relation"])
+            & acts["standard_units"].eq("nM")
+            & np.isfinite(acts["standard_value"]) & acts["standard_value"].gt(0)
+            & acts["canonical_smiles"].fillna("").astype(str).str.strip().ne(""))
+    acts = acts.loc[keep].dropna(subset=["document_chembl_id"]).copy()
+    docs = years.dropna(subset=["document_chembl_id"]).copy()
+    docs["document_year"] = pd.to_numeric(docs["document_year"], errors="coerce")
+    docs = docs[np.isfinite(docs["document_year"])].drop_duplicates()
+    if docs["document_chembl_id"].duplicated().any():
+        raise ValueError("conflicting publication years for the same document")
+    acts["document_chembl_id"] = acts["document_chembl_id"].astype(str)
+    docs["document_chembl_id"] = docs["document_chembl_id"].astype(str)
+    acts = acts.merge(docs, on="document_chembl_id", how="inner", validate="many_to_one")
+    acts["parent"] = _parent_keys(acts["canonical_smiles"])
+    acts["pic50"] = -np.log10(acts["standard_value"] * 1e-9)
+    keys = _parent_keys(smiles)
+    y = np.full(len(smiles), np.nan, dtype=np.float32)
+    retained = []
+    conditions = (acts["document_year"] < cutoff_v,
+                  acts["document_year"] < cutoff_t,
+                  acts["document_year"] >= cutoff_t)
+    for idx, condition in zip(pools, conditions):
+        medians = acts.loc[condition].groupby("parent")["pic50"].median()
+        values = medians.reindex(np.asarray(keys)[idx]).to_numpy(dtype=float)
+        usable = np.isfinite(values)
+        y[idx[usable]] = values[usable]
+        retained.append(idx[usable])
+    excluded = np.flatnonzero(~np.isfinite(y))
+    return y, retained, excluded
+
+
 def ensure_coverage(year, smiles):
     """Check the dated fraction; pin sparse undated SMILES to year_min (train side).
 
     Coverage > MIN_YEAR_COVERAGE -> split as-is. Between FILL_YEAR_COVERAGE and
     MIN_YEAR_COVERAGE -> undated SMILES (docs with no recorded year in ChEMBL)
-    are assigned the dataset minimum year, i.e. they always land in train.
+    are assigned the dataset minimum year for cutoff selection only.
+    asof_labels subsequently excludes them for lack of a dated label.
     Below FILL_YEAR_COVERAGE -> refuse: the timeline would be mostly invented.
     Returns the number of SMILES with a real (non-filled) year.
     """
@@ -196,7 +248,7 @@ def ensure_coverage(year, smiles):
         year[~known] = year_min
         print(f"  {n_fill} of {n} smiles have no publication year "
               f"(coverage {k / n:.1%}); pinning them to year_min={year_min} "
-              "(they fall on the train side)")
+              "(cutoff selection only; no dated label means exclusion)")
         return k
     missing = np.asarray(smiles, dtype=str)[~known]
     print(f"  {n - k} of {n} smiles have no publication year "
@@ -237,7 +289,7 @@ def time_split(year, test_frac=TEST_FRAC, valid_frac=VALID_FRAC):
     """-> (train_idx, valid_idx, test_idx, cutoff_v, cutoff_t).
 
     Molecules without a year can never satisfy year >= cutoff, so they
-    fall into train (check_disjoint still sees a full partition).
+    provisionally fall into train; asof_labels later excludes undated rows.
     """
     n = len(year)
     cutoff_t = cutoff_from_latest(year, test_frac * n)
@@ -274,6 +326,9 @@ def write_na_marker(split_dir, tag, reason, year_min, year_max, n_latest, n_busi
     with open(path, "w") as f:
         json.dump(payload, f, indent=2)
         f.write("\n")
+    old_split = os.path.join(split_dir, f"{tag}_time.npz")
+    if os.path.exists(old_split):
+        os.unlink(old_split)
     print(f"  wrote {os.path.relpath(path, BASE)}")
     return path
 
@@ -300,6 +355,8 @@ def plot_timeline(year, cutoff_v, cutoff_t, n_train, n_valid, n_test, tag, out_p
 
 
 def run(tag, in_npz, in_activities, in_years, split_dir, fig_dir):
+    # Failed/partial regeneration must never leave a consumable old split.
+    write_na_marker(split_dir, tag, "time split regeneration incomplete", None, None, None, None)
     smiles, activities, years_df = read_inputs(in_npz, in_activities, in_years)
     n = len(smiles)
     print(f"[{tag}] {n} molecules")
@@ -326,17 +383,35 @@ def run(tag, in_npz, in_activities, in_years, split_dir, fig_dir):
     train_idx, valid_idx, test_idx, cutoff_v, cutoff_t = time_split(year)
     check_disjoint(n, train_idx=train_idx, valid_idx=valid_idx, test_idx=test_idx)
 
+    y, pools, excluded = asof_labels(
+        smiles, activities, years_df, (train_idx, valid_idx, test_idx), cutoff_v, cutoff_t)
+    train_idx, valid_idx, test_idx = pools
+    if any(len(idx) < 2 for idx in pools):
+        write_na_marker(split_dir, tag, "fewer than two dated exact labels in a time pool",
+                        year_min, year_max, n_latest, n_busiest)
+        return None
+    source_hash = hashlib.sha256()
+    for path in (in_activities, in_years):
+        with open(path, "rb") as fh:
+            source_hash.update(fh.read())
+    with np.load(in_npz) as fp:
+        original_y = fp["y"]
+        signature = dataset_signature(smiles, original_y)
+    payload = dict(train_idx=train_idx, valid_idx=valid_idx, test_idx=test_idx,
+                   excluded_idx=excluded, y=y, original_y=original_y, label_policy=LABEL_POLICY,
+                   dataset_signature=signature, source_sha256=source_hash.hexdigest(),
+                   cutoff_valid=cutoff_v, cutoff_test=cutoff_t,
+                   scaffold_smiles=murcko_scaffold_list(smiles), smiles=smiles,
+                   year=year.astype(np.float32))
+    payload["label_id"] = label_signature(payload)
+
     os.makedirs(split_dir, exist_ok=True)
     out_npz = os.path.join(split_dir, f"{tag}_time.npz")
-    np.savez(
-        out_npz,
-        train_idx=train_idx,
-        valid_idx=valid_idx,
-        test_idx=test_idx,
-        scaffold_smiles=murcko_scaffold_list(smiles),
-        smiles=smiles,
-        year=year.astype(np.float32),
-    )
+    np.savez(out_npz, **payload)
+    na_path = os.path.join(split_dir, f"{tag}_time_NA.json")
+    if os.path.exists(na_path):
+        os.unlink(na_path)
+    print(f"  excluded {len(excluded)} molecules without an eligible dated exact label")
     print(f"  saved {os.path.relpath(out_npz, BASE)}")
 
     out_png = os.path.join(fig_dir, f"{tag}_timeline.png")

@@ -100,9 +100,9 @@
           },
           "out": {
             "n": 5,
-            "r2": -0.4006726356422676,
-            "rmse": 1.5338189293263054,
-            "mae": 1.3405477028627615
+            "r2": -0.4006726356422674,
+            "rmse": 1.5338189293263051,
+            "mae": 1.3405477028627613
           }
         }
       },
@@ -213,8 +213,8 @@
             }
           },
           "ad_t0.50": {
-            "n_candidates": 507,
-            "coverage": 0.9844660194174757,
+            "n_candidates": 508,
+            "coverage": 0.9864077669902913,
             "precision_at": {
               "100": 0.99,
               "200": 0.95
@@ -295,7 +295,7 @@
             "recall_top5": 0.9615384615384616
           },
           "ad_t0.50": {
-            "coverage_library": 0.9844660194174757,
+            "coverage_library": 0.9864077669902913,
             "n_flagged": 326,
             "precision": 0.8496932515337423,
             "recall": 0.9141914191419142,
@@ -312,7 +312,11 @@
           }
         }
       },
-      "csv": "results/uncertainty/hivpr_random_gine.csv"
+      "csv": "results/uncertainty/hivpr_random_gine.csv",
+      "ad_reference": {
+        "rf": "train+valid",
+        "gin": "train"
+      }
     },
     "scaffold": {
       "n_test": 524,
@@ -623,7 +627,11 @@
           }
         }
       },
-      "csv": "results/uncertainty/hivpr_scaffold_gine.csv"
+      "csv": "results/uncertainty/hivpr_scaffold_gine.csv",
+      "ad_reference": {
+        "rf": "train+valid",
+        "gin": "train"
+      }
     }
   }
 }

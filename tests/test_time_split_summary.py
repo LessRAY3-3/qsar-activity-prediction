@@ -449,15 +449,7 @@ def test_stored_constant_r2_matches_recomputed_baseline(tmp_path, monkeypatch,
 
 
 def test_print_conclusion_labels_drift_conditionally(load_experiment, capsys):
-    """Conditional drift wording (6c1e3bb; condition corrected per PR #6).
-
-    Mutant killed: the unconditional label -- every negative RF time R2
-    announced as "genuine temporal drift" regardless of the constant
-    baseline. Final polarity: 'holder' (negative RF that holds at/above a
-    negative constant) reads as genuine temporal drift; 'undercut'
-    (RF below the constant) is below no-skill, not drift. The two must
-    land in different note lines, never in one shared drift line.
-    """
+    """Neither side of the constant baseline establishes temporal drift."""
     mod = load_experiment("time_split_summary")
     df = pd.DataFrame([
         {"tag": "undercut", "rf_time_r2": -0.30, "constant_r2": -0.05,
@@ -477,11 +469,9 @@ def test_print_conclusion_labels_drift_conditionally(load_experiment, capsys):
     out = capsys.readouterr().out
 
     note_lines = [ln for ln in out.splitlines() if "note:" in ln]
-    drift = [ln for ln in note_lines
-             if "genuine temporal drift" in ln and "not claimed" not in ln]
-    non_drift = [ln for ln in note_lines
-                 if "not claimed as genuine temporal drift" in ln]
-    assert len(drift) == 1, f"expected one drift note, got {drift}"
-    assert "holder" in drift[0] and "undercut" not in drift[0]
-    assert len(non_drift) == 1, f"expected one non-drift note, got {non_drift}"
-    assert "undercut" in non_drift[0] and "holder" not in non_drift[0]
+    assert not any("reads as genuine" in ln for ln in note_lines)
+    above = [ln for ln in note_lines if "at/above the constant" in ln]
+    below = [ln for ln in note_lines if ": below the constant" in ln]
+    assert len(above) == 1 and "holder" in above[0]
+    assert len(below) == 1 and "undercut" in below[0]
+    assert all("do not establish temporal drift" in ln for ln in above + below)

@@ -25,6 +25,31 @@ SMILES = ["CC", "CCO", "c1ccccc1", "CC(=O)O", "CCCC", "c1ccncc1"]
 Y = np.array([5.5, 6.0, 6.5, 7.0, 7.5, 8.0], dtype=np.float32)
 
 
+def test_time_training_uses_asof_labels_for_scaling_and_evaluation(tmp_path, monkeypatch, load_script):
+    from time_labels import LABEL_POLICY, dataset_signature, label_signature
+    _build_cache(tmp_path)
+    proc = tmp_path / "data" / "processed"
+    y = np.array([3., 5., 6., 7., 8., 10.], dtype=np.float32)
+    sp = dict(train_idx=np.array([0, 1]), valid_idx=np.array([2, 3]), test_idx=np.array([4, 5]),
+              excluded_idx=np.array([], dtype=int), smiles=np.array(SMILES), y=y, original_y=Y,
+              year=np.array([2010, 2011, 2019, 2020, 2021, 2022]),
+              label_policy=LABEL_POLICY, dataset_signature=dataset_signature(SMILES, Y),
+              source_sha256="fixture", cutoff_valid=2019, cutoff_test=2021)
+    sp["label_id"] = label_signature(sp)
+    np.savez(proc / "splits" / f"{TAG}_time.npz", **sp)
+    mod = load_script("gnn_03_train_gin")
+    monkeypatch.setattr(mod, "BASE", str(tmp_path))
+    monkeypatch.setattr(mod, "select_device", lambda: "cpu")
+    monkeypatch.setattr(sys, "argv", ["gin", "--tag", TAG, "--split", "time", "--epochs", "2",
+                                     "--batch-size", "2", "--hidden", "16", "--num-layers", "2"])
+    mod.main()
+    pred = np.load(tmp_path / "results" / f"gnn_preds_{TAG}_time.npz")
+    np.testing.assert_allclose(pred["y_true"], y[sp["test_idx"]], atol=1e-6)
+    assert str(pred["label_id"]) == sp["label_id"]
+    checkpoint = torch.load(tmp_path / "results" / "gnn_models" / f"{TAG}_gin_time.pt", weights_only=False)
+    assert checkpoint["y_mean"] == 4.0 and checkpoint["y_std"] == 1.0
+
+
 def _build_cache(base):
     """Write data/processed/{TAG}_graphs.npz + splits/{TAG}_random.npz (CSR)."""
     graphs = [smiles_to_graph(s) for s in SMILES]
