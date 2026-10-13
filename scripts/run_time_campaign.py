@@ -261,13 +261,31 @@ def validate_outputs(job, root):
             raise ValueError("RF checkpoint parameters differ from metrics")
 
 
+def validate_job_inputs(job, root):
+    """Recheck a built plan, including a later NA marker, before trusting it."""
+    root = Path(root)
+    marker = root / "data/processed/splits" / f"{job['provenance']['tag']}_time_NA.json"
+    if marker.exists():
+        raise ValueError(f"{job['id']}: NA marker present; campaign refuses stale outputs")
+    for name, expected in {**job["provenance"]["inputs"], **job["provenance"]["code"]}.items():
+        if not (root / name).is_file() or digest(root / name) != expected:
+            raise ValueError(f"Input/source changed since job was planned: {name}")
+    bundle = job["provenance"].get("bundle_manifest")
+    if bundle is not None and (not (root / "manifest.json").is_file()
+                               or digest(root / "manifest.json") != bundle["sha256"]):
+        raise ValueError("Bundle manifest changed since job was planned")
+
+
 def run_job(job, args, root=ROOT):
     root = Path(root)
+    # A queued job may have become invalid since build_jobs(), even on resume.
+    validate_job_inputs(job, root)
     directory = args.campaign_dir.resolve() / job["id"]
     status_path = directory / "status.json"
     if status_path.exists():
         previous = json.loads(status_path.read_text())
         if can_resume(previous, job, root, directory):
+            validate_job_inputs(job, root)
             print(f"SKIP verified {job['id']}", flush=True)
             return
         if not args.rerun:
@@ -278,41 +296,77 @@ def run_job(job, args, root=ROOT):
     attempt_dir.mkdir()
     if status_path.exists():
         shutil.copy2(status_path, attempt_dir / "previous_status.json")
-    # Preserve all old files before training may replace any of them.
+    # Training never reads historical outputs or writes into the canonical tree.
+    # This also leaves the old artifacts intact on a no-op, OOM or interruption.
     for name in job["files"]:
         path = root / name
         if path.exists():
             destination = attempt_dir / "before" / name
             destination.parent.mkdir(parents=True, exist_ok=True)
             shutil.copy2(path, destination)
+    work = attempt_dir / "work"
+    work.mkdir()
     state = {"state": "running", "signature": job["signature"], "provenance": job["provenance"],
              "command": job["command"], "git": git_info(root), "host": socket.gethostname(),
              "pid": os.getpid(), "started_at": datetime.now(timezone.utc).isoformat(),
              "log": f"{attempt}/train.log", "snapshot": f"{attempt}/outputs"}
     atomic_json(status_path, state)
     start = time.monotonic()
+    published = []
     try:
+        names = list(job["provenance"]["inputs"]) + list(job["provenance"]["code"])
+        if job["provenance"].get("bundle_manifest") is not None:
+            names.append("manifest.json")
+        for name in names:
+            destination = work / name
+            destination.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copy2(root / name, destination)
+        validate_job_inputs(job, root)
+        validate_job_inputs(job, work)
         env = os.environ.copy()
         env.update({"QSAR_TAG": job["provenance"]["tag"], "PYTHONUNBUFFERED": "1"})
         with (attempt_dir / "train.log").open("w") as stream:
-            subprocess.run(job["command"], cwd=root, env=env, stdout=stream,
+            subprocess.run(job["command"], cwd=work, env=env, stdout=stream,
                            stderr=subprocess.STDOUT, check=True)
-        # Inputs/source must not have changed while a long job was running.
-        for name, expected in {**job["provenance"]["inputs"], **job["provenance"]["code"]}.items():
-            if digest(root / name) != expected:
-                raise ValueError(f"Input/source changed during training: {name}")
-        bundle = job["provenance"].get("bundle_manifest")
-        if bundle is not None and digest(root / "manifest.json") != bundle["sha256"]:
-            raise ValueError("Bundle manifest changed during training")
-        validate_outputs(job, root)
+        validate_job_inputs(job, root)
+        validate_job_inputs(job, work)
+        validate_outputs(job, work)
+        # Fresh metrics contain only time. Retain every historical non-time key.
+        metric_name = next(name for name in job["files"] if "metrics_" in name)
+        old_metric = attempt_dir / "before" / metric_name
+        if old_metric.exists():
+            payload = json.loads((work / metric_name).read_text())
+            historical = json.loads(old_metric.read_text())
+            payload.update({key: value for key, value in historical.items()
+                            if key not in ("time", "best_params_time")})
+            atomic_json(work / metric_name, payload)
         hashes = {}
         for name in job["files"]:
             destination = directory / state["snapshot"] / name
             destination.parent.mkdir(parents=True, exist_ok=True)
-            shutil.copy2(root / name, destination)
+            shutil.copy2(work / name, destination)
             hashes[name] = digest(destination)
+        validate_job_inputs(job, root)
+        # Publish only fully validated outputs; roll back if publication fails.
+        for name in job["files"]:
+            destination = root / name
+            destination.parent.mkdir(parents=True, exist_ok=True)
+            temporary = destination.with_name(destination.name + "." + uuid.uuid4().hex + ".tmp")
+            try:
+                shutil.copy2(directory / state["snapshot"] / name, temporary)
+                os.replace(temporary, destination)
+                published.append(name)
+            finally:
+                temporary.unlink(missing_ok=True)
+        validate_job_inputs(job, root)
         state.update(state="success", artifacts=hashes)
     except BaseException as exc:
+        for name in reversed(published):
+            before = attempt_dir / "before" / name
+            if before.exists():
+                shutil.copy2(before, root / name)
+            else:
+                (root / name).unlink(missing_ok=True)
         state.update(state="failed", error=f"{type(exc).__name__}: {exc}")
         raise
     finally:

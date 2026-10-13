@@ -69,7 +69,12 @@ def _write_inputs(tmp_path, years, broken=(), salt=()):
     Indices in ``salt`` are written to activities.csv as a multi-fragment
     (salt) form while the npz keeps the plain SMILES - the M1/03 regime.
     """
-    smiles = np.array(_smiles())
+    # Match the real cache contract: raw strings are standardized by 02
+    # once before 03 exports their parent keys.
+    import importlib
+    parent = importlib.import_module("02_clean_data")._parent_smiles
+    raw_smiles = np.array(_smiles())
+    smiles = np.array([parent(s)[0] for s in raw_smiles])
     years = np.asarray(years)
     assert len(years) == len(smiles)
 
@@ -88,7 +93,7 @@ def _write_inputs(tmp_path, years, broken=(), salt=()):
     broken = set(broken)
     salt = set(salt)
     act_rows, year_rows = [], []
-    for i, smi in enumerate(smiles):
+    for i, smi in enumerate(raw_smiles):
         act_smi = f"{smi}.Cl" if i in salt else smi
         act_rows.append((act_smi, f"DOC{i:03d}"))
         if i % 7 == 0:
@@ -153,7 +158,8 @@ def test_happy_path_disjoint_exhaustive_and_artifacts(tmp_path, monkeypatch, mod
     assert not (set(tr) & set(va) or set(tr) & set(te) or set(va) & set(te))
     assert set(tr) | set(va) | set(te) == set(range(N))
 
-    smiles = np.array(_smiles())
+    with np.load(paths["npz"]) as cache:
+        smiles = cache["smiles"]
     np.testing.assert_array_equal(out["smiles"], smiles)
     np.testing.assert_array_equal(out["scaffold_smiles"], murcko_scaffold_list(smiles))
 
@@ -208,7 +214,31 @@ def test_salt_activities_join_years_on_parent_keys(tmp_path, monkeypatch, mod, c
 
     d = np.load(paths["splits"] / f"{mod.TAG}_time.npz")
     np.testing.assert_array_equal(d["year"].astype(int), _years())  # per-molecule years exact
-    np.testing.assert_array_equal(d["smiles"], np.array(_smiles()))  # npz smiles untouched
+    with np.load(paths["npz"]) as cache:
+        np.testing.assert_array_equal(d["smiles"], cache["smiles"])
+
+
+def test_cached_parent_is_not_standardized_twice(mod):
+    """CHEMBL2035183 has a non-idempotent parent round trip in pinned RDKit.
+
+    Its exact 2012 record belongs in the pre-2016 training pool, even when
+    reparsing the parent cache would produce a different SMILES string.
+    """
+    raw = "C1=C/COCc2cc(ccc2OCCN2CCCC2)Nc2nccc(n2)-c2ccc(s2)COC/1"
+    cached_parent = mod._parent_smiles(raw)[0]
+    smiles = np.array([cached_parent])
+    acts = pd.DataFrame({"canonical_smiles": [raw],
+                         "document_chembl_id": ["CHEMBL2034857"],
+                         "standard_value": [7200.], "standard_units": ["nM"],
+                         "standard_relation": ["="]})
+    years = pd.DataFrame({"document_chembl_id": ["CHEMBL2034857"],
+                          "document_year": [2012]})
+    np.testing.assert_array_equal(mod.assign_years(smiles, acts, years), [2012.])
+    pools = [np.array([0]), np.array([], dtype=int), np.array([], dtype=int)]
+    y, retained, excluded = mod.asof_labels(smiles, acts, years, pools, 2016, 2018)
+    assert float(y[0]) == pytest.approx(9 - np.log10(7200), abs=1e-6)
+    assert retained[0].tolist() == [0]
+    assert len(excluded) == 0
 
 
 def test_short_year_span_writes_na_marker(tmp_path, monkeypatch, mod, capsys):
