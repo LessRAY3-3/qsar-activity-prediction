@@ -7,9 +7,11 @@ Three checks:
   2. Ultra-potent outliers (pIC50 > 9, i.e. IC50 < 1 nM). Values like this are
      often assay detection limits, unit mislabels or cross-assay artefacts
      rather than true affinity. Group them by assay / document to see whether
-     a few suspicious sources dominate. Only rows the label policy keeps
-     (standard_relation == "=") are counted - rows the H1 filter drops are
-     reported on a separate line, never mixed into the headline.
+     a few suspicious sources dominate. Only rows the model actually saw are
+     counted: 02's nM-unit and non-empty-SMILES filters apply first, then
+     only rows the label policy keeps (standard_relation == "=") - rows the
+     H1 filter drops are reported on a separate line, never mixed into the
+     headline.
   3. Permutation importance vs MDI. RandomForest's built-in (MDI) importance
      is inflated for correlated features - and 2048 fingerprint bits contain
      many chemically equivalent ones. Permutation importance on the held-out
@@ -69,7 +71,21 @@ def check_ultra_potent():
     print("\n== 2. ultra-potent records (pIC50 > 9, IC50 < 1 nM) ==")
     df = pd.read_csv(RAW)
     df["standard_value"] = pd.to_numeric(df["standard_value"], errors="coerce")
+    # Mirror 02's filters BEFORE counting: a row with a non-nM unit or an
+    # empty SMILES never becomes a label, so it must not enter the
+    # "labelled rows" denominator either (Low, PR #5).
+    if "standard_units" in df.columns:
+        n_units = len(df)
+        df = df[df["standard_units"] == "nM"]
+        if len(df) != n_units:
+            print(f"  (02 unit filter) dropped {n_units - len(df)} row(s) "
+                  "with standard_units != 'nM'")
     df = df.dropna(subset=["standard_value", "canonical_smiles"])
+    n_smiles = len(df)
+    df = df[df["canonical_smiles"].str.strip() != ""]
+    if len(df) != n_smiles:
+        print(f"  (02 SMILES filter) dropped {n_smiles - len(df)} row(s) "
+              "with empty canonical_smiles")
     df = df[df["standard_value"] > 0]
     df["pic50"] = -np.log10(df["standard_value"] * 1e-9)
     hot_all = df[df["pic50"] > 9]
@@ -94,10 +110,11 @@ def check_ultra_potent():
                   f"(relations: {rels}) - not counted above")
     else:
         # sources without a relation column (BACE): the label policy keeps
-        # every row, so the whole file is the kept set
+        # every row that survived 02's unit/SMILES filters above, so that
+        # filtered set is the kept set
         hot = hot_all
-        print(f"  {len(hot)} / {len(df)} raw rows ({len(hot)/len(df):.1%}) "
-              "have pIC50 > 9")
+        print(f"  {len(hot)} / {len(df)} rows after 02's unit/SMILES filters "
+              f"({len(hot)/len(df):.1%}) have pIC50 > 9")
     if len(hot) == 0:
         return
     for col in ["assay_description", "document_chembl_id"]:

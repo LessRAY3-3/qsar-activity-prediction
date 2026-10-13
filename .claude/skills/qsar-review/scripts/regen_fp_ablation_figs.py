@@ -27,13 +27,20 @@ BASE = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..",
 RES_DIR = os.path.join(BASE, "results", "fp_ablation")
 DEFAULT_FIG_DIR = os.path.join(BASE, "figures", "fp_ablation")
 PROTECTED_DIRS = tuple(
-    os.path.join(BASE, d) for d in ("results", "data", "models")
+    os.path.realpath(os.path.join(BASE, d)).lower()
+    for d in ("results", "data", "models")
 )
 
 
 def is_protected(path):
-    """True when path is inside results/, data/ or models/."""
-    return any(path == d or path.startswith(d + os.sep) for d in PROTECTED_DIRS)
+    """True when path is inside results/, data/ or models/.
+
+    Paths are compared after os.path.realpath + lowercasing so that
+    case-insensitive filesystems (macOS) cannot be bypassed with e.g.
+    ``--out Results/x``, and ``..``/symlink tricks are resolved first.
+    """
+    p = os.path.realpath(path).lower()
+    return any(p == d or p.startswith(d + os.sep) for d in PROTECTED_DIRS)
 
 
 def load_plot_module():

@@ -221,10 +221,11 @@ def make_combined_forest(sig_dir, fig_path):
 
     Reads the phase-0 gin summary (results/significance/summary.csv), the
     phase-1 gine summary (summary_gine.csv -- all 16 cells carry a mean3
-    CI after the full-panel run; results/gine_panel/summary.csv only as
-    a fallback point) and the phase-3 attentivefp summary
-    (summary_attentivefp.csv). Writes a NEW file -- ci_panel.png /
-    ci_panel_gine.png are never touched.
+    CI after the full-panel run; when a cell were missing,
+    results/gine_panel/summary.csv is the fallback, carrying that row's
+    centre AND whisker together so a row never mixes the two files) and
+    the phase-3 attentivefp summary (summary_attentivefp.csv). Writes a
+    NEW file -- ci_panel.png / ci_panel_gine.png are never touched.
     """
     import matplotlib
     matplotlib.use("Agg")
@@ -278,10 +279,16 @@ def make_combined_forest(sig_dir, fig_path):
             ax.plot([r["d_r2"]], [y + offsets["gine"]], "o",
                     color=colors["gine"], markersize=5)
         elif gine_pts is not None and cell in gine_pts.index:
-            ax.plot([gine_pts.loc[cell, "d_r2_mean"]],
-                    [y + offsets["gine"]], "o", markerfacecolor="white",
-                    markeredgecolor=colors["gine"], markeredgewidth=1.4,
-                    markersize=6)
+            # fallback row: whisker AND centre both from the gine panel
+            # campaign summary (results/gine_panel/summary.csv) -- a row
+            # never mixes summary_gine with the panel summary
+            r = gine_pts.loc[cell]
+            if np.isfinite(r["ci_lo"]) and np.isfinite(r["ci_hi"]):
+                ax.hlines(y + offsets["gine"], r["ci_lo"], r["ci_hi"],
+                          color=colors["gine"], linewidth=1.6)
+            ax.plot([r["d_r2_mean"]], [y + offsets["gine"]], "o",
+                    markerfacecolor="white", markeredgecolor=colors["gine"],
+                    markeredgewidth=1.4, markersize=6)
 
         a = afp.loc[cell]
         ax.hlines(y + offsets["attentivefp"], a["ci_lo"], a["ci_hi"],

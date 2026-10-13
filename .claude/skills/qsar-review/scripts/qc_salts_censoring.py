@@ -16,16 +16,28 @@ What / why:
      whose duplicate/leakage checks were 0 by construction.
   2. ChEMBL stores censored measurements ("IC50 > 10000 nM") with a
      ``standard_relation`` of ">" / "<" / ">=" / "<=".  Since the 2026-10-11
-     refresh the downloaders request that column and 02 keeps only "=" rows,
-     so this script counts censored rows in the raw pull directly; when the
-     column is absent (older/bace-style download) the exact-value striations
-     at 10^3/10^4/10^5 nM are reported as a proxy.  ``chembl_censoring_counts.py``
+     refresh the downloaders request that column and 02 keeps only "=" rows.
+     This script counts removed rows with 02's own inclusion rule, verbatim:
+     the pool is filtered exactly like 02 (unit nM, non-missing non-empty
+     SMILES, value > 0) and a row counts as censored/removed iff
+     ``standard_relation != "="`` (no stripping; empty/other values such as
+     ">>" are removed by 02 and are counted here too).  When the column is
+     absent (older/bace-style download) the exact-value striations at
+     10^3/10^4/10^5 nM are reported as a proxy.  ``chembl_censoring_counts.py``
      in this folder additionally audits censoring at the parent level
      (every modelled parent keeps >= 1 "=" record) and quantifies upstream
      censoring straight from the ChEMBL API.
 
+Exit code: the "must be 0" invariants are real checks - multi-fragment
+parent_smiles, duplicated parent_smiles, and cross-split parent overlap each
+make the script exit 1 when violated (skipped splits/inputs do not).  A
+clean CSV without a ``parent_smiles`` column (bace, which predates the M1
+parent standardization) skips the parent-level checks with a printed note
+instead of crashing, and does not fail on its own.
+
 Nothing is filtered or rewritten - like ``07_qc_checks.py`` the audit is the
-deliverable.  Output: console, plus a JSON summary when --out is given.
+deliverable.  Output: console, plus a JSON summary when --out is given
+(``results/``, ``data/``, ``models/`` and ``figures/`` are refused as --out).
 
 Usage (from anywhere; the repo root is found by walking up to
 scripts/qsar_common.py, or pass --repo):
@@ -59,8 +71,23 @@ def find_repo_root(start):
 # module-level paths are (re)bound in main() from --repo/--tag
 BASE = TAG = CLEAN_CSV = RAW_CSV = SPLIT_DIR = None
 
-CENSOR_RELATIONS = (">", "<", ">=", "<=", "~")
+CENSOR_RELATIONS = (">", "<", ">=", "<=", "~")  # reported breakdown only
 STRIATION_NM = (1000.0, 10000.0, 100000.0)  # exact pIC50 6 / 5 / 4
+
+
+def is_protected(path):
+    """True when path is inside results/, figures/, models/ or data/.
+
+    Paths are compared after os.path.realpath + lowercasing so that
+    case-insensitive filesystems (macOS) cannot be bypassed with e.g.
+    ``--out Results/x``, and ``..``/symlink tricks are resolved first.
+    """
+    p = os.path.realpath(path).lower()
+    protected = (
+        os.path.realpath(os.path.join(BASE, d)).lower()
+        for d in ("results", "figures", "models", "data"))
+    return any(p == d or p.startswith(d + os.sep) for d in protected)
+
 
 _CHOOSER = rdMolStandardize.LargestFragmentChooser()
 _UNCHARGER = rdMolStandardize.Uncharger()
@@ -75,6 +102,17 @@ def parent_smiles(smi):
 
 
 def check_salts(df):
+    if "parent_smiles" not in df.columns:
+        print("== 1. parent_smiles / salt forms ==")
+        print(f"  no parent_smiles column in {os.path.relpath(CLEAN_CSV, BASE)} - "
+              "parent-level salt audit skipped. This clean CSV predates the M1 "
+              "parent standardization (bace: 02's parent handling was added for "
+              "the ChEMBL panel; bace keeps the original download format), so "
+              "there is no stored parent column to audit. Multi-fragment and "
+              "duplicate checks below are vacuous - rerun 02 on this tag if a "
+              "parent-level audit is needed.")
+        return None, {"n_rows": int(len(df)), "parent_column_present": False,
+                      "skipped": "no parent_smiles column (pre-M1 clean CSV)"}
     parents = df["parent_smiles"].astype(str).to_numpy()
     prov = df["canonical_smiles"].astype(str).to_numpy()
 
@@ -114,6 +152,7 @@ def check_salts(df):
         for i in np.flatnonzero(mismatch)[:5]:
             print(f"    stored={parents[i]!r} recomputed={recomputed[i]!r}")
     return parents, {
+        "parent_column_present": True,
         "n_rows": int(len(df)),
         "n_parent_multifragment": int(multi_parent.sum()),
         "n_provenance_multifragment": int(multi_prov.sum()),
@@ -131,6 +170,9 @@ def check_split_leakage(parents):
     """Cross-split parent overlap. Must be 0: each parent is exactly one clean-CSV row."""
     print("\n== 2. parent-level train/test leakage ==")
     out = {}
+    if parents is None:
+        print("  skipped: no parent_smiles column to check against (see section 1)")
+        return out
     for split in ("random", "scaffold", "time"):
         path = os.path.join(SPLIT_DIR, f"{TAG}_{split}.npz")
         if not os.path.exists(path):
@@ -170,21 +212,38 @@ def check_censoring():
               "scripts/fetch_artifacts.py --raw or re-download, skipped")
         return {"raw_available": False}
     raw = pd.read_csv(RAW_CSV)
+    # mirror 02's record pool exactly (unit / value / SMILES filters) so the
+    # removed-row count below is directly comparable to 02's own printout
+    if "standard_units" in raw.columns:
+        raw = raw[raw["standard_units"] == "nM"].copy()
     raw["standard_value"] = pd.to_numeric(raw["standard_value"], errors="coerce")
-    raw = raw.dropna(subset=["standard_value"])
-    raw = raw[raw["standard_value"] > 0]
+    raw = raw.dropna(subset=["standard_value", "canonical_smiles"])
+    raw = raw[raw["canonical_smiles"].str.strip() != ""]
+    raw = raw[raw["standard_value"] > 0].copy()
     out = {"raw_available": True, "n_raw_rows": int(len(raw))}
 
     if "standard_relation" in raw.columns:
-        rel = raw["standard_relation"].astype(str).str.strip()
-        censored = rel.isin(CENSOR_RELATIONS)
+        # 02's inclusion rule, verbatim: keep only standard_relation == "="
+        # (no stripping). Everything else - including empty and odd values
+        # like ">>" - is removed by 02 and counts as censored/removed here.
+        removed = raw["standard_relation"] != "="
         out["standard_relation_available"] = True
-        out["n_censored"] = int(censored.sum())
-        out["by_relation"] = {str(k): int(v) for k, v in rel.value_counts().items()}
-        cens_by = {k: v for k, v in out["by_relation"].items() if k in CENSOR_RELATIONS}
-        print(f"  {int(censored.sum())} / {len(raw)} raw rows ({censored.mean():.1%}) carry a "
-              f"censored standard_relation ({', '.join(f'{k} x{v}' for k, v in cens_by.items())}); "
-              "02 keeps only '=' rows, so these never become labels")
+        out["n_removed_by_relation_rule"] = int(removed.sum())
+        out["by_relation"] = {("(empty)" if pd.isna(k) else str(k)): int(v)
+                              for k, v in raw.loc[removed, "standard_relation"]
+                              .value_counts(dropna=False).items()}
+        n_bounds = int(raw["standard_relation"].isin(CENSOR_RELATIONS).sum())
+        out["n_censored_bounds"] = n_bounds  # >, <, >=, <=, ~ subset of removed
+        bounds = {k: v for k, v in out["by_relation"].items() if k in CENSOR_RELATIONS}
+        other = {k: v for k, v in out["by_relation"].items() if k not in CENSOR_RELATIONS}
+        print(f"  {int(removed.sum())} / {len(raw)} raw rows ({removed.mean():.1%}) removed by "
+              f"02's rule (standard_relation != '='), on 02's own unit/value/SMILES pool; "
+              "these never become labels")
+        print(f"    classic censored bounds: "
+              f"{', '.join(f'{k} x{v}' for k, v in bounds.items()) or 'none'}"
+              + (f"; other non-'=' values: "
+                 f"{', '.join(f'{k} x{v}' for k, v in other.items())}"
+                 if other else ""))
     else:
         out["standard_relation_available"] = False
         print("  standard_relation column not in the raw CSV (older download) - "
@@ -220,19 +279,45 @@ def main(argv=None):
     RAW_CSV = os.path.join(BASE, "data", "raw", f"{TAG}_activities.csv")
     SPLIT_DIR = os.path.join(BASE, "data", "processed", "splits")
 
+    if args.out and is_protected(args.out):
+        raise SystemExit(f"--out {os.path.abspath(args.out)} points into a "
+                         "protected directory (results/ figures/ models/ data/); refusing")
+
     df = pd.read_csv(CLEAN_CSV)
     print(f"[{TAG}] {len(df)} cleaned compounds")
     parents, salts = check_salts(df)
     leakage = check_split_leakage(parents)
     censoring = check_censoring()
 
+    # the "must be 0" invariants are real checks: any violation exits 1
+    violations = []
+    if salts.get("parent_column_present"):
+        if salts["n_parent_multifragment"]:
+            violations.append(
+                f"{salts['n_parent_multifragment']} multi-fragment parent_smiles (must be 0)")
+        if salts["n_parents_duplicated"]:
+            violations.append(
+                f"{salts['n_parents_duplicated']} duplicated parent_smiles (must be 0)")
+    for split, info in leakage.items():
+        if info.get("split_matches_clean_order") and info["n_test_with_parent_in_train"]:
+            violations.append(
+                f"{split}: {info['n_test_with_parent_in_train']} test parents also in train "
+                "(expected 0)")
+    if violations:
+        print("\nFAIL - 'must be 0' invariants violated:")
+        for v in violations:
+            print(f"  - {v}")
+    else:
+        print("\nOK - all checked 'must be 0' invariants hold")
+
     if args.out:
         os.makedirs(os.path.dirname(os.path.abspath(args.out)), exist_ok=True)
         with open(args.out, "w") as f:
             json.dump({"tag": TAG, "salts": salts, "split_leakage": leakage,
-                       "censoring": censoring}, f, indent=2)
-        print(f"\nsaved -> {args.out}")
+                       "censoring": censoring, "violations": violations}, f, indent=2)
+        print(f"saved -> {args.out}")
+    return 1 if violations else 0
 
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())

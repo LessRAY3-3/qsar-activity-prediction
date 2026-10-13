@@ -69,13 +69,20 @@ PARAM_GRID = {
 }
 
 PROTECTED_DIRS = tuple(
-    os.path.join(BASE, d) for d in ("results", "figures", "models", "data")
+    os.path.realpath(os.path.join(BASE, d)).lower()
+    for d in ("results", "figures", "models", "data")
 )
 
 
 def is_protected(path):
-    """True when path is inside results/ figures/ models/ or data/."""
-    return any(path == d or path.startswith(d + os.sep) for d in PROTECTED_DIRS)
+    """True when path is inside results/, figures/, models/ or data/.
+
+    Paths are compared after os.path.realpath + lowercasing so that
+    case-insensitive filesystems (macOS) cannot be bypassed with e.g.
+    ``--out Results/x``, and ``..``/symlink tricks are resolved first.
+    """
+    p = os.path.realpath(path).lower()
+    return any(p == d or p.startswith(d + os.sep) for d in PROTECTED_DIRS)
 
 
 def ref_metrics(ref):
@@ -112,10 +119,8 @@ def main(argv=None):
     if is_protected(out):
         raise SystemExit(f"--out {out} points into a protected directory; refusing")
 
-    censored = pd_read_censored()
-    before = dict(PUBLISHED_BASELINE)
-    pinned = ref_metrics(args.baseline_ref)
-
+    # validate pinned inputs BEFORE reading them (fixes --dry-run crashing with
+    # FileNotFoundError on a fresh clone, where .scratch/h1_sensitivity/ is absent)
     inputs = {
         "fingerprints": FP, "censored_csv": CENSORED_CSV,
         "split_random": os.path.join(SPLIT_DIR, "egfr_full_random.npz"),
@@ -123,7 +128,15 @@ def main(argv=None):
     }
     missing = [k for k, p in inputs.items() if not os.path.exists(p)]
     if missing:
-        raise SystemExit(f"missing pinned inputs in {IN_DIR}: {missing}")
+        raise SystemExit(
+            f"missing pinned inputs in {IN_DIR}: {missing}. These are the immutable "
+            "pre-refresh snapshots (gitignored; not shipped in the repo or the "
+            "artifacts releases) - restore them from .scratch/h1_sensitivity/ "
+            "backups before running, this script cannot re-download them.")
+
+    censored = pd_read_censored()
+    before = dict(PUBLISHED_BASELINE)
+    pinned = ref_metrics(args.baseline_ref)
 
     print(f"baseline (published pre-refresh): "
           f"random R2 {before['random']['r2']:.4f}, "

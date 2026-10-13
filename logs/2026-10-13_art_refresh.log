@@ -1,0 +1,117 @@
+================================================================================
+2026-10-13 -- PR #5 artifact refresh (ART): what was regenerated and moved
+logs/2026-10-13_art_refresh.log
+================================================================================
+
+Written 2026-10-13 during the PR #5 finding-fix pass.  This is a record of
+work done today (not a shell transcript); every number below was measured
+from the files as they stand now.
+
+--------------------------------------------------------------------------------
+1. Seven learning-curve figures redrawn with the ddof=0 band
+--------------------------------------------------------------------------------
+
+Code path: experiments/learning_curve.py::make_figure (unchanged; it uses
+grp.std(ddof=0), matching the np.std convention recorded in
+results/learning_curve/summary_{tag}.json).  Driven directly from
+committed CSVs -- no model was trained, no CSV/JSON was rewritten.
+
+    for tag in a2a abl1 egfr egfr_full herg hivpr mpro:
+        make_figure(f"results/learning_curve/learning_curve_{tag}.csv",
+                    f"figures/learning_curve/learning_curve_{tag}.png",
+                    tag)
+
+Evidence:
+  * all 7 PNG md5s changed
+        before  7892928532e900dcc3403996d4c0f21d / 0e9dec4dd7d87592f200dadc307b2ea4
+                9979855d4826d68e1bc605da3d5c5c8f / 91553dffa475bf047eb78f3f855abeb9
+                532fc346d701467369983c9657faf882 / ef5956e8155736a08a86d8769bf5f855
+                7d7e530f4c6174e956719911f651bbb4
+        after   925494d0d81c817b51f0f7740e55cd52 / beb3d3206dba66b2955891cd1289ce1a
+                7635b8718b35492336053f3912b5324b / ab0f81c3db8af65dd47320b4bc1101ae
+                ae5ba95442d4807c4b319acd4ce3efc3 / b4fa9b52d0710596a2088ddeb6ee6c96
+                3b3bce4d1f555a95824a2a8e8027527d
+  * md5 of every results/learning_curve/*.csv and *.json is unchanged
+        (csv/json untouched, only the figures redrawn)
+  * figures/learning_curve/scaling_{egfr,egfr_full}.png untouched.
+
+Band-width check (measured from the 7 committed CSVs, 140
+(split, model, n) groups, every group has exactly 3 seeds):
+    std(ddof=1) / std(ddof=0) = 1.2247 for all 140 groups (= sqrt(3/2))
+=> the old ddof=1 bands were 1.2247x wider; the redrawn figures carry the
+narrower ddof=0 band, i.e. ~1.22x narrower than before, and now agree
+with summary_{tag}.json.
+
+--------------------------------------------------------------------------------
+2. vegfr2 permutation importance recomputed against the refreshed RF
+--------------------------------------------------------------------------------
+
+Command (the same one used for bace in the N13 sweep):
+
+    QSAR_TAG=vegfr2 .venv/bin/python scripts/07_qc_checks.py
+
+Rewrote (2026-10-13):
+    results/permutation_importance_vegfr2.csv        (100 rows)
+    figures/importance_mdi_vs_perm_vegfr2.png
+    figures/testset_hist_vegfr2.png                  (byte-identical to
+        before, md5 02227cf373ae40a5a75d2ceefa5668a7 -- it is derived
+        from the raw data only, so no change was expected)
+
+Values verified against the refreshed model, measured today:
+  * models/rf_random_split_vegfr2.joblib on the current random-split
+    test set: R2 = 0.669504 == results/metrics_vegfr2.json random r2
+    (0.669503776041366), i.e. the refreshed model.  The file this
+    replaced came from the pre-refresh model (R2 0.736, see
+    experiments/LOG.md:603), which is why it had to be redone.
+  * the new mdi column matches results/top_bits_vegfr2.csv
+    (regenerated 2026-10-12 in the N13 sweep) exactly: 9/9 overlapping
+    bits, max |mdi - importance| = 0.0.
+  * top bits changed as expected: old top-5 = 1291, 1617, 1240, 56, 388;
+    new top-5 = 1617, 388, 209, 1240, 184.  Headline row now
+        bit 1617  mdi 0.0802  perm_mean 0.2064 +- 0.0094
+    Spearman(MDI, perm) over the top-100 bits: 0.649 -> 0.697.
+    (Script prints 0.697 on the rerun; the 0.649 is recomputed today
+    from the saved pre-run copy of the CSV.)
+
+--------------------------------------------------------------------------------
+3. Archive moves (plain mv, no git)
+--------------------------------------------------------------------------------
+
+    18 pre-refresh files -> results/_archive-2026-10-09/scaling_ep300/
+        15 *ep300* results files (3 metrics json, 6 preds npz,
+        6 checkpoints from results/gnn_models/)
+        + results/learning_curve/{scaling_egfr.json, scaling_egfr_full.json,
+          ep300_confirmation.md}
+    6 stale interpretability findings -> results/_archive-2026-10-09/
+        interpretability_flat/ (every file under results/interpretability/
+        outside by_tag/ that still says "No molecule completed both
+        methods"); by_tag/ untouched.
+    README.txt added to results/_archive-2026-10-09/partial_summaries/
+        documenting the provenance of its 4 files.
+
+Old -> new paths: /tmp/artifact_moves.md (read by the methodology owner).
+
+--------------------------------------------------------------------------------
+4. New run records for the 2026-10-12 work
+--------------------------------------------------------------------------------
+
+    logs/2026-10-12_gine_full_panel_bootstrap.log
+    logs/2026-10-12_summary_attentivefp_abl1_update.log
+Both are after-the-fact records: the key values are transcribed from the
+committed results/significance/summary_gine.csv and
+summary_attentivefp.csv and say so; nothing was rerun to produce them.
+
+--------------------------------------------------------------------------------
+5. Left alone on purpose (pre-existing, reported not fixed)
+--------------------------------------------------------------------------------
+
+  * GINE uncertainty artifacts label the GINE ensemble "GIN":
+    experiments/uncertainty_ad.py keys the GNN side as "gin" everywhere
+    (plot_calibration's hardcoded ("rf","gin") tuple, the calib/ad dict
+    keys, the per-molecule CSV "model" column), so for --model gine the
+    figures' legend and summary_{tag}_gine.json's "calibration" key read
+    gin/GIN even though model_kind says "gine".
+  * The AD reference set is train-only:
+    experiments/uncertainty_ad.py:544,598 uses sp["train_idx"] and never
+    adds sp["valid_idx"], so the max-Tanimoto denominator omits the
+    validation molecules the RF was fit on.

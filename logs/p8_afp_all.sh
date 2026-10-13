@@ -4,8 +4,9 @@
 # author's machine (miniforge interpreter path, written before the
 # 2026-10-11 data refresh). Do not run as-is to reproduce the published
 # numbers; use the commands documented in README/docs instead.
-# The trailing push is opt-in: `git push` runs only when QSAR_ALLOW_GIT_PUSH=1
-# is exported explicitly (default: push disabled).
+# The trailing commit AND push are opt-in: both run only when
+# QSAR_ALLOW_GIT_PUSH=1 is exported explicitly (default: no git state is
+# touched on whatever branch is checked out).
 # P8 Phase 3: AttentiveFP panel - 8 targets x 2 splits x 3 seeds (MPS serial).
 # PyG AttentiveFP (gated attention + GRU over 30 timesteps) ~3x GIN per epoch.
 # Small targets first so early failures surface fast. Per-seed suffixes.
@@ -31,21 +32,21 @@ for tag in a2a hivpr mpro abl1 egfr vegfr2 herg egfr_full; do
 done
 echo "=== P8 AFP ALL DONE $(date '+%F %T') ==="
 
-echo "=== commit AFP results (push is opt-in) ==="
-git add results/gnn_metrics_*_attentivefp*.json \
-        results/gnn_preds_*_attentivefp*.npz \
-        results/gnn_models/*attentivefp*.pt \
-        logs/p8_afp_all.log 2>/dev/null
-if git diff --cached --quiet; then
-  echo "nothing to commit"
-else
-  git -c user.name="$(git config user.name || echo leisirui)" \
-      -c user.email="$(git config user.email || echo leisirui@users.noreply.github.com)" \
-      commit -m "results: P8 AttentiveFP panel (8 targets x 2 splits x 3 seeds)"
-  if [ "${QSAR_ALLOW_GIT_PUSH:-0}" = "1" ]; then
-    git push origin main 2>&1 | tail -2
+if [ "${QSAR_ALLOW_GIT_PUSH:-0}" = "1" ]; then
+  echo "=== commit + push AFP results (QSAR_ALLOW_GIT_PUSH=1) ==="
+  git add results/gnn_metrics_*_attentivefp*.json \
+          results/gnn_preds_*_attentivefp*.npz \
+          results/gnn_models/*attentivefp*.pt \
+          logs/p8_afp_all.log 2>/dev/null
+  if git diff --cached --quiet; then
+    echo "nothing to commit"
   else
-    echo "push skipped - export QSAR_ALLOW_GIT_PUSH=1 to push explicitly"
+    git -c user.name="$(git config user.name || echo leisirui)" \
+        -c user.email="$(git config user.email || echo leisirui@users.noreply.github.com)" \
+        commit -m "results: P8 AttentiveFP panel (8 targets x 2 splits x 3 seeds)"
+    git push origin main 2>&1 | tail -2
   fi
+else
+  echo "commit+push skipped - export QSAR_ALLOW_GIT_PUSH=1 to commit/push explicitly"
 fi
 echo "=== P8 AFP WRAP-UP DONE $(date '+%F %T') ==="

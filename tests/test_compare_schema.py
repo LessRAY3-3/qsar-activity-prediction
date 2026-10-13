@@ -1,9 +1,13 @@
 """gnn_04_compare.comparison_table effect-size columns + summary.csv verifier."""
 import json
+from pathlib import Path
 
+import joblib
 import numpy as np
 import pandas as pd
 import pytest
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.metrics import mean_squared_error, r2_score
 
 # RF metrics (schema of 04_train_and_evaluate's metrics_{TAG}.json)
 RF_METRICS = {
@@ -169,3 +173,90 @@ def test_verify_summary_csv_missing_split_round_trips(tmp_path, load_experiment)
     path = tmp_path / "summary.csv"
     mod.summary_frame(rows).to_csv(path, index=False)
     assert mod.verify_summary_csv(path) is True
+
+
+# ---------------------------------------------------------------- RF-vs-split check
+
+@pytest.fixture
+def rf_split_tree(tmp_path, monkeypatch, load_script):
+    """gnn_04_compare pointed at a tiny synthetic split with a real RF.
+
+    Every path constant is redirected into tmp_path, and the metrics json
+    records the R2/RMSE the saved model actually scores on the persisted
+    test_idx -- the non-circular reference load_split_data verifies against
+    before overwriting results/rf_preds_*.
+    """
+    rng = np.random.default_rng(0)
+    n, n_test = 60, 20
+    X = rng.integers(0, 2, size=(n, 32)).astype(np.uint8)
+    y = rng.normal(6.0, 1.0, n)
+    test_idx = np.arange(n_test)          # head of the array is the test set
+    smiles = np.array([f"CCO{i % 5}" for i in range(n)])
+
+    proc = tmp_path / "data" / "processed"
+    (proc / "splits").mkdir(parents=True)
+    np.savez(proc / "demo_fingerprints.npz", X=X, y=y, smiles=smiles)
+    np.savez(proc / "splits" / "demo_random.npz", test_idx=test_idx,
+             scaffold_smiles=smiles)
+
+    rf = RandomForestRegressor(n_estimators=8, random_state=0).fit(
+        X[n_test:], y[n_test:])
+    (tmp_path / "models").mkdir()
+    joblib.dump(rf, tmp_path / "models" / "rf_random_split_demo.joblib")
+    pred = rf.predict(X[test_idx])
+
+    results = tmp_path / "results"
+    results.mkdir()
+    np.savez(results / "gnn_preds_demo_random.npz", test_idx=test_idx,
+             y_true=y[test_idx], y_pred=pred + 0.1)
+
+    r2 = r2_score(y[test_idx], pred)
+    rmse = float(np.sqrt(mean_squared_error(y[test_idx], pred)))
+    metrics_path = results / "metrics_demo.json"
+    metrics_path.write_text(json.dumps(
+        {"random": {"split": "random", "r2": r2, "rmse": rmse}}))
+
+    mod = load_script("gnn_04_compare")
+    monkeypatch.setattr(mod, "BASE", str(tmp_path))
+    monkeypatch.setattr(mod, "TAG", "demo")
+    monkeypatch.setattr(mod, "RF_METRICS", str(metrics_path))
+    monkeypatch.setattr(mod, "FP_NPZ", str(proc / "demo_fingerprints.npz"))
+    monkeypatch.setattr(mod, "SPLIT_NPZ", str(proc / "splits" / "demo_{}.npz"))
+    return mod, metrics_path, pred
+
+
+def test_rf_repredict_mismatch_aborts_before_writing_preds(rf_split_tree):
+    """A regenerated split whose re-prediction misses metrics must abort
+    BEFORE results/rf_preds_* is overwritten (the non-circular check)."""
+    mod, metrics_path, _ = rf_split_tree
+    mj = json.loads(metrics_path.read_text())
+    mj["random"]["r2"] += 0.1               # r2 alone must already trip it
+    metrics_path.write_text(json.dumps(mj))
+
+    with pytest.raises(SystemExit):
+        mod.load_split_data("random")
+    assert not (Path(mod.BASE) / "results" / "rf_preds_demo_random.npz").exists()
+
+
+def test_rf_repredict_match_writes_verified_preds(rf_split_tree):
+    mod, _, pred = rf_split_tree
+    y_te, rf_pred, g_pred, scaf = mod.load_split_data("random")
+
+    written = np.load(Path(mod.BASE) / "results" / "rf_preds_demo_random.npz")
+    assert np.array_equal(written["test_idx"], np.arange(20))
+    assert np.allclose(written["y_pred"], pred)
+    assert np.allclose(rf_pred, pred)
+    assert len(y_te) == len(g_pred) == len(scaf) == 20
+
+
+def test_skip_model_check_writes_unverified_preds(rf_split_tree):
+    """verify=False is the announced bypass: it must skip the comparison,
+    not keep enforcing it (mutant: flag ignored -> SystemExit here)."""
+    mod, metrics_path, pred = rf_split_tree
+    mj = json.loads(metrics_path.read_text())
+    mj["random"]["r2"] += 0.1
+    metrics_path.write_text(json.dumps(mj))
+
+    mod.load_split_data("random", verify=False)
+    written = np.load(Path(mod.BASE) / "results" / "rf_preds_demo_random.npz")
+    assert np.allclose(written["y_pred"], pred)

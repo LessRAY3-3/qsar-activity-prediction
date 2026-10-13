@@ -90,9 +90,13 @@ def test_train_artifacts_per_model(tmp_path, monkeypatch, load_script, model):
     assert set(payload) == {"random"}  # top-level keys stay split names
     m = payload["random"]
     assert {"r2", "rmse", "mae", "params", "best_epoch",
-            "convergence_flag", "max_epochs", "train_mse"} <= set(m)
+            "convergence_flag", "max_epochs", "train_mse",
+            "device"} <= set(m)
     assert np.isfinite([m["r2"], m["rmse"], m["mae"]]).all()
     assert m["params"]["model"] == model
+    # the json records the device the run actually trained on; both GPU
+    # backends are mocked unavailable above, so it must be "cpu"
+    assert m["device"] == "cpu"
     # a 2-epoch run can never satisfy best_epoch < 30% of max epochs (0.6)
     assert m["convergence_flag"] is False
 
@@ -157,6 +161,8 @@ def test_convergence_flag_fires_on_degenerate_early_stop(
     assert m["best_epoch"] == 1
     assert m["max_epochs"] == 20
     assert m["train_mse"] == pytest.approx(0.9)
+    # same stub training path still records the device actually used
+    assert m["device"] == "cpu"
 
 
 def test_min_epochs_defers_early_stopping(tmp_path, monkeypatch, load_script, capsys):

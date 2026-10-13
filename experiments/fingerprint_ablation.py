@@ -26,7 +26,11 @@ Exit code 1 + no figure if the anchor fails (caller must stop and report).
 years excluded) while this script trains on train+valid like
 random/scaffold, so the r2/2048 anchor could never reproduce it. The
 old behaviour was a KeyError at the anchor AFTER the CSV had already
-been truncated and partly rewritten.
+been truncated and partly rewritten. Likewise a split-subset run (e.g.
+--splits random only) never rewrites the stored two-split outputs: if
+the committed CSV already covers splits this run does not, the script
+aborts before any training or write unless --force explicitly redraws
+the CSV/summary/figure from the subset.
 """
 import argparse
 import json
@@ -35,6 +39,7 @@ import sys
 import time
 
 import numpy as np
+import pandas as pd
 
 BASE = os.path.join(os.path.dirname(__file__), "..")
 sys.path.insert(0, os.path.join(BASE, "scripts"))
@@ -53,6 +58,10 @@ def parse_args():
     p.add_argument("--anchor-tol", type=float, default=0.01)
     p.add_argument("--out", default=os.path.join(BASE, "results", "fp_ablation"))
     p.add_argument("--fig-dir", default=os.path.join(BASE, "figures", "fp_ablation"))
+    p.add_argument("--force", action="store_true",
+                   help="allow a split-subset run to rewrite the stored "
+                        "CSV/summary/figure, dropping the splits it does "
+                        "not cover (default: refuse)")
     return p.parse_args()
 
 
@@ -162,6 +171,23 @@ def main():
                 f"[{args.tag}/{s}] missing split npz: "
                 f"{os.path.relpath(sp_path, BASE)} (run gnn_01_make_splits"
                 " first). No output file was written.")
+
+    # Split-coverage guard (same contract as paired_bootstrap's campaign
+    # coverage guard): the stored CSV/summary/figure cover every split they
+    # were built from, so a split-subset rerun must not rewrite them with
+    # fewer rows. Checked BEFORE any training, so a refusal costs nothing
+    # and leaves every output file untouched.
+    if not args.force and os.path.exists(csv_path):
+        stored_splits = set(pd.read_csv(csv_path)["split"].astype(str))
+        missing = sorted(stored_splits - set(splits))
+        if missing:
+            raise SystemExit(
+                f"[{args.tag}] {os.path.relpath(csv_path, BASE)} stores "
+                f"split(s) {missing} from a previous run, but this run only "
+                f"covers {sorted(set(splits))} and would drop them from the "
+                "CSV/summary/figure. Rerun with every stored split, or pass "
+                "--force to redraw the outputs from this subset. No output "
+                "file was written.")
 
     from sklearn.ensemble import RandomForestRegressor
     from sklearn.metrics import (mean_absolute_error, mean_squared_error,

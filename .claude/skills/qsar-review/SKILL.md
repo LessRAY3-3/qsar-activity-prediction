@@ -5,12 +5,15 @@ description: Audit this QSAR repo (ChEMBL -> pIC50 -> Morgan-fingerprint RF vs G
 
 # QSAR pipeline review
 
-This skill re-runs the review that was done on 2026-10-10 and keeps its
-lessons. The findings of that review, with file:line anchors, evidence and
-suggested fixes, are in `references/findings-2026-10-10.md`. Start every
-review by reading that file - first its dated amendment note, which points
-to the four claims the 2026-10-11 re-review corrected - and checking which
-items are still open.
+This skill re-runs the reviews done on 2026-10-10, 2026-10-11 and
+2026-10-12 and keeps their lessons. The findings, with file:line anchors,
+evidence and suggested fixes, are in `references/findings-2026-10-10.md`,
+`references/findings-2026-10-11.md` (N1-N14, the data-refresh re-review)
+and `references/findings-2026-10-12.md` (P1-P8 plus Low, reviewing the
+N1-N14 remediation). Start every review by reading the newest file, then
+the earlier ones - on the 2026-10-10 file, first its dated amendment note,
+which points to the four claims the 2026-10-11 re-review corrected - and
+checking which items are still open.
 
 ## 0. Baseline (5 min)
 
@@ -21,8 +24,9 @@ pytest -q
 ```
 
 `requirements.txt` pins need Python >= 3.12 (numpy 2.5.x). On 3.11, install
-unpinned: the suite (97 tests at the 2026-10-11 refresh; 117 when last run,
-2026-10-12) and ruff were verified to pass that way.
+unpinned: the suite (97 tests at the 2026-10-11 refresh; 135 at the 2026-10-12
+PR #4 head reviewed in findings-2026-10-12) and ruff were verified to pass
+that way.
 Many checks below need only `data/processed/` and `results/`, which are
 tracked; `models/` and `data/raw/` come from `python scripts/fetch_artifacts.py --all`.
 
@@ -47,8 +51,10 @@ re-reading the code or by a number computed from the repo, never inferred.
   `standard_relation` `>`/`<`. Since the 2026-10-11 refresh the downloaders
   (01d/01e) request that column and `02_clean_data.py` keeps only
   `standard_relation == "="` rows before aggregating labels (H1 fixed).
-  Residual risk: 02 fails open when the column is missing - legitimate only
-  for the known bace-style input; anything else should raise, not skip.
+  02 now fails closed on ChEMBL-format input that lacks the column
+  (N5 fixed, findings-2026-10-11; re-verified in findings-2026-10-12) -
+  the skip is limited to the known bace-style non-ChEMBL input; residual
+  fail-open edge cases are tracked in findings-2026-10-12 (Low, code).
   Quantify upstream censoring with `scripts/chembl_censoring_counts.py`
   (live API) and audit the committed raw pulls with its `--overlap` mode
   (section 2).
@@ -68,10 +74,13 @@ re-reading the code or by a number computed from the repo, never inferred.
 - Parent-level leakage (salt vs free base on both sides): rows are now
   unique `parent_smiles`, so cross-split parent overlap must be exactly 0;
   a non-zero count means split/CSV misalignment, not a leaky split.
-- `GridSearchCV(cv=5)` uses unshuffled `KFold`. Random-split train indices
-  are shuffled, but scaffold-split ones are ordered by scaffold group size
-  and time-split ones follow the SMILES-sorted clean CSV. Note it whenever
-  hyperparameter choice matters.
+- CV folds are shuffled (L3 fixed, findings-2026-10-10; re-verified
+  findings-2026-10-11): `04_train_and_evaluate.py` uses
+  `KFold(n_splits=5, shuffle=True, random_state=42)`. Metrics committed
+  before that fix were tuned under unshuffled folds - scaffold-split train
+  indices ordered by scaffold group size, time-split ones following the
+  SMILES-sorted clean CSV - so note it whenever comparing historical
+  hyperparameter choices.
 
 ### C. Experiment hygiene
 
@@ -95,9 +104,12 @@ The repo uses two Δ conventions (see `docs/methodology.md`, "Panel Δ
 conventions"): per-seed-mean R² and R² of the 3-seed ensemble prediction.
 Check that every column, label and table header names the convention it
 actually holds, that no table invites subtracting columns of one
-convention to get a Δ of the other, that `p_one_sided` is read as
-P(ΔR² > 0) and not as a p-value for a GIN win, and that std ddof is
-consistent between JSON summaries and figures.
+convention to get a Δ of the other, that the win-fraction column is named
+`frac_boot_gin_better` (legacy files still say `p_one_sided` and are
+renamed on read; the old `2*min(p, 1-p)` statistic was wrong and was
+retired - L1 fixed, amendment in findings-2026-10-10) and is read as the
+bootstrap fraction of replicates with ΔR² > 0, not as a p-value for a GIN
+win, and that std ddof is consistent between JSON summaries and figures.
 
 ### E. README vs results
 
@@ -114,16 +126,20 @@ are not machine-checked and need manual recomputation.
 
 | Script | What it does | Network |
 |---|---|---|
-| `scripts/qc_salts_censoring.py --tag TAG [--out f.json]` | audits the committed `parent_smiles` (multi-fragment / duplicated parents must be 0, split overlap must be 0, recomputation from provenance with 02's own standardization), provenance salt context, raw-CSV censoring counts | no |
+| `scripts/qc_salts_censoring.py --tag TAG [--out f.json]` | audits the committed `parent_smiles` (multi-fragment / duplicated parents must be 0, split overlap must be 0, recomputation from provenance with 02's own standardization) and **exits 1 when any must-be-0 invariant is violated**, provenance salt context, raw-CSV censoring counts with 02's own inclusion rule (`standard_relation != "="`); skips the parent-level checks with a note on clean CSVs that predate them (bace) | no |
 | `scripts/chembl_censoring_counts.py [--targets tag=CHEMBLID,...] [--overlap TAG] [--skip-counts]` | censored-record counts per target and assay type (live ChEMBL); with `--overlap`, an offline raw-CSV audit: every modelled parent keeps ≥ 1 `=` record and `n_measurements` matches, mixed exact+censored parents are counted, and raw parents dropped by the H1 filter are reported | counts: ChEMBL API; `--overlap --skip-counts`: no |
 | `scripts/verify_readme_tables.py [--out report.json] [--dry-run]` | independently recomputes README table cells (panel, time split, XGBoost, multitask, fp ablation, EGFR/BACE detail, GIN-vs-RF, fairness incl. GINE rows, dataset sizes) from `results/`; **exits non-zero on any mismatch** (`--dry-run` reports without failing) | no |
 | `scripts/rf_h1_sensitivity.py [--out D] [--dry-run] [--baseline-ref REF]` | the historical (pre-refresh) H1 sensitivity RF re-run; inputs pinned in `.scratch/h1_sensitivity/`, primary baseline = published pre-refresh metrics as constants, refreshed-state baseline pinned to tag `data-refresh-2026-10-11` (never HEAD); refuses `results/`/`figures/`/`models/`/`data/` outputs | no (local `git show` for the ref) |
-| `scripts/reconcile_h1.py [--old-raw F] [--clean F] [--out D] [--dry-run]` | record-level historical-vs-fresh pull reconciliation for egfr_full; the pre-refresh inputs were clobbered by the refresh, so defaults are degenerate - run `--dry-run` first, it says what to pass; handles `standard_relation` suffixes that used to KeyError | no |
+| `scripts/reconcile_h1.py [--old-raw F] [--clean F] [--out D] [--dry-run]` | record-level historical-vs-fresh pull reconciliation for egfr_full; the pre-refresh inputs were clobbered by the refresh, so both pull defaults are the refreshed pull and a full run **refuses an old==new degenerate comparison** - run `--dry-run` first, it says what to pass; handles `standard_relation` suffixes that used to KeyError | no |
 | `scripts/regen_fp_ablation_figs.py [--out D] [--dry-run] [--force]` | regenerates missing (or, with `--force`, stale) `figures/fp_ablation/*.png` through `experiments/fingerprint_ablation.py:make_figure`; import-safe (writes only under `__main__`) | no |
 
-All scripts find the repo root on their own. None writes into `results/`,
-`data/` or `models/` unless `--out` explicitly points there, and even then
-those directories are refused; `--dry-run` prints the plan without writing.
+All scripts find the repo root on their own. Every script that writes takes
+its destination from `--out` and refuses `results/`, `data/`, `models/`
+(and `figures/`, except `regen_fp_ablation_figs.py` whose output *is*
+`figures/fp_ablation/`) via a realpath-normalized, case-insensitive path
+check - `--out Results/x` is refused too on macOS's case-insensitive
+filesystem; `chembl_censoring_counts.py` writes nothing (console only);
+`--dry-run` prints the plan without writing.
 
 ## 3. Report format
 

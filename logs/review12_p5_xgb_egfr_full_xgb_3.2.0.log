@@ -1,0 +1,18 @@
+# review12 P5 — root cause: the 2026-10-12 reviewer's 0.68950 is xgboost 3.2.0, not a different pool
+# date: 2026-10-13 10:15:26  python: Python 3.12.14
+# isolated install (does NOT touch .venv):
+#   .venv/bin/python -m pip install --target /tmp/p5_xgb320 --no-deps xgboost==3.2.0
+# run with: PYTHONPATH=/tmp/p5_xgb320 .venv/bin/python (numpy/sklearn from the pinned venv)
+
+xgboost version: 3.2.0
+random   train+valid: r2=0.6895043849945068 rmse=0.7440128967720935 mae=0.5660851001739502
+random   == committed under 3.4.1: False
+random   == reviewer's 0.68950: True (exact 0.6895043849945068)
+scaffold train+valid: r2=0.567847728729248 rmse=0.9392571195241712 mae=0.7357325553894043
+scaffold == committed under 3.4.1: True
+random   train only: r2=0.6759648323059082  (pre-PR committed 0.6759648323059082; match=True)
+
+Conclusion: same pool (train+valid), same X, same split - only the xgboost version
+differs. 3.2.0 diverges from the pinned 3.4.1 on egfr_full/random (train+valid)
+while agreeing on egfr_full/scaffold and train-only; the committed value is the
+3.4.1 output of the documented protocol, reproduced bit-exactly above.

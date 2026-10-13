@@ -21,6 +21,7 @@ import sys
 from pathlib import Path
 
 import numpy as np
+import pytest
 
 ROOT = Path(__file__).resolve().parent.parent
 RF_KEYS = ("n_estimators", "max_depth", "min_samples_split")
@@ -126,6 +127,44 @@ def test_fp_ablation_falls_back_when_split_key_missing(tmp_path, monkeypatch,
     assert summary["rf_params"] == {"scaffold": dict(RANDOM_WINNER)}
     out = capsys.readouterr().out
     assert "best_params_scaffold not found; falling back to best_params_random" in out
+
+
+def test_fp_ablation_rejects_time_split_before_touching_outputs(
+        tmp_path, monkeypatch, load_experiment
+):
+    """`time` is refused up front even when metrics_{tag}.json scores it.
+
+    The scenario only the guard protects: metrics carries a scored "time"
+    entry (with its own best_params) AND tiny_time.npz exists, so nothing
+    but the rejection stops the run. The check must fire before any output
+    file is opened -- the old behaviour trained on train+valid, then died
+    at the anchor AFTER the CSV had been truncated. Behaviour is asserted
+    as SystemExit + untouched outputs, never as message wording.
+    """
+    _write_tree(tmp_path, with_scaffold_params=True)
+    mj_path = tmp_path / "results" / "metrics_tiny.json"
+    mj = json.loads(mj_path.read_text())
+    mj["time"] = {"split": "time", "r2": 0.55, "rmse": 1.1}
+    mj["best_params_time"] = dict(RANDOM_WINNER)
+    mj_path.write_text(json.dumps(mj))
+    np.savez(tmp_path / "data" / "processed" / "splits" / "tiny_time.npz",
+             train_idx=np.arange(0, 48), valid_idx=np.arange(48, 64),
+             test_idx=np.arange(64, 80))
+
+    mod = load_experiment("fingerprint_ablation")
+    monkeypatch.setattr(mod, "BASE", str(tmp_path))
+    out = tmp_path / "fp_out"
+    fig = tmp_path / "fp_fig"
+    monkeypatch.setattr(sys, "argv", [
+        "fingerprint_ablation.py", "--tag", "tiny",
+        "--radii", "2", "--bits", "2048", "--seeds", "42",
+        "--splits", "time", "--anchor-tol", "10",
+        "--out", str(out), "--fig-dir", str(fig),
+    ])
+    with pytest.raises(SystemExit):
+        mod.main()
+    assert not (out / "fp_ablation_tiny.csv").exists()
+    assert not (out / "summary_tiny.json").exists()
 
 
 # ---------------------------------------------------------------- y_randomization

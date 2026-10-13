@@ -197,3 +197,159 @@ def test_build_summary_keeps_ensemble_delta_not_column_difference(
     naive = (df["gin_time_r2_mean"] - df["rf_time_r2"]).to_numpy(dtype=np.float64)
     np.testing.assert_allclose(got_d, ens_delta, rtol=0, atol=1e-12)
     assert not np.allclose(got_d, naive, rtol=0, atol=1e-9)
+
+
+# ------------------------------------------------- constant_r2 / gin_best_epochs (N4)
+
+def _write_constant_tree(tmp_path, monkeypatch, load_experiment):
+    """Synthetic y where every plausible baseline pool gives a different R2.
+
+    train rows = 1s, valid rows = 2s, test rows = 9/9/10: the non-test pool
+    mean (9/7), the all-rows mean (3.7), the train-only mean (1.0) and the
+    test mean (28/3) all differ, so a wrong-pool mutant cannot land on the
+    expected value by accident.
+    """
+    mod = load_experiment("time_split_summary")
+    y = np.array([1, 1, 1, 1, 1, 2, 2, 9, 9, 10], dtype=np.float32)
+    proc = tmp_path / "data" / "processed"
+    (proc / "splits").mkdir(parents=True)
+    np.savez(proc / "t1_fingerprints.npz", y=y)
+    np.savez(proc / "splits" / "t1_time.npz",
+             year=np.arange(len(y), dtype=np.float64),
+             train_idx=np.arange(0, 5), valid_idx=np.arange(5, 7),
+             test_idx=np.arange(7, 10))
+    monkeypatch.setattr(mod, "BASE", str(tmp_path))
+    return mod, np.asarray(y, dtype=np.float64)
+
+
+def _baseline_r2(y, test_idx, pool_idx):
+    """Test R2 of predicting pool_idx's mean pIC50 on every test row."""
+    yt = y[test_idx]
+    pred = np.full(len(test_idx), y[pool_idx].mean())
+    return float(1.0 - ((yt - pred) ** 2).sum() / ((yt - yt.mean()) ** 2).sum())
+
+
+def test_constant_r2_is_never_hardcoded_zero(tmp_path, monkeypatch,
+                                             load_experiment):
+    """Mutant killed: constant_r2 returning 0.0 for every input.
+
+    On a test set far from the training pool the no-skill baseline R2 is
+    strongly negative; a constant 0 is exactly what the wrong "predict the
+    test mean" baseline would give and must not be reported.
+    """
+    mod, y = _write_constant_tree(tmp_path, monkeypatch, load_experiment)
+    got = mod.constant_r2("t1")
+    assert not np.isclose(got, 0.0, atol=1e-9)
+    assert got == pytest.approx(
+        _baseline_r2(y, np.arange(7, 10), np.arange(0, 7)), abs=1e-12)
+
+
+def test_constant_r2_predicts_from_non_test_pool(tmp_path, monkeypatch,
+                                                 load_experiment):
+    """Mutant killed: computing the constant from the wrong pool.
+
+    The baseline is the mean of every NON-test row (train+valid); all-rows,
+    train-only and test-mean pools each give a different R2 here and none
+    of them may match.
+    """
+    mod, y = _write_constant_tree(tmp_path, monkeypatch, load_experiment)
+    test_idx = np.arange(7, 10)
+    got = mod.constant_r2("t1")
+    assert got == pytest.approx(_baseline_r2(y, test_idx, np.arange(0, 7)),
+                                abs=1e-12)
+    wrong_pools = {
+        "all rows": np.arange(0, 10),
+        "train only": np.arange(0, 5),
+        "test rows": test_idx,
+    }
+    for name, pool in wrong_pools.items():
+        assert not np.isclose(got, _baseline_r2(y, test_idx, pool), atol=1e-6), \
+            f"constant_r2 matches the {name} pool"
+
+
+def test_gin_best_epochs_reads_time_metric(load_experiment):
+    """Mutant killed: best_epoch taken from the wrong split metric.
+
+    gin_best_epochs must join the three seeds' ``time`` early-stop epochs;
+    on the committed files every tag's random/scaffold best epochs differ
+    from its time epochs, and the stored summary column must equal the
+    time values exactly.
+    """
+    mod = load_experiment("time_split_summary")
+    results = Path(__file__).resolve().parent.parent / "results"
+    stored = pd.read_csv(results / "time_split" / "summary.csv").set_index("tag")
+
+    def _be(tag, suf, split):
+        with open(results / f"gnn_metrics_{tag}{suf}.json") as fh:
+            return int(json.load(fh)[split]["best_epoch"])
+
+    for tag in mod.TAGS:
+        expected = ",".join(str(_be(tag, suf, "time"))
+                            for suf in ("", "_seed1", "_seed2"))
+        got = mod.gin_best_epochs(tag)
+        assert got == expected
+        assert str(stored.loc[tag, "gin_best_epochs"]) == expected
+        for split in ("random", "scaffold"):
+            wrong = ",".join(str(_be(tag, suf, split))
+                             for suf in ("", "_seed1", "_seed2"))
+            assert got != wrong, f"{tag}: time epochs equal {split} epochs"
+
+
+def test_build_summary_writes_correct_baseline_columns(tmp_path, monkeypatch,
+                                                       load_experiment):
+    """Mutant killed: column present but filled with the wrong value.
+
+    build_summary runs the REAL constant_r2 / gin_best_epochs (nothing is
+    stubbed for them): constant_r2 must equal the non-test-pool R2 (never 0,
+    never another pool) and gin_best_epochs must join the time best_epoch of
+    each seed -- a decoy random.best_epoch sits in every json to catch a
+    wrong-metric read at plumbing level too.
+    """
+    mod = load_experiment("time_split_summary")
+
+    rng = np.random.default_rng(0)
+    y_all = rng.normal(6.0, 1.5, size=100)
+    test_idx = np.arange(40, 100)
+    y_all[test_idx] = rng.normal(8.0, 1.0, size=len(test_idx))  # drift
+    (tmp_path / "data" / "processed" / "splits").mkdir(parents=True)
+    expected_epochs = {}
+    for i, tag in enumerate(mod.TAGS):
+        np.savez(tmp_path / "data" / "processed" / "splits" / f"{tag}_time.npz",
+                 year=rng.integers(1990, 2026, size=100).astype(np.float64),
+                 train_idx=np.arange(0, 20), valid_idx=np.arange(20, 40),
+                 test_idx=test_idx)
+        np.savez(tmp_path / "data" / "processed" / f"{tag}_fingerprints.npz",
+                 y=y_all)
+        epochs = (i * 10 + 1, i * 10 + 2, i * 10 + 3)
+        expected_epochs[tag] = ",".join(str(e) for e in epochs)
+        (tmp_path / "results").mkdir(exist_ok=True)
+        for suf, e in zip(("", "_seed1", "_seed2"), epochs):
+            (tmp_path / "results" / f"gnn_metrics_{tag}{suf}.json").write_text(
+                json.dumps({"time": {"best_epoch": e, "r2": 0.5},
+                            "random": {"best_epoch": 99, "r2": 0.9}}))
+
+    # everything else build_summary reads is canned (see test 1)
+    monkeypatch.setattr(mod, "time_split_stats", lambda tag: {
+        "test_year_start": 2020, "test_year_end": 2021,
+        "n_total": 100, "n_train": 20, "n_valid": 20, "n_test": 60,
+        "test_frac": 0.6})
+    monkeypatch.setattr(mod, "_load_json",
+                        lambda name: {"time": {"r2": 0.5, "rmse": 1.0}})
+    monkeypatch.setattr(mod, "comparison_reference",
+                        lambda tag: {"random": (0.7, 0.6),
+                                     "scaffold": (0.6, 0.55)})
+    monkeypatch.setattr(mod, "time_significance", lambda: pd.DataFrame(
+        [SIG_ROW] * len(mod.TAGS), index=list(mod.TAGS)))
+    monkeypatch.setattr(mod, "BASE", str(tmp_path))
+
+    df = mod.build_summary().set_index("tag")
+    assert "constant_r2" in df.columns and "gin_best_epochs" in df.columns
+
+    y = np.asarray(y_all, dtype=np.float64)
+    pool = np.ones(len(y), dtype=bool)
+    pool[test_idx] = False
+    expected_const = _baseline_r2(y, test_idx, np.where(pool)[0])
+    assert not np.isclose(expected_const, 0.0, atol=1e-9)
+    np.testing.assert_allclose(df["constant_r2"], expected_const,
+                               rtol=0, atol=1e-12)
+    assert df["gin_best_epochs"].to_dict() == expected_epochs

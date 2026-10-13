@@ -7,7 +7,8 @@ are small and committed.
 The sha256 and line count of each raw CSV are listed in `raw/sha256sums.txt`
 - the manifest itself is the only committed exception to the raw-data
 gitignore (force-added; no `!` rule). When the raw files are obtained via
-the Release or re-downloaded, verify them against this manifest.
+the `artifacts-v2` release (`python scripts/fetch_artifacts.py`) or
+re-downloaded, verify them against this manifest.
 
 Two dating notes for the table below: the ChEMBL raw files were
 re-downloaded on 2026-10-10 with three extra columns
@@ -15,8 +16,12 @@ re-downloaded on 2026-10-10 with three extra columns
 the eight kept their original row counts, but `egfr` was re-pulled and
 rebuilt in the same pass (commit `e37c572`, "rebuild egfr (8k
 early-stop)"): **8,936 -> 8,000 data rows** - the pre-refresh count is
-the `egfr_activities.csv` inside `release/raw_data.tar.gz`, the current
-one is `raw/sha256sums.txt`'s 8,001 lines (header included). The
+the `egfr_activities.csv` inside the `artifacts-v1` release asset
+`raw_data.tar.gz` (sha256 `a87ad49c…`; the gitignored local `release/`
+folder is only a download cache of that same asset, verified
+2026-10-13: 8,937 lines = 8,936 data rows + header), the current
+one is `raw/sha256sums.txt`'s 8,001 lines (header included) - the
+`artifacts-v2` release ships this same 2026-10-11 re-pull. The
 manifest (dated 2026-10-10) is therefore the checksum of what is on disk
 now; and a "unique compound" count in a provenance row is from the
 original cleaning - after

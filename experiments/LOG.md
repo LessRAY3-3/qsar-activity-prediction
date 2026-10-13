@@ -4,6 +4,10 @@ Running log of the deep-dive experiments. Each entry: what ran, headline
 numbers (3-seed mean +/- std unless noted), and the commit holding the
 artifacts. Newest first. Maintained by M4 Air; results produced on M3 Max.
 
+**Status pointer (2026-10-13): entries are newest first, but the latest
+entry (2026-10-12 review-remediation campaign) sits at the *bottom* of
+this file; 2026-10-11 status lines it supersedes are marked in place.**
+
 ## 2026-10-11
 
 ### Full refresh: data rebuild + whole-campaign retrain + README rewrite — DELIVERED (batch uncommitted at write time; commits handled centrally)
@@ -76,14 +80,20 @@ artifacts. Newest first. Maintained by M4 Air; results produced on M3 Max.
     (`abl1`/`herg`/`vegfr2`) have no per-seed GINE predictions yet and
     are point estimates only (2 of them positive: `abl1`/scaffold
     +0.028, `herg`/random +0.006).
+    *(superseded 2026-10-12 — see bottom entry: full-panel bootstrap, all
+    16 cells carry CIs; mean3 now 1 GINE win / 7 RF wins / 8 undecided)*
   - **AttentiveFP panel**: wins **2 of 16** (`herg`/scaffold +0.062
     [+0.030, +0.092], `herg`/random +0.034 [+0.002, +0.065]), 8 cells
     favour RF, 6 undecided; all 8 random point estimates negative.
+    *(superseded 2026-10-12 — see bottom entry: after the `abl1`/scaffold
+    seed-42 rerun the mean3 tally is 7 RF / 2 AFP / 7 undecided)*
   - **Fingerprint ablation**: random grid stays within **−0.019 …
     +0.003** of the r=2/2048 anchor on all 8 tags; scaffold spreads
     **−0.043 … +0.041**, worst cells all r3/1024 (`vegfr2` −0.043,
     `hivpr` −0.042, `abl1` −0.040).
   - **XGBoost**: 13/16 cells ≤ RF (worst `egfr`/scaffold **−0.132**).
+    *(superseded 2026-10-12 — see bottom entry: same-pool rerun, 11/16
+    cells ≤ RF, worst `hivpr`/scaffold **−0.080**)*
   - **Multi-task pool**: 22,492 rows / 21,093 unique SMILES / 1,193 =
     **5.66%** appear under >1 target (pre-refresh 10.0%).
   - **Fairness campaign completed (3 tags)**: `experiments/gnn_fairness.py`
@@ -98,6 +108,9 @@ artifacts. Newest first. Maintained by M4 Air; results produced on M3 Max.
     estimates without bootstrap CIs; `results/gine_panel/summary.csv`
     was rebuilt from these refreshed `gine_runs` (10-11 19:35), so the
     three tags now read the fairness numbers.
+    *(superseded 2026-10-12 — see bottom entry: the full-panel bootstrap
+    gave every GINE cell a CI, so the point-estimate-only caveat above no
+    longer holds)*
 - **In progress / not re-run**:
   - **`scripts/07_qc_checks.py` not re-run**: `figures/testset_hist_*.png`
     still predate the refresh (flagged in `docs/methodology.md`).
@@ -110,6 +123,18 @@ artifacts. Newest first. Maintained by M4 Air; results produced on M3 Max.
   - README: top Status note, the architecture-comparison section
     (GINE/AFP counts) and the fingerprint-ablation section were rewritten
     against these artifacts; QC stays flagged inline.
+  - *(2026-10-13 status note — superseded in part by the bottom
+    2026-10-12 entry: `results/significance/summary_time.csv` and the
+    per-cell `*_time.csv` were re-merged onto the new schema with the
+    refreshed values (`p_one_sided` now 0 hits anywhere under
+    `results/`); `top_bits_{bace,egfr,vegfr2}.csv` and
+    `permutation_importance_bace.csv` were regenerated and the vegfr2
+    error analysis re-run (N13); README was re-stamped with the 10-12
+    counts (GINE "1 of 16", XGBoost "11 of 16"). Still open as stated
+    above: the QC testset-hist figures, vegfr2 y-randomization /
+    learning curve / interpretability, and
+    `permutation_importance_vegfr2.csv` (still built from the old
+    vegfr2 RF).)*
 
 ## 2026-10-10
 

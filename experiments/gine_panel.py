@@ -216,9 +216,12 @@ def make_combined_forest(panel_df, sig_dir, fig_path):
     """gin vs gine mean3 CIs side by side, one row per (tag, split).
 
     Reads the phase-0 gin summary (results/significance/summary.csv) plus
-    the phase-1 gine summary (summary_gine.csv) for the whisker centres;
-    every gine cell carries a bootstrap CI. Writes a NEW file --
-    ci_panel.png is never touched.
+    the phase-1 gine summary (summary_gine.csv). Whisker AND centre of a
+    row always come from the SAME campaign summary file: summary_gine.csv
+    when it carries the cell, otherwise both fall back to the panel
+    summary (results/gine_panel/summary.csv) -- the old code took the
+    whisker from the per-cell bootstrap CSVs and the centre from
+    summary_gine. Writes a NEW file -- ci_panel.png is never touched.
     """
     import matplotlib
     matplotlib.use("Agg")
@@ -246,16 +249,19 @@ def make_combined_forest(panel_df, sig_dir, fig_path):
         ax.plot([g["d_r2"]], [y + off], "o", color=colors["gin"],
                 markersize=5)
 
-        row = panel_df[(panel_df["tag"] == cell[0])
-                       & (panel_df["split"] == cell[1])].iloc[0]
-        # whisker centre: mean3 ensemble point from the gine summary (same
-        # convention as gin); falls back to the per-seed-mean delta only
-        # when the summary file is absent
-        point = row["d_r2_mean"]
+        # one source per row: campaign gine summary carries both the
+        # whisker and the centre; the panel summary is the same-file
+        # fallback when the cell is absent from summary_gine
         if gine is not None and cell in gine.index:
-            point = float(gine.loc[cell, "d_r2"])
-        ax.hlines(y - off, row["ci_lo"], row["ci_hi"],
-                  color=colors["gine"], linewidth=1.6)
+            r = gine.loc[cell]
+            lo, hi = float(r["ci_lo"]), float(r["ci_hi"])
+            point = float(r["d_r2"])
+        else:
+            row = panel_df[(panel_df["tag"] == cell[0])
+                           & (panel_df["split"] == cell[1])].iloc[0]
+            lo, hi = row["ci_lo"], row["ci_hi"]
+            point = row["d_r2_mean"]
+        ax.hlines(y - off, lo, hi, color=colors["gine"], linewidth=1.6)
         ax.plot([point], [y - off], "o", color=colors["gine"],
                 markersize=5)
 

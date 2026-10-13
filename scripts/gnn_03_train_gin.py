@@ -29,13 +29,18 @@ explains less than half the train variance) prints a prominent WARNING
 and records convergence_flag=true + best_epoch/max_epochs/train_mse in
 the metrics json (see convergence_flag()).
 
+The metrics json also records the device the run actually trained on (the
+select_device() result, e.g. 'cuda' / 'mps' / 'cpu') as `device`, at the
+same level as convergence_flag; metrics files written by runs before this
+field existed do not have it.
+
 Outputs (model name in the filename only when it is not the default gin,
 so existing gin artifacts and commands keep their exact names):
   results/gnn_models/{TAG}_{model}_{split}{suffix}.pt
   results/gnn_preds_{TAG}[_{model}]_{split}{suffix}.npz
   results/gnn_metrics_{TAG}[_{model}]{suffix}.json   updated
       {split: {r2, rmse, mae, params, best_epoch,
-               convergence_flag, max_epochs, train_mse}}
+               convergence_flag, max_epochs, train_mse, device}}
 """
 import argparse
 import copy
@@ -356,6 +361,7 @@ def main():
     all_m[args.split] = {**m, "best_epoch": best["epoch"],
                          "best_valid_rmse_std": best["rmse"],
                          "convergence_flag": flagged,
+                         "device": device,
                          "max_epochs": args.epochs,
                          "train_mse": final_train_mse,
                          "params": {k: v for k, v in vars(args).items() if k != "split"}}

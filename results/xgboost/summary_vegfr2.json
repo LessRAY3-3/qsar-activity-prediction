@@ -27,14 +27,18 @@
       "r2_std": null,
       "same_pool": true,
       "xgb_n_train": 7714,
-      "source": "headline metrics json (full non-test pool)"
+      "xgb_pool_sha256": "5a0a30674fec020ad663ee50074220f617530316b6c35ceb8f9480d154a0b53f",
+      "rf_pool_sha256": "5a0a30674fec020ad663ee50074220f617530316b6c35ceb8f9480d154a0b53f",
+      "source": "headline metrics json (pool fingerprints match)"
     },
     "scaffold": {
       "r2_mean": 0.5853499750696074,
       "r2_std": null,
       "same_pool": true,
       "xgb_n_train": 7698,
-      "source": "headline metrics json (full non-test pool)"
+      "xgb_pool_sha256": "cbfb0306f329f3f4ab0688424d80876df74adcbc9b8183bea8eb8c98ae00dae9",
+      "rf_pool_sha256": "cbfb0306f329f3f4ab0688424d80876df74adcbc9b8183bea8eb8c98ae00dae9",
+      "source": "headline metrics json (pool fingerprints match)"
     }
   },
   "by_split": {

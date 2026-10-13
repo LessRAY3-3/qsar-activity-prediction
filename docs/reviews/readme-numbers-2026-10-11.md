@@ -4,6 +4,27 @@
 
 **生成时间**：2026-10-11 约 13:15（本机时间）。此后 `results/` 仍在被后台任务写入（见 §0.3），引用本底稿前请复核文件 mtime。
 
+**状态更新（2026-10-13，不改正文原貌）**：上表的 NEW/PENDING/STALE/NEEDS-RECALC
+标记冻结在 2026-10-11 13:15，其中多处已被后续批次取代，引用"状态"前以下面为准：
+
+- `results/significance/` 四个 summary 与全部 per-cell csv 已是新 schema
+  （`n_boot` + `frac_boot_gin_better`，`p_one_sided` 在 `results/` 0 命中），
+  `summary_time.csv` 已含刷新值（herg/time mean3 **+0.032304**），§6 的
+  "全部 STALE，待 bootstrap 重跑" 已结（N1/N2 全 16 格 GINE bootstrap）；
+- XGBoost 已按同池协议全 8 tag 重跑（16/16 `same_pool: true`，**11/16 ≤ RF**，
+  worst `hivpr`/scaffold **−0.080**），§0.2 的 "rf_control NEEDS-RECALC" 已结；
+- `vegfr2` RF 已于 2026-10-11 15:31 落盘（0.670/0.585），全表 "PENDING/旧"
+  的 vegfr2 RF/panel/time/multitask/xgb 对照列已随之刷新；
+- **release 状态**：`artifacts-v2` 已于 2026-10-12 发布（刷新 raw × 10 +
+  `document_years.csv` + 26 个 RF 模型），`scripts/fetch_artifacts.py` 指向它，
+  README 快速上手的 stale 警告块已撤（当前 `README.md` 中 `stale` 0 命中）；
+- 仍开放：QC `figures/testset_hist_*.png`、vegfr2 y-randomization / learning
+  curve / interpretability、`permutation_importance_vegfr2.csv`（旧 RF）。
+
+本底稿正文保持生成时原貌；批次级运行记录见 `experiments/LOG.md` **末节**
+"2026-10-12 review-remediation campaign (PR #3 follow-up)"（该日志
+newest-first，最新条目在文件底部）。
+
 **统一口径**（与 `experiments/time_split_summary.py`、`scripts/gnn_04_compare.py` 一致）：
 
 - GIN 数值 = 3 seed（seed 42 / 1 / 2）**总体标准差**（`np.std(ddof=0)`），来源 `results/gnn_metrics_{tag}{,_seed1,_seed2}.json`。

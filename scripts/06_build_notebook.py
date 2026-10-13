@@ -23,15 +23,18 @@ SECTIONS = [
      "Keep nM rows, drop missing SMILES/IC50, convert to pIC50 "
      "(`-log10(IC50 * 1e-9)`), keep only exact measurements "
      "(**censoring filter**: `standard_relation == '='` before dedup - "
-     "bounds like `IC50 > 10000 nM` are not labels; skipped when the input "
-     "has no relation column), standardize each structure to its parent "
+     "bounds like `IC50 > 10000 nM` are not labels; **fail-closed** "
+     "(review finding N5): a ChEMBL input with no `standard_relation` "
+     "column aborts with a non-zero exit - only bace/non-ChEMBL sources "
+     "skip the filter), standardize each structure to its parent "
      "SMILES (largest fragment, charges neutralized), and collapse "
      "duplicate compounds **by `parent_smiles`** to the **median** pIC50."),
     ("03_featurize.py", "Step 3 - Morgan fingerprints (RDKit)",
      "Each **`parent_smiles`** - the same unit Step 2 deduplicates on, so "
      "one compound = one fingerprint - becomes a 2048-bit Morgan "
      "fingerprint (radius 2). Invalid SMILES that RDKit cannot parse are "
-     "dropped."),
+     "counted and abort the run - dropping them would shift every "
+     "downstream split/prediction index."),
     ("04_train_and_evaluate.py", "Steps 4-6 - Split, train, evaluate",
      "Random 80/20 split vs **scaffold split** (Bemis-Murcko scaffolds kept "
      "whole - simulates predicting new chemotypes). RandomForest with "

@@ -32,8 +32,11 @@ pull that the refresh replaced and should be quoted only as history.
    scaffolds (refreshed RF 0.7214 -> 0.6492, GIN 0.665 -> 0.612;
    pre-refresh the drop was ~0.2 R2, 0.747 -> 0.562).
 6. **Negative results reported** - a scheduler/dropout tuning pass
-   improved validation but degraded test (validation-set selection noise);
-   the simplest recipe was kept. GIN scaffold-split R2 varies +-0.02
+   (**pre-refresh**: the archived 2026-10-09 tuning run, artifacts under
+   `results/_archive-2026-10-09/`; see `docs/methodology.md`,
+   "Hyperparameters: an honest negative result") improved validation but
+   degraded test (validation-set selection noise); the simplest recipe
+   was kept. GIN scaffold-split R2 varies +-0.02
    across seeds - single-seed GNN comparisons are meaningless.
 7. **Failure-mode analysis** - the two models' 50 worst molecules overlap
    ~9x more than chance (refreshed: 25 random / 25 scaffold shared of 50,

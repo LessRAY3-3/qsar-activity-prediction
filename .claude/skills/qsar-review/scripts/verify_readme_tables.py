@@ -30,7 +30,8 @@ Known limitations (not machine-checked here):
     rounding.
 
 Flags:
-  --out PATH    write a JSON report (totals, per-table counts, failures)
+  --out PATH    write a JSON report (totals, per-table counts, failures);
+                results/, data/, models/ and figures/ are refused
   --dry-run     report mismatches but always exit 0 (exploration mode)
 
 Usage:
@@ -38,6 +39,7 @@ Usage:
     python .claude/skills/qsar-review/scripts/verify_readme_tables.py --out /tmp/report.json
 """
 import argparse
+import csv
 import json
 import os
 import re
@@ -52,7 +54,29 @@ FAIRNESS_TAGS = ["vegfr2", "herg", "abl1"]
 TOL = 0.0005001
 
 lines = []      # README lines, bound in main()
-results = []    # (table, cell_id, displayed, computed, ok)
+results = []    # (table, cell_id, displayed, computed, ok); reset in main()
+
+
+def read_csv_rows(path):
+    """DictReader over a results CSV - quoted fields (e.g. time-split
+    gin_best_epochs "6,3,11") must not shift later columns the way a naive
+    str.split(",") does."""
+    with open(path, newline="") as f:
+        return list(csv.DictReader(f))
+
+
+def is_protected(path):
+    """True when path is inside results/, figures/, models/ or data/.
+
+    Paths are compared after os.path.realpath + lowercasing so that
+    case-insensitive filesystems (macOS) cannot be bypassed with e.g.
+    ``--out Results/x``, and ``..``/symlink tricks are resolved first.
+    """
+    p = os.path.realpath(path).lower()
+    protected = (
+        os.path.realpath(os.path.join(BASE, d)).lower()
+        for d in ("results", "figures", "models", "data"))
+    return any(p == d or p.startswith(d + os.sep) for d in protected)
 
 
 def add(table, cell, disp, comp, ok=None):
@@ -111,12 +135,9 @@ def gin_seed42(tag, split):
 # ---------------------------------------------------------------- table 1
 def check_t1():
     sig_rows = {}
-    with open(f"{BASE}/results/significance/summary.csv") as f:
-        hdr = f.readline().strip().split(",")
-        for ln in f:
-            r = dict(zip(hdr, ln.strip().split(",")))
-            if r["pair"] == "mean3":
-                sig_rows[(r["tag"], r["split"])] = r
+    for r in read_csv_rows(f"{BASE}/results/significance/summary.csv"):
+        if r["pair"] == "mean3":
+            sig_rows[(r["tag"], r["split"])] = r
 
     t1 = find_table("| Tag | Target (ChEMBL id) | Family | n | RF rand | GIN rand |")
     assert len(t1) == 8, len(t1)
@@ -126,10 +147,9 @@ def check_t1():
         mj = json.load(open(f"{BASE}/results/metrics_{tag}.json"))
         gs = gin_stats(tag)
         n_total = None
-        for ln in open(f"{BASE}/results/time_split/summary.csv"):
-            parts = ln.strip().split(",")
-            if parts[0] == tag:
-                n_total = int(parts[3])
+        for r in read_csv_rows(f"{BASE}/results/time_split/summary.csv"):
+            if r["tag"] == tag:
+                n_total = int(r["n_total"])
         add("T1", f"{tag}/n", num(row[3].replace(",", "")), n_total)
         for k, split in ((4, "random"), (8, "scaffold")):
             rf = mj[split]["r2"]
@@ -165,19 +185,13 @@ def gin_ens_time(tag):
 
 def check_t2():
     ts = {}
-    with open(f"{BASE}/results/time_split/summary.csv") as f:
-        hdr = f.readline().strip().split(",")
-        for ln in f:
-            r = dict(zip(hdr, ln.strip().split(",")))
-            ts[r["tag"]] = r
+    for r in read_csv_rows(f"{BASE}/results/time_split/summary.csv"):
+        ts[r["tag"]] = r
 
     st_rows = {}
-    with open(f"{BASE}/results/significance/summary_time.csv") as f:
-        hdr = f.readline().strip().split(",")
-        for ln in f:
-            r = dict(zip(hdr, ln.strip().split(",")))
-            if r["pair"] == "mean3":
-                st_rows[r["tag"]] = r
+    for r in read_csv_rows(f"{BASE}/results/significance/summary_time.csv"):
+        if r["pair"] == "mean3":
+            st_rows[r["tag"]] = r
 
     t2 = find_table("| Tag | RF rand | GIN rand | RF time | GIN time | GIN ens |")
     assert len(t2) == 8, len(t2)
@@ -228,11 +242,8 @@ def check_t3():
 # ---------------------------------------------------------------- table 4a
 def check_t4():
     mt = {}
-    with open(f"{BASE}/results/multitask/summary.csv") as f:
-        hdr = f.readline().strip().split(",")
-        for ln in f:
-            r = dict(zip(hdr, ln.strip().split(",")))
-            mt[(r["task"], r["split"], r["method"])] = r
+    for r in read_csv_rows(f"{BASE}/results/multitask/summary.csv"):
+        mt[(r["task"], r["split"], r["method"])] = r
 
     t4 = find_table("| Task | Split | ST-RF | ST-GIN | pooled | MT-GIN |")
     assert len(t4) == 6, len(t4)
@@ -376,8 +387,13 @@ def parse_args(argv=None):
 
 
 def main(argv=None):
-    global lines
+    global lines, results
     args = parse_args(argv)
+    lines = []
+    results = []  # reset: repeated main() calls must not accumulate cells
+    if args.out and is_protected(args.out):
+        raise SystemExit(f"--out {os.path.abspath(args.out)} points into a "
+                         "protected directory (results/ figures/ models/ data/); refusing")
     readme = open(os.path.join(BASE, "README.md"), encoding="utf-8").read()
     lines = readme.splitlines()
     run_checks()

@@ -396,6 +396,107 @@ def test_is_campaign_run_flags_partial_invocations(load_experiment):
     assert not mod.is_campaign_run(["egfr"], 300)
 
 
+# ---------------------------------------------------------------- per-cell / coverage guards
+
+def test_check_cell_csv_refuses_stored_b_mismatch(load_experiment, tmp_path):
+    """A cell stored at a different n_boot is never overwritten without --force."""
+    mod = load_experiment("paired_bootstrap")
+    cell = tmp_path / "tiny_random.csv"
+    cell.write_text("tag,split,model_pair,n_boot\ntiny,random,mean3,10000\n")
+
+    with pytest.raises(SystemExit):
+        mod.check_cell_csv(str(cell), 300)
+    assert "10000" in cell.read_text()          # refusal leaves the file alone
+    mod.check_cell_csv(str(cell), 10_000)       # same B: allowed
+    mod.check_cell_csv(str(cell), 300, force=True)   # --force: allowed
+    mod.check_cell_csv(str(tmp_path / "absent.csv"), 300)  # new file: allowed
+
+    # a pre-n_boot cell counts as B=N_BOOT, matching read_existing_summary
+    legacy = tmp_path / "legacy.csv"
+    legacy.write_text("tag,split\nx,random\n")
+    mod.check_cell_csv(str(legacy), mod.N_BOOT)
+    with pytest.raises(SystemExit):
+        mod.check_cell_csv(str(legacy), 300)
+
+
+def test_main_aborts_before_overwriting_cell_with_different_b(
+        load_experiment, tmp_path, monkeypatch
+):
+    """End-to-end: a B=300 smoke run must not replace a stored B=10000 cell.
+
+    The stored cell file is also the sentinel: without the guard the run
+    rewrites it with the smoke-run rows (mutant: no SystemExit, file clobbered).
+    """
+    mod = load_experiment("paired_bootstrap")
+    _write_cell(tmp_path, "tiny", "random")
+    monkeypatch.setattr(mod, "BASE", str(tmp_path))
+    out = tmp_path / "out"
+    out.mkdir()
+    cell = out / "tiny_random.csv"
+    cell.write_text("tag,split,model_pair,n_boot\ntiny,random,mean3,10000\n")
+
+    with pytest.raises(SystemExit):
+        mod.main(["--tags", "tiny", "--splits", "random", "--n-boot", "300",
+                  "--out-dir", str(out), "--fig", str(tmp_path / "fig.png")])
+    assert cell.read_text() == "tag,split,model_pair,n_boot\ntiny,random,mean3,10000\n"
+
+
+def test_campaign_coverage_guard_refuses_subset(load_experiment, tmp_path):
+    """A campaign run covering a strict subset of stored cells needs --force."""
+    mod = load_experiment("paired_bootstrap")
+    stored = pd.DataFrame([
+        {"tag": "t1", "split": "random", "pair": "seed42", "n_boot": mod.N_BOOT},
+        {"tag": "t1", "split": "scaffold", "pair": "seed42", "n_boot": mod.N_BOOT},
+        {"tag": "t2", "split": "random", "pair": "seed42", "n_boot": mod.N_BOOT},
+    ])
+    path = tmp_path / "summary.csv"
+    stored.to_csv(path, index=False)
+
+    # full coverage and a missing summary are both fine
+    mod.guard_campaign_coverage(str(path), ["t1", "t2"], ["random", "scaffold"])
+    mod.guard_campaign_coverage(str(tmp_path / "absent.csv"), ["t1"], ["random"])
+
+    # strict subset: refused without --force, allowed with it
+    with pytest.raises(SystemExit):
+        mod.guard_campaign_coverage(str(path), ["t1", "t2"], ["random"])
+    mod.guard_campaign_coverage(str(path), ["t1", "t2"], ["random"], force=True)
+
+
+@pytest.mark.filterwarnings("ignore:invalid value encountered in subtract")
+def test_bootstrap_records_requested_n_boot_with_degenerate_resamples(
+        load_experiment
+):
+    """n_boot is the REQUESTED size, not the post-degenerate-filter count.
+
+    Resamples with zero y-variance are dropped from the percentiles; if the
+    recorded n_boot were len(filtered), an identical rerun would fail the
+    stored-rows n_boot comparison in merge_summary. y is 7x5.0 + one 8.0 so
+    an all-same draw happens with probability ~0.34 per resample.
+    """
+    mod = load_experiment("paired_bootstrap")
+    y = np.array([5.0] * 7 + [8.0])
+    rng = np.random.default_rng(3)
+    gin = y + rng.normal(0.0, 0.1, len(y))
+    rf = y + rng.normal(0.0, 0.1, len(y))
+    n_boot = 300
+
+    # independent proof that THIS run (same seed, same draw sequence)
+    # drops degenerate resamples, so the requested count differs from the
+    # post-filter count
+    gen = np.random.default_rng(mod.BOOT_SEED)
+    n_degenerate = 0
+    pos = 0
+    while pos < n_boot:
+        b = min(mod.CHUNK, n_boot - pos)
+        idx = gen.integers(0, len(y), size=(b, len(y)))
+        n_degenerate += int((y[idx].std(axis=1) == 0).sum())
+        pos += b
+    assert n_degenerate > 0
+
+    res = mod.paired_bootstrap(y, gin, rf, n_boot=n_boot, seed=mod.BOOT_SEED)
+    assert res["n_boot"] == n_boot             # mutant: n_boot - n_degenerate
+
+
 # ---------------------------------------------------------------- uncertainty / AD
 
 def test_max_similarities_in_unit_interval_with_self_match(load_experiment,

@@ -170,11 +170,15 @@ multitask `st_rf` row, and the test-set histograms / permutation-
 importance outputs (Data QC) - have all since been refreshed, and the
 sections below quote the refreshed tables. Still vintage-labelled rather
 than recomputed: the n\* crossover extrapolation and the ep300 budget
-confirmation under `results/learning_curve/` (see Data scaling), plus
-the pre-refresh artifacts moved under `results/_archive-2026-10-09/`.
-`docs/reviews/readme-numbers-2026-10-11.md` (the per-file
-NEW/PENDING/STALE map; re-synced with `experiments/LOG.md` in
-`7fb8478`/`920763d`) records the rest - re-check file mtimes before
+confirmation, both pre-refresh and now archived under
+`results/_archive-2026-10-09/scaling_ep300/` (see Data scaling), plus
+the other pre-refresh artifacts under `results/_archive-2026-10-09/`.
+`docs/reviews/readme-numbers-2026-10-11.md` is the number draft behind
+the README rewrite (generated 2026-10-11 ~13:15): its per-file
+NEW/PENDING/STALE markers are a snapshot of that moment and are now
+historical - it still shows `results/significance/` as STALE and the
+vegfr2 RF as PENDING, both since refreshed - so take current status from
+the paragraph above, not from that map, and re-check file mtimes before
 quoting any CI or panel number.
 
 ## Feature-importance checks (README "Interpretation & data QC")
@@ -280,7 +284,17 @@ cached as one CSR-style npz (`scripts/gnn_02_build_graphs.py`).
 Model: GIN (Graph Isomorphism Network), the canonical MoleculeNet baseline:
 AtomEncoder (sum of per-feature embeddings) -> 4 x [GINConv -> BatchNorm
 -> ReLU -> dropout, residual] -> global mean pool -> MLP head. PyTorch
-Geometric, trained on an Apple M4 (MPS). The default `gin` does not use
+Geometric. Training device: the committed GIN/GINE/AttentiveFP panel
+campaigns trained on the CUDA host win4070 (their per-run logs under
+`logs/win4070_/` print `device=cuda`); the single 2026-10-12 N3 re-run
+of the stalled `abl1`/scaffold AttentiveFP seed-42 (Statistical
+significance below) ran locally on the Mac under MPS
+(`logs/review11_n3_afp_abl1_scaffold_s42_min60.log`). From that fix
+onward `scripts/gnn_03_train_gin.py` records the device it actually
+used as `device` in the split block of `results/gnn_metrics_*.json`;
+metrics files written before that fix carry no `device` field, so the
+device of historical runs is recoverable only from the committed logs,
+not from the old json. The default `gin` does not use
 bond features (plain GINConv aggregates node features only), but the
 cached 3-dim bond features are no longer "stored but unused":
 `scripts/gnn_03_train_gin.py --model {gin, gine, attentivefp}` - all three
@@ -322,8 +336,9 @@ read the split-specific key - falling back to `best_params_random` with
 a printed note for tags that predate the backfill. Before review M2 all
 four auxiliary scripts reused `best_params_random` on the scaffold split
 too (the fourth, `interpretability_alignment.py`, no longer refits at
-all: it loads the committed split RF), although the two winners differ
-for 7 of 9 datasets.
+all: it loads the committed split RF), although on today's committed
+`best_params_*` the two winners still differ for 4 of 9 datasets
+(`abl1`, `egfr`, `mpro`, `bace`).
 
 ## Statistical significance (paired bootstrap)
 
@@ -428,7 +443,7 @@ phase 2 and the experiments):
 - **Why this direction was chosen, and the cost**: keeping the large
   families in test is what makes chemotype-level error analysis possible
   - the scaffold-coloured scatters and the thienopyrimidine /
-  quinazoline-aniline series findings (`scripts/gnn_05_error_analysis.py`) need whole
+  4-anilinoquinoline series findings (`scripts/gnn_05_error_analysis.py`) need whole
   families present in the test set. The cost is explicit: campaigns
   already run are not redone under the other convention, and switching
   to a MoleculeNet-aligned split later would require full retraining of
@@ -460,6 +475,25 @@ only already-known chemistry predicts genuinely newer compounds.
   tag) when the year span < 8 years, the busiest year holds < 100
   molecules, or dated-SMILES coverage falls below 95% (95-99% pins
   undated molecules to the train side).
+- **Year source scope (disclosure; the 2026-10-11 review's change was
+  deliberately declined).** The min-year join runs over the raw pull
+  `data/raw/{TAG}_activities.csv` - every activity record, including
+  censored (`<`/`>`) rows that the `=` label filter drops - so a
+  molecule's year can come from a record its label does not use.
+  Restricting the join to `standard_relation == '='` records (i.e.
+  taking years only from the records the label uses) was evaluated and
+  not adopted: recomputed over all 8 tags, that rule would change split
+  membership for **4 of 8 tags - egfr 1, egfr_full 19, herg 5, vegfr2
+  31** molecules (0 on `a2a`, `abl1`, `hivpr`, `mpro`) - and the
+  committed split files are pinned by the recomputation of **194**
+  prediction files under `results/`: every committed `*preds*.npz` that
+  has a committed clean CSV re-derives its `test_idx` from its split
+  npz and its `y_true` from `{TAG}_pic50_clean.csv` (only the 2 `esol`
+  prediction files have no committed clean CSV and fall outside that
+  count), so changing the year rule would invalidate 194 committed
+  prediction files rather than merely edit a split. The current rule -
+  first report from **all** raw records - is therefore kept, and this
+  is where it is disclosed.
 - **Training**: RF via `scripts/04_train_and_evaluate.py --split time`,
   GIN unchanged (`gnn_03` reads the same `{TAG}_time.npz`; 3 seeds).
   Asymmetry disclosure: RF random/scaffold fits the full 80% pool, but on
@@ -469,7 +503,7 @@ only already-known chemistry predicts genuinely newer compounds.
   and never sees the
   validation years, while the GIN trains on the same `train_idx` yet
   selects its checkpoint on those years; the two models are not treated
-  identically across splits (feeds the shrinkage reading below).
+  identically across splits (feeds the per-tag reading below).
 - **Results** (`results/time_split/summary.csv`, table in README
   "Publication-year time split"): panel means RF **0.694 (random) ->
   −0.034 (time)**, GIN **0.643 -> +0.032** (time, per-seed mean;
@@ -484,25 +518,75 @@ only already-known chemistry predicts genuinely newer compounds.
   and `herg` (+0.032 [−0.007, +0.073]) straddle 0. These Δ and CIs are
   ensemble (mean3) quantities, not the difference of the per-seed-mean
   columns displayed next to them - the README table carries a `GIN ens`
-  column and a worked `herg` example (columns subtract to +0.005,
-  ensemble Δ is +0.032).
-- **Reading**: the GIN *stays closer to the no-skill baseline* under
-  temporal drift on most targets - what the flipped significance table
-  measures - but that proximity is largely shrinkage rather than
-  retained skill: 20 of 24 time-split GIN runs early-stop before epoch
-  24 (median best epoch 80 on random/scaffold), predictions compress
-  toward the mean (std of the ensemble prediction / std of y =
+  column and works `egfr` as its example (its displayed columns subtract
+  to 0.088 − 0.123 = **−0.035** while the ensemble Δ is **+0.039** -
+  opposite signs from the same three runs).
+- **Reading (per tag)**: the GIN *stays closer to the no-skill
+  baseline* under temporal drift on most targets - what the flipped
+  significance table measures - but what that proximity means differs by
+  target; "largely shrinkage" was wrong as a blanket claim. All numbers
+  below recomputed from the committed files
+  (`results/rf_preds_{tag}_time.npz` +
+  `results/gnn_preds_{tag}_time{,_seed1,_seed2}.npz`; `constant_r2` /
+  `gin_best_epochs` from `results/time_split/summary.csv`; the constant
+  predicts the mean pIC50 of **all** non-test rows - train *and*
+  validation, i.e. partly the years the time RF itself never trains
+  on):
+
+  | time cell | constant R2 | RF R2 | GIN ens R2 | pred std / y std (RF vs GIN) | slope on truth (RF vs GIN) | reading |
+  |---|---|---|---|---|---|---|
+  | `a2a` | −0.004 | −0.301 | +0.024 | 0.69 vs 0.22 | 0.41 vs 0.07 | GIN win is shrinkage toward the mean |
+  | `abl1` | −0.132 | +0.560 | +0.324 | 0.63 vs 0.39 | 0.51 vs 0.27 | RF ahead |
+  | `egfr` | −0.063 | +0.123 | +0.162 | 0.81 vs 0.66 | 0.39 vs 0.30 | small GIN edge, CI straddles 0 |
+  | `egfr_full` | −0.455 | −0.736 | −0.144 | 0.57 vs 0.52 | 0.06 vs 0.14 | GIN win is a level shift, not spread |
+  | `herg` | −0.003 | −0.058 | −0.026 | 0.41 vs 0.44 | 0.06 vs 0.09 | both models sit at/below no-skill |
+  | `hivpr` | −0.006 | −0.027 | +0.088 | 0.53 vs 0.54 | 0.13 vs 0.20 | genuine extra GIN signal |
+  | `mpro` | −0.000 | +0.006 | +0.090 | 0.46 vs 0.32 | 0.12 vs 0.10 | genuine extra GIN signal |
+  | `vegfr2` | −0.002 | +0.160 | +0.108 | 0.47 vs 0.45 | 0.22 vs 0.16 | RF ahead |
+
+  - **Shrinkage on `a2a` (and `herg`)**: the ensemble compresses to
+    0.22 of y's spread with a slope of 0.07 (RF: 0.69 / 0.41) - the GIN
+    is closer to no-skill mostly because it regresses toward the mean,
+    and on `herg` both models are at/below the constant anyway
+    (GIN −0.026 vs constant −0.003).
+  - **Level shift on `egfr_full`** (means and stds, same recomputation):
+
+    | egfr_full / time | mean pIC50 | std |
+    |---|---|---|
+    | non-test pool (train + valid) | 6.69 | 1.35 |
+    | test set | 7.50 | 1.20 |
+    | RF predictions | 6.62 | 0.68 |
+    | GIN ensemble predictions | 7.04 | 0.62 |
+
+    The GIN's spread is essentially RF's (0.52 vs 0.57 of y std), but
+    its prediction *level* sits 0.42 closer to the newer test mean than
+    the RF's (gap 0.46 vs 0.88) - that is where the +0.592 ensemble Δ
+    comes from, not from tracking individual molecules (slope 0.14 vs
+    0.06, both nearly flat). The asymmetry above offers the plausible
+    mechanism: the GIN selects its checkpoint on the newest pre-test
+    years, which the time RF never trains on.
+  - **Genuine signal on `hivpr` and `mpro`**: on `hivpr` the GIN has
+    slightly *more* spread than RF (0.54 vs 0.53) and a higher slope
+    (0.20 vs 0.13) while RF sits below the constant; on `mpro` the GIN
+    beats the constant outright (+0.090 vs RF +0.006 against a constant
+    of −0.000) at roughly RF's slope - in both cells the GIN adds
+    ranking signal rather than only compressing.
+
+  Supporting facts (`results/time_split/summary.csv`): 20 of the 24
+  time-split GIN runs have their **best epoch** before epoch 24 (median
+  best epoch 80 on random/scaffold - best epochs, not stop epochs),
+  predictions compress toward the mean (ensemble pred std / y std =
   0.22-0.66 across the 8 time cells), and RF scores below the constant
-  baseline on `a2a`, `egfr_full`, `herg` and `hivpr` (`constant_r2` /
-  `gin_best_epochs` columns of `results/time_split/summary.csv`) - so
-  several "GIN wins" are RF below no-skill. The flip is partial: on `abl1` and
-  `vegfr2`, the targets where RF holds up under drift, RF is
-  significantly ahead. Absolute performance is the deployment criterion,
-  and there both fail: outside `abl1` (0.560/0.271 per-seed, +0.324
-  ensemble) nothing on either model clears 0.17 - every other cell sits
-  between −0.736 and +0.162. Two models at R2 <= 0 are not a model
-  selection problem - the honest number is that neither is deployable
-  on future chemistry at this data size.
+  baseline on `a2a`, `egfr_full`, `herg` and `hivpr` - so part of the
+  "GIN wins" pattern is RF below no-skill rather than GIN skill. The
+  flip is partial: on `abl1` and `vegfr2`, the targets where RF holds
+  up under drift, RF is significantly ahead. Absolute performance is
+  the deployment criterion, and there both fail: outside `abl1`
+  (0.560/0.271 per-seed, +0.324 ensemble) nothing on either model
+  clears 0.17 - every other cell sits between −0.736 and +0.162. Two
+  models at R2 <= 0 are not a model selection problem - the honest
+  number is that neither is deployable on future chemistry at this data
+  size.
   Artifacts: `figures/time_split/panel_3splits.png`,
   `figures/time_split/{tag}_timeline.png` (per-target year histograms
   with both cutoffs), `figures/pred_vs_actual_time_{tag}.png`.
@@ -578,8 +662,11 @@ number. Tuning artifacts (pre-refresh, 2026-10-09) are kept under
   data-quality conclusion, not a model-ranking one.
 - Failure modes still differ by chemotype. On the refreshed scaffold
   test set, the documented thienopyrimidine series (n=47) costs RF 1.32
-  mean |error| vs GIN 1.02, while the quinazoline-aniline series (n=88)
-  costs the GIN more - RF 0.779 vs GIN 0.962; the chromone query now
+  mean |error| vs GIN 1.02, while the 4-anilinoquinoline series (n=88,
+  scaffold `c1ccc(Nc2ccnc3ccccc23)cc1`) costs the GIN more - RF 0.779 vs
+  GIN 0.962; the quinazoline series proper is the largest scaffold in
+  the test set (n=355, `c1ccc(Nc2ncnc3ccccc23)cc1`), where the two
+  models nearly tie (RF 0.868 vs GIN 0.850); the chromone query now
   matches **0 of 912** `egfr` test molecules and is skipped there.
   Chromone and thienopyrimidine are the two documented EGFR-family
   queries, selected **per tag** by
@@ -623,15 +710,19 @@ set, validation set and hyperparameters frozen
   GIN 0.548, gap **−0.026**. The random gap narrows from −0.100 at
   n = 500 but never closes - no point on either split crosses
   (random gaps −0.107..−0.076, scaffold −0.062..−0.026) - the
-  curve-level echo of the eight-target panel: no target leads on the
-  mean, and no n produces a crossing.
+  curve-level echo of the eight-target panel, where only 2 of the 16
+  cells still lead on the per-seed-mean Δ (`abl1`/scaffold +0.022 and
+  `herg`/random +0.012; the other 14 are negative,
+  `results/multi_target/summary.csv`), and where no n on this curve
+  produces a crossing.
 - **Extrapolated crossover: pre-refresh vintage.** Fitting a saturating
   curve R2(n) = R2_inf − a·n^(−b) and solving the gap for its root
   (`experiments/scaling_analysis.py`) gave n\* ≈ 25k-35k (≈ 3x current
   data): n\* = **28,156** on random (per-seed **33,522 ± 13,558**, 95%
   CI **[19,765, 45,215]**, 3/3 seeds find a root) and n\* = **25,112**
   on scaffold (1/3 seeds). But
-  `results/learning_curve/scaling_egfr_full.json` was fit on the
+  `results/_archive-2026-10-09/scaling_ep300/scaling_egfr_full.json`
+  was fit on the
   *pre-refresh* curve (its `n_observed` grid still runs 500..9,717) and
   has not been re-fit on the refreshed 500-4,400 grid - treat the number
   as a pre-refresh (2026-10-04) order-of-magnitude estimate, not a
@@ -655,7 +746,7 @@ the RF−GIN gap: on those (pre-refresh) runs the conclusions were robust
 to training budget. The confirmation was never repeated on the
 refreshed labels (its `R2_base` values no longer match
 `results/gnn_metrics_egfr_full*.json`). Full record:
-`results/learning_curve/ep300_confirmation.md`.
+`results/_archive-2026-10-09/scaling_ep300/ep300_confirmation.md`.
 
 **The failures themselves transfer.** `gnn_05_error_analysis.py` on four
 targets (worst-50 overlap / Spearman ρ of per-molecule |error|, random /
@@ -707,7 +798,14 @@ way: the y-randomization verdict only requires every shuffled mean
 
 **XGBoost does not beat the tuned RF either** (-0.011 random /
 -0.045 scaffold vs the same-pool RF control, deterministic across
-seeds). "Deterministic" is literal, and worth reading correctly:
+seeds; all 16 cells re-reproduce bit-exactly under the pinned
+`xgboost==3.4.1`). One cell is version-sensitive: `egfr_full`/random
+reads 0.68144 under the pinned 3.4.1 but 0.68950 under unpinned
+xgboost 3.2.0 (Δ ~0.008 R²), while the other 15 cells are identical
+across those two versions - the version pin is part of the
+reproduction contract (`logs/review12_p5_xgb_egfr_full_repro_3.4.1.log`,
+`logs/review12_p5_xgb_egfr_full_xgb_3.2.0.log`). "Deterministic" is
+literal, and worth reading correctly:
 `XGBRegressor(tree_method="hist")` with the default
 `subsample=1.0` / `colsample_{bytree,bylevel,bynode}=1.0` has no
 stochastic path into the fit, so `random_state` changes nothing and the
@@ -744,8 +842,17 @@ follow different conventions, per-seed mean vs mean3 ensemble, see
 `experiments/afp_panel.py`), 7 CIs contain 0, and all 8 random-split
 point Δ are negative (−0.167 to −0.022). `abl1`/scaffold moved from
 RF-favoured to undecided after its stalled seed-42 run (best epoch
-15/100, train MSE 0.57) was rerun with a 60-epoch early-stop floor:
-ensemble Δ **+0.020 [−0.018, +0.057]**. The `seed42` convention
+15/100, train MSE 0.57; early stop at epoch 35,
+`logs/win4070_/win4070_overnight_train_attentivefp_abl1_scaffold_s42.log`,
+device=cuda) was independently re-run on this Mac
+(`logs/review11_n3_afp_abl1_scaffold_s42_min60.log`, device=mps):
+ensemble Δ **+0.020 [−0.018, +0.057]**. The flip is a fresh random
+draw on another device - the two runs already diverge at epoch 2
+(valid 0.9411 vs 0.9546) - **not** the `--min-epochs 60` floor added
+with the re-run: in the re-run the improving epochs run 1-11, 15, 24,
+..., 69-71, 82, and no stretch without improvement reaches patience 20
+(longest 46 -> 62), so the stop rule never fires and the floor never
+binds - the run reaches 100 epochs with or without it. The `seed42` convention
 reads 12/16 significant, every cell to RF. Tables
 `results/afp_panel/summary.csv`,
 `results/significance/summary_attentivefp.csv`; figures
@@ -851,7 +958,8 @@ QSAR_TAG=a2a python scripts/gnn_05_error_analysis.py   # shared-failure analysis
 # 3) panel aggregates + scaling analysis
 python experiments/multi_target_summary.py             # summary.csv + delta_vs_n.png
 python experiments/learning_curve.py --tag egfr_full --sizes 500,1000,1500,2000,2500,3000,3500,4000,4400
-python experiments/scaling_analysis.py --tag egfr_full # n* + CI, scaling_egfr_full.json/png
+python experiments/scaling_analysis.py --tag egfr_full # n* + CI, writes results/learning_curve/scaling_egfr_full.json/png
+                                                      # (the committed pre-refresh copy now lives in results/_archive-2026-10-09/scaling_ep300/)
 ```
 
 After downloads, per-target raw-file provenance is recorded in

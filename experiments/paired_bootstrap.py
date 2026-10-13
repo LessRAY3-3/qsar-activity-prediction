@@ -392,9 +392,11 @@ def merge_summary(summary, summary_path, n_boot, force=False):
 
     Keys already on disk are refreshed from `summary`; untouched keys are
     kept. Rows whose stored n_boot differs from this run's are never
-    silently mixed: without --force a SystemExit names the conflict, with
-    --force exactly those keys are overwritten. A missing target is
-    written fresh.
+    silently mixed: without --force a SystemExit names the conflict (and
+    points a smoke run at a scratch --out-dir instead), with --force
+    exactly those keys are overwritten (--force skips this guard, the
+    per-cell guard and the campaign-coverage guard together). A missing
+    target is written fresh.
     """
     if not os.path.exists(summary_path):
         return summary
@@ -407,8 +409,9 @@ def merge_summary(summary, summary_path, n_boot, force=False):
         raise SystemExit(
             f"{rel}: {len(stale)} stored row(s) for these cells have a "
             f"different n_boot ({sorted(set(stale['n_boot']))} vs this "
-            f"run's {n_boot}); refusing to mix bootstrap sizes. Rerun "
-            f"with --force to overwrite those keys.")
+            f"run's {n_boot}); refusing to mix bootstrap sizes. A smoke run "
+            "should write to a scratch --out-dir (the partial path), not "
+            "into the campaign directory; --force overwrites those keys.")
     kept = old[~overlap].reset_index()
     merged = pd.concat([kept, summary], ignore_index=True)
     return merged[list(SUMMARY_COLS)]
@@ -427,31 +430,44 @@ def is_campaign_run(tags, n_boot):
     return set(tags) == set(TAGS) and n_boot == N_BOOT
 
 
-def check_cell_csv(path, n_boot, force=False):
-    """Refuse to overwrite a stored per-cell CSV with a different n_boot.
+def check_cell_csv(path, n_boot, force=False, seed=BOOT_SEED):
+    """Refuse to overwrite a stored per-cell CSV with a different guard key.
 
-    The panels and reviewers read these files per (tag, split), so a
-    B=300 smoke run must not silently replace a B=10000 cell. A missing
-    n_boot column (files written before the column existed) is
-    validated as B=N_BOOT, matching read_existing_summary. With
-    --force the overwrite proceeds and is announced.
+    The guard key is (n_boot, boot_seed): the panels and reviewers read
+    these files per (tag, split), so a B=300 smoke run must not silently
+    replace a B=10000 cell, and a run with a different bootstrap seed must
+    not replace cells whose CIs were drawn from another seed's resamples.
+    A missing n_boot / boot_seed column (files written before the column
+    existed) validates as the campaign defaults (N_BOOT / BOOT_SEED),
+    matching read_existing_summary. With --force the overwrite proceeds
+    and is announced -- but --force skips ALL THREE campaign guards at
+    once (this per-cell guard, merge_summary's n_boot guard and
+    guard_campaign_coverage), so a smoke run should never need it: point
+    --out-dir at a scratch directory instead (partial runs already land on
+    the summary_partial / ci_panel_partial names, leaving the campaign
+    files untouched).
     """
     if not os.path.exists(path):
         return
     old = pd.read_csv(path)
     if "n_boot" not in old.columns:
         old["n_boot"] = N_BOOT
+    if "boot_seed" not in old.columns:
+        old["boot_seed"] = BOOT_SEED
     stored = sorted({int(v) for v in old["n_boot"]})
-    if all(v == n_boot for v in stored):
+    stored_seeds = sorted({int(v) for v in old["boot_seed"]})
+    if all(v == n_boot for v in stored) and all(v == seed for v in stored_seeds):
         return
     rel = os.path.relpath(path, BASE)
     if not force:
         raise SystemExit(
-            f"{rel}: stored n_boot {stored} != this run's {n_boot}; "
-            "refusing to overwrite the per-cell CSV. Rerun with --force "
-            "to overwrite it.")
-    print(f"  [force] overwriting {rel} (stored n_boot {stored} -> "
-          f"{n_boot})")
+            f"{rel}: stored (n_boot, boot_seed)={list(zip(stored, stored_seeds))} "
+            f"!= this run's ({n_boot}, {seed}); refusing to overwrite the "
+            "per-cell CSV. A smoke run belongs in a scratch --out-dir (the "
+            "partial path), not over the campaign cells; --force skips this "
+            "guard and the other two campaign guards together.")
+    print(f"  [force] overwriting {rel} (stored n_boot {stored} / "
+          f"boot_seed {stored_seeds} -> {n_boot} / {seed})")
 
 
 def guard_campaign_coverage(summary_path, tags, splits, force=False):
@@ -462,7 +478,12 @@ def guard_campaign_coverage(summary_path, tags, splits, force=False):
     rows, but the figure is drawn from this run's rows only: without
     this guard the campaign forest would silently drop every stored cell
     the run did not rerun. The stored summary defines the expected cell
-    set; covering a strict subset requires an explicit --force.
+    set; covering a strict subset requires an explicit --force -- which
+    skips all three campaign guards at once (this coverage guard,
+    merge_summary's n_boot guard and check_cell_csv's per-cell guard), so
+    a smoke or subset run should write to a scratch --out-dir (the
+    partial summary/figure path) instead of forcing its way into the
+    campaign files.
     """
     if not os.path.exists(summary_path):
         return
@@ -479,7 +500,8 @@ def guard_campaign_coverage(summary_path, tags, splits, force=False):
             f"{rel}: this run covers {len(run)} of the {len(stored)} "
             f"stored campaign cells; missing {cells}. Redrawing the "
             "campaign summary/figure from a subset needs an explicit "
-            "--force.")
+            "--force (which skips every campaign guard); a smoke run "
+            "should use a scratch --out-dir instead.")
     print(f"  [force] campaign coverage is a subset ({len(missing)} "
           "stored cell(s) not rerun; their summary rows are kept, the "
           "figure is drawn from this run's cells only)")
@@ -537,10 +559,15 @@ def parse_args(argv=None):
     p.add_argument("--seed", type=int, default=BOOT_SEED,
                    help="bootstrap Generator seed (fixed for reproducibility)")
     p.add_argument("--force", action="store_true",
-                   help="overwrite stored summary rows / per-cell CSVs "
-                        "whose n_boot differs from this run's, and allow "
-                        "redrawing the campaign outputs from a subset of "
-                        "the stored cells (default: refuse)")
+                   help="skip ALL THREE campaign guards at once: the "
+                        "per-cell (n_boot, boot_seed) overwrite check, the "
+                        "summary-row n_boot merge check, and the "
+                        "campaign-coverage subset check (default: each "
+                        "refuses). A smoke run should NOT use --force: "
+                        "point --out-dir at a scratch directory instead "
+                        "(partial runs write summary_partial*/"
+                        "ci_panel_partial* and never touch the campaign "
+                        "files)")
     p.add_argument("--out-dir", default=os.path.join(BASE, "results",
                                                      "significance"))
     p.add_argument("--fig", default=None,
@@ -562,8 +589,8 @@ def main(args=None):
     os.makedirs(out_dir, exist_ok=True)
 
     # Resolve the shared outputs up front so an unsafe run (campaign
-    # coverage subset, mixed n_boot) is refused BEFORE any cell CSV is
-    # touched, not after the bootstrap has already overwritten files.
+    # coverage subset, mixed n_boot / boot_seed) is refused BEFORE any cell
+    # CSV is touched, not after the bootstrap has already overwritten files.
     suffix = split_suffix(splits)
     partial = not is_campaign_run(tags, args.n_boot)
     summary_path = os.path.join(out_dir, summary_name(model, suffix,
@@ -572,11 +599,22 @@ def main(args=None):
         guard_campaign_coverage(summary_path, tags, splits,
                                 force=args.force)
 
-    rows = []
+    # Full preflight of EVERY cell before the write loop: the old in-loop
+    # check aborted on a later mismatch only after earlier cells had been
+    # rewritten. Any mismatch here SystemExits before a single file is
+    # written.
+    cell_paths = {}
     for tag in tags:
         for split in splits:
             path = os.path.join(out_dir, f"{out_stem(tag, split, model)}.csv")
-            check_cell_csv(path, args.n_boot, force=args.force)
+            cell_paths[(tag, split)] = path
+            check_cell_csv(path, args.n_boot, force=args.force,
+                           seed=args.seed)
+
+    rows = []
+    for tag in tags:
+        for split in splits:
+            path = cell_paths[(tag, split)]
             cell = cell_rows(tag, split, n_boot=args.n_boot, seed=args.seed,
                              model=model)
             pd.DataFrame(cell).to_csv(path, index=False)

@@ -18,11 +18,13 @@ Steps:
 Post-refresh input warning (2026-10-11 data refresh, tag
 `data-refresh-2026-10-11`): the hard-coded paths this script originally
 used were clobbered by the refresh. `data/raw/egfr_full_activities.csv` is
-now the REFRESHED pull (identical rows to egfr_full_v2_activities.csv), so
-the default old/new comparison is degenerate and the committed
-`data/processed/egfr_full_pic50_clean.csv` is the refreshed clean CSV, not
-the one the experiment diffed against. A faithful rerun must pass the
-pre-refresh inputs explicitly:
+now the REFRESHED pull (it replaced the deleted
+`egfr_full_v2_activities.csv`), so the default old/new comparison is
+degenerate - both defaults point at the same refreshed pull - and the
+committed `data/processed/egfr_full_pic50_clean.csv` is the refreshed clean
+CSV, not the one the experiment diffed against. The script refuses to run
+an old==new comparison. A faithful rerun must pass the pre-refresh inputs
+explicitly:
     --old-raw <historical pull, e.g. the artifacts-v1 release raw CSV>
     --clean .scratch/h1_sensitivity/egfr_full_pic50_clean_OLD.csv
 --dry-run resolves and validates all inputs (existence, rows,
@@ -33,6 +35,12 @@ Fixes since the 2026-10-11 review: explicit --old-raw/--new-raw/--clean/
 pulls carry standard_relation (the merged frame suffixes it to
 standard_relation_x/_y); missing standard_relation in the analysis pull
 fails with a clear message instead of a groupby KeyError.
+Fixes since the 2026-10-12 review: the --new-raw default no longer points
+at the deleted egfr_full_v2_activities.csv (both pull defaults are the
+current data/raw/egfr_full_activities.csv); a full (non-dry-run) run now
+refuses an old==new degenerate comparison with a clear message instead of
+writing a meaningless reconciliation; --out refuses results/, figures/,
+models/ and data/ (case-insensitive, realpath-normalized).
 
 Outputs into --out (default .scratch/h1_sensitivity/):
   reconcile_summary.json, label_diff_per_compound.csv,
@@ -55,9 +63,24 @@ import pandas as pd
 
 BASE = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..", ".."))
 DEFAULT_OUT = os.path.join(BASE, ".scratch", "h1_sensitivity")
+CURRENT_PULL = os.path.join(BASE, "data", "raw", "egfr_full_activities.csv")
 KEY = ["molecule_chembl_id", "canonical_smiles", "standard_value",
        "assay_type", "document_chembl_id"]
 PR1_CLAIM = {"censored_only": 2718, "total": 13497, "pct": 20.1}
+
+
+def is_protected(path):
+    """True when path is inside results/, figures/, models/ or data/.
+
+    Paths are compared after os.path.realpath + lowercasing so that
+    case-insensitive filesystems (macOS) cannot be bypassed with e.g.
+    ``--out Results/x``, and ``..``/symlink tricks are resolved first.
+    """
+    p = os.path.realpath(path).lower()
+    protected = (
+        os.path.realpath(os.path.join(BASE, d)).lower()
+        for d in ("results", "figures", "models", "data"))
+    return any(p == d or p.startswith(d + os.sep) for d in protected)
 
 
 def canon_value(v):
@@ -82,14 +105,15 @@ def clean_like_02(df):
 def parse_args(argv=None):
     p = argparse.ArgumentParser(description=__doc__,
                                 formatter_class=argparse.RawDescriptionHelpFormatter)
-    p.add_argument("--old-raw", default=os.path.join(BASE, "data", "raw",
-                                                     "egfr_full_activities.csv"),
+    p.add_argument("--old-raw", default=CURRENT_PULL,
                    help="historical raw pull (pre-refresh; without "
-                        "standard_relation). Default is now the REFRESHED pull - "
+                        "standard_relation). Default is now the REFRESHED pull "
+                        "(data/raw/egfr_full_activities.csv; the old "
+                        "egfr_full_v2_activities.csv default was deleted) - "
                         "pass the pre-refresh file for a faithful reconciliation.")
-    p.add_argument("--new-raw", default=os.path.join(BASE, "data", "raw",
-                                                     "egfr_full_v2_activities.csv"),
-                   help="fresh pull the campaign downloaded (default: egfr_full_v2)")
+    p.add_argument("--new-raw", default=CURRENT_PULL,
+                   help="fresh pull the campaign downloaded (default: "
+                        "data/raw/egfr_full_activities.csv, the refreshed pull)")
     p.add_argument("--clean", default=os.path.join(BASE, "data", "processed",
                                                    "egfr_full_pic50_clean.csv"),
                    help="committed clean CSV to diff labels against (pre-refresh "
@@ -98,6 +122,19 @@ def parse_args(argv=None):
     p.add_argument("--dry-run", action="store_true",
                    help="resolve and validate inputs, print the plan, write nothing")
     return p.parse_args(argv)
+
+
+def degenerate_inputs(old_path, new_path):
+    """True when --old-raw and --new-raw are the same file or identical content.
+
+    Reconciling the refreshed pull against itself is meaningless (the 2026-10-12
+    review found the old --new-raw default pointed at a deleted file; both
+    defaults now resolve to the same refreshed pull, so this must be caught
+    before any run, not just --dry-run).
+    """
+    if os.path.realpath(old_path) == os.path.realpath(new_path):
+        return True
+    return pd.read_csv(old_path).equals(pd.read_csv(new_path))
 
 
 def check_inputs(args):
@@ -114,16 +151,12 @@ def check_inputs(args):
         has_rel = "standard_relation" in df.columns
         print(f"  {name}: {path} ({n} rows, standard_relation={'yes' if has_rel else 'NO'})")
     if ok:
-        old_ids = pd.read_csv(args.old_raw, usecols=["molecule_chembl_id"])
-        new_ids = pd.read_csv(args.new_raw, usecols=["molecule_chembl_id"])
-        if len(old_ids) == len(new_ids):
-            same = pd.read_csv(args.old_raw).equals(pd.read_csv(args.new_raw))
-            if same:
-                print("  WARNING: --old-raw and --new-raw are identical files - "
-                      "the reconciliation would be degenerate (both are the "
-                      "post-refresh pull). Pass the pre-refresh historical pull "
-                      "via --old-raw (e.g. artifacts-v1 release raw).")
-                ok = False
+        if degenerate_inputs(args.old_raw, args.new_raw):
+            print("  WARNING: --old-raw and --new-raw are identical files - "
+                  "the reconciliation would be degenerate (both are the "
+                  "post-refresh pull). Pass the pre-refresh historical pull "
+                  "via --old-raw (e.g. artifacts-v1 release raw).")
+            ok = False
         if args.clean == os.path.join(BASE, "data", "processed",
                                       "egfr_full_pic50_clean.csv"):
             print("  NOTE: --clean is the committed (refreshed) clean CSV; label "
@@ -135,6 +168,9 @@ def check_inputs(args):
 def main(argv=None):
     args = parse_args(argv)
     out_dir = os.path.abspath(args.out)
+    if is_protected(out_dir):
+        raise SystemExit(f"--out {out_dir} points into a protected directory "
+                         "(results/ figures/ models/ data/); refusing")
 
     if args.dry_run:
         print(f"dry-run inputs for {os.path.basename(__file__)}:")
@@ -147,7 +183,15 @@ def main(argv=None):
                        ("--clean", args.clean)):
         if not os.path.exists(path):
             raise SystemExit(f"{name} not found: {path} (see --dry-run / docstring "
-                             "for the pre-refresh inputs)")
+                             "for the pre-refresh inputs; the defaults are the "
+                             "refreshed pull, so --old-raw must point elsewhere "
+                             "for a faithful reconciliation)")
+    if degenerate_inputs(args.old_raw, args.new_raw):
+        raise SystemExit(
+            "--old-raw and --new-raw are the same file / identical content "
+            f"({args.old_raw}); reconciling the refreshed pull against itself is "
+            "degenerate. Pass the pre-refresh historical pull via --old-raw "
+            "(e.g. the artifacts-v1 release raw CSV) - see --dry-run / docstring.")
     os.makedirs(out_dir, exist_ok=True)
 
     old = pd.read_csv(args.old_raw)
