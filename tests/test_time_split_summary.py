@@ -267,6 +267,26 @@ def test_constant_r2_predicts_from_non_test_pool(tmp_path, monkeypatch,
             f"constant_r2 matches the {name} pool"
 
 
+def test_asof_constant_uses_train_only_and_ignores_valid_and_excluded(
+        tmp_path, monkeypatch, load_experiment):
+    mod, cached_y = _write_constant_tree(tmp_path, monkeypatch, load_experiment)
+    split_path = tmp_path / "data" / "processed" / "splits" / "t1_time.npz"
+    with np.load(split_path) as archive:
+        sp = dict(archive)
+    # Historical labels differ from the cached all-year labels; excluded
+    # rows must not poison the baseline, nor may high validation labels leak in.
+    y = np.array([3., 5., 4., 4., np.nan, 20., 20., 8., 9., 10.])
+    sp.update(label_policy="exact-dated-asof-v1", y=y,
+              train_idx=np.arange(4), excluded_idx=np.array([4]))
+    np.savez(split_path, **sp)
+    got = mod.constant_r2("t1")
+    assert got == pytest.approx(_baseline_r2(y, sp["test_idx"], sp["train_idx"]))
+    for wrong_y, pool in ((y, np.arange(0, 7)),
+                          (y, np.array([0, 1, 2, 3, 5, 6])),
+                          (cached_y, sp["train_idx"])):
+        assert not np.isclose(got, _baseline_r2(wrong_y, sp["test_idx"], pool))
+
+
 def test_gin_best_epochs_reads_time_metric(load_experiment):
     """Mutant killed: best_epoch taken from the wrong split metric.
 

@@ -23,8 +23,8 @@ Outputs:
                                            test set cumulates the newest
                                            years to reach ~20%);
                                            constant_r2 is the test R2 of
-                                           predicting the mean pIC50 of all
-                                           non-test rows, gin_best_epochs
+                                           predicting mean training pIC50
+                                           (legacy: all non-test rows), gin_best_epochs
                                            the comma-joined time-split
                                            early-stop epochs of the 3 GIN
                                            seeds (N4)
@@ -110,8 +110,11 @@ def gin_time_r2(tag):
 
 
 def constant_r2(tag):
-    """Test R2 of the no-skill baseline (N4): predict the mean pIC50 of
-    every non-test row (train+valid) for all test rows."""
+    """Test R2 of a constant fitted on training labels only for as-of runs.
+
+    Legacy all-year results retain their original non-test (train+valid)
+    pool solely for historical reproduction.
+    """
     y = np.asarray(np.load(os.path.join(BASE, "data", "processed",
                                         f"{tag}_fingerprints.npz"))["y"],
                    dtype=np.float64)
@@ -122,7 +125,7 @@ def constant_r2(tag):
         raise ValueError(f"{tag}: y and split index spaces differ")
     if "label_policy" in sp:
         y = np.asarray(sp["y"], dtype=np.float64)
-        pool = np.concatenate([sp["train_idx"], sp["valid_idx"]])
+        pool = sp["train_idx"]
     else:
         pool = np.ones(len(y), dtype=bool)
         pool[test] = False

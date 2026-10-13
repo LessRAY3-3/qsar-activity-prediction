@@ -757,6 +757,12 @@ and figures together. Until then, the following values retain their original
 all-year-label provenance. Random/scaffold results require no retraining for
 this label correction.
 
+The [three-host retraining plan](docs/methodology.md#three-host-temporal-retraining-campaign-2026-10-13)
+assigns RF to the M3 Max, GIN to Ubuntu/RTX 4070, and input preparation and
+acceptance to the M4 Air. Local preparation has rebuilt and validated the
+eight splits; remote training awaits the user's connection-ready message.
+The new worker defaults to a read-only plan and requires `--execute` to train.
+
 **Legacy test R2 and paired molecule-bootstrap CI** (B = 10,000).
 GIN time is the per-seed mean; GIN ens is R2 of the averaged prediction;
 Δ = GIN ens − RF. Files: `results/time_split/summary.csv` and

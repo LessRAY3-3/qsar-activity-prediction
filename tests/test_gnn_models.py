@@ -117,6 +117,10 @@ def test_train_artifacts_per_model(tmp_path, monkeypatch, load_script, model):
     assert {"r2", "rmse", "mae", "params", "best_epoch",
             "convergence_flag", "max_epochs", "train_mse",
             "device"} <= set(m)
+    assert m["runtime"] == ckpt["runtime"]
+    assert m["runtime"]["seed"] == ckpt["args"]["seed"]
+    assert m["runtime"]["device"] == m["device"] == "cpu"
+    assert m["runtime"]["torch_threads"] == torch.get_num_threads()
     assert np.isfinite([m["r2"], m["rmse"], m["mae"]]).all()
     assert m["params"]["model"] == model
     # the json records the device the run actually trained on; both GPU

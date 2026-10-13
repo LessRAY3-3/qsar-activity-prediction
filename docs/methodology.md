@@ -976,3 +976,149 @@ python experiments/scaling_analysis.py --tag egfr_full # n* + CI, writes results
 
 After downloads, per-target raw-file provenance is recorded in
 [`data/README.md`](../data/README.md).
+
+## Three-host temporal retraining campaign (2026-10-13)
+
+This campaign replaces the historical time-split results with results from
+`exact-dated-asof-v1` labels. It covers 8 RF searches and 24 GIN fits
+(8 targets × seeds 42, 1, 2). Random/scaffold results and other GNN variants
+are outside this campaign. New scores must not be inferred from the old
+scores or from the number of changed labels.
+
+**Current gate:** only local preparation is authorized to run now. Do not
+connect to either SSH alias or start remote training until the user reports
+that the connections are ready. Preparation lives in the separate
+`retrain/time-asof-2026-10-13` worktree, based on main commit
+`d925163431b419a1b66e2417e8528447f0cbdeb4`.
+
+| Host | Responsibility | Initial resource budget |
+| --- | --- | --- |
+| M4 MacBook Air, coordinator | Freeze inputs; create and verify transfer bundles; receive, validate and summarize results | Local preparation only; 16 GiB RAM / 10 CPU cores observed |
+| `ssh m3`, M3 Max MacBook Pro | 8 RF jobs, one target at a time; each job is the existing 12-setting × 5-fold search plus refit | `QSAR_RF_JOBS=4`; each individual forest uses one job; BLAS/OpenMP threads = 1 |
+| `ssh win4070`, Ubuntu / RTX 4070 | 24 GIN jobs, one GPU job at a time | Explicit `--device cuda`, batch 128, initial CPU thread limit 2 |
+
+### Frozen inputs and local preparation
+
+The coordinator copies and hashes the 25 existing input files (document
+years, 8 activity tables, 8 fingerprint caches, 8 graph caches), then rebuilds
+all 8 time splits once. Both model families consume identical split files
+and `label_id` values; workers must not download new data or regenerate
+labels. Fingerprint/graph SMILES order and original labels are checked for
+agreement. Rows with no eligible dated exact measurement are excluded:
+
+| Target | Train | Validation | Test | Excluded |
+| --- | ---: | ---: | ---: | ---: |
+| a2a | 399 | 143 | 802 | 22 |
+| abl1 | 1,387 | 202 | 531 | 0 |
+| egfr | 2,948 | 340 | 1,233 | 39 |
+| egfr_full | 6,848 | 781 | 3,043 | 57 |
+| herg | 4,943 | 1,115 | 2,325 | 20 |
+| hivpr | 1,812 | 232 | 529 | 0 |
+| mpro | 1,017 | 643 | 1,750 | 0 |
+| vegfr2 | 6,294 | 1,280 | 2,038 | 31 |
+
+The 169 exclusions are eligibility filtering, not prediction failures.
+RF fits the training pool only, using its existing shuffled 5-fold selection
+protocol. GIN fits on the same pool, selects its checkpoint on validation,
+and evaluates on test. The no-skill constant baseline uses only the training
+labels. Test results must not drive hyperparameters, seed selection or
+decisions about whether to continue training.
+
+`scripts/time_campaign_bundle.py` creates separate RF and GIN archives,
+each containing the relevant caches, the same 8 time splits, Python source
+and dependency specifications. It excludes old models and results. The
+manifest records source revision and hashes, dependency hashes, data hashes,
+label versions, cutoff years and pool sizes. Source changes require a new
+bundle. Example preparation commands, from the coordinator worktree:
+
+```bash
+python scripts/time_campaign_bundle.py --role rf --output .scratch/time-campaign/bundles/rf
+python scripts/time_campaign_bundle.py --role gin --output .scratch/time-campaign/bundles/gin
+```
+
+### After the user opens the connections
+
+1. Inspect each remote machine's CPU, RAM, disk, OS and Python; inspect the
+   Ubuntu NVIDIA driver, actual free VRAM and CUDA availability. Do not assume
+   VRAM capacity from the GPU name. Use a dedicated campaign directory and
+   virtual environment on each machine. Resolve the pinned dependencies
+   there; record any necessary platform-specific CUDA wheel choice before
+   accepting a run. Avoid changing the system Python or GPU driver.
+2. Transfer the appropriate archive and its checksum, verify the archive
+   SHA256, and unpack into an empty directory. From that directory run
+   `python scripts/time_campaign_bundle.py --verify-manifest manifest.json --root .`.
+   Compare both hosts' 8 label IDs with the coordinator manifest. Successful
+   dependency imports and an actual CUDA smoke check are required before GIN.
+3. Run a read-only plan first. Then run a2a RF and a2a GIN seed 42 as full
+   pilot jobs, followed by egfr_full to check the larger workload. These jobs
+   count toward the campaign if their configuration remains unchanged.
+   Measure peak memory, elapsed time, throughput and validation convergence;
+   estimate the remaining duration from these observations. No reliable
+   completion time is available before this step.
+4. Continue the remaining jobs with the same environment and configuration.
+   Keep both laptops powered and awake. The worker runs serially per host;
+   RF and GIN hosts can work simultaneously. If memory is insufficient or
+   the protocol needs changing, resolve and record that decision before
+   continuing; do not silently lower only one job's model size or epochs.
+   A change to the GIN architecture or training budget requires a fresh
+   consistent GIN campaign, including replacement of the pilot runs.
+
+Worker commands below show the pilot and subsequent complete campaign.
+They are dry-runs until `--execute` is explicitly appended. Preserve the
+same environment between pilot and continuation so verified jobs can resume.
+
+```bash
+# m3: set these in its dedicated environment
+export QSAR_RF_JOBS=4
+export OMP_NUM_THREADS=1 MKL_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1
+python scripts/run_time_campaign.py --role rf --tags a2a
+python scripts/run_time_campaign.py --role rf --tags egfr_full
+python scripts/run_time_campaign.py --role rf
+
+# win4070: set these in its separate dedicated environment
+export OMP_NUM_THREADS=2 MKL_NUM_THREADS=2 OPENBLAS_NUM_THREADS=2
+python scripts/run_time_campaign.py --role gin --tags a2a --seeds 42 --device cuda
+python scripts/run_time_campaign.py --role gin --tags egfr_full --seeds 42 --device cuda
+python scripts/run_time_campaign.py --role gin --device cuda
+```
+
+GIN settings are fixed at hidden size 128, 4 layers, dropout 0.2, learning
+rate 0.001, batch 128, at most 100 epochs, patience 20, and minimum epochs 0.
+Explicit CUDA selection fails if unavailable instead of falling back to CPU.
+RF starts with four concurrent CV fits to bound memory; any later concurrency
+change must be recorded and applied consistently to the affected jobs.
+
+### Recovery and acceptance
+
+The worker creates `results/time_campaign/{role}_{tag}_seed{seed}/status.json`,
+an attempt log and an immutable artifact snapshot for every executed job.
+It hashes source, data, parameters and environment. A completed job is skipped
+only when that provenance and both canonical/snapshot output hashes match.
+Failed or incompatible jobs require inspection and explicit `--rerun`.
+Training restarts a failed job from the beginning; this is job-level resume,
+not an optimizer checkpoint continuation. After a crash, inspect any role
+lock's host/PID before manually removing a stale lock.
+
+Return snapshots, statuses, logs and both manifests into separate coordinator
+staging directories. Do not copy remote result directories over the local
+repository: clean worker bundles contain time-only metric JSON files.
+Acceptance must verify all 32 job identities, source/input hashes, label IDs,
+test indices, true labels, finite predictions and requested device. Recompute
+R²/RMSE/MAE from predictions, compare stored metrics, and ensure the three GIN
+seeds share the same test rows. Merge only `time` and RF `best_params_time`
+into existing metric files, preserving random/scaffold entries; archive old
+time results before replacing their canonical files.
+
+Only after all 32 jobs pass acceptance, run on the coordinator:
+
+```bash
+python experiments/paired_bootstrap.py --model gin --splits time --n-boot 10000
+python experiments/time_split_summary.py
+```
+
+Review validation traces and report uncertainty, the train-mean constant
+baseline and any poor or negative R² without discarding seeds. Update the
+time figures, tables and narrative together, then run the full test suite
+and submit a PR describing the protocol, source/data versions and changed
+results. Remote execution and result publication have not occurred during
+local preparation.

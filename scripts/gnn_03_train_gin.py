@@ -33,6 +33,9 @@ The metrics json also records the device the run actually trained on (the
 select_device() result, e.g. 'cuda' / 'mps' / 'cpu') as `device`, at the
 same level as convergence_flag; metrics files written by runs before this
 field existed do not have it.
+--device {auto,cpu,mps,cuda} pins the backend; an unavailable explicitly
+requested accelerator fails before loading data or writing artifacts.
+Runtime metadata records the seed, PyTorch version and thread counts.
 
 Outputs (model name in the filename only when it is not the default gin,
 so existing gin artifacts and commands keep their exact names):
@@ -83,10 +86,33 @@ def parse_args():
                    help="defer early stopping until this epoch (0 = off); "
                         "a stalled run cannot stop before it")
     p.add_argument("--seed", type=int, default=42)
+    p.add_argument("--device", choices=["auto", "cpu", "mps", "cuda"], default="auto",
+                   help="execution backend; explicit accelerators never fall back to CPU")
     p.add_argument("--suffix", default="",
                    help="suffix for model/preds/metrics files (used to keep "
                         "hyperparameter-search runs separate from the final ones)")
     return p.parse_args()
+
+
+def resolve_device(requested):
+    """Keep legacy auto selection, but fail closed for pinned accelerators."""
+    if requested == "auto":
+        return select_device()
+    if requested == "cpu":
+        return requested
+    available = (torch.cuda.is_available() if requested == "cuda"
+                 else torch.backends.mps.is_available() if requested == "mps"
+                 else False)
+    if not available:
+        raise ValueError(f"requested device {requested!r} is unavailable; no CPU fallback")
+    return requested
+
+
+def runtime_metadata(args, device):
+    return {"requested_device": args.device, "device": device, "seed": args.seed,
+            "torch_version": str(torch.__version__),
+            "torch_threads": torch.get_num_threads(),
+            "torch_interop_threads": torch.get_num_interop_threads()}
 
 
 class AtomEncoder(nn.Module):
@@ -273,7 +299,8 @@ def main():
     args = parse_args()
     torch.manual_seed(args.seed)
     np.random.seed(args.seed)
-    device = select_device()
+    device = resolve_device(args.device)
+    runtime = runtime_metadata(args, device)
 
     split_dir = os.path.join(BASE, "data", "processed", "splits")
     graphs = os.path.join(BASE, "data", "processed", f"{args.tag}_graphs.npz")
@@ -358,7 +385,7 @@ def main():
 
     os.makedirs(os.path.join(BASE, "results", "gnn_models"), exist_ok=True)
     torch.save({"state_dict": best["state"], "args": vars(args),
-                "y_mean": y_mean, "y_std": y_std, **label_meta},
+                "y_mean": y_mean, "y_std": y_std, "runtime": runtime, **label_meta},
                os.path.join(BASE, "results", "gnn_models", pt_name))
     np.savez(os.path.join(BASE, "results", preds_name),
              test_idx=split["test_idx"], y_true=ty, y_pred=tp, **label_meta)
@@ -370,6 +397,7 @@ def main():
                          "best_valid_rmse_std": best["rmse"],
                          "convergence_flag": flagged,
                          "device": device,
+                         "runtime": runtime,
                          "max_epochs": args.epochs,
                          "train_mse": final_train_mse,
                          "params": {k: v for k, v in vars(args).items() if k != "split"}}

@@ -30,6 +30,8 @@ CLI:
   Any {TAG}_time_NA.json marker takes precedence, prints its reason and
   skips with exit 0; missing both is an error. --plot-only renders saved
   predictions, respects --split, and never fits or writes models/metrics.
+  QSAR_RF_JOBS sets concurrent GridSearchCV jobs: -1 (default, all cores)
+  or a positive integer. Each individual forest remains single-threaded.
 """
 import json
 import os
@@ -66,6 +68,18 @@ PARAM_GRID = {
 CV_FOLDS = 5
 
 
+def rf_jobs():
+    """Bound outer CV parallelism without changing the grid or estimator."""
+    raw = os.environ.get("QSAR_RF_JOBS", "-1")
+    try:
+        jobs = int(raw)
+    except ValueError:
+        raise ValueError("QSAR_RF_JOBS must be -1 or a positive integer") from None
+    if jobs != -1 and jobs < 1:
+        raise ValueError("QSAR_RF_JOBS must be -1 or a positive integer")
+    return jobs
+
+
 def evaluate(model, X_test, y_test, tag):
     pred = model.predict(X_test)
     r2 = r2_score(y_test, pred)
@@ -91,6 +105,7 @@ def scatter(y_test, pred, tag, path, target):
 
 
 def run_split(X, y, smiles, train_idx, test_idx, tag, fig_path, target):
+    jobs = rf_jobs()
     print(f"\n=== {tag} split: train={len(train_idx)}, test={len(test_idx)} ===")
     # Shuffled folds: scaffold/time train pools are ordered by scaffold group or
     # SMILES, so unshuffled KFold would put whole chemotype blocks in one fold.
@@ -103,7 +118,7 @@ def run_split(X, y, smiles, train_idx, test_idx, tag, fig_path, target):
         PARAM_GRID,
         cv=cv,
         scoring="r2",
-        n_jobs=-1,
+        n_jobs=jobs,
         verbose=1,
     )
     cv_backend = os.environ.get("QSAR_CV_BACKEND", "").strip()
@@ -119,6 +134,8 @@ def run_split(X, y, smiles, train_idx, test_idx, tag, fig_path, target):
         gs.fit(X[train_idx], y[train_idx])
     print(f"Best params: {gs.best_params_}  (CV R2 = {gs.best_score_:.3f})")
     metrics, pred = evaluate(gs.best_estimator_, X[test_idx], y[test_idx], tag)
+    metrics["runtime"] = {"rf_jobs": jobs, "cv_backend": cv_backend or "default",
+                          "seed": RANDOM_STATE}
     scatter(y[test_idx], pred, tag, fig_path, target)
     return metrics, gs.best_estimator_, pred
 
@@ -220,6 +237,8 @@ def main():
     if args.plot_only:
         plot_saved_predictions([args.split] if args.split else ["random", "scaffold"])
         return
+
+    rf_jobs()  # reject invalid resource settings before any output is written
 
     # resolve the time split first so an NA marker skips before anything is written
     time_idx = None
