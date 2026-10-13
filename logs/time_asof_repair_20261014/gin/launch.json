@@ -1,0 +1,22 @@
+{
+  "pid": 26887,
+  "started_at": "2026-10-13T15:59:38.824382+00:00",
+  "source_commit": "d13f9125af56028f60e099ec2e914dd2509c239e",
+  "role": "gin",
+  "command": [
+    "systemd-inhibit",
+    "--what=idle",
+    "--mode=block",
+    "--who=qsar-gin-repair",
+    "--why=hERG label repair",
+    "/home/lessray/qsar-campaigns/time-asof-20261013-7ce15c1-gin/.venv/bin/python",
+    "/home/lessray/qsar-campaigns/time-asof-repair-d13f912-gin/run_repair.py",
+    "gin"
+  ],
+  "environment": {
+    "OMP_NUM_THREADS": "2",
+    "MKL_NUM_THREADS": "2",
+    "OPENBLAS_NUM_THREADS": "2",
+    "CUDA_VISIBLE_DEVICES": "0"
+  }
+}

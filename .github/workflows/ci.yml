@@ -25,4 +25,6 @@ jobs:
         run: ruff check scripts experiments tests
 
       - name: Tests
-        run: pytest -q
+        run: |
+          python scripts/restore_time_inputs.py
+          pytest -q

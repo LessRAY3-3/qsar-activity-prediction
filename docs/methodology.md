@@ -525,7 +525,7 @@ as-is, but a training label must use measurements available at its cutoff.
   Existing cleaning range rules apply before taking the parent median.
   Missing eligible labels produce explicit exclusions, not fallback to an
   all-year label. Train, valid, test and excluded indices partition cleaned
-  parent rows; excluded labels are missing. The campaign excludes 169 rows.
+  parent rows; excluded labels are missing. The campaign excludes 168 rows.
 - Versioned NPZ files include policy, source/dataset signatures, cutoffs,
   labels and `label_id`. Consumers validate these and prediction provenance;
   partially rerun campaigns cannot mix as-of labels with old predictions.
@@ -538,17 +538,18 @@ as-is, but a training label must use measurements available at its cutoff.
   used to choose hyperparameters, discard seeds or decide whether to extend a run.
 
 The [three-host campaign](#three-host-temporal-retraining-campaign-2026-10-13)
-records execution and reproduction commands. Frozen training source is
-`7ce15c1f0849ae69e0ca208f781a9824517eb328`; publication of the resulting
-artifacts is a later change. `results/time_split/campaign_acceptance.json`
+records execution and reproduction commands. The initial training source was
+`7ce15c1f0849ae69e0ca208f781a9824517eb328`; four hERG jobs were then replaced
+from `d13f9125af56028f60e099ec2e914dd2509c239e` after the cached-parent-key
+repair described below. The remaining 28 jobs retain their original provenance. `results/time_split/campaign_acceptance.json`
 records 32 accepted jobs, source/input/label hashes, environments, metric
 recomputation and checkpoint prediction replay. The RF replay matched exactly;
 GIN CUDA replay had maximum absolute prediction difference 9.54e-7. All GIN
 runs passed the script's convergence checks; this does not establish globally
 optimal training.
 
-**Current results.** Unweighted means over the eight tags are RF **−0.033**,
-GIN per-seed **+0.020**, and GIN ensemble **+0.061** time R2. The ensemble
+**Current results.** Unweighted means over the eight tags are RF **−0.034**,
+GIN per-seed **+0.022**, and GIN ensemble **+0.062** time R2. The ensemble
 ΔR2 molecule-bootstrap CI excludes zero in six cells: four favour GIN
 (`a2a`, `egfr_full`, `hivpr`, `mpro`) and two favour RF (`abl1`, `vegfr2`).
 `egfr` and `herg` include zero. These unadjusted 95% intervals condition on the
@@ -959,24 +960,63 @@ scores or from the number of changed labels.
 all 32 jobs ran in isolated remote environments and passed coordinator
 acceptance. Preparation lives in the `retrain/time-asof-2026-10-13` worktree,
 based on main commit `d925163431b419a1b66e2417e8528447f0cbdeb4`. Training used
-frozen source commit `7ce15c1f0849ae69e0ca208f781a9824517eb328`, not the later
-result-publication revision. Durable records are
-`results/time_split/campaign_acceptance.json` and
-`results/time_split/input_manifest_{rf,gin}.json`.
+initial frozen source commit `7ce15c1f0849ae69e0ca208f781a9824517eb328`.
+The hERG repair uses `d13f9125af56028f60e099ec2e914dd2509c239e`. Durable records
+are `results/time_split/campaign_acceptance.json`, which maps each current job
+to its source and manifest, and `input_manifest_{rf,gin}{,_repair}.json`.
+The original manifests and `initial_campaign_acceptance.json` remain historical
+records; their old hERG split is superseded by the repair manifests.
 
 | Host | Responsibility | Observed configuration |
 | --- | --- | --- |
 | M4 MacBook Air, coordinator | Freeze inputs; create and verify transfer bundles; receive, validate and summarize results | 16 GiB RAM / 10 CPU cores; preparation, acceptance and analysis |
-| `ssh m3`, M3 Max MacBook Pro | 8 RF jobs, one target at a time; each job is the existing 12-setting × 5-fold search plus refit | 64 GiB RAM / 16 CPU cores; 4 CV workers for first five targets, 16 for hivpr/mpro/vegfr2; individual forest and BLAS/OpenMP threads = 1 |
+| `ssh m3`, M3 Max MacBook Pro | 8 RF jobs, one target at a time; each job is the existing 12-setting × 5-fold search plus refit | 64 GiB RAM / 16 CPU cores; 4 CV workers for first five targets, 16 for hivpr/mpro/vegfr2 and the hERG repair; individual forest and BLAS/OpenMP threads = 1 |
 | `ssh win4070`, Ubuntu / RTX 4070 Laptop GPU | 24 GIN jobs, one GPU job at a time | 8 GiB VRAM; torch 2.14.0+cu126 / CUDA 12.6; explicit CUDA, batch 128, CPU threads = 2 |
 
 **Artifact distribution:** the `artifacts-v2` release used by
 `scripts/fetch_artifacts.py` has not been republished. Its RF temporal models
 are historical and do not reproduce this campaign. The new RF models remain
 on M3 and in the coordinator's accepted local results; they are gitignored.
-The updated Git artifacts include 24 GIN checkpoints and all 32 prediction
-files, which support recomputing the tables and CIs. RF inference requires
+The updated Git artifacts include 24 GIN checkpoints, all 32 prediction
+files, and the eight frozen temporal splits in
+`results/time_split/inputs/splits.tar.gz`. Its adjacent `manifest.json` records
+archive and member sizes, SHA256 hashes and label IDs. RF inference requires
 an accepted model or retraining from the frozen inputs.
+
+### Recompute temporal statistics from a fresh checkout
+
+After installing `requirements.txt`, run:
+
+```bash
+python scripts/restore_time_inputs.py
+python experiments/paired_bootstrap.py --model gin --splits time --n-boot 10000
+python experiments/time_split_summary.py
+```
+
+These commands need no Release download, raw activity table, fingerprint/graph
+cache or remote machine. The frozen NPZs contain the split indices, as-of labels,
+original labels, publication years and dataset/label signatures needed to validate
+the committed predictions and calculate the train-only constant baseline.
+Restoration checks schema, exactly eight regular archive members, byte hashes,
+internal split signatures and every RF/GIN prediction and metric label version.
+All checks finish before any split is written. Existing different splits and NA
+markers cause an error and remain untouched; use a fresh checkout or inspect and
+archive the conflicting local files explicitly. Matching files are retained.
+The command validates consistency with the checked-out publication, not independent
+authenticity of a third-party package. Use the package from the same Git revision.
+
+Maintainers create a **new** package directory only after accepted predictions
+and metrics have been integrated:
+
+```bash
+python scripts/restore_time_inputs.py --pack --package /path/to/new-input-package
+```
+
+The packing command also requires all eight splits to match all 32 published
+prediction/metric versions. Review its manifest and then publish that complete
+package as `results/time_split/inputs/`; do not reuse an older package for a new
+label generation. Statistical reproduction is separate from rebuilding the
+as-of labels from raw records or retraining the RF/GIN models described below.
 
 ### Frozen inputs and local preparation
 
@@ -993,12 +1033,12 @@ agreement. Rows with no eligible dated exact measurement are excluded:
 | abl1 | 1,387 | 202 | 531 | 0 |
 | egfr | 2,948 | 340 | 1,233 | 39 |
 | egfr_full | 6,848 | 781 | 3,043 | 57 |
-| herg | 4,943 | 1,115 | 2,325 | 20 |
+| herg | 4,944 | 1,115 | 2,325 | 19 |
 | hivpr | 1,812 | 232 | 529 | 0 |
 | mpro | 1,017 | 643 | 1,750 | 0 |
 | vegfr2 | 6,294 | 1,280 | 2,038 | 31 |
 
-The 169 exclusions are eligibility filtering, not prediction failures.
+The 168 exclusions are eligibility filtering, not prediction failures.
 RF fits the training pool only, using its existing shuffled 5-fold selection
 protocol. GIN fits on the same pool, selects its checkpoint on validation,
 and evaluates on test. The no-skill constant baseline uses only the training
@@ -1070,14 +1110,43 @@ RF started with four concurrent CV fits to bound memory. At the user's
 request, the last three targets (`hivpr`, `mpro`, `vegfr2`) used 16; all
 individual forests still used one job. This concurrency change is recorded
 per job and did not change the search space, folds or model parameters.
-RF wall time was 7,071 seconds (117.9 minutes); the 24 GIN fits completed in
+Initial RF wall time was 7,071 seconds (117.9 minutes); the initial 24 GIN fits completed in
 225 seconds (3.75 minutes), excluding environment setup and artifact transfer.
 All 24 GIN fits used the frozen recipe and none triggered a convergence flag.
+
+### Cached-parent-key repair (2026-10-14)
+
+Feature-cache SMILES are already normalized by cleaning. Applying the parent
+transform again is not necessarily idempotent: for hERG `CHEMBL2035183`, it
+changed the key and hid the dated exact 7,200 nM measurement from 2012. The
+split generator now normalizes raw records once and joins them to unchanged
+cached parent keys. A real-compound regression test covers this case.
+
+Rebuilding all eight splits changed only hERG: training rows increased from
+4,943 to 4,944 and exclusions fell from 20 to 19. Validation (1,115) and test
+(2,325) rows and labels did not change. The other seven splits have identical
+arrays and label IDs, with original file bytes retained. Their 28 completed
+jobs remain valid. `repair_split_comparison.json` records the comparison.
+The four prescribed hERG fits use the same hyperparameters and seeds; only
+RF outer CV concurrency changes from four to sixteen workers. This rerun is
+required by the corrected training input, not chosen from test performance.
+The repair took 1,625 seconds for RF and 47 seconds for the three GIN jobs,
+excluding transfer and acceptance. RF checkpoint replay matched exactly;
+maximum CUDA GIN prediction replay error was 9.54e-7. On hERG, RF R2 is
+−0.056, mean single-seed GIN R2 is −0.065±0.033, and ensemble GIN R2 is
+−0.034. The ensemble ΔR2 is +0.022 with 95% CI [−0.016, +0.061], still
+including zero. Logs are under `logs/time_asof_repair_20261014/`.
 
 ### Recovery and acceptance
 
 The worker creates `results/time_campaign/{role}_{tag}_seed{seed}/status.json`,
 an attempt log and an immutable artifact snapshot for every executed job.
+Each attempt trains in a fresh source/input directory with no old model or
+prediction outputs. NA state and source/input/manifest hashes are checked before
+training, before resume and again before publication; an empty or partial
+training run cannot succeed by reusing an old file. Validated outputs are
+snapshotted, with non-time metric entries preserved, and a publication exception
+rolls back files already replaced.
 It hashes source, data, parameters and environment. A completed job is skipped
 only when that provenance and both canonical/snapshot output hashes match.
 Failed or incompatible jobs require inspection and explicit `--rerun`.

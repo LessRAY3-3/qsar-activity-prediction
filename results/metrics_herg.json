@@ -74,13 +74,13 @@
   "tag": "herg",
   "target": "Voltage-gated inwardly rectifying potassium channel KCNH2",
   "time": {
-    "label_id": "cfa8bc4a32d0b179943f36a1234f46c2ea95e6518ae1d368609fd3520fb1f8d4",
-    "mae": 0.6957801125776217,
-    "r2": -0.046743799717638757,
-    "rmse": 0.9721964036248725,
+    "label_id": "369e86d94fe32622d959806abc5379f5487ab2f63282a4642af6c5003c628e93",
+    "mae": 0.6984463653677611,
+    "r2": -0.055579351490586903,
+    "rmse": 0.9762909303705097,
     "runtime": {
       "cv_backend": "loky",
-      "rf_jobs": 4,
+      "rf_jobs": 16,
       "seed": 42
     },
     "split": "time"

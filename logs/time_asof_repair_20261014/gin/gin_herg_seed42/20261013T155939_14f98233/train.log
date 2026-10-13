@@ -1,0 +1,17 @@
+/home/lessray/qsar-campaigns/time-asof-20261013-7ce15c1-gin/.venv/lib/python3.12/site-packages/torch/jit/_script.py:1491: FutureWarning: `torch.jit.script` is deprecated. Please switch to `torch.compile` or `torch.export`.
+  warnings.warn(
+[herg/time] device=cuda  y_mean=5.412 y_std=0.978
+/home/lessray/qsar-campaigns/time-asof-repair-d13f912-gin/work/results/time_campaign/gin_herg_seed42/20261013T155939_14f98233/work/scripts/gnn_03_train_gin.py:273: UserWarning: Converting a tensor with requires_grad=True to a scalar may lead to unexpected behavior.
+Consider using tensor.detach() first. (Triggered internally at /__w/pytorch/pytorch/torch/csrc/autograd/generated/python_variable_methods.cpp:820.)
+  total += float(loss) * len(batch.y)
+  epoch   1  train_mse=0.9329  valid_rmse=0.8594  lr=1.0e-03 *
+  epoch   2  train_mse=0.8115  valid_rmse=0.7470  lr=1.0e-03 *
+  epoch  10  train_mse=0.6151  valid_rmse=0.7427  lr=1.0e-03 *
+  epoch  13  train_mse=0.5760  valid_rmse=0.7311  lr=1.0e-03 *
+  epoch  20  train_mse=0.5334  valid_rmse=0.7765  lr=1.0e-03
+  epoch  23  train_mse=0.4584  valid_rmse=0.7290  lr=5.0e-04 *
+  epoch  30  train_mse=0.4252  valid_rmse=0.7412  lr=5.0e-04
+  epoch  40  train_mse=0.3781  valid_rmse=0.7573  lr=1.3e-04
+  early stop at epoch 43 (best epoch 23)
+  TEST  R2=-0.0389  RMSE=0.9686  MAE=0.6660  (13s)
+  saved -> results/gnn_models/herg_gin_time.pt, results/gnn_preds_herg_time.npz, results/gnn_metrics_herg.json

@@ -1,26 +1,30 @@
 {
-  "accepted_at": "2026-10-13T15:26:56.210709+00:00",
+  "accepted_at": "2026-10-13T16:41:32.068641+00:00",
   "analysis": {
     "delta_convention": "point=ensemble_mean-pred_R2;ci=ensemble_mean-pred_R2",
     "files": [
       {
         "path": "results/time_split/summary.csv",
-        "sha256": "79f25dcb12e628c7f09233c7bdd01f15d9264d51c6d919837033180f325a4649"
+        "sha256": "6c28bef94b70cf027ca83a3bd578b297d627bf6ada2a4919aff87435f0b05c3d"
       },
       {
         "path": "results/significance/summary_time.csv",
-        "sha256": "160fd47700ea7a3335d346db6c3797d94abd9b4d38a2cb353e6683e34837dce9"
+        "sha256": "8afc59a243b838e570c372e38a17237f6d2d75c56fb456ab83fd41afc6138722"
       },
       {
         "path": "figures/time_split/panel_3splits.png",
-        "sha256": "d4acdab0523b9decd19bdb6a66d808176b338b19e2f5a67e4ccbb3ea7e83a118"
+        "sha256": "5fe784f1e996ce7e82b3232db89d00bfbecd3567a5f2c8e15e23693655737876"
       },
       {
         "path": "figures/significance/ci_panel_time.png",
-        "sha256": "3cb7028ff4d19ac1139af7b46f71f2221e9b85429ad10cda6fb165422ec43bdd"
+        "sha256": "2ab5d3f0bd8a0201161902228cccf6f07e46c64927359068448a1cba05aef233"
       }
     ],
-    "paired_bootstrap_replicates": 10000
+    "frozen_input_manifest": "results/time_split/inputs/manifest.json",
+    "frozen_input_manifest_sha256": "d341acc273682f75482370359597ed7970387ea2ca174e0c8ba7d6823d9dc697",
+    "label_audit_sha256": "df4f9b0d4fea753d3065757263b82354d14b4897a9035de58dceb342ca587d49",
+    "paired_bootstrap_replicates": 10000,
+    "source_commit": "0b4fb29"
   },
   "checks": {
     "checkpoint_loading": true,
@@ -33,13 +37,14 @@
   "gin_convergence_flags": 0,
   "gin_jobs": 24,
   "gin_max_cuda_replay_abs_error": 9.5367431640625e-07,
-  "gin_wall_seconds": 225.281504,
   "hosts": {
     "coordinator": "M4 MacBook Air, 10 CPU cores, 16 GiB RAM",
     "gin": "RTX 4070 Laptop GPU, 8 GiB VRAM, CUDA 12.6",
     "rf": "M3 Max, 16 CPU cores, 64 GiB RAM"
   },
-  "independent_review": {
+  "initial_campaign_acceptance": "results/time_split/initial_campaign_acceptance.json",
+  "initial_gin_wall_seconds": 225.281504,
+  "initial_independent_review": {
     "blocking_findings": 0,
     "cpu_threads": 2,
     "gin_best_validation_rmse_max_abs_error": 1.1920928955078125e-07,
@@ -48,6 +53,18 @@
     "jobs_rechecked": 32,
     "non_time_metric_entries_compared_with_source_commit": true,
     "validation_batch_size": 512
+  },
+  "initial_remote_return_archive_sha256": {
+    "gin": "928d7245b7fe4735a2ab4dd7109ca1e2edf732c5afa946a5aa699b24f7e3f304",
+    "rf": "dca7e7f77dba41f50f02cd3bdaf0237a7d52742f310fa4983130c9225bb7bbc7"
+  },
+  "initial_rf_wall_seconds": 7071.198738,
+  "initial_source_commit": "7ce15c1f0849ae69e0ca208f781a9824517eb328",
+  "initial_verification": {
+    "diff_check": "passed",
+    "pytest_passed": 292,
+    "pytest_warnings": 3,
+    "ruff": "passed"
   },
   "integrated_files": [
     {
@@ -68,7 +85,7 @@
     },
     {
       "path": "figures/pred_vs_actual_time_herg.png",
-      "sha256": "8190f79a75252ea7ccb4c6a5f3d568d8309c6dcaff637fbcabc0cd10221b19de"
+      "sha256": "8fdbbe79ead6fc8e72a17b1b2fe0b6010a63122d16429ee746c6c2fbd00eed92"
     },
     {
       "path": "figures/pred_vs_actual_time_hivpr.png",
@@ -100,7 +117,7 @@
     },
     {
       "path": "models/rf_time_split_herg.joblib",
-      "sha256": "4d2caecf5aeab36f9a7ea0dce00542fc4a0a3e11ad9689cacd750f70a9665986"
+      "sha256": "514a3f9a4aa01e82801e241d46113fb171d18f3446d6473eff78821902ac7908"
     },
     {
       "path": "models/rf_time_split_hivpr.joblib",
@@ -164,15 +181,15 @@
     },
     {
       "path": "results/gnn_metrics_herg.json",
-      "sha256": "8bc30a25cb84b21e007aa74094b102272c3fd6ff3f45178392ce3780f8d6a5dd"
+      "sha256": "6144253bc9b81ee0a3ba668d0968fcf82ef8590cb0cb0955194267928372c7e9"
     },
     {
       "path": "results/gnn_metrics_herg_seed1.json",
-      "sha256": "50aa3fa4ca7407ff357a7f436ba670fb9b898fe1e90a32508264e9db6a4953d4"
+      "sha256": "23ea5c3c7200bc7219ebed82dab837b70873007443e06e5c9b1fe4bf6dcc78f8"
     },
     {
       "path": "results/gnn_metrics_herg_seed2.json",
-      "sha256": "83fef36942a1ae1293774fc11265ff277d7fff50f13a8023102df0a4cda72c1f"
+      "sha256": "d3f317990148698abc13c7c78f7c4873ae3b8d03e4060293fac800785733794f"
     },
     {
       "path": "results/gnn_metrics_hivpr.json",
@@ -260,15 +277,15 @@
     },
     {
       "path": "results/gnn_models/herg_gin_time.pt",
-      "sha256": "6f10f789bfbadff37dfe9bb8e88bc16274c200a3f8b99269ebef791c54abd8f3"
+      "sha256": "71a6b5e6705bde0ba75b2d27d6ccdefa9fb9e745d532fe27b5cc88115342222b"
     },
     {
       "path": "results/gnn_models/herg_gin_time_seed1.pt",
-      "sha256": "b417fea5150a7a6480ab265db92a833a46230b4b4d6f21449582d8a0710462a1"
+      "sha256": "76f3188bef46b49d9f4754a6053a6cb6687b901f639b88ee01a700c0f3cf492e"
     },
     {
       "path": "results/gnn_models/herg_gin_time_seed2.pt",
-      "sha256": "5c8653814cdc97bcb26ae45c64ac8650dd92b5c80164078408e2af12d1a60e49"
+      "sha256": "b46ef10767d23d14ffea48476d7716fcec0f2da543907d694a35bfdbb61ba8e7"
     },
     {
       "path": "results/gnn_models/hivpr_gin_time.pt",
@@ -356,15 +373,15 @@
     },
     {
       "path": "results/gnn_preds_herg_time.npz",
-      "sha256": "2c130011b907d132bca2f65fe38732f7064ec201c8fb12ff26f6a6939b71f0bf"
+      "sha256": "20f29327532fbb1fc3435d2faa6bfb573378c217c53612ab03941c38de84095c"
     },
     {
       "path": "results/gnn_preds_herg_time_seed1.npz",
-      "sha256": "5fcdc857b2bbd2c4e04c29cd33dc4dd6403f9725ffbbd21c15e821642814de66"
+      "sha256": "ca40e88f985afd1f0f14073566c10fc717669e3474765cbde42207bdebf2785a"
     },
     {
       "path": "results/gnn_preds_herg_time_seed2.npz",
-      "sha256": "63befca063071e69429b0dce365f6c0728fe5a991a100d58981df0cd947fa1d6"
+      "sha256": "43e002097d0a90f17a923d0e02f4a48f04d87cb4f2c468c5a852f720b2674ea3"
     },
     {
       "path": "results/gnn_preds_hivpr_time.npz",
@@ -420,7 +437,7 @@
     },
     {
       "path": "results/metrics_herg.json",
-      "sha256": "ec4a78525a6df45155a17e576e04f3d446ac7f7dae4254dad023f91986f08b9e"
+      "sha256": "7fe0e44a3da8d79f3fb313a236dbdd6149c603a6c27f2537ff983709e2520680"
     },
     {
       "path": "results/metrics_hivpr.json",
@@ -452,7 +469,7 @@
     },
     {
       "path": "results/rf_preds_herg_time.npz",
-      "sha256": "b9360f7c35bc20a18db3b90c3638219d980e78289bc4d94a3c296f1ec453b2a1"
+      "sha256": "f4818b247dd6ba553de567f532f832b19cb5d0d42a876035f7934e1d4055c47d"
     },
     {
       "path": "results/rf_preds_hivpr_time.npz",
@@ -471,6 +488,7 @@
     {
       "elapsed_seconds": 116.19728720800049,
       "finished_at": "2026-10-13T12:28:42.801282+00:00",
+      "input_manifest": "results/time_split/input_manifest_rf.json",
       "label_id": "b35580bb601adf4fb9e604dee3dd0f8989d11ebd4f14eaafc3e25a4e40f44b5b",
       "mae": 0.9650510256033085,
       "n_test": 802,
@@ -540,6 +558,7 @@
       "rmse": 1.1761679676593964,
       "role": "rf",
       "signature": "f2cd9bca90dc62fa4be9f639915e673d21865168cbd204dc25834a296e9379c6",
+      "source_commit": "7ce15c1f0849ae69e0ca208f781a9824517eb328",
       "started_at": "2026-10-13T12:26:46.603780+00:00",
       "state": "success",
       "tag": "a2a",
@@ -548,6 +567,7 @@
     {
       "elapsed_seconds": 1970.8538322919994,
       "finished_at": "2026-10-13T13:01:33.689510+00:00",
+      "input_manifest": "results/time_split/input_manifest_rf.json",
       "label_id": "09e7659309a88d077bdad0001daf441245aa9b9f88573d2cf755cd8697b3680b",
       "mae": 1.3453344574301194,
       "n_test": 3043,
@@ -617,6 +637,7 @@
       "rmse": 1.584873832435118,
       "role": "rf",
       "signature": "7cc2f21da72ce3d9a6ff48c5fd64e251dc1d4f37bbf21c51c445abbc6117ecb2",
+      "source_commit": "7ce15c1f0849ae69e0ca208f781a9824517eb328",
       "started_at": "2026-10-13T12:28:42.833890+00:00",
       "state": "success",
       "tag": "egfr_full",
@@ -625,6 +646,7 @@
     {
       "elapsed_seconds": 215.9423139579958,
       "finished_at": "2026-10-13T13:05:09.680556+00:00",
+      "input_manifest": "results/time_split/input_manifest_rf.json",
       "label_id": "999bd88ee0bf093ad765dd8c7769f26756c3f4a47935e0de22391af8feb6e7c3",
       "mae": 0.8868448061318323,
       "n_test": 531,
@@ -694,6 +716,7 @@
       "rmse": 1.0296852351157821,
       "role": "rf",
       "signature": "9c58c339b8322183f37daca7a0a85ab41d7fe6d057c994cdbe2e2a3e9935f0b2",
+      "source_commit": "7ce15c1f0849ae69e0ca208f781a9824517eb328",
       "started_at": "2026-10-13T13:01:33.737956+00:00",
       "state": "success",
       "tag": "abl1",
@@ -702,6 +725,7 @@
     {
       "elapsed_seconds": 588.4045981250019,
       "finished_at": "2026-10-13T13:14:58.137472+00:00",
+      "input_manifest": "results/time_split/input_manifest_rf.json",
       "label_id": "b181f531e8ac9454c8ce55a1669a28259e7d3aa65852a74ce38eac44be846761",
       "mae": 0.9223231841139535,
       "n_test": 1233,
@@ -771,91 +795,16 @@
       "rmse": 1.1871786023910091,
       "role": "rf",
       "signature": "35040a3d765499384478e4db465999d58b624e5ff819264fa3bf6a1e35243000",
+      "source_commit": "7ce15c1f0849ae69e0ca208f781a9824517eb328",
       "started_at": "2026-10-13T13:05:09.728957+00:00",
       "state": "success",
       "tag": "egfr",
       "train_mean_constant_r2": -0.05441273324492779
     },
     {
-      "elapsed_seconds": 2254.270277415999,
-      "finished_at": "2026-10-13T13:52:32.464196+00:00",
-      "label_id": "cfa8bc4a32d0b179943f36a1234f46c2ea95e6518ae1d368609fd3520fb1f8d4",
-      "mae": 0.6957801125776217,
-      "n_test": 2325,
-      "n_train": 4943,
-      "prediction_replay_max_abs_error": 0.0,
-      "provenance": {
-        "bundle_manifest": {
-          "sha256": "7f898588665878ec5d9f4f34beeb500300f7f30507beca212b7d2733b4d79f71",
-          "source_git_head": "7ce15c1f0849ae69e0ca208f781a9824517eb328"
-        },
-        "code": {
-          "scripts/04_train_and_evaluate.py": "a8cb621f18279ab7ea0a0ca515ef45bf52d71bf1fb91a50993d66b13709ae329",
-          "scripts/qsar_common.py": "86be4f6672aab3a9564a8e0c7e2213f0cab870154f2ea9b68b13b32c41bb250c",
-          "scripts/run_time_campaign.py": "97a3f38ccd610691db05222c37eb6c71d015936f76e13a3f6d1798067baa5fc6",
-          "scripts/time_labels.py": "6c88a8a3cede0bf10d69edcbb8d51bc5f004d85293bd34e0a6ccfc659361d9ca"
-        },
-        "command": [
-          "scripts/04_train_and_evaluate.py",
-          "--split",
-          "time"
-        ],
-        "environment": {
-          "packages": {
-            "joblib": "1.6.0",
-            "numpy": "2.5.3",
-            "rdkit": "2026.3.6",
-            "scikit-learn": "1.9.1",
-            "torch": "unavailable",
-            "torch-geometric": "unavailable"
-          },
-          "platform": "macOS-27.0-arm64-arm-64bit",
-          "python": "3.12.14",
-          "variables": {
-            "CUBLAS_WORKSPACE_CONFIG": null,
-            "CUDA_VISIBLE_DEVICES": null,
-            "MKL_NUM_THREADS": "1",
-            "OMP_NUM_THREADS": "1",
-            "OPENBLAS_NUM_THREADS": "1",
-            "PYTHONHASHSEED": null,
-            "QSAR_CV_BACKEND": "loky",
-            "QSAR_RF_JOBS": "4"
-          }
-        },
-        "hyperparameters": {
-          "cv_folds": 5,
-          "device": "cpu",
-          "grid": "PARAM_GRID in hashed RF source",
-          "seed": 42
-        },
-        "inputs": {
-          "data/processed/herg_fingerprints.npz": "78bed5f5f0816091ade54f658d1eaf5479cecd71905ded194e57527a8da71baa",
-          "data/processed/splits/herg_time.npz": "fdeb6f3b6fa5b7e2eaaa2fc5f2e1af3146a2fc6c092a4034c0bdc17bd7c28790"
-        },
-        "label_id": "cfa8bc4a32d0b179943f36a1234f46c2ea95e6518ae1d368609fd3520fb1f8d4",
-        "role": "rf",
-        "schema": 1,
-        "tag": "herg"
-      },
-      "r2": -0.046743799717638757,
-      "returned_artifact_sha256": {
-        "figures/pred_vs_actual_time_herg.png": "8190f79a75252ea7ccb4c6a5f3d568d8309c6dcaff637fbcabc0cd10221b19de",
-        "models/rf_time_split_herg.joblib": "4d2caecf5aeab36f9a7ea0dce00542fc4a0a3e11ad9689cacd750f70a9665986",
-        "results/metrics_herg.json": "1bf1df0d13665c2021b723275073141e07dad82bb85fb45d85b66f6f30c439a3",
-        "results/rf_preds_herg_time.npz": "b9360f7c35bc20a18db3b90c3638219d980e78289bc4d94a3c296f1ec453b2a1"
-      },
-      "rf_jobs": 4,
-      "rmse": 0.9721964036248725,
-      "role": "rf",
-      "signature": "c55fa996ab9bd9eaa3632cf06a47fa0e2c8621da6473869c10f1b0fcdb4e27e1",
-      "started_at": "2026-10-13T13:14:58.187272+00:00",
-      "state": "success",
-      "tag": "herg",
-      "train_mean_constant_r2": -0.002632902392021741
-    },
-    {
       "elapsed_seconds": 134.16837850000593,
       "finished_at": "2026-10-13T13:54:47.447410+00:00",
+      "input_manifest": "results/time_split/input_manifest_rf.json",
       "label_id": "66a8a839e6cff2f4d7b9664c286fd8d2b716b784faab4aa60d7bf5e74d94eec6",
       "mae": 1.4039708164781963,
       "n_test": 529,
@@ -925,6 +874,7 @@
       "rmse": 1.7573408496671954,
       "role": "rf",
       "signature": "8b049d0c6bc52442bc1c2cadfb91ea0a9020f8848148bfd8b04c5cc554410fdf",
+      "source_commit": "7ce15c1f0849ae69e0ca208f781a9824517eb328",
       "started_at": "2026-10-13T13:52:33.278534+00:00",
       "state": "success",
       "tag": "hivpr",
@@ -933,6 +883,7 @@
     {
       "elapsed_seconds": 78.324686208005,
       "finished_at": "2026-10-13T13:56:05.806780+00:00",
+      "input_manifest": "results/time_split/input_manifest_rf.json",
       "label_id": "75bb580c77d0dbe64c7aed1178c0dbc2505f44f3c3c91cc0344a95e8c305c17c",
       "mae": 0.8205771422854266,
       "n_test": 1750,
@@ -1002,6 +953,7 @@
       "rmse": 1.0503746926423576,
       "role": "rf",
       "signature": "b4ed5973abfbeffe07ccf81710e45fb18eaa3d8c1f1250a538ac074876ebb29c",
+      "source_commit": "7ce15c1f0849ae69e0ca208f781a9824517eb328",
       "started_at": "2026-10-13T13:54:47.481577+00:00",
       "state": "success",
       "tag": "mpro",
@@ -1010,6 +962,7 @@
     {
       "elapsed_seconds": 1711.9424697499999,
       "finished_at": "2026-10-13T14:24:37.802518+00:00",
+      "input_manifest": "results/time_split/input_manifest_rf.json",
       "label_id": "0257d96ee9bd87e1664b7ac0bfb946a556acdd78ef5389fbb62256c0462beb78",
       "mae": 0.949414680355855,
       "n_test": 2038,
@@ -1079,6 +1032,7 @@
       "rmse": 1.1669492680626685,
       "role": "rf",
       "signature": "43599f659e14e0fc182c588458179f6258b4ff0ca9af0ca86bcb61ba86ab611b",
+      "source_commit": "7ce15c1f0849ae69e0ca208f781a9824517eb328",
       "started_at": "2026-10-13T13:56:05.839401+00:00",
       "state": "success",
       "tag": "vegfr2",
@@ -1090,6 +1044,7 @@
       "device": "cuda",
       "elapsed_seconds": 5.9729992469999615,
       "finished_at": "2026-10-13T15:14:33.863300+00:00",
+      "input_manifest": "results/time_split/input_manifest_gin.json",
       "label_id": "b35580bb601adf4fb9e604dee3dd0f8989d11ebd4f14eaafc3e25a4e40f44b5b",
       "mae": 0.7875807881355286,
       "prediction_replay_max_abs_error": 9.5367431640625e-07,
@@ -1187,6 +1142,7 @@
       "role": "gin",
       "seed": 42,
       "signature": "99b0731c970329425f5557ed8801270adef8b430a0bff8da952dfac092047aa1",
+      "source_commit": "7ce15c1f0849ae69e0ca208f781a9824517eb328",
       "started_at": "2026-10-13T15:14:27.890009+00:00",
       "state": "success",
       "tag": "a2a"
@@ -1197,6 +1153,7 @@
       "device": "cuda",
       "elapsed_seconds": 5.626597783999841,
       "finished_at": "2026-10-13T15:14:57.185547+00:00",
+      "input_manifest": "results/time_split/input_manifest_gin.json",
       "label_id": "b35580bb601adf4fb9e604dee3dd0f8989d11ebd4f14eaafc3e25a4e40f44b5b",
       "mae": 0.8622844219207764,
       "prediction_replay_max_abs_error": 4.76837158203125e-07,
@@ -1296,6 +1253,7 @@
       "role": "gin",
       "seed": 1,
       "signature": "a30b0ebc2d81aa6bd7ab4f6ebd57bafcc7466decb86266798a01beac868a708c",
+      "source_commit": "7ce15c1f0849ae69e0ca208f781a9824517eb328",
       "started_at": "2026-10-13T15:14:51.558624+00:00",
       "state": "success",
       "tag": "a2a"
@@ -1306,6 +1264,7 @@
       "device": "cuda",
       "elapsed_seconds": 3.5618439939999007,
       "finished_at": "2026-10-13T15:15:00.751995+00:00",
+      "input_manifest": "results/time_split/input_manifest_gin.json",
       "label_id": "b35580bb601adf4fb9e604dee3dd0f8989d11ebd4f14eaafc3e25a4e40f44b5b",
       "mae": 0.8361777067184448,
       "prediction_replay_max_abs_error": 4.76837158203125e-07,
@@ -1405,6 +1364,7 @@
       "role": "gin",
       "seed": 2,
       "signature": "7f78ce96d28f10a1a3bf965577f8c1d0e33a70e8e934de1868abdf87cb0e05f8",
+      "source_commit": "7ce15c1f0849ae69e0ca208f781a9824517eb328",
       "started_at": "2026-10-13T15:14:57.189848+00:00",
       "state": "success",
       "tag": "a2a"
@@ -1415,6 +1375,7 @@
       "device": "cuda",
       "elapsed_seconds": 16.816397526999936,
       "finished_at": "2026-10-13T15:14:50.684239+00:00",
+      "input_manifest": "results/time_split/input_manifest_gin.json",
       "label_id": "09e7659309a88d077bdad0001daf441245aa9b9f88573d2cf755cd8697b3680b",
       "mae": 1.123979926109314,
       "prediction_replay_max_abs_error": 9.5367431640625e-07,
@@ -1512,6 +1473,7 @@
       "role": "gin",
       "seed": 42,
       "signature": "e383f7bd2b0b163179e8ae310b75e6030c3642bef0382a44ed175e1d7ea7a66e",
+      "source_commit": "7ce15c1f0849ae69e0ca208f781a9824517eb328",
       "started_at": "2026-10-13T15:14:33.867661+00:00",
       "state": "success",
       "tag": "egfr_full"
@@ -1522,6 +1484,7 @@
       "device": "cuda",
       "elapsed_seconds": 13.120864383000026,
       "finished_at": "2026-10-13T15:15:13.878196+00:00",
+      "input_manifest": "results/time_split/input_manifest_gin.json",
       "label_id": "09e7659309a88d077bdad0001daf441245aa9b9f88573d2cf755cd8697b3680b",
       "mae": 1.024499773979187,
       "prediction_replay_max_abs_error": 9.5367431640625e-07,
@@ -1621,6 +1584,7 @@
       "role": "gin",
       "seed": 1,
       "signature": "390de1c9c856cee56768a18dab7bec071dad7e23d151e83cb7ffa80ec11f2981",
+      "source_commit": "7ce15c1f0849ae69e0ca208f781a9824517eb328",
       "started_at": "2026-10-13T15:15:00.757017+00:00",
       "state": "success",
       "tag": "egfr_full"
@@ -1631,6 +1595,7 @@
       "device": "cuda",
       "elapsed_seconds": 11.41244034600004,
       "finished_at": "2026-10-13T15:15:25.295366+00:00",
+      "input_manifest": "results/time_split/input_manifest_gin.json",
       "label_id": "09e7659309a88d077bdad0001daf441245aa9b9f88573d2cf755cd8697b3680b",
       "mae": 1.0545932054519653,
       "prediction_replay_max_abs_error": 4.76837158203125e-07,
@@ -1730,6 +1695,7 @@
       "role": "gin",
       "seed": 2,
       "signature": "231040cf8049ec16ca1b3b00749309b6c268ae598854de8dda17e04fb02c4c1d",
+      "source_commit": "7ce15c1f0849ae69e0ca208f781a9824517eb328",
       "started_at": "2026-10-13T15:15:13.882611+00:00",
       "state": "success",
       "tag": "egfr_full"
@@ -1740,6 +1706,7 @@
       "device": "cuda",
       "elapsed_seconds": 5.08261340099989,
       "finished_at": "2026-10-13T15:15:30.382467+00:00",
+      "input_manifest": "results/time_split/input_manifest_gin.json",
       "label_id": "999bd88ee0bf093ad765dd8c7769f26756c3f4a47935e0de22391af8feb6e7c3",
       "mae": 1.2706624269485474,
       "prediction_replay_max_abs_error": 9.5367431640625e-07,
@@ -1837,6 +1804,7 @@
       "role": "gin",
       "seed": 42,
       "signature": "2c243f49e021e1057a271c315ce90d55f07fa8e379367c12a20e8a6546284615",
+      "source_commit": "7ce15c1f0849ae69e0ca208f781a9824517eb328",
       "started_at": "2026-10-13T15:15:25.299679+00:00",
       "state": "success",
       "tag": "abl1"
@@ -1847,6 +1815,7 @@
       "device": "cuda",
       "elapsed_seconds": 5.759350812000093,
       "finished_at": "2026-10-13T15:15:36.146448+00:00",
+      "input_manifest": "results/time_split/input_manifest_gin.json",
       "label_id": "999bd88ee0bf093ad765dd8c7769f26756c3f4a47935e0de22391af8feb6e7c3",
       "mae": 0.9113582372665405,
       "prediction_replay_max_abs_error": 9.5367431640625e-07,
@@ -1946,6 +1915,7 @@
       "role": "gin",
       "seed": 1,
       "signature": "fbd74bb3f1074735e417843f2f9aa82aa982711f3d1e99e0d6b9c7af9bac7244",
+      "source_commit": "7ce15c1f0849ae69e0ca208f781a9824517eb328",
       "started_at": "2026-10-13T15:15:30.386827+00:00",
       "state": "success",
       "tag": "abl1"
@@ -1956,6 +1926,7 @@
       "device": "cuda",
       "elapsed_seconds": 5.098912302999906,
       "finished_at": "2026-10-13T15:15:41.249952+00:00",
+      "input_manifest": "results/time_split/input_manifest_gin.json",
       "label_id": "999bd88ee0bf093ad765dd8c7769f26756c3f4a47935e0de22391af8feb6e7c3",
       "mae": 1.2550756931304932,
       "prediction_replay_max_abs_error": 9.5367431640625e-07,
@@ -2055,6 +2026,7 @@
       "role": "gin",
       "seed": 2,
       "signature": "450ea261ae8a5441829d51bff16e12461e93af8fead096d06e966d674ae5131f",
+      "source_commit": "7ce15c1f0849ae69e0ca208f781a9824517eb328",
       "started_at": "2026-10-13T15:15:36.150737+00:00",
       "state": "success",
       "tag": "abl1"
@@ -2065,6 +2037,7 @@
       "device": "cuda",
       "elapsed_seconds": 9.176521799000056,
       "finished_at": "2026-10-13T15:15:50.431115+00:00",
+      "input_manifest": "results/time_split/input_manifest_gin.json",
       "label_id": "b181f531e8ac9454c8ce55a1669a28259e7d3aa65852a74ce38eac44be846761",
       "mae": 0.9531881809234619,
       "prediction_replay_max_abs_error": 9.5367431640625e-07,
@@ -2162,6 +2135,7 @@
       "role": "gin",
       "seed": 42,
       "signature": "36dff5348191e53078552e5c61b29e694c1d85abe96204d847f08a6d5be37715",
+      "source_commit": "7ce15c1f0849ae69e0ca208f781a9824517eb328",
       "started_at": "2026-10-13T15:15:41.254315+00:00",
       "state": "success",
       "tag": "egfr"
@@ -2172,6 +2146,7 @@
       "device": "cuda",
       "elapsed_seconds": 10.691109835000134,
       "finished_at": "2026-10-13T15:16:01.126608+00:00",
+      "input_manifest": "results/time_split/input_manifest_gin.json",
       "label_id": "b181f531e8ac9454c8ce55a1669a28259e7d3aa65852a74ce38eac44be846761",
       "mae": 0.9697027802467346,
       "prediction_replay_max_abs_error": 9.5367431640625e-07,
@@ -2271,6 +2246,7 @@
       "role": "gin",
       "seed": 1,
       "signature": "7d17a208b9645c6416e2bf8b4498d5163f2310476fd0fb871a421124e5e3ed6c",
+      "source_commit": "7ce15c1f0849ae69e0ca208f781a9824517eb328",
       "started_at": "2026-10-13T15:15:50.435337+00:00",
       "state": "success",
       "tag": "egfr"
@@ -2281,6 +2257,7 @@
       "device": "cuda",
       "elapsed_seconds": 7.268777870000122,
       "finished_at": "2026-10-13T15:16:08.399978+00:00",
+      "input_manifest": "results/time_split/input_manifest_gin.json",
       "label_id": "b181f531e8ac9454c8ce55a1669a28259e7d3aa65852a74ce38eac44be846761",
       "mae": 0.9931879043579102,
       "prediction_replay_max_abs_error": 9.5367431640625e-07,
@@ -2380,334 +2357,10 @@
       "role": "gin",
       "seed": 2,
       "signature": "e27a8ec1effa15f4e1f704d9005dc15482e0d62b8a9df7040df8c96614ff1851",
+      "source_commit": "7ce15c1f0849ae69e0ca208f781a9824517eb328",
       "started_at": "2026-10-13T15:16:01.130919+00:00",
       "state": "success",
       "tag": "egfr"
-    },
-    {
-      "best_epoch": 13,
-      "convergence_flag": false,
-      "device": "cuda",
-      "elapsed_seconds": 12.924699229999987,
-      "finished_at": "2026-10-13T15:16:21.329315+00:00",
-      "label_id": "cfa8bc4a32d0b179943f36a1234f46c2ea95e6518ae1d368609fd3520fb1f8d4",
-      "mae": 0.6600233316421509,
-      "prediction_replay_max_abs_error": 4.76837158203125e-07,
-      "provenance": {
-        "bundle_manifest": {
-          "sha256": "880bb231510b1f89cdb5277ec56ca37692b9fee31e41d6483c8d7a18d762d305",
-          "source_git_head": "7ce15c1f0849ae69e0ca208f781a9824517eb328"
-        },
-        "code": {
-          "scripts/gnn_03_train_gin.py": "8267a295abc303ae66be276b6045ad2a4043d41ed2d02c59004b0ae5841da360",
-          "scripts/gnn_graph_dataset.py": "e004eefea627c97f379dcded339843bdd3318c790ff390a58ba6da7c883a1fea",
-          "scripts/qsar_common.py": "86be4f6672aab3a9564a8e0c7e2213f0cab870154f2ea9b68b13b32c41bb250c",
-          "scripts/run_time_campaign.py": "97a3f38ccd610691db05222c37eb6c71d015936f76e13a3f6d1798067baa5fc6",
-          "scripts/time_labels.py": "6c88a8a3cede0bf10d69edcbb8d51bc5f004d85293bd34e0a6ccfc659361d9ca"
-        },
-        "command": [
-          "scripts/gnn_03_train_gin.py",
-          "--tag",
-          "herg",
-          "--split",
-          "time",
-          "--model",
-          "gin",
-          "--seed",
-          "42",
-          "--hidden",
-          "128",
-          "--num-layers",
-          "4",
-          "--dropout",
-          "0.2",
-          "--lr",
-          "0.001",
-          "--batch-size",
-          "128",
-          "--epochs",
-          "100",
-          "--patience",
-          "20",
-          "--min-epochs",
-          "0",
-          "--device",
-          "cuda"
-        ],
-        "environment": {
-          "packages": {
-            "joblib": "1.6.0",
-            "numpy": "2.5.3",
-            "rdkit": "2026.3.6",
-            "scikit-learn": "1.9.1",
-            "torch": "2.14.0+cu126",
-            "torch-geometric": "2.8.0.post1"
-          },
-          "platform": "Linux-7.0.0-38-generic-x86_64-with-glibc2.39",
-          "python": "3.12.15",
-          "variables": {
-            "CUBLAS_WORKSPACE_CONFIG": null,
-            "CUDA_VISIBLE_DEVICES": "0",
-            "MKL_NUM_THREADS": "2",
-            "OMP_NUM_THREADS": "2",
-            "OPENBLAS_NUM_THREADS": "2",
-            "PYTHONHASHSEED": null,
-            "QSAR_CV_BACKEND": null,
-            "QSAR_RF_JOBS": null
-          }
-        },
-        "hyperparameters": {
-          "batch_size": 128,
-          "device": "cuda",
-          "dropout": 0.2,
-          "epochs": 100,
-          "hidden": 128,
-          "lr": 0.001,
-          "min_epochs": 0,
-          "num_layers": 4,
-          "patience": 20,
-          "seed": 42
-        },
-        "inputs": {
-          "data/processed/herg_graphs.npz": "0d060f03d6852fab51c27444f9655c9c50111bb43899ea3fff7a8a932ef7458f",
-          "data/processed/splits/herg_time.npz": "fdeb6f3b6fa5b7e2eaaa2fc5f2e1af3146a2fc6c092a4034c0bdc17bd7c28790"
-        },
-        "label_id": "cfa8bc4a32d0b179943f36a1234f46c2ea95e6518ae1d368609fd3520fb1f8d4",
-        "role": "gin",
-        "schema": 1,
-        "tag": "herg"
-      },
-      "r2": -0.013348102569580078,
-      "returned_artifact_sha256": {
-        "results/gnn_metrics_herg.json": "eaeac151bd62d5c94f47ef50ebacb944aab7b35ba0a3eeb2912baf87b10c7042",
-        "results/gnn_models/herg_gin_time.pt": "6f10f789bfbadff37dfe9bb8e88bc16274c200a3f8b99269ebef791c54abd8f3",
-        "results/gnn_preds_herg_time.npz": "2c130011b907d132bca2f65fe38732f7064ec201c8fb12ff26f6a6939b71f0bf"
-      },
-      "rmse": 0.9565620362044827,
-      "role": "gin",
-      "seed": 42,
-      "signature": "0f757897988b6c462ded28298661b0c2403471e35889b0a3ad6868c1d6cc9020",
-      "started_at": "2026-10-13T15:16:08.404321+00:00",
-      "state": "success",
-      "tag": "herg"
-    },
-    {
-      "best_epoch": 21,
-      "convergence_flag": false,
-      "device": "cuda",
-      "elapsed_seconds": 14.89906267099991,
-      "finished_at": "2026-10-13T15:16:36.232801+00:00",
-      "label_id": "cfa8bc4a32d0b179943f36a1234f46c2ea95e6518ae1d368609fd3520fb1f8d4",
-      "mae": 0.6844193935394287,
-      "prediction_replay_max_abs_error": 4.76837158203125e-07,
-      "provenance": {
-        "bundle_manifest": {
-          "sha256": "880bb231510b1f89cdb5277ec56ca37692b9fee31e41d6483c8d7a18d762d305",
-          "source_git_head": "7ce15c1f0849ae69e0ca208f781a9824517eb328"
-        },
-        "code": {
-          "scripts/gnn_03_train_gin.py": "8267a295abc303ae66be276b6045ad2a4043d41ed2d02c59004b0ae5841da360",
-          "scripts/gnn_graph_dataset.py": "e004eefea627c97f379dcded339843bdd3318c790ff390a58ba6da7c883a1fea",
-          "scripts/qsar_common.py": "86be4f6672aab3a9564a8e0c7e2213f0cab870154f2ea9b68b13b32c41bb250c",
-          "scripts/run_time_campaign.py": "97a3f38ccd610691db05222c37eb6c71d015936f76e13a3f6d1798067baa5fc6",
-          "scripts/time_labels.py": "6c88a8a3cede0bf10d69edcbb8d51bc5f004d85293bd34e0a6ccfc659361d9ca"
-        },
-        "command": [
-          "scripts/gnn_03_train_gin.py",
-          "--tag",
-          "herg",
-          "--split",
-          "time",
-          "--model",
-          "gin",
-          "--seed",
-          "1",
-          "--hidden",
-          "128",
-          "--num-layers",
-          "4",
-          "--dropout",
-          "0.2",
-          "--lr",
-          "0.001",
-          "--batch-size",
-          "128",
-          "--epochs",
-          "100",
-          "--patience",
-          "20",
-          "--min-epochs",
-          "0",
-          "--device",
-          "cuda",
-          "--suffix",
-          "_seed1"
-        ],
-        "environment": {
-          "packages": {
-            "joblib": "1.6.0",
-            "numpy": "2.5.3",
-            "rdkit": "2026.3.6",
-            "scikit-learn": "1.9.1",
-            "torch": "2.14.0+cu126",
-            "torch-geometric": "2.8.0.post1"
-          },
-          "platform": "Linux-7.0.0-38-generic-x86_64-with-glibc2.39",
-          "python": "3.12.15",
-          "variables": {
-            "CUBLAS_WORKSPACE_CONFIG": null,
-            "CUDA_VISIBLE_DEVICES": "0",
-            "MKL_NUM_THREADS": "2",
-            "OMP_NUM_THREADS": "2",
-            "OPENBLAS_NUM_THREADS": "2",
-            "PYTHONHASHSEED": null,
-            "QSAR_CV_BACKEND": null,
-            "QSAR_RF_JOBS": null
-          }
-        },
-        "hyperparameters": {
-          "batch_size": 128,
-          "device": "cuda",
-          "dropout": 0.2,
-          "epochs": 100,
-          "hidden": 128,
-          "lr": 0.001,
-          "min_epochs": 0,
-          "num_layers": 4,
-          "patience": 20,
-          "seed": 1
-        },
-        "inputs": {
-          "data/processed/herg_graphs.npz": "0d060f03d6852fab51c27444f9655c9c50111bb43899ea3fff7a8a932ef7458f",
-          "data/processed/splits/herg_time.npz": "fdeb6f3b6fa5b7e2eaaa2fc5f2e1af3146a2fc6c092a4034c0bdc17bd7c28790"
-        },
-        "label_id": "cfa8bc4a32d0b179943f36a1234f46c2ea95e6518ae1d368609fd3520fb1f8d4",
-        "role": "gin",
-        "schema": 1,
-        "tag": "herg"
-      },
-      "r2": -0.14366066455841064,
-      "returned_artifact_sha256": {
-        "results/gnn_metrics_herg_seed1.json": "1b1e14a41c40348d305133c8dc1b86dab11cec7ceaf682f8fa30831a8738da60",
-        "results/gnn_models/herg_gin_time_seed1.pt": "b417fea5150a7a6480ab265db92a833a46230b4b4d6f21449582d8a0710462a1",
-        "results/gnn_preds_herg_time_seed1.npz": "5fcdc857b2bbd2c4e04c29cd33dc4dd6403f9725ffbbd21c15e821642814de66"
-      },
-      "rmse": 1.0162074839577104,
-      "role": "gin",
-      "seed": 1,
-      "signature": "f65ac0390e58203763ad555dc859efcabcad46b99008f6a96bc724c8a6c48a66",
-      "started_at": "2026-10-13T15:16:21.333591+00:00",
-      "state": "success",
-      "tag": "herg"
-    },
-    {
-      "best_epoch": 33,
-      "convergence_flag": false,
-      "device": "cuda",
-      "elapsed_seconds": 18.89909542600003,
-      "finished_at": "2026-10-13T15:16:55.136449+00:00",
-      "label_id": "cfa8bc4a32d0b179943f36a1234f46c2ea95e6518ae1d368609fd3520fb1f8d4",
-      "mae": 0.6672236919403076,
-      "prediction_replay_max_abs_error": 4.76837158203125e-07,
-      "provenance": {
-        "bundle_manifest": {
-          "sha256": "880bb231510b1f89cdb5277ec56ca37692b9fee31e41d6483c8d7a18d762d305",
-          "source_git_head": "7ce15c1f0849ae69e0ca208f781a9824517eb328"
-        },
-        "code": {
-          "scripts/gnn_03_train_gin.py": "8267a295abc303ae66be276b6045ad2a4043d41ed2d02c59004b0ae5841da360",
-          "scripts/gnn_graph_dataset.py": "e004eefea627c97f379dcded339843bdd3318c790ff390a58ba6da7c883a1fea",
-          "scripts/qsar_common.py": "86be4f6672aab3a9564a8e0c7e2213f0cab870154f2ea9b68b13b32c41bb250c",
-          "scripts/run_time_campaign.py": "97a3f38ccd610691db05222c37eb6c71d015936f76e13a3f6d1798067baa5fc6",
-          "scripts/time_labels.py": "6c88a8a3cede0bf10d69edcbb8d51bc5f004d85293bd34e0a6ccfc659361d9ca"
-        },
-        "command": [
-          "scripts/gnn_03_train_gin.py",
-          "--tag",
-          "herg",
-          "--split",
-          "time",
-          "--model",
-          "gin",
-          "--seed",
-          "2",
-          "--hidden",
-          "128",
-          "--num-layers",
-          "4",
-          "--dropout",
-          "0.2",
-          "--lr",
-          "0.001",
-          "--batch-size",
-          "128",
-          "--epochs",
-          "100",
-          "--patience",
-          "20",
-          "--min-epochs",
-          "0",
-          "--device",
-          "cuda",
-          "--suffix",
-          "_seed2"
-        ],
-        "environment": {
-          "packages": {
-            "joblib": "1.6.0",
-            "numpy": "2.5.3",
-            "rdkit": "2026.3.6",
-            "scikit-learn": "1.9.1",
-            "torch": "2.14.0+cu126",
-            "torch-geometric": "2.8.0.post1"
-          },
-          "platform": "Linux-7.0.0-38-generic-x86_64-with-glibc2.39",
-          "python": "3.12.15",
-          "variables": {
-            "CUBLAS_WORKSPACE_CONFIG": null,
-            "CUDA_VISIBLE_DEVICES": "0",
-            "MKL_NUM_THREADS": "2",
-            "OMP_NUM_THREADS": "2",
-            "OPENBLAS_NUM_THREADS": "2",
-            "PYTHONHASHSEED": null,
-            "QSAR_CV_BACKEND": null,
-            "QSAR_RF_JOBS": null
-          }
-        },
-        "hyperparameters": {
-          "batch_size": 128,
-          "device": "cuda",
-          "dropout": 0.2,
-          "epochs": 100,
-          "hidden": 128,
-          "lr": 0.001,
-          "min_epochs": 0,
-          "num_layers": 4,
-          "patience": 20,
-          "seed": 2
-        },
-        "inputs": {
-          "data/processed/herg_graphs.npz": "0d060f03d6852fab51c27444f9655c9c50111bb43899ea3fff7a8a932ef7458f",
-          "data/processed/splits/herg_time.npz": "fdeb6f3b6fa5b7e2eaaa2fc5f2e1af3146a2fc6c092a4034c0bdc17bd7c28790"
-        },
-        "label_id": "cfa8bc4a32d0b179943f36a1234f46c2ea95e6518ae1d368609fd3520fb1f8d4",
-        "role": "gin",
-        "schema": 1,
-        "tag": "herg"
-      },
-      "r2": -0.08131420612335205,
-      "returned_artifact_sha256": {
-        "results/gnn_metrics_herg_seed2.json": "f9c722d97c446f9eaba1a91a9f0e38c6f913bdd0ae7254d93279f8497f4b86ac",
-        "results/gnn_models/herg_gin_time_seed2.pt": "5c8653814cdc97bcb26ae45c64ac8650dd92b5c80164078408e2af12d1a60e49",
-        "results/gnn_preds_herg_time_seed2.npz": "63befca063071e69429b0dce365f6c0728fe5a991a100d58981df0cd947fa1d6"
-      },
-      "rmse": 0.9881201752286091,
-      "role": "gin",
-      "seed": 2,
-      "signature": "85f0ef1346fd79523e98b0e0d54eb67f93f968c33e0a427a7f1bc29ebd8d66e4",
-      "started_at": "2026-10-13T15:16:36.237081+00:00",
-      "state": "success",
-      "tag": "herg"
     },
     {
       "best_epoch": 22,
@@ -2715,6 +2368,7 @@
       "device": "cuda",
       "elapsed_seconds": 7.363401516999829,
       "finished_at": "2026-10-13T15:17:02.504346+00:00",
+      "input_manifest": "results/time_split/input_manifest_gin.json",
       "label_id": "66a8a839e6cff2f4d7b9664c286fd8d2b716b784faab4aa60d7bf5e74d94eec6",
       "mae": 1.31492018699646,
       "prediction_replay_max_abs_error": 9.5367431640625e-07,
@@ -2812,6 +2466,7 @@
       "role": "gin",
       "seed": 42,
       "signature": "0c97b9dde4f89b963c541a0dfcadac8f49f93706e000d7efbc154fa6f74664d0",
+      "source_commit": "7ce15c1f0849ae69e0ca208f781a9824517eb328",
       "started_at": "2026-10-13T15:16:55.140660+00:00",
       "state": "success",
       "tag": "hivpr"
@@ -2822,6 +2477,7 @@
       "device": "cuda",
       "elapsed_seconds": 5.535627710999961,
       "finished_at": "2026-10-13T15:17:08.044552+00:00",
+      "input_manifest": "results/time_split/input_manifest_gin.json",
       "label_id": "66a8a839e6cff2f4d7b9664c286fd8d2b716b784faab4aa60d7bf5e74d94eec6",
       "mae": 1.2951709032058716,
       "prediction_replay_max_abs_error": 9.5367431640625e-07,
@@ -2921,6 +2577,7 @@
       "role": "gin",
       "seed": 1,
       "signature": "dccff41b602292767af912968a209827e117bb90c4aa0d7f921f4d4ac9e57bcb",
+      "source_commit": "7ce15c1f0849ae69e0ca208f781a9824517eb328",
       "started_at": "2026-10-13T15:17:02.508647+00:00",
       "state": "success",
       "tag": "hivpr"
@@ -2931,6 +2588,7 @@
       "device": "cuda",
       "elapsed_seconds": 6.676010852000218,
       "finished_at": "2026-10-13T15:17:14.725286+00:00",
+      "input_manifest": "results/time_split/input_manifest_gin.json",
       "label_id": "66a8a839e6cff2f4d7b9664c286fd8d2b716b784faab4aa60d7bf5e74d94eec6",
       "mae": 1.3984668254852295,
       "prediction_replay_max_abs_error": 9.5367431640625e-07,
@@ -3030,6 +2688,7 @@
       "role": "gin",
       "seed": 2,
       "signature": "0b7ef812e144176f73d8949fcb2251c167566f4ad8f550e9eb121725805f9c07",
+      "source_commit": "7ce15c1f0849ae69e0ca208f781a9824517eb328",
       "started_at": "2026-10-13T15:17:08.048993+00:00",
       "state": "success",
       "tag": "hivpr"
@@ -3040,6 +2699,7 @@
       "device": "cuda",
       "elapsed_seconds": 4.67885929199997,
       "finished_at": "2026-10-13T15:17:19.408896+00:00",
+      "input_manifest": "results/time_split/input_manifest_gin.json",
       "label_id": "75bb580c77d0dbe64c7aed1178c0dbc2505f44f3c3c91cc0344a95e8c305c17c",
       "mae": 0.8373159766197205,
       "prediction_replay_max_abs_error": 4.76837158203125e-07,
@@ -3137,6 +2797,7 @@
       "role": "gin",
       "seed": 42,
       "signature": "cc3162a2a540e8cf8be1d7f1f9c8f83733076f1700acbb5d54914f785bd2aff1",
+      "source_commit": "7ce15c1f0849ae69e0ca208f781a9824517eb328",
       "started_at": "2026-10-13T15:17:14.729728+00:00",
       "state": "success",
       "tag": "mpro"
@@ -3147,6 +2808,7 @@
       "device": "cuda",
       "elapsed_seconds": 5.00664722800002,
       "finished_at": "2026-10-13T15:17:24.420217+00:00",
+      "input_manifest": "results/time_split/input_manifest_gin.json",
       "label_id": "75bb580c77d0dbe64c7aed1178c0dbc2505f44f3c3c91cc0344a95e8c305c17c",
       "mae": 0.8436951637268066,
       "prediction_replay_max_abs_error": 4.76837158203125e-07,
@@ -3246,6 +2908,7 @@
       "role": "gin",
       "seed": 1,
       "signature": "4196bf3ecb20ad9cd8cd4705310297b48dd4b0a7f25946657d2b708c95a49995",
+      "source_commit": "7ce15c1f0849ae69e0ca208f781a9824517eb328",
       "started_at": "2026-10-13T15:17:19.413295+00:00",
       "state": "success",
       "tag": "mpro"
@@ -3256,6 +2919,7 @@
       "device": "cuda",
       "elapsed_seconds": 4.632973658999845,
       "finished_at": "2026-10-13T15:17:29.057952+00:00",
+      "input_manifest": "results/time_split/input_manifest_gin.json",
       "label_id": "75bb580c77d0dbe64c7aed1178c0dbc2505f44f3c3c91cc0344a95e8c305c17c",
       "mae": 0.800666868686676,
       "prediction_replay_max_abs_error": 4.76837158203125e-07,
@@ -3355,6 +3019,7 @@
       "role": "gin",
       "seed": 2,
       "signature": "1a2d91e979b5d2ca31a8c0b593d82085238149badf676639430f568e37ebaef8",
+      "source_commit": "7ce15c1f0849ae69e0ca208f781a9824517eb328",
       "started_at": "2026-10-13T15:17:24.424671+00:00",
       "state": "success",
       "tag": "mpro"
@@ -3365,6 +3030,7 @@
       "device": "cuda",
       "elapsed_seconds": 15.544388749000063,
       "finished_at": "2026-10-13T15:17:44.607535+00:00",
+      "input_manifest": "results/time_split/input_manifest_gin.json",
       "label_id": "0257d96ee9bd87e1664b7ac0bfb946a556acdd78ef5389fbb62256c0462beb78",
       "mae": 0.9940931797027588,
       "prediction_replay_max_abs_error": 9.5367431640625e-07,
@@ -3462,6 +3128,7 @@
       "role": "gin",
       "seed": 42,
       "signature": "db2d284e448f89933a6d99f2eb8961036ecafd50d1354d9a409da06bb10fbe8f",
+      "source_commit": "7ce15c1f0849ae69e0ca208f781a9824517eb328",
       "started_at": "2026-10-13T15:17:29.062771+00:00",
       "state": "success",
       "tag": "vegfr2"
@@ -3472,6 +3139,7 @@
       "device": "cuda",
       "elapsed_seconds": 14.070506039000065,
       "finished_at": "2026-10-13T15:17:58.682632+00:00",
+      "input_manifest": "results/time_split/input_manifest_gin.json",
       "label_id": "0257d96ee9bd87e1664b7ac0bfb946a556acdd78ef5389fbb62256c0462beb78",
       "mae": 1.056694746017456,
       "prediction_replay_max_abs_error": 4.76837158203125e-07,
@@ -3571,6 +3239,7 @@
       "role": "gin",
       "seed": 1,
       "signature": "d0be418c80af4f5570e5e2c746acc10d8eb1f48ce34e11f2c64c25d877a62f85",
+      "source_commit": "7ce15c1f0849ae69e0ca208f781a9824517eb328",
       "started_at": "2026-10-13T15:17:44.611830+00:00",
       "state": "success",
       "tag": "vegfr2"
@@ -3581,6 +3250,7 @@
       "device": "cuda",
       "elapsed_seconds": 13.776100163000137,
       "finished_at": "2026-10-13T15:18:12.463418+00:00",
+      "input_manifest": "results/time_split/input_manifest_gin.json",
       "label_id": "0257d96ee9bd87e1664b7ac0bfb946a556acdd78ef5389fbb62256c0462beb78",
       "mae": 0.9803918600082397,
       "prediction_replay_max_abs_error": 9.5367431640625e-07,
@@ -3680,27 +3350,848 @@
       "role": "gin",
       "seed": 2,
       "signature": "58aaeab2cb1d7e79f8a03ef5187b0c1386d7c2440e8a2524c6d97f34ed160855",
+      "source_commit": "7ce15c1f0849ae69e0ca208f781a9824517eb328",
       "started_at": "2026-10-13T15:17:58.687028+00:00",
       "state": "success",
       "tag": "vegfr2"
+    },
+    {
+      "elapsed_seconds": 1625.0758199999982,
+      "finished_at": "2026-10-13T16:32:19.415231+00:00",
+      "input_manifest": "results/time_split/input_manifest_rf_repair.json",
+      "label_id": "369e86d94fe32622d959806abc5379f5487ab2f63282a4642af6c5003c628e93",
+      "mae": 0.6984463653677611,
+      "prediction_replay_max_abs_error": 0.0,
+      "provenance": {
+        "bundle_manifest": {
+          "sha256": "f1605d440ccb31bbdc75c773e8fb217d31607ad7c36def45b6f63325ae3406ad",
+          "source_git_head": "d13f9125af56028f60e099ec2e914dd2509c239e"
+        },
+        "code": {
+          "scripts/04_train_and_evaluate.py": "a8cb621f18279ab7ea0a0ca515ef45bf52d71bf1fb91a50993d66b13709ae329",
+          "scripts/qsar_common.py": "86be4f6672aab3a9564a8e0c7e2213f0cab870154f2ea9b68b13b32c41bb250c",
+          "scripts/run_time_campaign.py": "e48aa8f606f1852ab5990e5069d23fb2b3a62cd7bb32de600b5ed6b7223c8773",
+          "scripts/time_labels.py": "6c88a8a3cede0bf10d69edcbb8d51bc5f004d85293bd34e0a6ccfc659361d9ca"
+        },
+        "command": [
+          "scripts/04_train_and_evaluate.py",
+          "--split",
+          "time"
+        ],
+        "environment": {
+          "packages": {
+            "joblib": "1.6.0",
+            "numpy": "2.5.3",
+            "rdkit": "2026.3.6",
+            "scikit-learn": "1.9.1",
+            "torch": "unavailable",
+            "torch-geometric": "unavailable"
+          },
+          "platform": "macOS-27.0-arm64-arm-64bit",
+          "python": "3.12.14",
+          "variables": {
+            "CUBLAS_WORKSPACE_CONFIG": null,
+            "CUDA_VISIBLE_DEVICES": null,
+            "MKL_NUM_THREADS": "1",
+            "OMP_NUM_THREADS": "1",
+            "OPENBLAS_NUM_THREADS": "1",
+            "PYTHONHASHSEED": null,
+            "QSAR_CV_BACKEND": "loky",
+            "QSAR_RF_JOBS": "16"
+          }
+        },
+        "hyperparameters": {
+          "cv_folds": 5,
+          "device": "cpu",
+          "grid": "PARAM_GRID in hashed RF source",
+          "seed": 42
+        },
+        "inputs": {
+          "data/processed/herg_fingerprints.npz": "78bed5f5f0816091ade54f658d1eaf5479cecd71905ded194e57527a8da71baa",
+          "data/processed/splits/herg_time.npz": "90933252420671d709bdf0de5e4782e6f8351dfe0fb96977c9ee143fcb370647"
+        },
+        "label_id": "369e86d94fe32622d959806abc5379f5487ab2f63282a4642af6c5003c628e93",
+        "role": "rf",
+        "schema": 1,
+        "tag": "herg"
+      },
+      "r2": -0.055579351490586903,
+      "returned_artifact_sha256": {
+        "figures/pred_vs_actual_time_herg.png": "8fdbbe79ead6fc8e72a17b1b2fe0b6010a63122d16429ee746c6c2fbd00eed92",
+        "models/rf_time_split_herg.joblib": "514a3f9a4aa01e82801e241d46113fb171d18f3446d6473eff78821902ac7908",
+        "results/metrics_herg.json": "55f5ebebddc8b42acc4ff04fa7ef64642b8287484046e42862a4c7ebd6b34754",
+        "results/rf_preds_herg_time.npz": "f4818b247dd6ba553de567f532f832b19cb5d0d42a876035f7934e1d4055c47d"
+      },
+      "rmse": 0.9762909303705097,
+      "role": "rf",
+      "seed": 42,
+      "signature": "7fa67708fb42efe1dcb3cf96cf0538a18857813531a3c1374b5dfa3dc8d55959",
+      "source_commit": "d13f9125af56028f60e099ec2e914dd2509c239e",
+      "started_at": "2026-10-13T16:05:14.331156+00:00",
+      "state": "success",
+      "tag": "herg"
+    },
+    {
+      "best_epoch": 23,
+      "convergence_flag": false,
+      "device": "cuda",
+      "elapsed_seconds": 17.524865263999345,
+      "finished_at": "2026-10-13T15:59:56.575196+00:00",
+      "input_manifest": "results/time_split/input_manifest_gin_repair.json",
+      "label_id": "369e86d94fe32622d959806abc5379f5487ab2f63282a4642af6c5003c628e93",
+      "mae": 0.6659982204437256,
+      "prediction_replay_max_abs_error": 4.76837158203125e-07,
+      "provenance": {
+        "bundle_manifest": {
+          "sha256": "c4ac95061ed9dcc7820e8c44358616be61e6369acda382df5dce87cbd4089925",
+          "source_git_head": "d13f9125af56028f60e099ec2e914dd2509c239e"
+        },
+        "code": {
+          "scripts/gnn_03_train_gin.py": "8267a295abc303ae66be276b6045ad2a4043d41ed2d02c59004b0ae5841da360",
+          "scripts/gnn_graph_dataset.py": "e004eefea627c97f379dcded339843bdd3318c790ff390a58ba6da7c883a1fea",
+          "scripts/qsar_common.py": "86be4f6672aab3a9564a8e0c7e2213f0cab870154f2ea9b68b13b32c41bb250c",
+          "scripts/run_time_campaign.py": "e48aa8f606f1852ab5990e5069d23fb2b3a62cd7bb32de600b5ed6b7223c8773",
+          "scripts/time_labels.py": "6c88a8a3cede0bf10d69edcbb8d51bc5f004d85293bd34e0a6ccfc659361d9ca"
+        },
+        "command": [
+          "scripts/gnn_03_train_gin.py",
+          "--tag",
+          "herg",
+          "--split",
+          "time",
+          "--model",
+          "gin",
+          "--seed",
+          "42",
+          "--hidden",
+          "128",
+          "--num-layers",
+          "4",
+          "--dropout",
+          "0.2",
+          "--lr",
+          "0.001",
+          "--batch-size",
+          "128",
+          "--epochs",
+          "100",
+          "--patience",
+          "20",
+          "--min-epochs",
+          "0",
+          "--device",
+          "cuda"
+        ],
+        "environment": {
+          "packages": {
+            "joblib": "1.6.0",
+            "numpy": "2.5.3",
+            "rdkit": "2026.3.6",
+            "scikit-learn": "1.9.1",
+            "torch": "2.14.0+cu126",
+            "torch-geometric": "2.8.0.post1"
+          },
+          "platform": "Linux-7.0.0-38-generic-x86_64-with-glibc2.39",
+          "python": "3.12.15",
+          "variables": {
+            "CUBLAS_WORKSPACE_CONFIG": null,
+            "CUDA_VISIBLE_DEVICES": "0",
+            "MKL_NUM_THREADS": "2",
+            "OMP_NUM_THREADS": "2",
+            "OPENBLAS_NUM_THREADS": "2",
+            "PYTHONHASHSEED": null,
+            "QSAR_CV_BACKEND": null,
+            "QSAR_RF_JOBS": null
+          }
+        },
+        "hyperparameters": {
+          "batch_size": 128,
+          "device": "cuda",
+          "dropout": 0.2,
+          "epochs": 100,
+          "hidden": 128,
+          "lr": 0.001,
+          "min_epochs": 0,
+          "num_layers": 4,
+          "patience": 20,
+          "seed": 42
+        },
+        "inputs": {
+          "data/processed/herg_graphs.npz": "0d060f03d6852fab51c27444f9655c9c50111bb43899ea3fff7a8a932ef7458f",
+          "data/processed/splits/herg_time.npz": "90933252420671d709bdf0de5e4782e6f8351dfe0fb96977c9ee143fcb370647"
+        },
+        "label_id": "369e86d94fe32622d959806abc5379f5487ab2f63282a4642af6c5003c628e93",
+        "role": "gin",
+        "schema": 1,
+        "tag": "herg"
+      },
+      "r2": -0.038910508155822754,
+      "returned_artifact_sha256": {
+        "results/gnn_metrics_herg.json": "a6e75ab1c89cfc83d6efab09e28a1ac431de6a620112ec9dc4816ec1b6b4c716",
+        "results/gnn_models/herg_gin_time.pt": "71a6b5e6705bde0ba75b2d27d6ccdefa9fb9e745d532fe27b5cc88115342222b",
+        "results/gnn_preds_herg_time.npz": "20f29327532fbb1fc3435d2faa6bfb573378c217c53612ab03941c38de84095c"
+      },
+      "rmse": 0.9685518308190851,
+      "role": "gin",
+      "seed": 42,
+      "signature": "df6879f51ea3194c5be94d675e0e395e50e7f8e45bff6e32132630b2c265bf50",
+      "source_commit": "d13f9125af56028f60e099ec2e914dd2509c239e",
+      "started_at": "2026-10-13T15:59:39.049942+00:00",
+      "state": "success",
+      "tag": "herg"
+    },
+    {
+      "best_epoch": 25,
+      "convergence_flag": false,
+      "device": "cuda",
+      "elapsed_seconds": 16.091038724999635,
+      "finished_at": "2026-10-13T16:00:12.706542+00:00",
+      "input_manifest": "results/time_split/input_manifest_gin_repair.json",
+      "label_id": "369e86d94fe32622d959806abc5379f5487ab2f63282a4642af6c5003c628e93",
+      "mae": 0.6708722710609436,
+      "prediction_replay_max_abs_error": 4.76837158203125e-07,
+      "provenance": {
+        "bundle_manifest": {
+          "sha256": "c4ac95061ed9dcc7820e8c44358616be61e6369acda382df5dce87cbd4089925",
+          "source_git_head": "d13f9125af56028f60e099ec2e914dd2509c239e"
+        },
+        "code": {
+          "scripts/gnn_03_train_gin.py": "8267a295abc303ae66be276b6045ad2a4043d41ed2d02c59004b0ae5841da360",
+          "scripts/gnn_graph_dataset.py": "e004eefea627c97f379dcded339843bdd3318c790ff390a58ba6da7c883a1fea",
+          "scripts/qsar_common.py": "86be4f6672aab3a9564a8e0c7e2213f0cab870154f2ea9b68b13b32c41bb250c",
+          "scripts/run_time_campaign.py": "e48aa8f606f1852ab5990e5069d23fb2b3a62cd7bb32de600b5ed6b7223c8773",
+          "scripts/time_labels.py": "6c88a8a3cede0bf10d69edcbb8d51bc5f004d85293bd34e0a6ccfc659361d9ca"
+        },
+        "command": [
+          "scripts/gnn_03_train_gin.py",
+          "--tag",
+          "herg",
+          "--split",
+          "time",
+          "--model",
+          "gin",
+          "--seed",
+          "1",
+          "--hidden",
+          "128",
+          "--num-layers",
+          "4",
+          "--dropout",
+          "0.2",
+          "--lr",
+          "0.001",
+          "--batch-size",
+          "128",
+          "--epochs",
+          "100",
+          "--patience",
+          "20",
+          "--min-epochs",
+          "0",
+          "--device",
+          "cuda",
+          "--suffix",
+          "_seed1"
+        ],
+        "environment": {
+          "packages": {
+            "joblib": "1.6.0",
+            "numpy": "2.5.3",
+            "rdkit": "2026.3.6",
+            "scikit-learn": "1.9.1",
+            "torch": "2.14.0+cu126",
+            "torch-geometric": "2.8.0.post1"
+          },
+          "platform": "Linux-7.0.0-38-generic-x86_64-with-glibc2.39",
+          "python": "3.12.15",
+          "variables": {
+            "CUBLAS_WORKSPACE_CONFIG": null,
+            "CUDA_VISIBLE_DEVICES": "0",
+            "MKL_NUM_THREADS": "2",
+            "OMP_NUM_THREADS": "2",
+            "OPENBLAS_NUM_THREADS": "2",
+            "PYTHONHASHSEED": null,
+            "QSAR_CV_BACKEND": null,
+            "QSAR_RF_JOBS": null
+          }
+        },
+        "hyperparameters": {
+          "batch_size": 128,
+          "device": "cuda",
+          "dropout": 0.2,
+          "epochs": 100,
+          "hidden": 128,
+          "lr": 0.001,
+          "min_epochs": 0,
+          "num_layers": 4,
+          "patience": 20,
+          "seed": 1
+        },
+        "inputs": {
+          "data/processed/herg_graphs.npz": "0d060f03d6852fab51c27444f9655c9c50111bb43899ea3fff7a8a932ef7458f",
+          "data/processed/splits/herg_time.npz": "90933252420671d709bdf0de5e4782e6f8351dfe0fb96977c9ee143fcb370647"
+        },
+        "label_id": "369e86d94fe32622d959806abc5379f5487ab2f63282a4642af6c5003c628e93",
+        "role": "gin",
+        "schema": 1,
+        "tag": "herg"
+      },
+      "r2": -0.044777631759643555,
+      "returned_artifact_sha256": {
+        "results/gnn_metrics_herg_seed1.json": "e428ebcb80cb9ace45f982ea86a5ffda99de19ccd8ee4d78005a291a0e2fbe59",
+        "results/gnn_models/herg_gin_time_seed1.pt": "76f3188bef46b49d9f4754a6053a6cb6687b901f639b88ee01a700c0f3cf492e",
+        "results/gnn_preds_herg_time_seed1.npz": "ca40e88f985afd1f0f14073566c10fc717669e3474765cbde42207bdebf2785a"
+      },
+      "rmse": 0.9712828779608585,
+      "role": "gin",
+      "seed": 1,
+      "signature": "cd26911787544c27992f3155ffa175f73512b9b3a9dd2b7eec93ce6ed22dd6bf",
+      "source_commit": "d13f9125af56028f60e099ec2e914dd2509c239e",
+      "started_at": "2026-10-13T15:59:56.615206+00:00",
+      "state": "success",
+      "tag": "herg"
+    },
+    {
+      "best_epoch": 13,
+      "convergence_flag": false,
+      "device": "cuda",
+      "elapsed_seconds": 12.691621838000174,
+      "finished_at": "2026-10-13T16:00:25.438669+00:00",
+      "input_manifest": "results/time_split/input_manifest_gin_repair.json",
+      "label_id": "369e86d94fe32622d959806abc5379f5487ab2f63282a4642af6c5003c628e93",
+      "mae": 0.6757155060768127,
+      "prediction_replay_max_abs_error": 9.5367431640625e-07,
+      "provenance": {
+        "bundle_manifest": {
+          "sha256": "c4ac95061ed9dcc7820e8c44358616be61e6369acda382df5dce87cbd4089925",
+          "source_git_head": "d13f9125af56028f60e099ec2e914dd2509c239e"
+        },
+        "code": {
+          "scripts/gnn_03_train_gin.py": "8267a295abc303ae66be276b6045ad2a4043d41ed2d02c59004b0ae5841da360",
+          "scripts/gnn_graph_dataset.py": "e004eefea627c97f379dcded339843bdd3318c790ff390a58ba6da7c883a1fea",
+          "scripts/qsar_common.py": "86be4f6672aab3a9564a8e0c7e2213f0cab870154f2ea9b68b13b32c41bb250c",
+          "scripts/run_time_campaign.py": "e48aa8f606f1852ab5990e5069d23fb2b3a62cd7bb32de600b5ed6b7223c8773",
+          "scripts/time_labels.py": "6c88a8a3cede0bf10d69edcbb8d51bc5f004d85293bd34e0a6ccfc659361d9ca"
+        },
+        "command": [
+          "scripts/gnn_03_train_gin.py",
+          "--tag",
+          "herg",
+          "--split",
+          "time",
+          "--model",
+          "gin",
+          "--seed",
+          "2",
+          "--hidden",
+          "128",
+          "--num-layers",
+          "4",
+          "--dropout",
+          "0.2",
+          "--lr",
+          "0.001",
+          "--batch-size",
+          "128",
+          "--epochs",
+          "100",
+          "--patience",
+          "20",
+          "--min-epochs",
+          "0",
+          "--device",
+          "cuda",
+          "--suffix",
+          "_seed2"
+        ],
+        "environment": {
+          "packages": {
+            "joblib": "1.6.0",
+            "numpy": "2.5.3",
+            "rdkit": "2026.3.6",
+            "scikit-learn": "1.9.1",
+            "torch": "2.14.0+cu126",
+            "torch-geometric": "2.8.0.post1"
+          },
+          "platform": "Linux-7.0.0-38-generic-x86_64-with-glibc2.39",
+          "python": "3.12.15",
+          "variables": {
+            "CUBLAS_WORKSPACE_CONFIG": null,
+            "CUDA_VISIBLE_DEVICES": "0",
+            "MKL_NUM_THREADS": "2",
+            "OMP_NUM_THREADS": "2",
+            "OPENBLAS_NUM_THREADS": "2",
+            "PYTHONHASHSEED": null,
+            "QSAR_CV_BACKEND": null,
+            "QSAR_RF_JOBS": null
+          }
+        },
+        "hyperparameters": {
+          "batch_size": 128,
+          "device": "cuda",
+          "dropout": 0.2,
+          "epochs": 100,
+          "hidden": 128,
+          "lr": 0.001,
+          "min_epochs": 0,
+          "num_layers": 4,
+          "patience": 20,
+          "seed": 2
+        },
+        "inputs": {
+          "data/processed/herg_graphs.npz": "0d060f03d6852fab51c27444f9655c9c50111bb43899ea3fff7a8a932ef7458f",
+          "data/processed/splits/herg_time.npz": "90933252420671d709bdf0de5e4782e6f8351dfe0fb96977c9ee143fcb370647"
+        },
+        "label_id": "369e86d94fe32622d959806abc5379f5487ab2f63282a4642af6c5003c628e93",
+        "role": "gin",
+        "schema": 1,
+        "tag": "herg"
+      },
+      "r2": -0.11230778694152832,
+      "returned_artifact_sha256": {
+        "results/gnn_metrics_herg_seed2.json": "de56a4f4321a6bd6956014db683ef96cbe98c652177fc7a42ed5b6145ef5bfe3",
+        "results/gnn_models/herg_gin_time_seed2.pt": "b46ef10767d23d14ffea48476d7716fcec0f2da543907d694a35bfdbb61ba8e7",
+        "results/gnn_preds_herg_time_seed2.npz": "43e002097d0a90f17a923d0e02f4a48f04d87cb4f2c468c5a852f720b2674ea3"
+      },
+      "rmse": 1.002181296738261,
+      "role": "gin",
+      "seed": 2,
+      "signature": "881a4f8ba53535d02bd5283ba2bb583dc916b509da4276b351518e444a395ece",
+      "source_commit": "d13f9125af56028f60e099ec2e914dd2509c239e",
+      "started_at": "2026-10-13T16:00:12.746741+00:00",
+      "state": "success",
+      "tag": "herg"
     }
   ],
   "jobs_accepted": 32,
   "label_policy": "exact-dated-asof-v1",
   "legacy_artifacts_git_revision": "7ce15c1f0849ae69e0ca208f781a9824517eb328",
-  "remote_return_archive_sha256": {
-    "gin": "928d7245b7fe4735a2ab4dd7109ca1e2edf732c5afa946a5aa699b24f7e3f304",
-    "rf": "dca7e7f77dba41f50f02cd3bdaf0237a7d52742f310fa4983130c9225bb7bbc7"
+  "repair": {
+    "accepted_at": "2026-10-13T16:41:32.068641+00:00",
+    "independent_data_and_gin_review": "results/time_split/repair_independent_review.json",
+    "jobs_replaced": 4,
+    "jobs_retained": 28,
+    "reason": "Preserve once-normalized cached parent key; recover CHEMBL2035183 (2012, 7200 nM) into hERG train",
+    "remote_return_archive_sha256": {
+      "gin": "a1f9d0a48ef5fefc4d7ef0b771af22839c123936484f1e809201592f439a7eee",
+      "rf": "b6714ee0a176792a3545d5844e0eee8ee0719483fadfdfe048e91386d1bec8a0"
+    },
+    "source_commit": "d13f9125af56028f60e099ec2e914dd2509c239e",
+    "split_comparison": "results/time_split/repair_split_comparison.json",
+    "superseded_jobs": [
+      {
+        "elapsed_seconds": 2254.270277415999,
+        "finished_at": "2026-10-13T13:52:32.464196+00:00",
+        "label_id": "cfa8bc4a32d0b179943f36a1234f46c2ea95e6518ae1d368609fd3520fb1f8d4",
+        "mae": 0.6957801125776217,
+        "n_test": 2325,
+        "n_train": 4943,
+        "prediction_replay_max_abs_error": 0.0,
+        "provenance": {
+          "bundle_manifest": {
+            "sha256": "7f898588665878ec5d9f4f34beeb500300f7f30507beca212b7d2733b4d79f71",
+            "source_git_head": "7ce15c1f0849ae69e0ca208f781a9824517eb328"
+          },
+          "code": {
+            "scripts/04_train_and_evaluate.py": "a8cb621f18279ab7ea0a0ca515ef45bf52d71bf1fb91a50993d66b13709ae329",
+            "scripts/qsar_common.py": "86be4f6672aab3a9564a8e0c7e2213f0cab870154f2ea9b68b13b32c41bb250c",
+            "scripts/run_time_campaign.py": "97a3f38ccd610691db05222c37eb6c71d015936f76e13a3f6d1798067baa5fc6",
+            "scripts/time_labels.py": "6c88a8a3cede0bf10d69edcbb8d51bc5f004d85293bd34e0a6ccfc659361d9ca"
+          },
+          "command": [
+            "scripts/04_train_and_evaluate.py",
+            "--split",
+            "time"
+          ],
+          "environment": {
+            "packages": {
+              "joblib": "1.6.0",
+              "numpy": "2.5.3",
+              "rdkit": "2026.3.6",
+              "scikit-learn": "1.9.1",
+              "torch": "unavailable",
+              "torch-geometric": "unavailable"
+            },
+            "platform": "macOS-27.0-arm64-arm-64bit",
+            "python": "3.12.14",
+            "variables": {
+              "CUBLAS_WORKSPACE_CONFIG": null,
+              "CUDA_VISIBLE_DEVICES": null,
+              "MKL_NUM_THREADS": "1",
+              "OMP_NUM_THREADS": "1",
+              "OPENBLAS_NUM_THREADS": "1",
+              "PYTHONHASHSEED": null,
+              "QSAR_CV_BACKEND": "loky",
+              "QSAR_RF_JOBS": "4"
+            }
+          },
+          "hyperparameters": {
+            "cv_folds": 5,
+            "device": "cpu",
+            "grid": "PARAM_GRID in hashed RF source",
+            "seed": 42
+          },
+          "inputs": {
+            "data/processed/herg_fingerprints.npz": "78bed5f5f0816091ade54f658d1eaf5479cecd71905ded194e57527a8da71baa",
+            "data/processed/splits/herg_time.npz": "fdeb6f3b6fa5b7e2eaaa2fc5f2e1af3146a2fc6c092a4034c0bdc17bd7c28790"
+          },
+          "label_id": "cfa8bc4a32d0b179943f36a1234f46c2ea95e6518ae1d368609fd3520fb1f8d4",
+          "role": "rf",
+          "schema": 1,
+          "tag": "herg"
+        },
+        "r2": -0.046743799717638757,
+        "returned_artifact_sha256": {
+          "figures/pred_vs_actual_time_herg.png": "8190f79a75252ea7ccb4c6a5f3d568d8309c6dcaff637fbcabc0cd10221b19de",
+          "models/rf_time_split_herg.joblib": "4d2caecf5aeab36f9a7ea0dce00542fc4a0a3e11ad9689cacd750f70a9665986",
+          "results/metrics_herg.json": "1bf1df0d13665c2021b723275073141e07dad82bb85fb45d85b66f6f30c439a3",
+          "results/rf_preds_herg_time.npz": "b9360f7c35bc20a18db3b90c3638219d980e78289bc4d94a3c296f1ec453b2a1"
+        },
+        "rf_jobs": 4,
+        "rmse": 0.9721964036248725,
+        "role": "rf",
+        "signature": "c55fa996ab9bd9eaa3632cf06a47fa0e2c8621da6473869c10f1b0fcdb4e27e1",
+        "started_at": "2026-10-13T13:14:58.187272+00:00",
+        "state": "success",
+        "tag": "herg",
+        "train_mean_constant_r2": -0.002632902392021741
+      },
+      {
+        "best_epoch": 13,
+        "convergence_flag": false,
+        "device": "cuda",
+        "elapsed_seconds": 12.924699229999987,
+        "finished_at": "2026-10-13T15:16:21.329315+00:00",
+        "label_id": "cfa8bc4a32d0b179943f36a1234f46c2ea95e6518ae1d368609fd3520fb1f8d4",
+        "mae": 0.6600233316421509,
+        "prediction_replay_max_abs_error": 4.76837158203125e-07,
+        "provenance": {
+          "bundle_manifest": {
+            "sha256": "880bb231510b1f89cdb5277ec56ca37692b9fee31e41d6483c8d7a18d762d305",
+            "source_git_head": "7ce15c1f0849ae69e0ca208f781a9824517eb328"
+          },
+          "code": {
+            "scripts/gnn_03_train_gin.py": "8267a295abc303ae66be276b6045ad2a4043d41ed2d02c59004b0ae5841da360",
+            "scripts/gnn_graph_dataset.py": "e004eefea627c97f379dcded339843bdd3318c790ff390a58ba6da7c883a1fea",
+            "scripts/qsar_common.py": "86be4f6672aab3a9564a8e0c7e2213f0cab870154f2ea9b68b13b32c41bb250c",
+            "scripts/run_time_campaign.py": "97a3f38ccd610691db05222c37eb6c71d015936f76e13a3f6d1798067baa5fc6",
+            "scripts/time_labels.py": "6c88a8a3cede0bf10d69edcbb8d51bc5f004d85293bd34e0a6ccfc659361d9ca"
+          },
+          "command": [
+            "scripts/gnn_03_train_gin.py",
+            "--tag",
+            "herg",
+            "--split",
+            "time",
+            "--model",
+            "gin",
+            "--seed",
+            "42",
+            "--hidden",
+            "128",
+            "--num-layers",
+            "4",
+            "--dropout",
+            "0.2",
+            "--lr",
+            "0.001",
+            "--batch-size",
+            "128",
+            "--epochs",
+            "100",
+            "--patience",
+            "20",
+            "--min-epochs",
+            "0",
+            "--device",
+            "cuda"
+          ],
+          "environment": {
+            "packages": {
+              "joblib": "1.6.0",
+              "numpy": "2.5.3",
+              "rdkit": "2026.3.6",
+              "scikit-learn": "1.9.1",
+              "torch": "2.14.0+cu126",
+              "torch-geometric": "2.8.0.post1"
+            },
+            "platform": "Linux-7.0.0-38-generic-x86_64-with-glibc2.39",
+            "python": "3.12.15",
+            "variables": {
+              "CUBLAS_WORKSPACE_CONFIG": null,
+              "CUDA_VISIBLE_DEVICES": "0",
+              "MKL_NUM_THREADS": "2",
+              "OMP_NUM_THREADS": "2",
+              "OPENBLAS_NUM_THREADS": "2",
+              "PYTHONHASHSEED": null,
+              "QSAR_CV_BACKEND": null,
+              "QSAR_RF_JOBS": null
+            }
+          },
+          "hyperparameters": {
+            "batch_size": 128,
+            "device": "cuda",
+            "dropout": 0.2,
+            "epochs": 100,
+            "hidden": 128,
+            "lr": 0.001,
+            "min_epochs": 0,
+            "num_layers": 4,
+            "patience": 20,
+            "seed": 42
+          },
+          "inputs": {
+            "data/processed/herg_graphs.npz": "0d060f03d6852fab51c27444f9655c9c50111bb43899ea3fff7a8a932ef7458f",
+            "data/processed/splits/herg_time.npz": "fdeb6f3b6fa5b7e2eaaa2fc5f2e1af3146a2fc6c092a4034c0bdc17bd7c28790"
+          },
+          "label_id": "cfa8bc4a32d0b179943f36a1234f46c2ea95e6518ae1d368609fd3520fb1f8d4",
+          "role": "gin",
+          "schema": 1,
+          "tag": "herg"
+        },
+        "r2": -0.013348102569580078,
+        "returned_artifact_sha256": {
+          "results/gnn_metrics_herg.json": "eaeac151bd62d5c94f47ef50ebacb944aab7b35ba0a3eeb2912baf87b10c7042",
+          "results/gnn_models/herg_gin_time.pt": "6f10f789bfbadff37dfe9bb8e88bc16274c200a3f8b99269ebef791c54abd8f3",
+          "results/gnn_preds_herg_time.npz": "2c130011b907d132bca2f65fe38732f7064ec201c8fb12ff26f6a6939b71f0bf"
+        },
+        "rmse": 0.9565620362044827,
+        "role": "gin",
+        "seed": 42,
+        "signature": "0f757897988b6c462ded28298661b0c2403471e35889b0a3ad6868c1d6cc9020",
+        "started_at": "2026-10-13T15:16:08.404321+00:00",
+        "state": "success",
+        "tag": "herg"
+      },
+      {
+        "best_epoch": 21,
+        "convergence_flag": false,
+        "device": "cuda",
+        "elapsed_seconds": 14.89906267099991,
+        "finished_at": "2026-10-13T15:16:36.232801+00:00",
+        "label_id": "cfa8bc4a32d0b179943f36a1234f46c2ea95e6518ae1d368609fd3520fb1f8d4",
+        "mae": 0.6844193935394287,
+        "prediction_replay_max_abs_error": 4.76837158203125e-07,
+        "provenance": {
+          "bundle_manifest": {
+            "sha256": "880bb231510b1f89cdb5277ec56ca37692b9fee31e41d6483c8d7a18d762d305",
+            "source_git_head": "7ce15c1f0849ae69e0ca208f781a9824517eb328"
+          },
+          "code": {
+            "scripts/gnn_03_train_gin.py": "8267a295abc303ae66be276b6045ad2a4043d41ed2d02c59004b0ae5841da360",
+            "scripts/gnn_graph_dataset.py": "e004eefea627c97f379dcded339843bdd3318c790ff390a58ba6da7c883a1fea",
+            "scripts/qsar_common.py": "86be4f6672aab3a9564a8e0c7e2213f0cab870154f2ea9b68b13b32c41bb250c",
+            "scripts/run_time_campaign.py": "97a3f38ccd610691db05222c37eb6c71d015936f76e13a3f6d1798067baa5fc6",
+            "scripts/time_labels.py": "6c88a8a3cede0bf10d69edcbb8d51bc5f004d85293bd34e0a6ccfc659361d9ca"
+          },
+          "command": [
+            "scripts/gnn_03_train_gin.py",
+            "--tag",
+            "herg",
+            "--split",
+            "time",
+            "--model",
+            "gin",
+            "--seed",
+            "1",
+            "--hidden",
+            "128",
+            "--num-layers",
+            "4",
+            "--dropout",
+            "0.2",
+            "--lr",
+            "0.001",
+            "--batch-size",
+            "128",
+            "--epochs",
+            "100",
+            "--patience",
+            "20",
+            "--min-epochs",
+            "0",
+            "--device",
+            "cuda",
+            "--suffix",
+            "_seed1"
+          ],
+          "environment": {
+            "packages": {
+              "joblib": "1.6.0",
+              "numpy": "2.5.3",
+              "rdkit": "2026.3.6",
+              "scikit-learn": "1.9.1",
+              "torch": "2.14.0+cu126",
+              "torch-geometric": "2.8.0.post1"
+            },
+            "platform": "Linux-7.0.0-38-generic-x86_64-with-glibc2.39",
+            "python": "3.12.15",
+            "variables": {
+              "CUBLAS_WORKSPACE_CONFIG": null,
+              "CUDA_VISIBLE_DEVICES": "0",
+              "MKL_NUM_THREADS": "2",
+              "OMP_NUM_THREADS": "2",
+              "OPENBLAS_NUM_THREADS": "2",
+              "PYTHONHASHSEED": null,
+              "QSAR_CV_BACKEND": null,
+              "QSAR_RF_JOBS": null
+            }
+          },
+          "hyperparameters": {
+            "batch_size": 128,
+            "device": "cuda",
+            "dropout": 0.2,
+            "epochs": 100,
+            "hidden": 128,
+            "lr": 0.001,
+            "min_epochs": 0,
+            "num_layers": 4,
+            "patience": 20,
+            "seed": 1
+          },
+          "inputs": {
+            "data/processed/herg_graphs.npz": "0d060f03d6852fab51c27444f9655c9c50111bb43899ea3fff7a8a932ef7458f",
+            "data/processed/splits/herg_time.npz": "fdeb6f3b6fa5b7e2eaaa2fc5f2e1af3146a2fc6c092a4034c0bdc17bd7c28790"
+          },
+          "label_id": "cfa8bc4a32d0b179943f36a1234f46c2ea95e6518ae1d368609fd3520fb1f8d4",
+          "role": "gin",
+          "schema": 1,
+          "tag": "herg"
+        },
+        "r2": -0.14366066455841064,
+        "returned_artifact_sha256": {
+          "results/gnn_metrics_herg_seed1.json": "1b1e14a41c40348d305133c8dc1b86dab11cec7ceaf682f8fa30831a8738da60",
+          "results/gnn_models/herg_gin_time_seed1.pt": "b417fea5150a7a6480ab265db92a833a46230b4b4d6f21449582d8a0710462a1",
+          "results/gnn_preds_herg_time_seed1.npz": "5fcdc857b2bbd2c4e04c29cd33dc4dd6403f9725ffbbd21c15e821642814de66"
+        },
+        "rmse": 1.0162074839577104,
+        "role": "gin",
+        "seed": 1,
+        "signature": "f65ac0390e58203763ad555dc859efcabcad46b99008f6a96bc724c8a6c48a66",
+        "started_at": "2026-10-13T15:16:21.333591+00:00",
+        "state": "success",
+        "tag": "herg"
+      },
+      {
+        "best_epoch": 33,
+        "convergence_flag": false,
+        "device": "cuda",
+        "elapsed_seconds": 18.89909542600003,
+        "finished_at": "2026-10-13T15:16:55.136449+00:00",
+        "label_id": "cfa8bc4a32d0b179943f36a1234f46c2ea95e6518ae1d368609fd3520fb1f8d4",
+        "mae": 0.6672236919403076,
+        "prediction_replay_max_abs_error": 4.76837158203125e-07,
+        "provenance": {
+          "bundle_manifest": {
+            "sha256": "880bb231510b1f89cdb5277ec56ca37692b9fee31e41d6483c8d7a18d762d305",
+            "source_git_head": "7ce15c1f0849ae69e0ca208f781a9824517eb328"
+          },
+          "code": {
+            "scripts/gnn_03_train_gin.py": "8267a295abc303ae66be276b6045ad2a4043d41ed2d02c59004b0ae5841da360",
+            "scripts/gnn_graph_dataset.py": "e004eefea627c97f379dcded339843bdd3318c790ff390a58ba6da7c883a1fea",
+            "scripts/qsar_common.py": "86be4f6672aab3a9564a8e0c7e2213f0cab870154f2ea9b68b13b32c41bb250c",
+            "scripts/run_time_campaign.py": "97a3f38ccd610691db05222c37eb6c71d015936f76e13a3f6d1798067baa5fc6",
+            "scripts/time_labels.py": "6c88a8a3cede0bf10d69edcbb8d51bc5f004d85293bd34e0a6ccfc659361d9ca"
+          },
+          "command": [
+            "scripts/gnn_03_train_gin.py",
+            "--tag",
+            "herg",
+            "--split",
+            "time",
+            "--model",
+            "gin",
+            "--seed",
+            "2",
+            "--hidden",
+            "128",
+            "--num-layers",
+            "4",
+            "--dropout",
+            "0.2",
+            "--lr",
+            "0.001",
+            "--batch-size",
+            "128",
+            "--epochs",
+            "100",
+            "--patience",
+            "20",
+            "--min-epochs",
+            "0",
+            "--device",
+            "cuda",
+            "--suffix",
+            "_seed2"
+          ],
+          "environment": {
+            "packages": {
+              "joblib": "1.6.0",
+              "numpy": "2.5.3",
+              "rdkit": "2026.3.6",
+              "scikit-learn": "1.9.1",
+              "torch": "2.14.0+cu126",
+              "torch-geometric": "2.8.0.post1"
+            },
+            "platform": "Linux-7.0.0-38-generic-x86_64-with-glibc2.39",
+            "python": "3.12.15",
+            "variables": {
+              "CUBLAS_WORKSPACE_CONFIG": null,
+              "CUDA_VISIBLE_DEVICES": "0",
+              "MKL_NUM_THREADS": "2",
+              "OMP_NUM_THREADS": "2",
+              "OPENBLAS_NUM_THREADS": "2",
+              "PYTHONHASHSEED": null,
+              "QSAR_CV_BACKEND": null,
+              "QSAR_RF_JOBS": null
+            }
+          },
+          "hyperparameters": {
+            "batch_size": 128,
+            "device": "cuda",
+            "dropout": 0.2,
+            "epochs": 100,
+            "hidden": 128,
+            "lr": 0.001,
+            "min_epochs": 0,
+            "num_layers": 4,
+            "patience": 20,
+            "seed": 2
+          },
+          "inputs": {
+            "data/processed/herg_graphs.npz": "0d060f03d6852fab51c27444f9655c9c50111bb43899ea3fff7a8a932ef7458f",
+            "data/processed/splits/herg_time.npz": "fdeb6f3b6fa5b7e2eaaa2fc5f2e1af3146a2fc6c092a4034c0bdc17bd7c28790"
+          },
+          "label_id": "cfa8bc4a32d0b179943f36a1234f46c2ea95e6518ae1d368609fd3520fb1f8d4",
+          "role": "gin",
+          "schema": 1,
+          "tag": "herg"
+        },
+        "r2": -0.08131420612335205,
+        "returned_artifact_sha256": {
+          "results/gnn_metrics_herg_seed2.json": "f9c722d97c446f9eaba1a91a9f0e38c6f913bdd0ae7254d93279f8497f4b86ac",
+          "results/gnn_models/herg_gin_time_seed2.pt": "5c8653814cdc97bcb26ae45c64ac8650dd92b5c80164078408e2af12d1a60e49",
+          "results/gnn_preds_herg_time_seed2.npz": "63befca063071e69429b0dce365f6c0728fe5a991a100d58981df0cd947fa1d6"
+        },
+        "rmse": 0.9881201752286091,
+        "role": "gin",
+        "seed": 2,
+        "signature": "85f0ef1346fd79523e98b0e0d54eb67f93f968c33e0a427a7f1bc29ebd8d66e4",
+        "started_at": "2026-10-13T15:16:36.237081+00:00",
+        "state": "success",
+        "tag": "herg"
+      }
+    ],
+    "wall_seconds": {
+      "gin": 47.04795185100011,
+      "rf": 1625.3009551249997
+    }
   },
   "rf_jobs": 8,
   "rf_prediction_replay_max_abs_error": 0.0,
-  "rf_wall_seconds": 7071.198738,
-  "schema": "qsar-temporal-campaign-acceptance-v1",
-  "source_commit": "7ce15c1f0849ae69e0ca208f781a9824517eb328",
-  "verification": {
-    "diff_check": "passed",
-    "pytest_passed": 292,
-    "pytest_warnings": 3,
-    "ruff": "passed"
-  }
+  "schema": "qsar-temporal-campaign-acceptance-v2",
+  "source_commits": [
+    "7ce15c1f0849ae69e0ca208f781a9824517eb328",
+    "d13f9125af56028f60e099ec2e914dd2509c239e"
+  ]
 }

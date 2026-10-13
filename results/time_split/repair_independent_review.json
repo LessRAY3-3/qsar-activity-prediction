@@ -1,0 +1,153 @@
+{
+  "schema": "herg-repair-independent-review-v1",
+  "reviewed_at": "2026-10-13T16:09:55.373503+00:00",
+  "scope": "read-only data/code/model review; only this report written; RF still pending",
+  "issues": [],
+  "raw_case": {
+    "molecule_chembl_id": "CHEMBL2035183",
+    "activity_id": 10910681,
+    "document_chembl_id": "CHEMBL2034857",
+    "year": 2012.0,
+    "nM": 7200.0,
+    "pic50_expected": 5.142667503568732,
+    "pic50_saved": 5.142667293548584,
+    "raw_smiles": "C1=C/COCc2cc(ccc2OCCN2CCCC2)Nc2nccc(n2)-c2ccc(s2)COC/1",
+    "one_pass_parent": "C1=C2COC/C=C/COCc3cc(ccc3OCCN3CCCC3)Nc3nccc(n3)C(=C1)S2",
+    "two_pass_parent": "C1=C/COCc2cc(ccc2OCCN2CCCC2)Nc2nccc(n2)-c2ccc(s2)COC/1",
+    "cache_row": 17,
+    "train_cutoff_exclusive": 2016,
+    "new_counts": {
+      "train": 4944,
+      "valid": 1115,
+      "test": 2325,
+      "excluded": 19
+    },
+    "only_pool_change": "row17 excluded -> train",
+    "only_y_change_row": 17,
+    "new_label_id": "369e86d94fe32622d959806abc5379f5487ab2f63282a4642af6c5003c628e93"
+  },
+  "other_targets": [
+    {
+      "tag": "a2a",
+      "all_fields_identical": true,
+      "label_id": "b35580bb601adf4fb9e604dee3dd0f8989d11ebd4f14eaafc3e25a4e40f44b5b",
+      "new_sha256": "5a28451cf757e4f547197bf7ae45701c496917e11cf07a699287fa7f7932eecd",
+      "previous_sha256": "5a28451cf757e4f547197bf7ae45701c496917e11cf07a699287fa7f7932eecd",
+      "byte_identical": true
+    },
+    {
+      "tag": "abl1",
+      "all_fields_identical": true,
+      "label_id": "999bd88ee0bf093ad765dd8c7769f26756c3f4a47935e0de22391af8feb6e7c3",
+      "new_sha256": "7d5bc03ae5ac43bf776df73f11223069b6d574cde84f0633e5cf18d9e9c9ed62",
+      "previous_sha256": "7d5bc03ae5ac43bf776df73f11223069b6d574cde84f0633e5cf18d9e9c9ed62",
+      "byte_identical": true
+    },
+    {
+      "tag": "egfr_full",
+      "all_fields_identical": true,
+      "label_id": "09e7659309a88d077bdad0001daf441245aa9b9f88573d2cf755cd8697b3680b",
+      "new_sha256": "fdcd58f8ea2a2e83a2529160581202a6295f073dfa0bb6560a10dd4eb4a4f993",
+      "previous_sha256": "fdcd58f8ea2a2e83a2529160581202a6295f073dfa0bb6560a10dd4eb4a4f993",
+      "byte_identical": true
+    },
+    {
+      "tag": "egfr",
+      "all_fields_identical": true,
+      "label_id": "b181f531e8ac9454c8ce55a1669a28259e7d3aa65852a74ce38eac44be846761",
+      "new_sha256": "47d2d02eac0f9faac7024f34f722602ce40c19db36726353aa81a6b13b4aa966",
+      "previous_sha256": "47d2d02eac0f9faac7024f34f722602ce40c19db36726353aa81a6b13b4aa966",
+      "byte_identical": true
+    },
+    {
+      "tag": "hivpr",
+      "all_fields_identical": true,
+      "label_id": "66a8a839e6cff2f4d7b9664c286fd8d2b716b784faab4aa60d7bf5e74d94eec6",
+      "new_sha256": "57f292a4333ae6a94922236d0ec5e183dd46fb438ba0db0c942eaf503f928455",
+      "previous_sha256": "57f292a4333ae6a94922236d0ec5e183dd46fb438ba0db0c942eaf503f928455",
+      "byte_identical": true
+    },
+    {
+      "tag": "mpro",
+      "all_fields_identical": true,
+      "label_id": "75bb580c77d0dbe64c7aed1178c0dbc2505f44f3c3c91cc0344a95e8c305c17c",
+      "new_sha256": "a04f76855f5e0114854af278c7c86d26abe6b4d96acf691fbb49b9869267419f",
+      "previous_sha256": "a04f76855f5e0114854af278c7c86d26abe6b4d96acf691fbb49b9869267419f",
+      "byte_identical": true
+    },
+    {
+      "tag": "vegfr2",
+      "all_fields_identical": true,
+      "label_id": "0257d96ee9bd87e1664b7ac0bfb946a556acdd78ef5389fbb62256c0462beb78",
+      "new_sha256": "7cd41dc7b53d23150416536830f6cdeb7b8160233620727162ef0b9e20751653",
+      "previous_sha256": "7cd41dc7b53d23150416536830f6cdeb7b8160233620727162ef0b9e20751653",
+      "byte_identical": true
+    }
+  ],
+  "gin_jobs": [
+    {
+      "seed": 42,
+      "label_id": "369e86d94fe32622d959806abc5379f5487ab2f63282a4642af6c5003c628e93",
+      "artifact_hashes_verified": true,
+      "code_and_input_hashes_verified": true,
+      "provenance_signature_verified": true,
+      "train_normalization_verified": true,
+      "train_y_mean": 5.411808490753174,
+      "train_y_std": 0.9782280325889587,
+      "best_epoch": 23,
+      "stop_epoch": 43,
+      "convergence_flag": false,
+      "metrics_recomputed": {
+        "r2": -0.038910508155822754,
+        "rmse": 0.9685518308190851,
+        "mae": 0.6659982204437256
+      },
+      "best_valid_rmse_std_replay": 0.7290165424346924,
+      "best_valid_rmse_std_abs_error": 0.0,
+      "test_prediction_max_abs_error": 1.9073486328125e-06
+    },
+    {
+      "seed": 1,
+      "label_id": "369e86d94fe32622d959806abc5379f5487ab2f63282a4642af6c5003c628e93",
+      "artifact_hashes_verified": true,
+      "code_and_input_hashes_verified": true,
+      "provenance_signature_verified": true,
+      "train_normalization_verified": true,
+      "train_y_mean": 5.411808490753174,
+      "train_y_std": 0.9782280325889587,
+      "best_epoch": 25,
+      "stop_epoch": 45,
+      "convergence_flag": false,
+      "metrics_recomputed": {
+        "r2": -0.044777631759643555,
+        "rmse": 0.9712828779608585,
+        "mae": 0.6708722710609436
+      },
+      "best_valid_rmse_std_replay": 0.7186465263366699,
+      "best_valid_rmse_std_abs_error": 0.0,
+      "test_prediction_max_abs_error": 1.430511474609375e-06
+    },
+    {
+      "seed": 2,
+      "label_id": "369e86d94fe32622d959806abc5379f5487ab2f63282a4642af6c5003c628e93",
+      "artifact_hashes_verified": true,
+      "code_and_input_hashes_verified": true,
+      "provenance_signature_verified": true,
+      "train_normalization_verified": true,
+      "train_y_mean": 5.411808490753174,
+      "train_y_std": 0.9782280325889587,
+      "best_epoch": 13,
+      "stop_epoch": 33,
+      "convergence_flag": false,
+      "metrics_recomputed": {
+        "r2": -0.11230778694152832,
+        "rmse": 1.002181296738261,
+        "mae": 0.6757155060768127
+      },
+      "best_valid_rmse_std_replay": 0.7006242275238037,
+      "best_valid_rmse_std_abs_error": 0.0,
+      "test_prediction_max_abs_error": 9.5367431640625e-07
+    }
+  ],
+  "conclusion": "PASS for corrected hERG split and all 3 replacement GIN jobs; RF and final integrated campaign not reviewed here"
+}

@@ -40,12 +40,12 @@
     "rmse": 0.8829371609063725
   },
   "time": {
-    "best_epoch": 33,
-    "best_valid_rmse_std": 0.7125858664512634,
+    "best_epoch": 13,
+    "best_valid_rmse_std": 0.7006242275238037,
     "convergence_flag": false,
     "device": "cuda",
-    "label_id": "cfa8bc4a32d0b179943f36a1234f46c2ea95e6518ae1d368609fd3520fb1f8d4",
-    "mae": 0.6672236919403076,
+    "label_id": "369e86d94fe32622d959806abc5379f5487ab2f63282a4642af6c5003c628e93",
+    "mae": 0.6757155060768127,
     "max_epochs": 100,
     "params": {
       "batch_size": 128,
@@ -62,8 +62,8 @@
       "suffix": "_seed2",
       "tag": "herg"
     },
-    "r2": -0.08131420612335205,
-    "rmse": 0.9881201752286091,
+    "r2": -0.11230778694152832,
+    "rmse": 1.002181296738261,
     "runtime": {
       "device": "cuda",
       "requested_device": "cuda",
@@ -72,6 +72,6 @@
       "torch_threads": 2,
       "torch_version": "2.14.0+cu126"
     },
-    "train_mse": 0.3440227552256602
+    "train_mse": 0.38924792543969877
   }
 }

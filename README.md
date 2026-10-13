@@ -107,9 +107,29 @@ quoted under *Significance* below. The CI is computed on the *ensemble*
 
 ### Reproduce: fast path
 
+To recompute the current temporal statistics from a fresh checkout, no model
+or raw-data download is needed. Git contains the predictions, metrics and
+`results/time_split/inputs/` frozen split package:
+
 ```bash
 pip install -r requirements.txt
-python scripts/fetch_artifacts.py --all   # 下载训练好的 models/、data/raw/ 和指纹缓存（GitHub Release）
+python scripts/restore_time_inputs.py
+python experiments/paired_bootstrap.py --model gin --splits time --n-boot 10000
+python experiments/time_split_summary.py
+```
+
+The restore command verifies the archive and every split's SHA256, validates
+its label signature, and checks all 32 prediction/metric label versions before
+writing the eight NPZ files under `data/processed/splits/`. It refuses conflicting
+local splits or `*_time_NA.json` markers; inspect and archive those files first,
+or run in a clean checkout. It never replaces local data automatically. The
+as-of constant baseline reads training labels directly from these frozen splits.
+This reproduces statistics from predictions; it does not retrain models.
+
+For the historical random/scaffold pipeline and full feature caches:
+
+```bash
+python scripts/fetch_artifacts.py --all   # models/、data/raw/ 和指纹缓存（GitHub Release）
 ```
 
 **Temporal model download limitation:** `fetch_artifacts.py` still reads the
@@ -131,9 +151,10 @@ own `sha256sums.txt` (download integrity), and the extracted raw files
 against the repo's `data/raw/sha256sums.txt` — the script aborts loudly
 on any release whose raw data predates the 2026-10-11 refresh.
 
-The fast path is designed so that Phase 2 runs directly
-(`gnn_01_make_splits.py` onward): saved RF models and regenerated
-splits verify against the published metrics with no retraining.
+The release-based random/scaffold path is designed so that Phase 2 runs directly
+(`gnn_01_make_splits.py` onward): its saved RF models and regenerated
+random/scaffold splits verify against the corresponding published metrics
+with no retraining.
 `--all` also downloads and extracts `processed_cache.tar.gz`, the
 fingerprint caches `gnn_01` reads first, so no re-featurization is
 needed before Phase 2. Full retraining, incl. phase 3:
@@ -750,7 +771,7 @@ with newest years held out. Labels use exact (`=`), valid nM measurements with
 known document years: train uses years **before the validation cutoff**,
 validation uses years **before the test cutoff**, and test uses years **at or
 after the test cutoff**. A molecule without an eligible measurement in its
-assigned pool is excluded (169 rows across the eight tags); undated measurements
+assigned pool is excluded (168 rows across the eight tags); undated measurements
 cannot supply labels. `scripts/time_labels.py` verifies dataset signatures and
 `label_id`; training and analysis reject mismatched versions. RF fits train
 only; GIN fits the same pool and selects checkpoints on validation. The constant
@@ -760,7 +781,11 @@ between RF and GIN remains.
 The [three-host campaign](docs/methodology.md#three-host-temporal-retraining-campaign-2026-10-13)
 completed 8 RF searches on M3 Max and 24 GIN fits on the Ubuntu RTX 4070 Laptop
 GPU (8 GiB), with the M4 Air preparing inputs and accepting results. Training
-used frozen source revision `7ce15c1f0849ae69e0ca208f781a9824517eb328`;
+used frozen source revision `7ce15c1f0849ae69e0ca208f781a9824517eb328`.
+A subsequent cached-parent-key repair recovered one eligible hERG training
+molecule and reran its RF plus three GIN fits from
+`d13f9125af56028f60e099ec2e914dd2509c239e`. The other 28 jobs retain their
+original inputs and provenance;
 [result acceptance and provenance](results/time_split/campaign_acceptance.json)
 record all 32 jobs. Source/input hashes, label IDs, test alignment, recomputed
 metrics and checkpoint prediction replay passed. All three predeclared seeds
@@ -781,15 +806,15 @@ not a controlled isolation of the effect of splitting.
 | `abl1` | 0.822 | 0.767 | +0.559 | +0.203±0.179 | +0.257 | **−0.302** | [−0.352, −0.252] |
 | `egfr` | 0.721 | 0.665 | +0.140 | +0.097±0.036 | +0.123 | −0.017 | [−0.068, +0.035] |
 | `egfr_full` | 0.729 | 0.667 | −0.753 | −0.233±0.065 | −0.188 | **+0.565** | [+0.513, +0.623] |
-| `herg` | 0.607 | 0.619 | −0.047 | −0.079±0.053 | −0.041 | +0.006 | [−0.036, +0.049] |
+| `herg` | 0.607 | 0.619 | −0.056 | −0.065±0.033 | −0.034 | +0.022 | [−0.016, +0.061] |
 | `hivpr` | 0.692 | 0.632 | −0.044 | +0.066±0.064 | +0.094 | **+0.138** | [+0.061, +0.217] |
 | `mpro` | 0.602 | 0.572 | +0.007 | +0.035±0.046 | +0.084 | **+0.077** | [+0.034, +0.122] |
 | `vegfr2` | 0.670 | 0.605 | +0.150 | −0.006±0.074 | +0.047 | **−0.102** | [−0.130, −0.074] |
 
 The ensemble CI favours GIN on `a2a`, `egfr_full`, `hivpr` and `mpro`, RF on
 `abl1` and `vegfr2`, and includes zero on `egfr` and `herg`. Across the eight
-tags, the unweighted mean time R2 is **−0.033 RF**, **+0.020 GIN per seed** and
-**+0.061 GIN ensemble**; `egfr` and `egfr_full` overlap and are not independent
+tags, the unweighted mean time R2 is **−0.034 RF**, **+0.022 GIN per seed** and
+**+0.062 GIN ensemble**; `egfr` and `egfr_full` overlap and are not independent
 targets. GIN's relative advantage on `egfr_full` still leaves its ensemble R2
 negative (−0.188); both model families also have negative R2 on `herg`.
 

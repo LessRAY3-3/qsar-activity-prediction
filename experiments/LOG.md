@@ -8,9 +8,51 @@ the win4070 CUDA host (logs committed under `logs/win4070_/`) and the
 auxiliary batches (learning curve, y-randomization, multitask) on this
 M4 Air under MPS; older 2026-09/10 entries also record M3 Max runs.
 
-**Status pointer (2026-10-13): the completed as-of temporal campaign is
-recorded immediately below. Earlier PR #6 and 2026-10-12 remediation entries
-remain at the bottom. Their historical time scores are superseded.**
+**Status pointer (2026-10-14): the repair below defines the current temporal
+results. The initial 2026-10-13 entry records the preceding campaign; its hERG
+scores and aggregate means are superseded. Earlier all-year-label time scores
+are historical only.**
+
+## 2026-10-14 — hERG parent-key repair and reproducible temporal inputs
+
+- **Data correction:** time splitting was normalizing already-normalized cache
+  SMILES again. For `CHEMBL2035183`, that changed the key and excluded a valid
+  2012 exact 7,200 nM measurement. The raw-record key is now normalized once
+  and joined to the unchanged cache key. hERG train increases 4,943 → 4,944;
+  exclusions decrease 20 → 19 (168 total). Validation/test rows and labels are
+  unchanged. All other seven split arrays and their retained file bytes match.
+- **Training:** source `d13f9125af56028f60e099ec2e914dd2509c239e`; replace only
+  hERG RF + GIN seeds 42/1/2. RF ran on M3 with 16 CV workers in 1,625 seconds;
+  GIN ran on the 4070 in 47 seconds. Original model recipes are unchanged.
+  The other 28 jobs retain source `7ce15c1` and their original provenance.
+- **Worker correction:** each attempt starts with isolated source/input files
+  and empty outputs. NA/input/source/manifest changes are rechecked before
+  execution, resume and publication. No-op or partial runs cannot reuse old
+  artifacts; publication failures roll back replaced files.
+- **Acceptance:** four replacement jobs passed frozen source/input/label hashes,
+  metric recomputation and checkpoint loading. RF replay is exact; maximum
+  CUDA GIN replay error is 9.54e-7. Independent CPU replay of all three GIN
+  validation scores matched exactly, with train-only normalization verified.
+  All 32 current prediction files align with the current labels; non-time
+  metric entries remain unchanged. Acceptance maps jobs to the initial or
+  repair manifests instead of assigning one source revision to every job.
+- **Updated results:** hERG RF R2 −0.056; GIN per-seed −0.065±0.033; GIN
+  ensemble −0.034. Ensemble ΔR2 +0.022, 95% CI [−0.016, +0.061]. B=10,000
+  bootstrap retains four GIN wins, two RF wins and two intervals containing
+  zero. Eight-row means are RF −0.034, GIN per-seed +0.022, ensemble +0.062.
+  The original uncertainty and overlapping-target caveats still apply.
+- **Reproduction:** publish the eight frozen splits as a 2.1 MiB package in
+  `results/time_split/inputs/`. `scripts/restore_time_inputs.py` verifies hashes,
+  split signatures and all prediction/metric label versions before restoration.
+  Conflicting local inputs are refused. The as-of constant baseline now reads
+  split labels directly, so raw tables and feature caches are unnecessary for
+  bootstrap/summary reproduction. CI restores and validates the package before
+  running tests. Analysis code is recorded at `0b4fb29`.
+- **Records:** `results/time_split/campaign_acceptance.json`,
+  `repair_split_comparison.json`, `repair_independent_review.json`, repair input
+  manifests and `logs/time_asof_repair_20261014/`. The original acceptance is
+  preserved as `initial_campaign_acceptance.json`. RF release assets remain
+  historical; accepted new joblib files are retained on M3 and the coordinator.
 
 ## 2026-10-13 — completed as-of temporal retraining
 
