@@ -8,8 +8,8 @@ artifact that already exists on disk.
 
 Inputs (per tag):
   data/processed/splits/{tag}_time.npz               sizes + test years
-  data/processed/{tag}_fingerprints.npz              y for the constant
-                                                     (no-skill) baseline
+  data/processed/{tag}_fingerprints.npz              legacy baseline only;
+                                                     as-of baseline uses split y
   results/metrics_{tag}.json                         RF "time" r2/rmse
   results/gnn_metrics_{tag}{,_seed1,_seed2}.json     GIN "time" r2 +
                                                      best_epoch (3 seeds)
@@ -115,18 +115,21 @@ def constant_r2(tag):
     Legacy all-year results retain their original non-test (train+valid)
     pool solely for historical reproduction.
     """
-    y = np.asarray(np.load(os.path.join(BASE, "data", "processed",
-                                        f"{tag}_fingerprints.npz"))["y"],
-                   dtype=np.float64)
     sp = np.load(os.path.join(BASE, "data", "processed", "splits",
                               f"{tag}_time.npz"))
     test = np.asarray(sp["test_idx"])
-    if len(y) != len(sp["year"]):
-        raise ValueError(f"{tag}: y and split index spaces differ")
     if "label_policy" in sp:
+        sp = load_time_split(os.path.join(BASE, "data", "processed", "splits"), tag)
+        if sp is None:
+            raise ValueError(f"{tag}: time split is NA")
         y = np.asarray(sp["y"], dtype=np.float64)
         pool = sp["train_idx"]
     else:
+        y = np.asarray(np.load(os.path.join(BASE, "data", "processed",
+                                            f"{tag}_fingerprints.npz"))["y"],
+                       dtype=np.float64)
+        if len(y) != len(sp["year"]):
+            raise ValueError(f"{tag}: y and split index spaces differ")
         pool = np.ones(len(y), dtype=bool)
         pool[test] = False
     yt = y[test]

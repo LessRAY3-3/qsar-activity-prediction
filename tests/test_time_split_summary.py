@@ -275,9 +275,16 @@ def test_asof_constant_uses_train_only_and_ignores_valid_and_excluded(
     # Historical labels differ from the cached all-year labels; excluded
     # rows must not poison the baseline, nor may high validation labels leak in.
     y = np.array([3., 5., 4., 4., np.nan, 20., 20., 8., 9., 10.])
-    sp.update(label_policy="exact-dated-asof-v1", y=y,
+    from time_labels import dataset_signature, label_signature
+    smiles = np.array(["C" * (i + 1) for i in range(len(y))])
+    sp.update(label_policy="exact-dated-asof-v1", y=y, original_y=cached_y,
+              smiles=smiles, dataset_signature=dataset_signature(smiles, cached_y),
+              source_sha256="a" * 64, cutoff_valid=5, cutoff_test=7,
               train_idx=np.arange(4), excluded_idx=np.array([4]))
+    sp["label_id"] = label_signature(sp)
     np.savez(split_path, **sp)
+    # Fresh checkouts need only the frozen splits, never a fingerprint cache.
+    (tmp_path / "data/processed/t1_fingerprints.npz").unlink()
     got = mod.constant_r2("t1")
     assert got == pytest.approx(_baseline_r2(y, sp["test_idx"], sp["train_idx"]))
     for wrong_y, pool in ((y, np.arange(0, 7)),
