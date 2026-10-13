@@ -1,0 +1,16 @@
+<GIN_CAMPAIGN>/.venv/lib/python3.12/site-packages/torch/jit/_script.py:1491: FutureWarning: `torch.jit.script` is deprecated. Please switch to `torch.compile` or `torch.export`.
+  warnings.warn(
+[hivpr/time] device=cuda  y_mean=7.305 y_std=1.490
+<GIN_CAMPAIGN>/work/scripts/gnn_03_train_gin.py:273: UserWarning: Converting a tensor with requires_grad=True to a scalar may lead to unexpected behavior.
+Consider using tensor.detach() first. (Triggered internally at /__w/pytorch/pytorch/torch/csrc/autograd/generated/python_variable_methods.cpp:820.)
+  total += float(loss) * len(batch.y)
+  epoch   1  train_mse=0.8811  valid_rmse=1.1719  lr=1.0e-03 *
+  epoch   3  train_mse=0.6562  valid_rmse=0.9063  lr=1.0e-03 *
+  epoch  10  train_mse=0.4837  valid_rmse=1.0181  lr=1.0e-03
+  epoch  11  train_mse=0.4707  valid_rmse=0.8124  lr=1.0e-03 *
+  epoch  15  train_mse=0.4387  valid_rmse=0.7584  lr=1.0e-03 *
+  epoch  20  train_mse=0.4098  valid_rmse=1.1519  lr=1.0e-03
+  epoch  30  train_mse=0.3359  valid_rmse=0.9475  lr=5.0e-04
+  early stop at epoch 35 (best epoch 15)
+  TEST  R2=-0.0186  RMSE=1.7359  MAE=1.3985  (4s)
+  saved -> results/gnn_models/hivpr_gin_time_seed2.pt, results/gnn_preds_hivpr_time_seed2.npz, results/gnn_metrics_hivpr_seed2.json

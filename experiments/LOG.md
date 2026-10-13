@@ -8,11 +8,46 @@ the win4070 CUDA host (logs committed under `logs/win4070_/`) and the
 auxiliary batches (learning curve, y-randomization, multitask) on this
 M4 Air under MPS; older 2026-09/10 entries also record M3 Max runs.
 
-**Status pointer (2026-10-13): entries are newest first, but the two
-latest entries sit at the *bottom* of this file — first the 2026-10-13
-PR #6 review-remediation entry, below it the 2026-10-12
-review-remediation campaign; superseded status lines are marked in
-place.**
+**Status pointer (2026-10-13): the completed as-of temporal campaign is
+recorded immediately below. Earlier PR #6 and 2026-10-12 remediation entries
+remain at the bottom. Their historical time scores are superseded.**
+
+## 2026-10-13 — completed as-of temporal retraining
+
+- **Frozen protocol:** source `7ce15c1f0849ae69e0ca208f781a9824517eb328`,
+  `exact-dated-asof-v1`, eight targets, 169 label-eligibility exclusions.
+  RF fits train only with its 12-setting, five-fold search; GIN fits the
+  same pool and selects checkpoints on validation, seeds 42/1/2. No test
+  scores were used to alter the recipe or discard seeds.
+- **Execution:** M3 Max completed eight RF jobs in 117.9 minutes (four
+  CV workers for the first five targets; sixteen for hivpr/mpro/vegfr2).
+  RTX 4070 Laptop GPU, 8 GiB, torch 2.14.0+cu126 / CUDA 12.6 completed
+  24 GIN fits in 225.3 seconds, excluding setup and transfer. All stopped
+  after 20 epochs without validation improvement; best epochs span 2–33.
+  No script convergence flags were triggered; this is not evidence of
+  optimal fitting. M4 Air prepared inputs, accepted results and ran analysis.
+- **Acceptance:** 32/32 jobs passed source/input/label hash checks, test-row
+  alignment, checkpoint loading and metric recomputation. RF checkpoint
+  replay matched exactly; maximum CUDA GIN prediction difference was
+  9.54e-7. Records: `results/time_split/campaign_acceptance.json`, both
+  `input_manifest_*.json` files and `logs/time_asof_20261013/`.
+- **Results:** B=10,000 paired molecule bootstrap of the three-seed
+  ensemble favours GIN on a2a/egfr_full/hivpr/mpro and RF on abl1/vegfr2;
+  egfr/herg intervals contain zero. Unweighted mean time R² is RF −0.033,
+  GIN per-seed +0.020, GIN ensemble +0.061. Current figures and README
+  report negative scores, train-only constant baselines and uncertainty.
+  These intervals condition on fitted seeds; targets include overlapping
+  EGFR datasets and are not independent replications.
+- **Integration:** archived previous temporal artifacts before replacing
+  predictions, GIN checkpoints and figures; merged only `time` and RF
+  `best_params_time` into metric JSON files. All non-time metric entries
+  are unchanged. The old MSE decomposition remains a historical record.
+- **Distribution:** RF models are retained on M3 and the coordinator,
+  outside Git. The `artifacts-v2` release has not been updated for this
+  campaign and still contains historical RF time models.
+- **Validation:** 292 tests passed; Ruff and `git diff --check` passed.
+  The stored-constant regression test now independently selects train-only
+  as-of labels, while preserving its historical non-test-pool branch.
 
 ## 2026-10-11
 

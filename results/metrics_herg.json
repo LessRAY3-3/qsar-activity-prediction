@@ -1,18 +1,4 @@
 {
-  "target": "Voltage-gated inwardly rectifying potassium channel KCNH2",
-  "tag": "herg",
-  "random": {
-    "split": "random",
-    "r2": 0.6066868678540435,
-    "rmse": 0.5974673558590733,
-    "mae": 0.4235310897400266
-  },
-  "scaffold": {
-    "split": "scaffold",
-    "r2": 0.3844663110464861,
-    "rmse": 0.8882092427455922,
-    "mae": 0.5845110086441727
-  },
   "best_params_random": {
     "bootstrap": true,
     "ccp_alpha": 0.0,
@@ -53,12 +39,6 @@
     "verbose": 0,
     "warm_start": false
   },
-  "time": {
-    "split": "time",
-    "r2": -0.05834526938614237,
-    "rmse": 0.9775867737567929,
-    "mae": 0.7003392199489238
-  },
   "best_params_time": {
     "bootstrap": true,
     "ccp_alpha": 0.0,
@@ -72,11 +52,37 @@
     "min_samples_split": 2,
     "min_weight_fraction_leaf": 0.0,
     "monotonic_cst": null,
-    "n_estimators": 300,
+    "n_estimators": 500,
     "n_jobs": 1,
     "oob_score": false,
     "random_state": 42,
     "verbose": 0,
     "warm_start": false
+  },
+  "random": {
+    "mae": 0.4235310897400266,
+    "r2": 0.6066868678540435,
+    "rmse": 0.5974673558590733,
+    "split": "random"
+  },
+  "scaffold": {
+    "mae": 0.5845110086441727,
+    "r2": 0.3844663110464861,
+    "rmse": 0.8882092427455922,
+    "split": "scaffold"
+  },
+  "tag": "herg",
+  "target": "Voltage-gated inwardly rectifying potassium channel KCNH2",
+  "time": {
+    "label_id": "cfa8bc4a32d0b179943f36a1234f46c2ea95e6518ae1d368609fd3520fb1f8d4",
+    "mae": 0.6957801125776217,
+    "r2": -0.046743799717638757,
+    "rmse": 0.9721964036248725,
+    "runtime": {
+      "cv_backend": "loky",
+      "rf_jobs": 4,
+      "seed": 42
+    },
+    "split": "time"
   }
 }

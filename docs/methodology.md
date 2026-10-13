@@ -143,8 +143,8 @@ What was rebuilt (commits `d1bebd9` -> `e37c572`, raw re-download
   cannot be regenerated bit-identically with today's code even though
   its labels are unchanged.
 
-Recomputed **after** the rebuild (status at 2026-10-12, see the number
-draft for per-file timestamps):
+Recomputed **after** the rebuild (historical status at 2026-10-12; its time
+outputs were superseded by the corrected campaign below):
 
 - **RF**: `results/metrics_{tag}.json` for all 8 panel tags + bace,
   retrained under the shuffled-fold grid search (`18d888e`, `05be454`;
@@ -284,32 +284,25 @@ cached as one CSR-style npz (`scripts/gnn_02_build_graphs.py`).
 Model: GIN (Graph Isomorphism Network), the canonical MoleculeNet baseline:
 AtomEncoder (sum of per-feature embeddings) -> 4 x [GINConv -> BatchNorm
 -> ReLU -> dropout, residual] -> global mean pool -> MLP head. PyTorch
-Geometric. Training device - scoped to the runs whose logs are
-committed: the non-egfr GIN panel cells (7 tags x random/scaffold/time
-x 3 seeds) and the GINE and AttentiveFP panel campaigns trained on the
-CUDA host win4070 (per-run logs under `logs/win4070_/` print
-`device=cuda`); the 2026-10-12 N3 re-run of the stalled
-`abl1`/scaffold AttentiveFP seed-42 (Statistical significance below)
-ran locally on this Mac under MPS
-(`logs/review11_n3_afp_abl1_scaffold_s42_min60.log`), and so did the
-2026-10-11 auxiliary batches - learning curves, y-randomization and
-multitask (`logs/aux_m4_*.log`; `logs/multitask.log` prints
-`device=mps`). The refreshed `egfr` GIN cells behind the headline
-comparison (random 0.6694 / 0.6608 / 0.6636, scaffold 0.6308 / 0.6074 /
-0.5991, time 0.0404 / 0.0325 / 0.1913) are the exception: their
-training logs were not committed, and they are **not** the `egfr` runs
-recorded in `logs/win4070_/win4070_gin_c.log` - that log's egfr block
-reports pre-re-pull values (random 0.7055 / 0.6989 / 0.7124, scaffold
-0.4931 / 0.5102 / 0.5092; its `y_mean=6.238` does not match the
-refreshed random-split train mean 6.491). Treat those nine cells as
-products of the 2026-10-11 refresh campaign with the training device
-unrecorded - not as documented CUDA runs. The current
-`scripts/gnn_03_train_gin.py` records the device it actually used as
-`device` in the split block of `results/gnn_metrics_*.json`, but every
-metrics json committed so far predates that addition (none of the 73
-`gnn_metrics_*.json` files carries the field - not even the N3 rerun's
-`gnn_metrics_abl1_attentivefp.json`), so the device of any historical
-run is recoverable only from committed logs. The default `gin` does not use
+Geometric. The corrected temporal campaign ran all 24 GIN fits on the CUDA
+host win4070 (RTX 4070 Laptop GPU, 8 GiB VRAM), with torch 2.14.0+cu126 and
+CUDA 12.6. Every new time metrics block and checkpoint records the actual
+device; `results/time_split/campaign_acceptance.json` records the accepted
+per-run provenance. This source revision is distinct from the later revision
+that publishes the resulting artifacts.
+
+Historical random/scaffold device evidence remains scoped to committed logs:
+the non-egfr GIN cells and the GINE/AttentiveFP campaigns used win4070
+(`logs/win4070_/`, `device=cuda`). The 2026-10-12 rerun of stalled
+`abl1`/scaffold AttentiveFP seed 42 ran under local MPS
+(`logs/review11_n3_afp_abl1_scaffold_s42_min60.log`), as did the 2026-10-11
+learning-curve, y-randomization and multitask auxiliary batches
+(`logs/aux_m4_*.log`, `logs/multitask.log`). The refreshed `egfr` GIN
+random scores (0.6694 / 0.6608 / 0.6636) and scaffold scores
+(0.6308 / 0.6074 / 0.5991) have no committed training logs. They are not the
+pre-re-pull `egfr` runs in `logs/win4070_/win4070_gin_c.log` and their device
+remains unrecorded. Those historical metrics predate device metadata; the new
+time metadata must not be used to infer their device. The default `gin` does not use
 bond features (plain GINConv aggregates node features only), but the
 cached 3-dim bond features are no longer "stored but unused":
 `scripts/gnn_03_train_gin.py --model {gin, gine, attentivefp}` - all three
@@ -471,8 +464,8 @@ separable from resampling noise - analysis only, nothing is retrained:
   `summary_partial{suffix}.csv` / `ci_panel_partial{suffix}.png` and
   leaves the campaign files untouched (review L2; the merge, the
   legacy-`p_one_sided` reader and the partial-run guard are pinned by
-  `tests/test_p8_analysis.py`). The time-split run flips the pattern -
-  see the next section.
+  `tests/test_p8_analysis.py`). The corrected time-split comparison is
+  reported in the publication-year section below.
 
 ## Scaffold split convention: largest groups go to *test* (opposite of DeepChem)
 
@@ -503,23 +496,20 @@ phase 2 and the experiments):
   to a MoleculeNet-aligned split later would require full retraining of
   every cell.
 
-## Publication-year (time) split: corrected policy, legacy artifacts
+## Publication-year (time) split: corrected policy and results
 
-**2026-10-13 validity correction.** The committed time models and prediction
-files used the cleaned all-year median labels. Assigning each molecule to its
-first publication year did not prevent later measurements from changing its
-training label. Consequently, all existing time scores, CIs, decompositions
-and figures are retained only as a historical audit record. They do not support
-prospective validation, model selection under drift or deployment claims.
-The corrected implementation has not yet been followed by the full 8 RF +
-24 GIN time-training campaign; no as-of result is claimed here.
+**Correction and completed retraining.** The historical time models used
+cleaned all-year median labels. First-publication grouping did not prevent
+later measurements from changing a training label. The current results replace
+that campaign with 8 RF searches and 24 GIN fits using `exact-dated-asof-v1`,
+followed by acceptance, B=10,000 paired bootstrap and regenerated summaries
+and figures. Random/scaffold labels and results were preserved.
 
-For `egfr_full`, 413 training parents have measurements from 2019 onward and
-279 from 2021 onward. `CHEMBL266995` illustrates the effect: its two 1999
-measurements yield median pIC50 6.898, while inclusion of a 2024 measurement
-makes the old label 8.097. This is distinct from choosing whether the first
-report can be a censored activity record: first-report grouping can stay as-is,
-but the fitted label must use information available at the training cutoff.
+For `egfr_full`, the old training pool included 413 parents with measurements
+from 2019 onward and 279 from 2021 onward. `CHEMBL266995` illustrates the
+effect: its two 1999 measurements yield median pIC50 6.898, while inclusion of
+a 2024 measurement makes the old label 8.097. First-report grouping can stay
+as-is, but a training label must use measurements available at its cutoff.
 
 **Current protocol (`scripts/gnn_08_time_splits.py`,
 `scripts/time_labels.py`, policy `exact-dated-asof-v1`):**
@@ -527,85 +517,65 @@ but the fitted label must use information available at the training cutoff.
 - The earliest known document year across raw activity records defines
   first report. `data/raw/document_years.csv` contains the document-year
   lookup (4,147 documents across eight targets; missing years remain missing).
-  Test and validation cutoffs continue to select the newest first-report years.
-- Aggregate labels separately within each assigned pool from exact (`=`)
-  measurements, after relation normalization, valid positive nM values, and
+  Test and validation cutoffs select the newest first-report years.
+- Labels are aggregated separately within each assigned pool from exact (`=`)
+  measurements, after relation normalization, valid positive nM values and
   known document years. Train labels use **year < cutoff_valid**; validation
   labels use **year < cutoff_test**; test labels use **year >= cutoff_test**.
-  Apply the existing cleaning range rules before taking the parent median.
-  Missing/undated eligible labels lead to explicit exclusions, not fallback
-  to an all-year label. Train, valid, test and excluded indices partition the
-  cleaned parent rows; excluded labels are missing.
+  Existing cleaning range rules apply before taking the parent median.
+  Missing eligible labels produce explicit exclusions, not fallback to an
+  all-year label. Train, valid, test and excluded indices partition cleaned
+  parent rows; excluded labels are missing. The campaign excludes 169 rows.
 - Versioned NPZ files include policy, source/dataset signatures, cutoffs,
-  labels and `label_id`. Consumers validate them and prediction provenance;
+  labels and `label_id`. Consumers validate these and prediction provenance;
   partially rerun campaigns cannot mix as-of labels with old predictions.
   An NA marker takes precedence over an old split. Regeneration makes valid
   and NA states mutually exclusive.
-- RF fits train only. GNN fits the same train pool and selects checkpoints
-  using validation. The new constant comparison uses the training-label
-  mean. This still leaves a checkpoint-selection asymmetry to disclose.
-- Completion requires rebuilding all eight time splits, retraining 8 RF and
-  24 GIN models, then regenerating time predictions, bootstrap summaries,
-  metric tables and figures as one version-consistent campaign. Random and
-  scaffold labels are unchanged by this correction.
+- RF fits train only with shuffled five-fold hyperparameter selection. GIN
+  fits the same train pool and selects checkpoints on validation. The constant
+  uses the training-label mean. This checkpoint-selection asymmetry remains.
+- All three predeclared GIN seeds (42, 1, 2) are included. No test score was
+  used to choose hyperparameters, discard seeds or decide whether to extend a run.
 
-**Rebuild command sequence (not yet executed as a full campaign):** run from
-repository root with dependencies and raw/model inputs available. This replaces
-the temporal splits and outputs; the prior artifacts remain recoverable in Git
-history. Available hardware in this repair session is CPU-only, and a successful
-code/test check is not a claim that the training campaign finished.
+The [three-host campaign](#three-host-temporal-retraining-campaign-2026-10-13)
+records execution and reproduction commands. Frozen training source is
+`7ce15c1f0849ae69e0ca208f781a9824517eb328`; publication of the resulting
+artifacts is a later change. `results/time_split/campaign_acceptance.json`
+records 32 accepted jobs, source/input/label hashes, environments, metric
+recomputation and checkpoint prediction replay. The RF replay matched exactly;
+GIN CUDA replay had maximum absolute prediction difference 9.54e-7. All GIN
+runs passed the script's convergence checks; this does not establish globally
+optimal training.
 
-```bash
-set -e
-for tag in a2a abl1 egfr egfr_full herg hivpr mpro vegfr2; do
-  python scripts/gnn_08_time_splits.py --tag "$tag"
-  QSAR_TAG="$tag" python scripts/04_train_and_evaluate.py --split time
-  python scripts/gnn_03_train_gin.py --tag "$tag" --split time --seed 42
-  python scripts/gnn_03_train_gin.py --tag "$tag" --split time --seed 1 --suffix _seed1
-  python scripts/gnn_03_train_gin.py --tag "$tag" --split time --seed 2 --suffix _seed2
-done
-python experiments/paired_bootstrap.py --splits time
-python experiments/time_split_summary.py
-```
+**Current results.** Unweighted means over the eight tags are RF **−0.033**,
+GIN per-seed **+0.020**, and GIN ensemble **+0.061** time R2. The ensemble
+ΔR2 molecule-bootstrap CI excludes zero in six cells: four favour GIN
+(`a2a`, `egfr_full`, `hivpr`, `mpro`) and two favour RF (`abl1`, `vegfr2`).
+`egfr` and `herg` include zero. These unadjusted 95% intervals condition on the
+three fitted seeds and resample paired test molecules; they do not capture
+all training, assay or scaffold-cluster uncertainty. `egfr` is contained in
+`egfr_full`, so the eight rows are not independent target replications.
 
-New-version analysis checks prediction, metric and bootstrap `label_id` values;
-a mixed campaign fails instead of producing a combined table. Entirely legacy
-artifacts can still be recomputed for audit with a warning. After a successful
-full rerun, update the README's currently legacy tables from the new summaries
-and remove the legacy warning only for outputs actually regenerated.
+The relative GIN gain on `egfr_full` does not imply adequate absolute
+performance: ensemble R2 is −0.188 there, versus RF −0.753. Both models also
+have negative R2 on `herg`. Publication-year holdouts are retrospective and
+do not identify a causal drift mechanism or establish deployment readiness.
+For any constant c, R2 = −(c − mean(y_test))² / Var(y_test); a negative constant
+score can occur under ordinary stationary sampling variation. Current
+`constant_r2` uses train-only labels, whereas the historical constant also
+used validation. Random/scaffold comparisons also use a different label
+aggregation policy and cannot isolate the effect of splitting alone.
 
-**Historical numbers below are not recomputed as-of results.** Legacy panel
-means are RF 0.694 random → −0.034 time; GIN 0.643 → +0.032 (per-seed mean),
-and +0.078 for the time ensemble. Legacy mean3 molecule-bootstrap CIs exclude
-zero in six cells (four favouring GIN, two RF); this describes old files only.
-The historical constant uses all non-test rows, including validation, and
-cannot be compared as though it had the same training information as RF.
-A negative constant R2 alone cannot establish drift: for constant c,
-R2 = −(c − mean(y_test))² / Var(y_test), which can be negative under ordinary
-sampling variation from a stationary distribution.
-
-The following **legacy MSE decomposition** remains numerically reproducible
-from committed predictions (`logs/2026-10-13_time_split_mse_decomposition.log`).
-Its level term and Shapley-allocated spread/correlation terms sum exactly to
-ensemble ΔR2; this arithmetic identity neither identifies a causal mechanism
-nor establishes performance on future chemistry.
-
-  | time cell | constant R2 | RF R2 | GIN ens R2 | level | spread | correlation | pred std / y std (RF vs GIN) | slope (RF vs GIN) | r (RF vs GIN) |
-  |---|---|---|---|---|---|---|---|---|---|
-  | `a2a` | −0.004 | −0.301 | +0.024 | +0.580 | +0.008 | −0.263 | 0.69 vs 0.22 | 0.41 vs 0.07 | 0.59 vs 0.30 |
-  | `abl1` | −0.132 | +0.560 | +0.324 | −0.002 | −0.115 | −0.119 | 0.63 vs 0.39 | 0.51 vs 0.27 | 0.81 vs 0.70 |
-  | `egfr` | −0.063 | +0.123 | +0.162 | +0.005 | +0.079 | −0.044 | 0.81 vs 0.66 | 0.39 vs 0.30 | 0.49 vs 0.45 |
-  | `egfr_full` | −0.455 | −0.736 | −0.144 | +0.392 | +0.032 | +0.168 | 0.57 vs 0.52 | 0.06 vs 0.14 | 0.11 vs 0.26 |
-  | `herg` | −0.003 | −0.058 | −0.026 | +0.005 | −0.016 | +0.044 | 0.41 vs 0.44 | 0.06 vs 0.09 | 0.14 vs 0.19 |
-  | `hivpr` | −0.006 | −0.027 | +0.088 | −0.000 | −0.008 | +0.123 | 0.53 vs 0.54 | 0.13 vs 0.20 | 0.26 vs 0.37 |
-  | `mpro` | −0.000 | +0.006 | +0.090 | +0.025 | +0.027 | +0.032 | 0.46 vs 0.31 | 0.12 vs 0.10 | 0.27 vs 0.31 |
-  | `vegfr2` | −0.002 | +0.160 | +0.108 | +0.035 | +0.002 | −0.089 | 0.47 vs 0.45 | 0.22 vs 0.16 | 0.46 vs 0.36 |
-
-Legacy artifacts: `results/time_split/summary.csv`,
+Current artifacts are `results/time_split/summary.csv`,
 `results/significance/summary_time.csv`, `figures/time_split/panel_3splits.png`,
-`figures/time_split/{tag}_timeline.png`, and
-`figures/pred_vs_actual_time_{tag}.png`. The README preserves the corresponding
-scores with the same legacy warning.
+`figures/time_split/{tag}_timeline.png` and
+`figures/pred_vs_actual_time_{tag}.png`. The README reports the matching table.
+The old all-year-label scores and MSE decomposition in
+`logs/2026-10-13_time_split_mse_decomposition.log` are historical only, retained
+in Git revision `7ce15c1` and a coordinator scratch archive. They cannot be
+recomputed from the replaced current prediction files. Their level and
+Shapley-allocated spread/correlation terms were arithmetic descriptions of
+those old predictions, not causal evidence.
 
 ## Uncertainty & applicability domain
 
@@ -985,17 +955,28 @@ This campaign replaces the historical time-split results with results from
 are outside this campaign. New scores must not be inferred from the old
 scores or from the number of changed labels.
 
-**Current gate:** only local preparation is authorized to run now. Do not
-connect to either SSH alias or start remote training until the user reports
-that the connections are ready. Preparation lives in the separate
-`retrain/time-asof-2026-10-13` worktree, based on main commit
-`d925163431b419a1b66e2417e8528447f0cbdeb4`.
+**Status: complete and accepted.** After the user enabled each connection,
+all 32 jobs ran in isolated remote environments and passed coordinator
+acceptance. Preparation lives in the `retrain/time-asof-2026-10-13` worktree,
+based on main commit `d925163431b419a1b66e2417e8528447f0cbdeb4`. Training used
+frozen source commit `7ce15c1f0849ae69e0ca208f781a9824517eb328`, not the later
+result-publication revision. Durable records are
+`results/time_split/campaign_acceptance.json` and
+`results/time_split/input_manifest_{rf,gin}.json`.
 
-| Host | Responsibility | Initial resource budget |
+| Host | Responsibility | Observed configuration |
 | --- | --- | --- |
-| M4 MacBook Air, coordinator | Freeze inputs; create and verify transfer bundles; receive, validate and summarize results | Local preparation only; 16 GiB RAM / 10 CPU cores observed |
-| `ssh m3`, M3 Max MacBook Pro | 8 RF jobs, one target at a time; each job is the existing 12-setting × 5-fold search plus refit | `QSAR_RF_JOBS=4`; each individual forest uses one job; BLAS/OpenMP threads = 1 |
-| `ssh win4070`, Ubuntu / RTX 4070 | 24 GIN jobs, one GPU job at a time | Explicit `--device cuda`, batch 128, initial CPU thread limit 2 |
+| M4 MacBook Air, coordinator | Freeze inputs; create and verify transfer bundles; receive, validate and summarize results | 16 GiB RAM / 10 CPU cores; preparation, acceptance and analysis |
+| `ssh m3`, M3 Max MacBook Pro | 8 RF jobs, one target at a time; each job is the existing 12-setting × 5-fold search plus refit | 64 GiB RAM / 16 CPU cores; 4 CV workers for first five targets, 16 for hivpr/mpro/vegfr2; individual forest and BLAS/OpenMP threads = 1 |
+| `ssh win4070`, Ubuntu / RTX 4070 Laptop GPU | 24 GIN jobs, one GPU job at a time | 8 GiB VRAM; torch 2.14.0+cu126 / CUDA 12.6; explicit CUDA, batch 128, CPU threads = 2 |
+
+**Artifact distribution:** the `artifacts-v2` release used by
+`scripts/fetch_artifacts.py` has not been republished. Its RF temporal models
+are historical and do not reproduce this campaign. The new RF models remain
+on M3 and in the coordinator's accepted local results; they are gitignored.
+The updated Git artifacts include 24 GIN checkpoints and all 32 prediction
+files, which support recomputing the tables and CIs. RF inference requires
+an accepted model or retraining from the frozen inputs.
 
 ### Frozen inputs and local preparation
 
@@ -1036,7 +1017,7 @@ python scripts/time_campaign_bundle.py --role rf --output .scratch/time-campaign
 python scripts/time_campaign_bundle.py --role gin --output .scratch/time-campaign/bundles/gin
 ```
 
-### After the user opens the connections
+### Remote execution procedure
 
 1. Inspect each remote machine's CPU, RAM, disk, OS and Python; inspect the
    Ubuntu NVIDIA driver, actual free VRAM and CUDA availability. Do not assume
@@ -1085,8 +1066,13 @@ python scripts/run_time_campaign.py --role gin --device cuda
 GIN settings are fixed at hidden size 128, 4 layers, dropout 0.2, learning
 rate 0.001, batch 128, at most 100 epochs, patience 20, and minimum epochs 0.
 Explicit CUDA selection fails if unavailable instead of falling back to CPU.
-RF starts with four concurrent CV fits to bound memory; any later concurrency
-change must be recorded and applied consistently to the affected jobs.
+RF started with four concurrent CV fits to bound memory. At the user's
+request, the last three targets (`hivpr`, `mpro`, `vegfr2`) used 16; all
+individual forests still used one job. This concurrency change is recorded
+per job and did not change the search space, folds or model parameters.
+RF wall time was 7,071 seconds (117.9 minutes); the 24 GIN fits completed in
+225 seconds (3.75 minutes), excluding environment setup and artifact transfer.
+All 24 GIN fits used the frozen recipe and none triggered a convergence flag.
 
 ### Recovery and acceptance
 
@@ -1109,16 +1095,18 @@ seeds share the same test rows. Merge only `time` and RF `best_params_time`
 into existing metric files, preserving random/scaffold entries; archive old
 time results before replacing their canonical files.
 
-Only after all 32 jobs pass acceptance, run on the coordinator:
+After all 32 jobs passed acceptance, the coordinator ran:
 
 ```bash
 python experiments/paired_bootstrap.py --model gin --splits time --n-boot 10000
 python experiments/time_split_summary.py
 ```
 
-Review validation traces and report uncertainty, the train-mean constant
-baseline and any poor or negative R² without discarding seeds. Update the
-time figures, tables and narrative together, then run the full test suite
-and submit a PR describing the protocol, source/data versions and changed
-results. Remote execution and result publication have not occurred during
-local preparation.
+The resulting time figures, tables and narrative use the accepted campaign.
+Acceptance checked all source/input hashes and label versions, recalculated
+R²/RMSE/MAE, and loaded every checkpoint. RF predictions replayed exactly;
+GIN replay on CUDA differed by at most 9.54e-7. Old temporal artifacts were
+archived before replacement, and only the `time` / RF `best_params_time`
+metric entries were merged, preserving all random/scaffold entries.
+The acceptance record preserves per-job hashes and environments independently
+of subsequent documentation and result-publication changes.

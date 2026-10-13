@@ -1,0 +1,8 @@
+Target: Human immunodeficiency virus type 1 protease | Feature matrix: X=(2573, 2048), y range [2.30, 11.00]
+
+=== time split: train=1812, test=529 ===
+Fitting 5 folds for each of 12 candidates, totalling 60 fits
+Best params: {'max_depth': None, 'min_samples_split': 5, 'n_estimators': 300}  (CV R2 = 0.718)
+[time]  R2 = -0.044   RMSE = 1.757   MAE = 1.404
+
+Metrics merged -> <RF_CAMPAIGN>/work/results/metrics_hivpr.json

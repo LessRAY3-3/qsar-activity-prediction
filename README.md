@@ -8,8 +8,9 @@ classic QSAR (Morgan fingerprints -> RandomForest) and a GIN graph
 network, across eight ChEMBL targets (EGFR is counted twice: every one
 of `egfr`'s 4,560 parents also sits in `egfr_full`, so the "7 of 8"
 tallies below double-count EGFR) plus a MoleculeNet fallback.
-Headline, an honest negative result: **the GIN does not beat the tuned
-fingerprint baseline on this panel**. Deep detail:
+On the random/scaffold panel, **the GIN does not consistently beat the tuned
+fingerprint baseline**. The corrected time split gives a mixed result, detailed
+below. Deep detail:
 [docs/methodology.md](docs/methodology.md); interview prep:
 [docs/interview.md](docs/interview.md).
 
@@ -28,14 +29,13 @@ fingerprint baseline on this panel**. Deep detail:
 > campaign** (`vegfr2`/`herg`/`abl1`) are refreshed against those
 > datasets (`experiments/LOG.md`).
 
-> **2026-10-13 audit correction — time results remain legacy.** The committed
-> time predictions, tables and figures used labels aggregated across all years,
-> including measurements published after the training cutoff. They are retained
-> as an audit record and **do not support prospective temporal validation**,
-> time-based model selection or deployment claims. The code now uses versioned
-> as-of labels, rejects legacy training inputs and prevents mixed time versions; the full **8 RF + 24 GIN**
-> time campaign and downstream summaries still require regeneration. Random and
-> scaffold labels/results are unaffected. See [time policy](#publication-year-time-split-legacy-results-and-corrected-policy).
+> **2026-10-13 temporal correction and retraining.** All **8 RF + 24 GIN**
+> time jobs have completed with versioned `exact-dated-asof-v1` labels, followed
+> by artifact acceptance and regeneration of the B=10,000 paired bootstrap,
+> summary tables and figures. The previous all-year labels allowed future
+> measurements into training labels; those old results are historical only.
+> Random/scaffold labels and results are unchanged. See the
+> [corrected time results](#publication-year-time-split-corrected-results).
 
 ## Results
 
@@ -111,6 +111,16 @@ quoted under *Significance* below. The CI is computed on the *ensemble*
 pip install -r requirements.txt
 python scripts/fetch_artifacts.py --all   # 下载训练好的 models/、data/raw/ 和指纹缓存（GitHub Release）
 ```
+
+**Temporal model download limitation:** `fetch_artifacts.py` still reads the
+`artifacts-v2` release, whose RF time models predate this retraining. Downloading
+that release does **not** obtain the new as-of RF models. The accepted RF models
+are retained on M3 and in the coordinator's local results; no replacement RF
+release has been published. Current Git artifacts contain the 24 new GIN
+checkpoints and all 32 RF/GIN prediction files, so the published temporal
+statistics can be recomputed from predictions. To reproduce RF inference,
+use an accepted campaign model or rerun the documented RF campaign; do not pair
+a release's historical RF model with the new temporal labels or scores.
 
 Python **>= 3.12** is required: the pinned numpy 2.5.3, scipy 1.18.1,
 xgboost 3.4.1 and shap 0.52.0 publish no 3.11 wheels, so the install
@@ -724,91 +734,76 @@ confounders. Establishing negative transfer requires a common molecule split
 and matched head capacity; the overlap's effect has no guaranteed direction.
 See [methodology](docs/methodology.md).
 
-## Publication-year time split: legacy results and corrected policy
+## Publication-year time split: corrected results
 
-**The tables and figures in this section are historical audit artifacts, not
-valid prospective time-test evidence.** First-report splitting did not stop
-future measurements from entering a training molecule's all-year median label.
-For example, `egfr_full` has 413 training parents with measurements in 2019 or
-later, including 279 with measurements in 2021 or later. `CHEMBL266995` has a
-1999-only median pIC50 of 6.898, but its old training label is 8.097 after a
-2024 measurement is included. The previous claims about time-based model wins,
-robustness under drift and deployability are withdrawn pending a full rerun.
+The full time campaign has been retrained after removing future measurements
+from training labels. The old first-report split used all-year median labels:
+for example, `egfr_full` had 413 training parents with measurements in 2019 or
+later, including 279 with measurements in 2021 or later. `CHEMBL266995` had a
+1999-only median pIC50 of 6.898, but its old label became 8.097 after including
+a 2024 measurement. The old scores and MSE decomposition remain historical
+records in Git revision `7ce15c1`; they are not the current results below.
 
-**Corrected policy (`exact-dated-asof-v1`).** First-report group assignment is
-unchanged: earliest dated activity across raw records determines the molecule's
-year, with newest years held out. Labels are now built from exact (`=`), valid
-nM measurements with known document years: train uses years **before the
-validation cutoff**, validation uses years **before the test cutoff**, and
-test uses years **at or after the test cutoff**. A molecule without an eligible
-measurement for its assigned pool is excluded; undated measurements cannot
-supply labels. `scripts/time_labels.py` verifies the dataset signature and
-`label_id`; RF and GNN training reject legacy or mismatched inputs. Temporal
-analysis validates new-version provenance and can still inspect an entirely
-legacy campaign with an explicit warning, but cannot mix campaign versions.
-RF fits the training pool; GNN uses that pool and selects checkpoints on
-validation. The new constant baseline also uses
-training labels only.
+**Policy (`exact-dated-asof-v1`).** First-report group assignment is unchanged:
+the earliest dated activity across raw records determines the molecule's year,
+with newest years held out. Labels use exact (`=`), valid nM measurements with
+known document years: train uses years **before the validation cutoff**,
+validation uses years **before the test cutoff**, and test uses years **at or
+after the test cutoff**. A molecule without an eligible measurement in its
+assigned pool is excluded (169 rows across the eight tags); undated measurements
+cannot supply labels. `scripts/time_labels.py` verifies dataset signatures and
+`label_id`; training and analysis reject mismatched versions. RF fits train
+only; GIN fits the same pool and selects checkpoints on validation. The constant
+baseline uses the training-label mean. Thus the checkpoint-selection asymmetry
+between RF and GIN remains.
 
-**Rerun status:** implementation and regression tests are complete; full
-training is not. Regenerate all eight time splits, fit 8 RF models and 24 GIN
-runs (3 seeds per target), then regenerate predictions, significance, summaries,
-and figures together. Until then, the following values retain their original
-all-year-label provenance. Random/scaffold results require no retraining for
-this label correction.
+The [three-host campaign](docs/methodology.md#three-host-temporal-retraining-campaign-2026-10-13)
+completed 8 RF searches on M3 Max and 24 GIN fits on the Ubuntu RTX 4070 Laptop
+GPU (8 GiB), with the M4 Air preparing inputs and accepting results. Training
+used frozen source revision `7ce15c1f0849ae69e0ca208f781a9824517eb328`;
+[result acceptance and provenance](results/time_split/campaign_acceptance.json)
+record all 32 jobs. Source/input hashes, label IDs, test alignment, recomputed
+metrics and checkpoint prediction replay passed. All three predeclared seeds
+(42, 1, 2) are retained; none triggered the training script's convergence flag.
 
-The [three-host retraining plan](docs/methodology.md#three-host-temporal-retraining-campaign-2026-10-13)
-assigns RF to the M3 Max, GIN to Ubuntu/RTX 4070, and input preparation and
-acceptance to the M4 Air. Local preparation has rebuilt and validated the
-eight splits; remote training awaits the user's connection-ready message.
-The new worker defaults to a read-only plan and requires `--execute` to train.
-
-**Legacy test R2 and paired molecule-bootstrap CI** (B = 10,000).
-GIN time is the per-seed mean; GIN ens is R2 of the averaged prediction;
-Δ = GIN ens − RF. Files: `results/time_split/summary.csv` and
-`results/significance/summary_time.csv`. Bold entries indicate only that the
-legacy molecule-bootstrap CI excludes zero.
+**Test R2 and paired molecule-bootstrap CI** (B = 10,000). GIN time is the
+per-seed mean ± population standard deviation; GIN ens is R2 of the averaged
+prediction; Δ = GIN ens − RF. Files: `results/time_split/summary.csv` and
+`results/significance/summary_time.csv`. Bold Δ entries indicate that the
+unadjusted 95% molecule-bootstrap CI excludes zero. These intervals condition
+on the three fitted seeds; they do not capture all training or assay uncertainty.
+Random columns retain the earlier all-year-label protocol and are context,
+not a controlled isolation of the effect of splitting.
 
 | Tag | RF rand | GIN rand | RF time | GIN time | GIN ens | Δ time (ensemble) | 95% CI |
 |---|---|---|---|---|---|---|---|
-| `a2a` | 0.710 | 0.621 | −0.301 | −0.023±0.059 | +0.024 | **+0.326** | [+0.188, +0.467] |
-| `abl1` | 0.822 | 0.767 | +0.560 | +0.271±0.182 | +0.324 | **−0.236** | [−0.275, −0.197] |
-| `egfr` | 0.721 | 0.665 | +0.123 | +0.088±0.073 | +0.162 | +0.039 | [−0.012, +0.093] |
-| `egfr_full` | 0.729 | 0.667 | −0.736 | −0.176±0.052 | −0.144 | **+0.592** | [+0.536, +0.656] |
-| `herg` | 0.607 | 0.619 | −0.058 | −0.053±0.016 | −0.026 | +0.032 | [−0.007, +0.073] |
-| `hivpr` | 0.692 | 0.632 | −0.027 | +0.029±0.076 | +0.088 | **+0.115** | [+0.036, +0.196] |
-| `mpro` | 0.602 | 0.572 | +0.006 | +0.055±0.019 | +0.090 | **+0.084** | [+0.043, +0.128] |
-| `vegfr2` | 0.670 | 0.605 | +0.160 | +0.068±0.033 | +0.108 | **−0.052** | [−0.077, −0.026] |
+| `a2a` | 0.710 | 0.621 | −0.273 | +0.081±0.036 | +0.115 | **+0.389** | [+0.292, +0.490] |
+| `abl1` | 0.822 | 0.767 | +0.559 | +0.203±0.179 | +0.257 | **−0.302** | [−0.352, −0.252] |
+| `egfr` | 0.721 | 0.665 | +0.140 | +0.097±0.036 | +0.123 | −0.017 | [−0.068, +0.035] |
+| `egfr_full` | 0.729 | 0.667 | −0.753 | −0.233±0.065 | −0.188 | **+0.565** | [+0.513, +0.623] |
+| `herg` | 0.607 | 0.619 | −0.047 | −0.079±0.053 | −0.041 | +0.006 | [−0.036, +0.049] |
+| `hivpr` | 0.692 | 0.632 | −0.044 | +0.066±0.064 | +0.094 | **+0.138** | [+0.061, +0.217] |
+| `mpro` | 0.602 | 0.572 | +0.007 | +0.035±0.046 | +0.084 | **+0.077** | [+0.034, +0.122] |
+| `vegfr2` | 0.670 | 0.605 | +0.150 | −0.006±0.074 | +0.047 | **−0.102** | [−0.130, −0.074] |
 
-The legacy ensemble Δ is positive on six targets; four positive and two negative
-CIs exclude zero. These counts describe old prediction files only and are not
-model-selection evidence for the corrected temporal protocol. The old
-`constant_r2` uses all non-test labels, including validation, unlike the corrected
-training-only baseline. A negative constant R2 is not itself evidence of drift:
-for any constant c, R2 = −(c − mean(y_test))² / Var(y_test).
+The ensemble CI favours GIN on `a2a`, `egfr_full`, `hivpr` and `mpro`, RF on
+`abl1` and `vegfr2`, and includes zero on `egfr` and `herg`. Across the eight
+tags, the unweighted mean time R2 is **−0.033 RF**, **+0.020 GIN per seed** and
+**+0.061 GIN ensemble**; `egfr` and `egfr_full` overlap and are not independent
+targets. GIN's relative advantage on `egfr_full` still leaves its ensemble R2
+negative (−0.188); both model families also have negative R2 on `herg`.
 
-**Legacy MSE decomposition, retained for arithmetic audit.** The level,
-spread and correlation components sum to ΔR2 (spread/correlation use a Shapley
-allocation of their cross-term). This identity describes the stored predictions;
-it establishes neither a causal mechanism nor temporal generalization.
-Source: `logs/2026-10-13_time_split_mse_decomposition.log`.
+These are retrospective publication-year holdouts, not evidence of a causal
+drift mechanism or deployment readiness. A negative constant R2 alone cannot
+establish drift: for any constant c,
+R2 = −(c − mean(y_test))² / Var(y_test). The current `constant_r2` uses train
+labels only, unlike the old train-plus-validation constant. No hyperparameters,
+seeds or continuation decisions were selected from these test scores.
 
-| Tag | Δ (GIN ens − RF) | level | spread | correlation |
-|---|---|---|---|---|
-| `a2a` | +0.326 | +0.580 | +0.008 | −0.263 |
-| `abl1` | −0.236 | −0.002 | −0.115 | −0.119 |
-| `egfr` | +0.039 | +0.005 | +0.079 | −0.044 |
-| `egfr_full` | +0.592 | +0.392 | +0.032 | +0.168 |
-| `herg` | +0.032 | +0.005 | −0.016 | +0.044 |
-| `hivpr` | +0.115 | −0.000 | −0.008 | +0.123 |
-| `mpro` | +0.084 | +0.025 | +0.027 | +0.032 |
-| `vegfr2` | −0.052 | +0.035 | +0.002 | −0.089 |
+The timeline figures (`figures/time_split/{tag}_timeline.png`), three-split
+panel and RF temporal prediction plots have been regenerated for this campaign.
 
-Legacy timelines and panel: `figures/time_split/{tag}_timeline.png` and
-`figures/time_split/panel_3splits.png`. These figures have not been regenerated
-under the as-of policy.
-
-![Legacy time results; as-of retraining pending](figures/time_split/panel_3splits.png)
+![Corrected publication-year holdout results](figures/time_split/panel_3splits.png)
 
 ## Uncertainty & applicability domain: error ranking and screening checks
 

@@ -84,9 +84,8 @@ def test_stored_d_r2_mean3_matches_recomputed_ensemble_delta(load_experiment):
     DELTA_CONVENTION calls "ensemble_mean-pred_R2". It is NOT
     gin_time_r2_mean - rf_time_r2: that displayed-column difference
     subtracts R2 values of different prediction sets (mean of per-seed R2
-    vs RF R2) and can even flip sign (egfr: column diff -0.035, stored
-    ensemble delta +0.039; the real herg stored value is +0.032304, not
-    the old test's +0.007734).
+    vs RF R2) and can even flip sign. The synthetic test below covers
+    that case independently of any particular campaign's scores.
     """
     mod = load_experiment("time_split_summary")
     results = Path(__file__).resolve().parent.parent / "results"
@@ -410,7 +409,8 @@ def test_stored_constant_r2_matches_recomputed_baseline(tmp_path, monkeypatch,
     Dual path. When the committed data/processed npz files are checked out
     (local full repo; CI does not check them out), every stored tag value
     must equal an INDEPENDENT recomputation from
-    {tag}_fingerprints.npz + {tag}_time.npz (pool = all non-test rows).
+    {tag}_fingerprints.npz + {tag}_time.npz: as-of labels use the training
+    pool only; historical labels use all non-test rows.
     Without the npz (CI) the same recomputation contract is enforced on a
     synthetic committed-style tree through the real build_summary, and the
     committed summary.csv must still carry a finite constant_r2 for every
@@ -430,6 +430,10 @@ def test_stored_constant_r2_matches_recomputed_baseline(tmp_path, monkeypatch,
             dtype=np.float64)
         sp = np.load(root / "data" / "processed" / "splits" / f"{tag}_time.npz")
         test = np.asarray(sp["test_idx"])
+        if "label_policy" in sp:
+            assert str(sp["label_policy"]) == "exact-dated-asof-v1"
+            return _baseline_r2(np.asarray(sp["y"], dtype=np.float64),
+                                test, sp["train_idx"])
         pool = np.ones(len(y), dtype=bool)
         pool[test] = False
         return _baseline_r2(y, test, np.where(pool)[0])

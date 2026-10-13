@@ -1,62 +1,77 @@
 {
   "random": {
-    "r2": 0.6326391696929932,
-    "rmse": 0.680369637735385,
-    "mae": 0.5099219083786011,
     "best_epoch": 35,
     "best_valid_rmse_std": 0.6808207631111145,
+    "mae": 0.5099219083786011,
     "params": {
-      "tag": "a2a",
-      "model": "gin",
-      "hidden": 128,
-      "num_layers": 4,
-      "dropout": 0.2,
-      "lr": 0.001,
       "batch_size": 128,
+      "dropout": 0.2,
       "epochs": 100,
+      "hidden": 128,
+      "lr": 0.001,
+      "model": "gin",
+      "num_layers": 4,
       "patience": 20,
       "seed": 2,
-      "suffix": "_seed2"
-    }
+      "suffix": "_seed2",
+      "tag": "a2a"
+    },
+    "r2": 0.6326391696929932,
+    "rmse": 0.680369637735385
   },
   "scaffold": {
-    "r2": 0.6736859679222107,
-    "rmse": 0.5914583150503764,
-    "mae": 0.4590831696987152,
     "best_epoch": 37,
     "best_valid_rmse_std": 0.6879183053970337,
+    "mae": 0.4590831696987152,
     "params": {
-      "tag": "a2a",
-      "model": "gin",
-      "hidden": 128,
-      "num_layers": 4,
-      "dropout": 0.2,
-      "lr": 0.001,
       "batch_size": 128,
+      "dropout": 0.2,
       "epochs": 100,
+      "hidden": 128,
+      "lr": 0.001,
+      "model": "gin",
+      "num_layers": 4,
       "patience": 20,
       "seed": 2,
-      "suffix": "_seed2"
-    }
+      "suffix": "_seed2",
+      "tag": "a2a"
+    },
+    "r2": 0.6736859679222107,
+    "rmse": 0.5914583150503764
   },
   "time": {
-    "r2": 0.060600876808166504,
-    "rmse": 1.010299039987612,
-    "mae": 0.8174284100532532,
-    "best_epoch": 11,
-    "best_valid_rmse_std": 0.722323477268219,
+    "best_epoch": 4,
+    "best_valid_rmse_std": 0.7668536305427551,
+    "convergence_flag": false,
+    "device": "cuda",
+    "label_id": "b35580bb601adf4fb9e604dee3dd0f8989d11ebd4f14eaafc3e25a4e40f44b5b",
+    "mae": 0.8361777067184448,
+    "max_epochs": 100,
     "params": {
-      "tag": "a2a",
-      "model": "gin",
-      "hidden": 128,
-      "num_layers": 4,
-      "dropout": 0.2,
-      "lr": 0.001,
       "batch_size": 128,
+      "device": "cuda",
+      "dropout": 0.2,
       "epochs": 100,
+      "hidden": 128,
+      "lr": 0.001,
+      "min_epochs": 0,
+      "model": "gin",
+      "num_layers": 4,
       "patience": 20,
       "seed": 2,
-      "suffix": "_seed2"
-    }
+      "suffix": "_seed2",
+      "tag": "a2a"
+    },
+    "r2": 0.08439922332763672,
+    "rmse": 0.9974197238753411,
+    "runtime": {
+      "device": "cuda",
+      "requested_device": "cuda",
+      "seed": 2,
+      "torch_interop_threads": 16,
+      "torch_threads": 2,
+      "torch_version": "2.14.0+cu126"
+    },
+    "train_mse": 0.4382605625125101
   }
 }

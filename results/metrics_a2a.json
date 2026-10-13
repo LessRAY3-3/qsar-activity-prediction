@@ -1,18 +1,4 @@
 {
-  "target": "Adenosine receptor A2a",
-  "tag": "a2a",
-  "random": {
-    "split": "random",
-    "r2": 0.7099535296263921,
-    "rmse": 0.604550120519908,
-    "mae": 0.46112221980218965
-  },
-  "scaffold": {
-    "split": "scaffold",
-    "r2": 0.7024594756345401,
-    "rmse": 0.5647800402720565,
-    "mae": 0.4058022610964819
-  },
   "best_params_random": {
     "bootstrap": true,
     "ccp_alpha": 0.0,
@@ -53,17 +39,11 @@
     "verbose": 0,
     "warm_start": false
   },
-  "time": {
-    "split": "time",
-    "r2": -0.3011926816723849,
-    "rmse": 1.1890378112055549,
-    "mae": 0.9501845007567712
-  },
   "best_params_time": {
     "bootstrap": true,
     "ccp_alpha": 0.0,
     "criterion": "squared_error",
-    "max_depth": 20,
+    "max_depth": null,
     "max_features": 1.0,
     "max_leaf_nodes": null,
     "max_samples": null,
@@ -78,5 +58,31 @@
     "random_state": 42,
     "verbose": 0,
     "warm_start": false
+  },
+  "random": {
+    "mae": 0.46112221980218965,
+    "r2": 0.7099535296263921,
+    "rmse": 0.604550120519908,
+    "split": "random"
+  },
+  "scaffold": {
+    "mae": 0.4058022610964819,
+    "r2": 0.7024594756345401,
+    "rmse": 0.5647800402720565,
+    "split": "scaffold"
+  },
+  "tag": "a2a",
+  "target": "Adenosine receptor A2a",
+  "time": {
+    "label_id": "b35580bb601adf4fb9e604dee3dd0f8989d11ebd4f14eaafc3e25a4e40f44b5b",
+    "mae": 0.9650510256033085,
+    "r2": -0.2731775621180179,
+    "rmse": 1.1761679676593964,
+    "runtime": {
+      "cv_backend": "loky",
+      "rf_jobs": 4,
+      "seed": 42
+    },
+    "split": "time"
   }
 }

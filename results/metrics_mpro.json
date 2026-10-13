@@ -1,18 +1,4 @@
 {
-  "target": "Replicase polyprotein 1ab",
-  "tag": "mpro",
-  "random": {
-    "split": "random",
-    "r2": 0.6016693541674416,
-    "rmse": 0.66744372503415,
-    "mae": 0.43348358282474175
-  },
-  "scaffold": {
-    "split": "scaffold",
-    "r2": 0.43324947067186403,
-    "rmse": 0.6884820568930475,
-    "mae": 0.5372765507126434
-  },
   "best_params_random": {
     "bootstrap": true,
     "ccp_alpha": 0.0,
@@ -53,12 +39,6 @@
     "verbose": 0,
     "warm_start": false
   },
-  "time": {
-    "split": "time",
-    "r2": 0.006064819862442783,
-    "rmse": 1.0508558075679586,
-    "mae": 0.8227246882103191
-  },
   "best_params_time": {
     "bootstrap": true,
     "ccp_alpha": 0.0,
@@ -72,11 +52,37 @@
     "min_samples_split": 2,
     "min_weight_fraction_leaf": 0.0,
     "monotonic_cst": null,
-    "n_estimators": 500,
+    "n_estimators": 300,
     "n_jobs": 1,
     "oob_score": false,
     "random_state": 42,
     "verbose": 0,
     "warm_start": false
+  },
+  "random": {
+    "mae": 0.43348358282474175,
+    "r2": 0.6016693541674416,
+    "rmse": 0.66744372503415,
+    "split": "random"
+  },
+  "scaffold": {
+    "mae": 0.5372765507126434,
+    "r2": 0.43324947067186403,
+    "rmse": 0.6884820568930475,
+    "split": "scaffold"
+  },
+  "tag": "mpro",
+  "target": "Replicase polyprotein 1ab",
+  "time": {
+    "label_id": "75bb580c77d0dbe64c7aed1178c0dbc2505f44f3c3c91cc0344a95e8c305c17c",
+    "mae": 0.8205771422854266,
+    "r2": 0.0069747212589171825,
+    "rmse": 1.0503746926423576,
+    "runtime": {
+      "cv_backend": "loky",
+      "rf_jobs": 16,
+      "seed": 42
+    },
+    "split": "time"
   }
 }

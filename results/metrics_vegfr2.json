@@ -1,18 +1,4 @@
 {
-  "target": "Vascular endothelial growth factor receptor 2",
-  "tag": "vegfr2",
-  "random": {
-    "split": "random",
-    "r2": 0.669503776041366,
-    "rmse": 0.6488965398855797,
-    "mae": 0.47077429209713023
-  },
-  "scaffold": {
-    "split": "scaffold",
-    "r2": 0.5853499750696074,
-    "rmse": 0.6819633607766343,
-    "mae": 0.5053304788729788
-  },
   "best_params_random": {
     "bootstrap": true,
     "ccp_alpha": 0.0,
@@ -53,12 +39,6 @@
     "verbose": 0,
     "warm_start": false
   },
-  "time": {
-    "split": "time",
-    "r2": 0.16039785237901327,
-    "rmse": 1.159732556051197,
-    "mae": 0.9408036281095643
-  },
   "best_params_time": {
     "bootstrap": true,
     "ccp_alpha": 0.0,
@@ -72,11 +52,37 @@
     "min_samples_split": 2,
     "min_weight_fraction_leaf": 0.0,
     "monotonic_cst": null,
-    "n_estimators": 300,
+    "n_estimators": 500,
     "n_jobs": 1,
     "oob_score": false,
     "random_state": 42,
     "verbose": 0,
     "warm_start": false
+  },
+  "random": {
+    "mae": 0.47077429209713023,
+    "r2": 0.669503776041366,
+    "rmse": 0.6488965398855797,
+    "split": "random"
+  },
+  "scaffold": {
+    "mae": 0.5053304788729788,
+    "r2": 0.5853499750696074,
+    "rmse": 0.6819633607766343,
+    "split": "scaffold"
+  },
+  "tag": "vegfr2",
+  "target": "Vascular endothelial growth factor receptor 2",
+  "time": {
+    "label_id": "0257d96ee9bd87e1664b7ac0bfb946a556acdd78ef5389fbb62256c0462beb78",
+    "mae": 0.949414680355855,
+    "r2": 0.14991609229324,
+    "rmse": 1.1669492680626685,
+    "runtime": {
+      "cv_backend": "loky",
+      "rf_jobs": 16,
+      "seed": 42
+    },
+    "split": "time"
   }
 }

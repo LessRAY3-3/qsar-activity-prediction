@@ -1,0 +1,21 @@
+<GIN_CAMPAIGN>/.venv/lib/python3.12/site-packages/torch/jit/_script.py:1491: FutureWarning: `torch.jit.script` is deprecated. Please switch to `torch.compile` or `torch.export`.
+  warnings.warn(
+[egfr/time] device=cuda  y_mean=6.435 y_std=1.471
+<GIN_CAMPAIGN>/work/scripts/gnn_03_train_gin.py:273: UserWarning: Converting a tensor with requires_grad=True to a scalar may lead to unexpected behavior.
+Consider using tensor.detach() first. (Triggered internally at /__w/pytorch/pytorch/torch/csrc/autograd/generated/python_variable_methods.cpp:820.)
+  total += float(loss) * len(batch.y)
+  epoch   1  train_mse=0.6690  valid_rmse=1.5466  lr=1.0e-03 *
+  epoch   2  train_mse=0.5460  valid_rmse=1.3967  lr=1.0e-03 *
+  epoch   3  train_mse=0.4898  valid_rmse=0.9947  lr=1.0e-03 *
+  epoch   5  train_mse=0.4510  valid_rmse=0.9035  lr=1.0e-03 *
+  epoch   9  train_mse=0.4456  valid_rmse=0.8830  lr=1.0e-03 *
+  epoch  10  train_mse=0.4151  valid_rmse=1.0334  lr=1.0e-03
+  epoch  13  train_mse=0.4266  valid_rmse=0.8610  lr=1.0e-03 *
+  epoch  20  train_mse=0.3748  valid_rmse=0.9045  lr=1.0e-03
+  epoch  24  train_mse=0.3433  valid_rmse=0.8553  lr=5.0e-04 *
+  epoch  27  train_mse=0.3398  valid_rmse=0.8289  lr=5.0e-04 *
+  epoch  30  train_mse=0.3260  valid_rmse=0.8389  lr=5.0e-04
+  epoch  40  train_mse=0.3042  valid_rmse=0.9277  lr=2.5e-04
+  early stop at epoch 47 (best epoch 27)
+  TEST  R2=0.1009  RMSE=1.2138  MAE=0.9697  (8s)
+  saved -> results/gnn_models/egfr_gin_time_seed1.pt, results/gnn_preds_egfr_time_seed1.npz, results/gnn_metrics_egfr_seed1.json

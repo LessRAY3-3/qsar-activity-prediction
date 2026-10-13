@@ -9,10 +9,12 @@ figures in the README and the run ledger in `experiments/LOG.md`.
 Numbers are the refreshed (2026-10-11 refresh / 2026-10-12 re-run)
 values; anything marked **pre-refresh** is from the 6,165-compound `egfr`
 pull that the refresh replaced and should be quoted only as history.
-The time-split results are also **legacy audit artifacts**: their all-year
-labels included future measurements. Versioned as-of labels are implemented,
-but the 8 RF + 24 GIN time campaign has not been rerun. Do not quote the old
-time table as prospective validation or evidence for deployment/model choice.
+The time campaign was retrained on 2026-10-13: all 8 RF + 24 GIN jobs now
+use versioned as-of labels and passed artifact acceptance. Use the current
+README time table; the old all-year-label results remain historical only.
+The new ensemble molecule-bootstrap intervals favour GIN on four targets,
+RF on two, and include zero on two. These retrospective holdouts do not
+establish a causal drift mechanism or deployment readiness.
 
 1. **Why pIC50** - order-of-magnitude target standardisation.
 2. **Why scaffold split** - random splits leak analogues across
