@@ -21,15 +21,27 @@ SECTIONS = [
      "`scripts/01alt_download_bace.py` - set `QSAR_TAG=bace` to use it."),
     ("02_clean_data.py", "Step 2 - Data cleaning & pIC50 transform",
      "Keep nM rows, drop missing SMILES/IC50, convert to pIC50 "
-     "(`-log10(IC50 * 1e-9)`) and collapse duplicate compounds to the "
-     "**median** pIC50."),
+     "(`-log10(IC50 * 1e-9)`), keep only exact measurements "
+     "(**censoring filter**: `standard_relation == '='` before dedup - "
+     "bounds like `IC50 > 10000 nM` are not labels; **fail-closed** "
+     "(review finding N5): a ChEMBL input with no `standard_relation` "
+     "column aborts with a non-zero exit - only bace/non-ChEMBL sources "
+     "skip the filter), standardize each structure to its parent "
+     "SMILES (largest fragment, charges neutralized), and collapse "
+     "duplicate compounds **by `parent_smiles`** to the **median** pIC50."),
     ("03_featurize.py", "Step 3 - Morgan fingerprints (RDKit)",
-     "Each SMILES becomes a 2048-bit Morgan fingerprint (radius 2). "
-     "Invalid SMILES that RDKit cannot parse are dropped."),
+     "Each **`parent_smiles`** - the same unit Step 2 deduplicates on, so "
+     "one compound = one fingerprint - becomes a 2048-bit Morgan "
+     "fingerprint (radius 2). Invalid SMILES that RDKit cannot parse are "
+     "counted and abort the run - dropping them would shift every "
+     "downstream split/prediction index."),
     ("04_train_and_evaluate.py", "Steps 4-6 - Split, train, evaluate",
      "Random 80/20 split vs **scaffold split** (Bemis-Murcko scaffolds kept "
      "whole - simulates predicting new chemotypes). RandomForest with "
-     "GridSearchCV; metrics: R2 / RMSE / MAE + scatter plots."),
+     "GridSearchCV over shuffled 5-fold CV "
+     "(`KFold(5, shuffle=True, random_state=42)` - rows are ordered by "
+     "parent/scaffold, so unshuffled folds would leak contiguous chemotype "
+     "blocks across folds); metrics: R2 / RMSE / MAE + scatter plots."),
     ("05_explain_bits.py", "Step 6 (advanced) - What do the top bits mean?",
      "Map the most important fingerprint bits back to the molecular "
      "substructures that set them (RDKit bitInfo + PathToSubmol)."),
@@ -47,9 +59,11 @@ End-to-end pipeline: **ChEMBL data -> cleaning -> Morgan fingerprints ->
 RandomForest QSAR model -> evaluation -> substructure interpretation**.
 
 The code cells are auto-generated from `scripts/` (see
-`scripts/06_build_notebook.py`), so the notebook never drifts from the
-runnable pipeline. Set the environment variable `QSAR_TAG` to `egfr`
-(default) or `bace` to switch datasets.
+`scripts/06_build_notebook.py`), and `tests/test_notebook_sync.py` runs in CI
+to verify the built cells still carry the current cleaning/featurization/CV
+policy - so the notebook never drifts from the runnable pipeline. Set the
+environment variable `QSAR_TAG` to `egfr` (default) or `bace` to switch
+datasets.
 """
 
 

@@ -7,7 +7,8 @@ same resample index matrix is applied to both models' predictions) and
 turns each cell's delta into a 95% CI plus the fraction of bootstrap
 deltas above zero (frac_boot_gin_better -- a fraction, NOT a p-value;
 filtering it at 0.05 would drop every GIN win).
-Analysis only -- no model is trained, no existing file is modified.
+Analysis only -- no model is trained; writes go only to the output
+paths listed below, each guarded against partial/mixed-size runs.
 
 `--model gine` (P8 phase 1) reruns the identical procedure against the
 GINE predictions; outputs then carry a `_gine` suffix ({tag}_{split}_gine.csv,
@@ -35,6 +36,22 @@ does not cover the full tag set or uses a non-default --n-boot is a
 partial run: it writes summary_partial{suffix}.csv /
 ci_panel_partial{suffix}.png and never touches the campaign files, so
 `--tags egfr --n-boot 300` can no longer shrink the 32-row summary to 4.
+A non-default --out-dir also moves the default figure there, so a
+scratch smoke run writes summary AND figure outside the repo (--fig
+overrides the default).
+
+The same protections cover the per-cell CSVs and the campaign figure:
+a cell file stored with a different n_boot is never overwritten without
+--force (a B=300 smoke run must not replace a B=10000 cell the panels
+read), and a campaign run whose (tag, split) coverage is a strict subset
+of the stored campaign summary (e.g. all 8 tags but --splits random
+only) is refused unless --force, so the campaign forest can never be
+silently redrawn from a subset. n_boot is recorded as the REQUESTED
+bootstrap size (degenerate resamples are dropped only from the
+percentiles), so an identical rerun always compares equal to the
+stored rows; the shared summary rows record boot_seed alongside it,
+and the summary-level n_boot guard runs in the preflight -- BEFORE any
+cell CSV is rewritten, not after.
 
 Inputs (per tag x split; test_idx alignment is asserted, never assumed):
   results/rf_preds_{tag}_{split}.npz          RF test preds (original pIC50)
@@ -68,8 +85,9 @@ e.g. summary_time.csv / ci_panel_time.png -- see split_suffix):
                                            #(dR2_boot > 0)/B, and n_boot
   results/significance/summary{suffix}.csv cells x 2 pairs;
                                            significant = CI excludes 0;
-                                           n_boot recorded per row so a merge
-                                           can refuse to mix bootstrap sizes
+                                           n_boot and boot_seed recorded per
+                                           row so a merge can refuse to mix
+                                           bootstrap sizes or seeds
   results/significance/summary_partial{suffix}.csv
                                            the same, for partial runs (never
                                            touches the campaign summary)
@@ -82,11 +100,14 @@ cells where RF (or GIN/GINE) wins significantly.
 """
 import argparse
 import os
+import sys
 
 import numpy as np
 import pandas as pd
 
 BASE = os.path.join(os.path.dirname(__file__), "..")
+sys.path.insert(0, os.path.join(BASE, "scripts"))
+from time_labels import load_time_split, require_prediction_version  # noqa: E402
 
 TAGS = ("a2a", "abl1", "egfr", "egfr_full", "herg", "hivpr", "mpro", "vegfr2")
 SPLITS = ("random", "scaffold")
@@ -184,6 +205,17 @@ def load_cell(tag, split, model="gin"):
     if not np.array_equal(rf["test_idx"], sp["test_idx"]):
         raise ValueError(f"{tag}/{split}: rf test_idx != split test_idx")
 
+    if split == "time":
+        marker = os.path.join(BASE, "data", "processed", "splits", f"{tag}_time_NA.json")
+        if os.path.exists(marker):
+            raise ValueError(f"{tag}: time split is NA; stale predictions cannot be analysed")
+        if "label_policy" in sp or "label_id" in sp:
+            sp = load_time_split(os.path.dirname(marker), tag)
+        if "label_id" in sp or "label_id" in rf:
+            require_prediction_version(rf, sp)
+        else:
+            print(f"[{tag}/time] historical all-year labels; not prospective validation")
+
     gins = []
     for suf in SEED_SUFFIXES:
         g = _npz(gnn_preds_name(tag, split, suf, model))
@@ -193,6 +225,8 @@ def load_cell(tag, split, model="gin"):
         if not np.allclose(g["y_true"], rf["y_true"], atol=1e-4):
             raise ValueError(f"{tag}/{split}: gnn{suffix_label(suf)} y_true "
                              f"!= rf y_true")
+        if split == "time" and ("label_id" in sp or "label_id" in g):
+            require_prediction_version(g, sp)
         gins.append(np.asarray(g["y_pred"], dtype=np.float64))
 
     return {
@@ -201,6 +235,7 @@ def load_cell(tag, split, model="gin"):
         "gin42": gins[0],
         "gin_mean3": np.mean(np.stack(gins), axis=0),
         "n_test": int(len(rf["test_idx"])),
+        "label_id": str(sp.get("label_id", "")),
     }
 
 
@@ -260,7 +295,11 @@ def paired_bootstrap(y_true, pred_gin, pred_rf, n_boot=N_BOOT, seed=BOOT_SEED):
         "delta_rmse_point": rmse(y, p_gin) - rmse(y, p_rf),
         "delta_rmse_ci_lo": float(rlo),
         "delta_rmse_ci_hi": float(rhi),
-        "n_boot": int(len(d_r2)),
+        # the REQUESTED n_boot, not len(d_r2): degenerate resamples are
+        # dropped only from the percentiles, and recording the post-filter
+        # count would make an identical rerun fail the stored-rows n_boot
+        # comparison in merge_summary
+        "n_boot": int(n_boot),
     }
 
 
@@ -276,6 +315,7 @@ def cell_rows(tag, split, n_boot=N_BOOT, seed=BOOT_SEED, model="gin"):
         rows.append({
             "tag": tag,
             "split": split,
+            **({"label_id": cell["label_id"]} if split == "time" else {}),
             "model_pair": pair,
             "n_test": cell["n_test"],
             "r2_gin": r2(cell["y"], pred_gin),
@@ -362,10 +402,14 @@ def read_existing_summary(path):
     validated as B=N_BOOT (that is the only size the campaign ever ran),
     and the retired p_one_sided column is renamed to
     frac_boot_gin_better so legacy files can still be merge-updated.
+    A missing boot_seed column (files written before the column existed)
+    is filled with the campaign default, matching check_cell_csv.
     """
     old = pd.read_csv(path)
     if "n_boot" not in old.columns:
         old["n_boot"] = N_BOOT
+    if "boot_seed" not in old.columns:
+        old["boot_seed"] = BOOT_SEED
     if "p_one_sided" in old.columns and "frac_boot_gin_better" not in old.columns:
         old = old.rename(columns={"p_one_sided": "frac_boot_gin_better"})
     return old
@@ -376,9 +420,13 @@ def merge_summary(summary, summary_path, n_boot, force=False):
 
     Keys already on disk are refreshed from `summary`; untouched keys are
     kept. Rows whose stored n_boot differs from this run's are never
-    silently mixed: without --force a SystemExit names the conflict, with
-    --force exactly those keys are overwritten. A missing target is
-    written fresh.
+    silently mixed: without --force a SystemExit names the conflict (and
+    points a smoke run at a scratch --out-dir instead), with --force
+    exactly those keys are overwritten (--force skips this guard, the
+    per-cell guard and the campaign-coverage guard together). A missing
+    target is written fresh. Columns `summary` carries beyond SUMMARY_COLS
+    (currently boot_seed) ride along after the standard ones; kept rows
+    keep their stored values (legacy rows default to BOOT_SEED).
     """
     if not os.path.exists(summary_path):
         return summary
@@ -391,20 +439,136 @@ def merge_summary(summary, summary_path, n_boot, force=False):
         raise SystemExit(
             f"{rel}: {len(stale)} stored row(s) for these cells have a "
             f"different n_boot ({sorted(set(stale['n_boot']))} vs this "
-            f"run's {n_boot}); refusing to mix bootstrap sizes. Rerun "
-            f"with --force to overwrite those keys.")
+            f"run's {n_boot}); refusing to mix bootstrap sizes. A smoke run "
+            "should write to a scratch --out-dir (summary AND figure land "
+            "there; --fig overrides), not into the campaign directory; "
+            "--force overwrites those keys.")
     kept = old[~overlap].reset_index()
     merged = pd.concat([kept, summary], ignore_index=True)
-    return merged[list(SUMMARY_COLS)]
+    extra = [c for c in summary.columns if c not in SUMMARY_COLS]
+    return merged[list(SUMMARY_COLS) + extra]
 
 
 def is_campaign_run(tags, n_boot):
     """Full tag set at the default B -> may merge into the campaign table.
 
     Anything else (a tag subset, a smoke-test B) is a partial run: it
-    must stay clear of the campaign summary/figure.
+    must stay clear of the campaign summary/figure. Split coverage
+    against the *stored* campaign summary is checked separately by
+    guard_campaign_coverage (a full-tag --splits random run passes this
+    function but must not redraw the campaign forest from 16 of 32
+    cells).
     """
     return set(tags) == set(TAGS) and n_boot == N_BOOT
+
+
+def check_cell_csv(path, n_boot, force=False, seed=BOOT_SEED):
+    """Refuse to overwrite a stored per-cell CSV with a different guard key.
+
+    The guard key is (n_boot, boot_seed): the panels and reviewers read
+    these files per (tag, split), so a B=300 smoke run must not silently
+    replace a B=10000 cell, and a run with a different bootstrap seed must
+    not replace cells whose CIs were drawn from another seed's resamples.
+    A missing n_boot / boot_seed column (files written before the column
+    existed) validates as the campaign defaults (N_BOOT / BOOT_SEED),
+    matching read_existing_summary. With --force the overwrite proceeds
+    and is announced -- but --force skips ALL THREE campaign guards at
+    once (this per-cell guard, merge_summary's n_boot guard and
+    guard_campaign_coverage), so a smoke run should never need it: point
+    --out-dir at a scratch directory instead (partial runs already land on
+    the summary_partial / ci_panel_partial names, leaving the campaign
+    files untouched).
+    """
+    if not os.path.exists(path):
+        return
+    old = pd.read_csv(path)
+    if "n_boot" not in old.columns:
+        old["n_boot"] = N_BOOT
+    if "boot_seed" not in old.columns:
+        old["boot_seed"] = BOOT_SEED
+    stored = sorted({int(v) for v in old["n_boot"]})
+    stored_seeds = sorted({int(v) for v in old["boot_seed"]})
+    if all(v == n_boot for v in stored) and all(v == seed for v in stored_seeds):
+        return
+    rel = os.path.relpath(path, BASE)
+    if not force:
+        raise SystemExit(
+            f"{rel}: stored (n_boot, boot_seed)={list(zip(stored, stored_seeds))} "
+            f"!= this run's ({n_boot}, {seed}); refusing to overwrite the "
+            "per-cell CSV. A smoke run belongs in a scratch --out-dir "
+            "(summary AND figure land there; --fig overrides), not over "
+            "the campaign cells; --force skips this guard and the other "
+            "two campaign guards together.")
+    print(f"  [force] overwriting {rel} (stored n_boot {stored} / "
+          f"boot_seed {stored_seeds} -> {n_boot} / {seed})")
+
+
+def guard_campaign_coverage(summary_path, tags, splits, force=False):
+    """Refuse campaign outputs from a strict subset of the stored cells.
+
+    A full-tag run over only part of the campaign's splits (e.g.
+    --splits random) merge-updates the campaign summary without losing
+    rows, but the figure is drawn from this run's rows only: without
+    this guard the campaign forest would silently drop every stored cell
+    the run did not rerun. The stored summary defines the expected cell
+    set; covering a strict subset requires an explicit --force -- which
+    skips all three campaign guards at once (this coverage guard,
+    merge_summary's n_boot guard and check_cell_csv's per-cell guard), so
+    a smoke or subset run should write to a scratch --out-dir (the
+    partial summary/figure path) instead of forcing its way into the
+    campaign files.
+    """
+    if not os.path.exists(summary_path):
+        return
+    old = read_existing_summary(summary_path)
+    stored = set(zip(old["tag"], old["split"]))
+    run = {(t, s) for t in tags for s in splits}
+    missing = sorted(stored - run)
+    if not missing:
+        return
+    rel = os.path.relpath(summary_path, BASE)
+    if not force:
+        cells = ", ".join(f"{t}/{s}" for t, s in missing)
+        raise SystemExit(
+            f"{rel}: this run covers {len(run)} of the {len(stored)} "
+            f"stored campaign cells; missing {cells}. Redrawing the "
+            "campaign summary/figure from a subset needs an explicit "
+            "--force (which skips every campaign guard); a smoke run "
+            "should use a scratch --out-dir instead.")
+    print(f"  [force] campaign coverage is a subset ({len(missing)} "
+          "stored cell(s) not rerun; their summary rows are kept, the "
+          "figure is drawn from this run's cells only)")
+
+
+def guard_summary_n_boot(summary_path, tags, splits, n_boot, force=False):
+    """Refuse summary rows for the run's cells stored at a different n_boot.
+
+    Same conflict merge_summary refuses, but checked BEFORE the write
+    loop: the old placement let a smoke run rewrite every cell CSV and
+    only then abort when the summary merge hit the mixed-B rows. Here the
+    stored summary defines the conflict set and the run only supplies the
+    cells (tag, split) it would refresh; --force skips this guard and the
+    other two campaign guards together, so a smoke run should write to a
+    scratch --out-dir (summary AND figure land there; --fig overrides)
+    instead of forcing its way into the campaign files.
+    """
+    if not os.path.exists(summary_path):
+        return
+    old = read_existing_summary(summary_path)
+    run = {(t, s) for t in tags for s in splits}
+    overlap = pd.Series([(t, s) in run
+                         for t, s in zip(old["tag"], old["split"])],
+                        index=old.index)
+    stale = old[overlap & (old["n_boot"] != n_boot)]
+    if len(stale) and not force:
+        rel = os.path.relpath(summary_path, BASE)
+        raise SystemExit(
+            f"{rel}: {len(stale)} stored row(s) for these cells have a "
+            f"different n_boot ({sorted(set(stale['n_boot']))} vs this "
+            f"run's {n_boot}); refusing to mix bootstrap sizes. A smoke run "
+            "should write to a scratch --out-dir (summary AND figure land "
+            "there; --fig overrides), not into the campaign directory; "
+            "--force overwrites those keys.")
 
 
 # ---------------------------------------------------------------- report
@@ -459,9 +623,16 @@ def parse_args(argv=None):
     p.add_argument("--seed", type=int, default=BOOT_SEED,
                    help="bootstrap Generator seed (fixed for reproducibility)")
     p.add_argument("--force", action="store_true",
-                   help="overwrite stored summary rows whose n_boot differs "
-                        "from this run's (default: refuse to mix bootstrap "
-                        "sizes)")
+                   help="skip ALL THREE campaign guards at once: the "
+                        "per-cell (n_boot, boot_seed) overwrite check, the "
+                        "summary-row n_boot merge check, and the "
+                        "campaign-coverage subset check (default: each "
+                        "refuses). A smoke run should NOT use --force: "
+                        "point --out-dir at a scratch directory instead "
+                        "(partial runs write summary_partial*/"
+                        "ci_panel_partial* and never touch the campaign "
+                        "files; the default figure follows a scratch "
+                        "--out-dir, or pass --fig)")
     p.add_argument("--out-dir", default=os.path.join(BASE, "results",
                                                      "significance"))
     p.add_argument("--fig", default=None,
@@ -475,15 +646,47 @@ def main(args=None):
     model = args.model
     tags = [t.strip() for t in args.tags.split(",") if t.strip()]
     splits = [s.strip() for s in args.splits.split(",") if s.strip()]
+    if args.seed < 0:
+        raise SystemExit(
+            f"--seed must be a non-negative integer (got {args.seed}); "
+            "np.random.default_rng rejects negative seeds")
     out_dir = os.path.abspath(args.out_dir)
     os.makedirs(out_dir, exist_ok=True)
+
+    # Resolve the shared outputs up front so an unsafe run (campaign
+    # coverage subset, mixed n_boot / boot_seed) is refused BEFORE any cell
+    # CSV is touched, not after the bootstrap has already overwritten files.
+    suffix = split_suffix(splits)
+    partial = not is_campaign_run(tags, args.n_boot)
+    summary_path = os.path.join(out_dir, summary_name(model, suffix,
+                                                      partial=partial))
+    if not partial:
+        guard_campaign_coverage(summary_path, tags, splits,
+                                force=args.force)
+    # the summary-level n_boot conflict is refused up front too: merge
+    # runs after the write loop, so a late SystemExit there would leave
+    # every cell CSV already rewritten (Low, PR #6)
+    guard_summary_n_boot(summary_path, tags, splits, args.n_boot,
+                         force=args.force)
+
+    # Full preflight of EVERY cell before the write loop: the old in-loop
+    # check aborted on a later mismatch only after earlier cells had been
+    # rewritten. Any mismatch here SystemExits before a single file is
+    # written.
+    cell_paths = {}
+    for tag in tags:
+        for split in splits:
+            path = os.path.join(out_dir, f"{out_stem(tag, split, model)}.csv")
+            cell_paths[(tag, split)] = path
+            check_cell_csv(path, args.n_boot, force=args.force,
+                           seed=args.seed)
 
     rows = []
     for tag in tags:
         for split in splits:
+            path = cell_paths[(tag, split)]
             cell = cell_rows(tag, split, n_boot=args.n_boot, seed=args.seed,
                              model=model)
-            path = os.path.join(out_dir, f"{out_stem(tag, split, model)}.csv")
             pd.DataFrame(cell).to_csv(path, index=False)
             for r in cell:
                 rows.append(r)
@@ -495,26 +698,39 @@ def main(args=None):
         print("no cells processed")
         return
 
-    partial = not is_campaign_run(tags, args.n_boot)
     summary_rows = [{**r,
                      "pair": r["model_pair"],
                      "d_r2": r["delta_r2_point"],
                      "d_rmse": r["delta_rmse_point"],
                      "d_rmse_ci_lo": r["delta_rmse_ci_lo"],
                      "d_rmse_ci_hi": r["delta_rmse_ci_hi"],
-                     "n_boot": r["n_boot"]}
+                     "n_boot": r["n_boot"],
+                     "boot_seed": r["boot_seed"]}
                     for r in rows]
-    summary = pd.DataFrame(summary_rows, columns=SUMMARY_COLS)
-    suffix = split_suffix(splits)
-    summary_path = os.path.join(out_dir, summary_name(model, suffix,
-                                                      partial=partial))
+    # boot_seed rides along after the standard columns so a summary row
+    # records the resamples its CIs were drawn from (SUMMARY_COLS itself
+    # stays the stable merge schema; legacy rows default to BOOT_SEED)
+    summary = pd.DataFrame(summary_rows,
+                           columns=SUMMARY_COLS + ["boot_seed"]
+                           + (["label_id"] if "time" in splits else []))
     merged = merge_summary(summary, summary_path, n_boot=args.n_boot,
                            force=args.force)
     merged.to_csv(summary_path, index=False)
 
-    fig_path = args.fig or os.path.join(BASE, "figures", "significance",
-                                        default_fig_name(model, suffix,
-                                                         partial=partial))
+    default_out = os.path.abspath(os.path.join(BASE, "results",
+                                               "significance"))
+    if args.fig:
+        fig_path = os.path.abspath(args.fig)
+    elif out_dir != default_out:
+        # a scratch --out-dir run must not write its figure into the
+        # repo's figures/significance: the figure follows the out-dir
+        # (--fig overrides)
+        fig_path = os.path.join(out_dir, default_fig_name(model, suffix,
+                                                          partial=partial))
+    else:
+        fig_path = os.path.join(BASE, "figures", "significance",
+                                default_fig_name(model, suffix,
+                                                 partial=partial))
     fig_path = os.path.abspath(fig_path)
     make_figure(rows, fig_path, n_boot=args.n_boot, model=model)
     print_conclusion(summary, model=model)

@@ -25,9 +25,11 @@ CLI:
   (now carrying best_params_random and best_params_scaffold).
   The time split reads its indices from
   data/processed/splits/{TAG}_time.npz (train_idx/test_idx; valid_idx is
-  ignored - RF uses CV, not early stopping). If that npz is missing but a
-  {TAG}_time_NA.json marker exists beside it, its "reason" is printed and
-  the run skips with exit 0; missing both is an error.
+  ignored - RF uses CV, not early stopping). The npz must carry versioned
+  as-of labels; old all-year-label splits are rejected for training.
+  Any {TAG}_time_NA.json marker takes precedence, prints its reason and
+  skips with exit 0; missing both is an error. --plot-only renders saved
+  predictions, respects --split, and never fits or writes models/metrics.
 """
 import json
 import os
@@ -45,6 +47,7 @@ from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 from sklearn.model_selection import GridSearchCV, KFold, train_test_split
 
 from qsar_common import RANDOM_STATE, scaffold_split
+from time_labels import load_time_split, require_prediction_version
 
 BASE = os.path.join(os.path.dirname(__file__), "..")
 TAG = os.environ.get("QSAR_TAG", "egfr")  # which dataset: egfr | bace
@@ -120,7 +123,7 @@ def run_split(X, y, smiles, train_idx, test_idx, tag, fig_path, target):
     return metrics, gs.best_estimator_, pred
 
 
-def run_single(split, train_idx, test_idx, X, y, smiles, target):
+def run_single(split, train_idx, test_idx, X, y, smiles, target, label_id=None):
     """Train/evaluate ONE split, save model + preds npz, merge its metrics.
 
     Merges two keys: {split} (r2/rmse/mae) and best_params_{split}
@@ -132,12 +135,16 @@ def run_single(split, train_idx, test_idx, X, y, smiles, target):
         X, y, smiles, train_idx, test_idx, split,
         os.path.join(FIG_DIR, f"pred_vs_actual_{split}_{TAG}.png"), target
     )
+    if label_id is not None:
+        best.time_label_id_ = label_id
+        m["label_id"] = label_id
     joblib.dump(best, os.path.join(MODEL_DIR, f"rf_{split}_split_{TAG}.joblib"))
     # same keys/dtypes as the existing rf_preds_{TAG}_{split}.npz files:
     # test_idx int64, y_true (dataset dtype), y_pred float64
     os.makedirs(RESULTS_DIR, exist_ok=True)
     np.savez(os.path.join(RESULTS_DIR, f"rf_preds_{TAG}_{split}.npz"),
-             test_idx=np.asarray(test_idx), y_true=y[test_idx], y_pred=pred)
+             test_idx=np.asarray(test_idx), y_true=y[test_idx], y_pred=pred,
+             **({"label_id": label_id} if label_id is not None else {}))
     # merge: load whatever is there, overwrite only this split's keys, rewrite
     payload = json.load(open(METRICS_JSON)) if os.path.exists(METRICS_JSON) else {}
     payload[split] = m
@@ -155,30 +162,64 @@ def resolve_time_split():
     beside it instead and carries the reason to print. Neither -> error.
     valid_idx is deliberately not read: RF cross-validates, no early stop.
     """
-    npz_path = os.path.join(SPLIT_DIR, f"{TAG}_time.npz")
-    if os.path.exists(npz_path):
-        d = np.load(npz_path)
-        return d["train_idx"], d["test_idx"]
-    na_path = os.path.join(SPLIT_DIR, f"{TAG}_time_NA.json")
-    if os.path.exists(na_path):
-        na = json.load(open(na_path))
-        print(f"[{TAG}/time] skipped: {na.get('reason', na)}")
-        return None
-    raise SystemExit(
-        f"missing time split: neither {npz_path} nor {na_path} exists")
+    sp = load_time_split(SPLIT_DIR, TAG)
+    return None if sp is None else (sp["train_idx"], sp["test_idx"])
+
+
+def plot_saved_predictions(selected):
+    """Plot stored predictions without fitting or writing model/metric files."""
+    for split in selected:
+        if split == "time" and os.path.exists(os.path.join(SPLIT_DIR, f"{TAG}_time_NA.json")):
+            print(f"[{TAG}/time] skipped: NA marker present")
+            continue
+        pred_path = os.path.join(RESULTS_DIR, f"rf_preds_{TAG}_{split}.npz")
+        if split == "time":
+            with np.load(pred_path) as pred:
+                split_path = os.path.join(SPLIT_DIR, f"{TAG}_time.npz")
+                if os.path.exists(split_path):
+                    with np.load(split_path) as archive:
+                        sp = dict(archive)
+                    if "label_policy" in sp or "label_id" in sp:
+                        sp = load_time_split(SPLIT_DIR, TAG)
+                        if sp is None:
+                            continue
+                    if "label_id" in sp or "label_id" in pred:
+                        require_prediction_version(pred, sp)
+                elif "label_id" in pred:
+                    raise ValueError("versioned time predictions require their matching split")
+                if "label_id" not in pred:
+                    print("[time/plot-only] historical all-year labels; not prospective validation")
+                y, p = pred["y_true"], pred["y_pred"]
+        else:
+            # Default RF training saves models only; always predict from that
+            # current model, never prefer a possibly stale random/scaffold NPZ.
+            with np.load(IN_NPZ) as data:
+                if split == "random":
+                    _, test = train_test_split(np.arange(len(data["y"])), test_size=0.2,
+                                               random_state=RANDOM_STATE)
+                else:
+                    _, test = scaffold_split(data["smiles"], test_size=0.2)
+                model = joblib.load(os.path.join(MODEL_DIR, f"rf_{split}_split_{TAG}.joblib"))
+                y, p = data["y"][test], model.predict(data["X"][test])
+        os.makedirs(FIG_DIR, exist_ok=True)
+        scatter(y, p, split, os.path.join(FIG_DIR, f"pred_vs_actual_{split}_{TAG}.png"), TAG)
 
 
 def main():
     import argparse
     p = argparse.ArgumentParser()
     p.add_argument("--plot-only", action="store_true",
-                   help="skip GridSearchCV; load the saved models, re-plot the "
+                   help="skip GridSearchCV; load saved models/predictions, re-plot the "
                         "predicted-vs-actual figures (metrics are NOT rewritten)")
     p.add_argument("--split", choices=["random", "scaffold", "time"], default=None,
                    help="train/evaluate only this split and merge just its key "
                         "into metrics_{TAG}.json (default: train random + scaffold "
                         "and rewrite the whole metrics file, as before)")
     args = p.parse_args()
+
+    if args.plot_only:
+        plot_saved_predictions([args.split] if args.split else ["random", "scaffold"])
+        return
 
     # resolve the time split first so an NA marker skips before anything is written
     time_idx = None
@@ -197,7 +238,11 @@ def main():
     print(f"Target: {target} | Feature matrix: X={X.shape}, y range [{y.min():.2f}, {y.max():.2f}]")
 
     if args.split == "time":  # indices come from the npz; no random/scaffold work
-        run_single("time", time_idx[0], time_idx[1], X, y, smiles, target)
+        sp = load_time_split(SPLIT_DIR, TAG, smiles, y)
+        if sp is None:
+            return
+        run_single("time", time_idx[0], time_idx[1], X, sp["y"], smiles, target,
+                   label_id=str(sp["label_id"]))
         return
 
     # ---- random split ----
@@ -206,15 +251,6 @@ def main():
     )
     # ---- scaffold split ----
     tr_s, te_s = scaffold_split(smiles, test_size=0.2)
-
-    if args.plot_only:
-        for split, train_idx, test_idx in (("random", tr, te), ("scaffold", tr_s, te_s)):
-            model = joblib.load(os.path.join(MODEL_DIR, f"rf_{split}_split_{TAG}.joblib"))
-            pred = model.predict(X[test_idx])
-            print(f"[plot-only:{split}] test R2 = {r2_score(y[test_idx], pred):.6f}")
-            scatter(y[test_idx], pred, split,
-                    os.path.join(FIG_DIR, f"pred_vs_actual_{split}_{TAG}.png"), target)
-        return
 
     if args.split is not None:  # --split random | --split scaffold
         if args.split == "random":

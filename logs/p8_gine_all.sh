@@ -1,4 +1,9 @@
 #!/bin/bash
+# HOST-SPECIFIC EXAMPLE - not part of the reproducible pipeline.
+# Kept as a record of how this campaign was launched on the original
+# author's machine (pre-2026-10-11 refresh; PY/paths were host state).
+# Do not run as-is to reproduce the published numbers; use the commands
+# documented in README/docs instead.
 # P8 Phase 1: GINE frozen-recipe panel - 5 remaining targets x 2 splits x 3 seeds.
 # vegfr2/herg/abl1 GINE results already exist from experiments/gnn_fairness.py.
 # MPS is serial: one run at a time. Per-seed suffixes everywhere (LOG artifact-naming lesson).

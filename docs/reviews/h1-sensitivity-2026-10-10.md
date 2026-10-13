@@ -10,7 +10,7 @@
 
 ## 范围与产物
 
-本次只做 egfr_full（CHEMBL203）一个靶点、RF 一个模型族的敏感性实验。不改清洗脚本（02 的修复属 Phase C），实验脚本与中间产物全部放在 `.scratch/h1_sensitivity/`（不进 git），仅本报告与 [scripts/01d_download_incremental.py](../../scripts/01d_download_incremental.py) 的工作区改动属于仓库内容（01d 的 `COLUMNS` 已补齐 `standard_relation`、`data_validity_comment`、`activity_id` 三字段，与 01e 一致，`ruff check` 通过，**未提交**）。
+本次只做 egfr_full（CHEMBL203）一个靶点、RF 一个模型族的敏感性实验。不改清洗脚本（02 的修复属 Phase C），实验脚本与中间产物全部放在 `.scratch/h1_sensitivity/`（不进 git），仅本报告与 [scripts/01d_download_incremental.py](../../scripts/01d_download_incremental.py) 的工作区改动属于仓库内容（01d 的 `COLUMNS` 已补齐 `standard_relation`、`data_validity_comment`、`activity_id` 三字段，与 01e 一致，`ruff check` 通过；**已随 2026-10-11 数据刷新提交**）。
 
 产物清单：
 

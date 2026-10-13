@@ -7,16 +7,31 @@ and the FULL headline train pool
 (train_idx + valid_idx = the 80% the headline RF trained on) is used with
 the persisted test set. Seeds vary RF's random_state.
 
-Anchor: radius=2 / 2048 bits must reproduce the headline metrics
-(0.747 random / 0.562 scaffold) because it IS the headline featurization,
-read from the persisted cache written by scripts/03_featurize.py. The
-other three cells featurize on the fly with the identical RDKit call.
+Anchor: radius=2 / 2048 bits must reproduce metrics_{tag}.json's headline
+R2 for the split (within --anchor-tol on the 3-seed mean) because it IS
+the headline featurization, read from the persisted cache written by
+scripts/03_featurize.py. The other three cells featurize on the fly with
+the identical RDKit call.
 
-Outputs:
+Outputs (written only after every (split, radius, n_bits, seed) run has
+finished, so a failed run never leaves a truncated/partial CSV over the
+committed one):
   results/fp_ablation/fp_ablation_{TAG}.csv   one row per run
   results/fp_ablation/summary_{TAG}.json
   figures/fp_ablation/fp_ablation_{TAG}.png
 Exit code 1 + no figure if the anchor fails (caller must stop and report).
+--splits is limited to the anchorable headline splits {random, scaffold}:
+`time` is rejected up front, before any file is opened, because
+04_train_and_evaluate trains the time RF on train_idx only (validation
+years excluded) while this script trains on train+valid like
+random/scaffold, so the r2/2048 anchor could never reproduce it. The
+old behaviour was a KeyError at the anchor AFTER the CSV had already
+been truncated and partly rewritten. Likewise a subset run -- covering
+fewer splits, radii, n_bits values or seeds than the stored CSV --
+never rewrites the stored full-grid outputs: if the committed CSV
+carries any grid value this run does not, the script aborts before any
+training or write unless --force explicitly redraws the
+CSV/summary/figure from the subset.
 """
 import argparse
 import json
@@ -25,6 +40,7 @@ import sys
 import time
 
 import numpy as np
+import pandas as pd
 
 BASE = os.path.join(os.path.dirname(__file__), "..")
 sys.path.insert(0, os.path.join(BASE, "scripts"))
@@ -43,6 +59,11 @@ def parse_args():
     p.add_argument("--anchor-tol", type=float, default=0.01)
     p.add_argument("--out", default=os.path.join(BASE, "results", "fp_ablation"))
     p.add_argument("--fig-dir", default=os.path.join(BASE, "figures", "fp_ablation"))
+    p.add_argument("--force", action="store_true",
+                   help="allow a subset run (fewer splits, radii, n_bits "
+                        "or seeds than the stored CSV) to rewrite the "
+                        "stored CSV/summary/figure, dropping the grid "
+                        "values it does not cover (default: refuse)")
     return p.parse_args()
 
 
@@ -102,7 +123,7 @@ def main():
     radii = [int(r) for r in args.radii.split(",")]
     bits_list = [int(b) for b in args.bits.split(",")]
     seeds = [int(s) for s in args.seeds.split(",")]
-    splits = [s.strip() for s in args.splits.split(",")]
+    splits = [s.strip() for s in args.splits.split(",") if s.strip()]
     os.makedirs(args.out, exist_ok=True)
     os.makedirs(args.fig_dir, exist_ok=True)
     csv_path = os.path.join(args.out, f"fp_ablation_{args.tag}.csv")
@@ -113,24 +134,90 @@ def main():
                               f"{args.tag}_fingerprints.npz"))
     y, smiles = fp["y"], fp["smiles"]
     mj = json.load(open(os.path.join(BASE, "results", f"metrics_{args.tag}.json")))
-    headline = {k: mj[k]["r2"] for k in ("random", "scaffold")}
+    headline = {k: mj[k]["r2"] for k in ("random", "scaffold") if k in mj}
     rf_params_by_split = {}
+
+    # Fail fast, BEFORE any output file is opened: every requested split
+    # needs a headline RF the r2/2048 anchor can reproduce. `time` is
+    # rejected even when metrics_{tag}.json carries a "time" entry --
+    # 04_train_and_evaluate trains the time RF on train_idx only (no
+    # validation years), while this script trains on train+valid like
+    # random/scaffold, so the anchor would fail by construction. The old
+    # KeyError at headline[split] hit only AFTER the CSV had been
+    # truncated and partly rewritten.
+    bad = [s for s in splits if s not in headline]
+    if bad:
+        scored = sorted(k for k, v in mj.items()
+                        if isinstance(v, dict) and "r2" in v)
+        parts = []
+        for s in bad:
+            if s in scored:
+                parts.append(
+                    f"'{s}' exists in metrics_{args.tag}.json but is not "
+                    "anchorable: 04_train_and_evaluate trains that RF on "
+                    "train_idx only (validation years excluded), while "
+                    "this script trains on train+valid like "
+                    "random/scaffold")
+            else:
+                parts.append(f"'{s}' has no entry in metrics_{args.tag}.json "
+                             f"(scored splits: {scored})")
+        raise SystemExit(
+            f"[{args.tag}] unsupported --splits entry: " + "; ".join(parts)
+            + f". Supported: {sorted(headline)}. No output file was "
+            "written.")
+    for s in splits:
+        sp_path = os.path.join(BASE, "data", "processed", "splits",
+                               f"{args.tag}_{s}.npz")
+        if not os.path.exists(sp_path):
+            raise SystemExit(
+                f"[{args.tag}/{s}] missing split npz: "
+                f"{os.path.relpath(sp_path, BASE)} (run gnn_01_make_splits"
+                " first). No output file was written.")
+
+    # Coverage guard (same contract as paired_bootstrap's campaign
+    # coverage guard): the stored CSV/summary/figure cover every split,
+    # radius, n_bits and seed they were built from, so a SUBSET run --
+    # any of the four grid dimensions -- must not rewrite them with
+    # fewer rows. Checked BEFORE any training, so a refusal costs
+    # nothing and leaves every output file untouched.
+    if not args.force and os.path.exists(csv_path):
+        stored = pd.read_csv(csv_path)
+        dropped = []
+        stored_splits = set(stored["split"].astype(str))
+        missing = sorted(stored_splits - set(splits))
+        if missing:
+            dropped.append(f"split(s) {missing}")
+        for col, run_vals, label in (("radius", set(radii), "radius value(s)"),
+                                     ("n_bits", set(bits_list),
+                                      "n_bits value(s)"),
+                                     ("seed", set(seeds), "seed(s)")):
+            stored_vals = set(stored[col].tolist())
+            gone = sorted(stored_vals - run_vals)
+            if gone:
+                dropped.append(f"{label} {gone}")
+        if dropped:
+            raise SystemExit(
+                f"[{args.tag}] {os.path.relpath(csv_path, BASE)} stores "
+                + " and ".join(dropped)
+                + " from a previous run that this run would drop from the "
+                "CSV/summary/figure. Rerun with every stored grid value, or "
+                "pass --force to redraw the outputs from this subset. No "
+                "output file was written.")
 
     from sklearn.ensemble import RandomForestRegressor
     from sklearn.metrics import (mean_absolute_error, mean_squared_error,
                                  r2_score)
 
     rows = []
-    csv_f = open(csv_path, "w")
-    csv_f.write(HEADER + "\n")
-
-    def emit(row):
-        rows.append(row)
-        csv_f.write(",".join(str(row[k]) for k in HEADER.split(",")) + "\n")
-        csv_f.flush()
-
     anchor_fail = []
     print(f"[{args.tag}] radii={radii} bits={bits_list} seeds={seeds}")
+
+    def emit(row):
+        # buffered only: the CSV is written once the whole grid has
+        # finished, so a mid-run failure cannot overwrite the committed
+        # file with partial rows
+        rows.append(row)
+
     for split in splits:
         sp = np.load(os.path.join(BASE, "data", "processed", "splits",
                                   f"{args.tag}_{split}.npz"))
@@ -178,7 +265,12 @@ def main():
                             f"{headline[split]:.4f}")
                         print(f"  ANCHOR FAIL {split}: {mean_r2:.4f} vs "
                               f"{headline[split]:.4f}")
-    csv_f.close()
+    # every run finished (or raised above with the old CSV untouched):
+    # only now rewrite the output files
+    with open(csv_path, "w") as csv_f:
+        csv_f.write(HEADER + "\n")
+        for row in rows:
+            csv_f.write(",".join(str(row[k]) for k in HEADER.split(",")) + "\n")
 
     by_cell = {}
     for r in rows:

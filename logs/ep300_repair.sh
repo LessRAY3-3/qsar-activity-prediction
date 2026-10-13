@@ -1,4 +1,9 @@
 #!/bin/bash
+# HOST-SPECIFIC EXAMPLE - not part of the reproducible pipeline.
+# Kept as a record of how this campaign was launched on the original
+# author's machine (hard-coded interpreter paths, written before the
+# 2026-10-11 data refresh). Do not run as-is to reproduce the published
+# numbers; use the commands documented in README/docs instead.
 cd /Users/leisirui/qsar-activity-prediction || exit 1
 PY=/Users/leisirui/miniforge3/envs/qsar/bin/python
 LOG=/Users/leisirui/qsar-activity-prediction/logs/ep300_repair.log

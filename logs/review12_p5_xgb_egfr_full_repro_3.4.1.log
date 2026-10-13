@@ -1,0 +1,31 @@
+# review12 P5 — egfr_full/random reproduction under the PINNED environment
+# date: 2026-10-13 10:14:24  python: Python 3.12.14
+# xgboost: 3.4.1 (requirements.txt:15 pins xgboost==3.4.1)
+# protocol: Morgan fp from data/processed/egfr_full_fingerprints.npz (== rebuilt from
+#   parent_smiles via qsar_common.morgan_fp_numpy; verified below), fit pool = train+valid
+#   of the committed split data/processed/splits/egfr_full_random.npz, PR params
+#   (n_estimators=500, lr=0.05, max_depth=6, tree_method=hist, cpu).
+
+## committed reference (results/xgboost/xgboost_egfr_full.csv @ 7d02376)
+random   : r2=0.681437611579895 rmse=0.7536157236013942 mae=0.5738705992698669
+scaffold : r2=0.567847728729248 rmse=0.9392571195241712 mae=0.7357325553894043
+
+## featurization consistency (npz vs rebuilt from clean csv)
+rows: 10729 smiles(parent_smiles) equal: True
+y equal (pic50 float32): True
+X identical to committed npz: True (invalid=0)
+
+## fits (xgboost 3.4.1)
+random   train+valid (documented protocol, seed 42): r2=0.681437611579895 rmse=0.7536157236013942 mae=0.5738705992698669 (2.5s)
+random   == committed (r2,rmse,mae): True
+scaffold train+valid (documented protocol, seed 42): r2=0.567847728729248 rmse=0.9392571195241712 mae=0.7357325553894043 (2.5s)
+scaffold == committed (r2,rmse,mae): True
+
+## candidate-pool search, random split (target committed r2=0.681437611579895)
+train only (pre-PR protocol): r2=0.6759648323059082 rmse=0.7600615643361501 mae=0.5807866454124451 (2.4s)
+train+valid, sorted order: r2=0.681437611579895 rmse=0.7536157236013942 mae=0.5738705992698669 (2.8s)
+train+valid, shuffled order: r2=0.681437611579895 rmse=0.7536157236013942 mae=0.5738705992698669 (2.8s)
+redrawn carve 42: new train only: r2=0.6724985837936401 rmse=0.7641160458639665 mae=0.5813215374946594 (2.7s)
+redrawn carve 0: new train only: r2=0.6802775859832764 rmse=0.7549866756627657 mae=0.5758365988731384 (2.7s)
+redrawn carve 1: new train only: r2=0.6762999296188354 rmse=0.7596685744720959 mae=0.5802157521247864 (2.7s)
+redrawn carve 7: new train only: r2=0.6844820380210876 rmse=0.7500060796491257 mae=0.5700057148933411 (2.3s)

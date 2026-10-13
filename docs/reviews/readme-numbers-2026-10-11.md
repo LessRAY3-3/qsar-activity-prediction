@@ -4,6 +4,42 @@
 
 **生成时间**：2026-10-11 约 13:15（本机时间）。此后 `results/` 仍在被后台任务写入（见 §0.3），引用本底稿前请复核文件 mtime。
 
+**状态更新（2026-10-13，不改正文原貌）**：上表的 NEW/PENDING/STALE/NEEDS-RECALC
+标记冻结在 2026-10-11 13:15，其中多处已被后续批次取代，引用"状态"前以下面为准：
+
+- `results/significance/` 四个 summary 与全部 per-cell csv 已是新 schema
+  （`n_boot` + `frac_boot_gin_better`，`p_one_sided` 在 `results/` 0 命中），
+  `summary_time.csv` 已含刷新值（herg/time mean3 **+0.032304**），§6 的
+  "全部 STALE，待 bootstrap 重跑" 已结（N1/N2 全 16 格 GINE bootstrap）；
+- XGBoost 已按同池协议全 8 tag 重跑（16/16 `same_pool: true`，**11/16 ≤ RF**，
+  worst `hivpr`/scaffold **−0.080**），§0.2 的 "rf_control NEEDS-RECALC" 已结；
+- `vegfr2` RF 已于 2026-10-11 15:31 落盘（0.670/0.585），全表 "PENDING/旧"
+  的 vegfr2 RF/panel/time/multitask/xgb 对照列已随之刷新；
+- **release 状态**：`artifacts-v2` 已于 2026-10-12 发布（刷新 raw × 10 +
+  `document_years.csv` + 26 个 RF 模型），2026-10-13 原位重传补入
+  `processed_cache.tar.gz`（P4 快速路径，`--all`/`--cache` 可取）；
+  `scripts/fetch_artifacts.py` 指向它，README 快速上手的 stale 警告块已撤
+  （当前 `README.md` 中 `stale` 0 命中）；
+- **2026-10-13（PR #6 复查 R1-R5 整改批次）**：R1 单 seed 依赖分析见
+  `logs/2026-10-13_single_seed_dependence.log`（48 格 14 格条件性：5 个 GNN
+  胜中 4 个、21 个 RF 胜中 1 个 = AFP hivpr/scaffold、9 个平局转 RF-significant）；
+  R2 时间切分误差分解见 `logs/2026-10-13_time_split_mse_decomposition.log`
+  （level/spread/correlation，残差 ≤9e-16，替代机制标签）；批次记录见
+  `experiments/LOG.md` 末节 "2026-10-13 PR #6 review-remediation"；
+  本文件状态行、`docs/reviews/fixes-2026-10-11.md` 测试数、
+  `docs/interview.md` 调参日期（更正为 2026-09-24）同批同步；
+- 仍开放（2026-10-13 复核后收窄）：vegfr2 y-randomization / learning
+  curve / interpretability（PR #6 仍列其为 pre-refresh）。原先列在此的
+  QC `figures/testset_hist_*.png` 与 `permutation_importance_vegfr2.csv`
+  已刷新落盘（07 全 8 tag 重跑：7 tag 10-11、bace 10-12、vegfr2 10-13，
+  `logs/2026-10-13_art_refresh.log`），7 张 `figures/learning_curve/*.png`
+  已于 10-13 重绘为 ddof=0 窄带。
+
+本底稿正文保持生成时原貌；批次级运行记录见 `experiments/LOG.md` **末节**
+"2026-10-13 PR #6 review-remediation"（其下为 "2026-10-12
+review-remediation campaign (PR #3 follow-up)"；该日志 newest-first，
+最新条目在文件底部）。
+
 **统一口径**（与 `experiments/time_split_summary.py`、`scripts/gnn_04_compare.py` 一致）：
 
 - GIN 数值 = 3 seed（seed 42 / 1 / 2）**总体标准差**（`np.std(ddof=0)`），来源 `results/gnn_metrics_{tag}{,_seed1,_seed2}.json`。
@@ -405,8 +441,8 @@
 - **XGB 3 seed 完全相同**（`r2_std = 0.0`）：seed 没传入模型（见 §3）。
 - **`a2a` learning curve 只有 1 个点**（n≥1000 全部 skipped，train pool 仅 982/960）。
 - **`mt_metrics.json` 的 `_run.outdir` = `/home/lessray/...`**（win4070 远端产物，经 `.scratch/pull_gpuwave.sh multitask` 拉回）——与本机产物混放，来源要写清。
-- **`results/_diag_tasks1/`**（10-04）与 `results/{afp_panel,fairness,fp_ablation,multi_target}` 等目录含更早的诊断/面板产物，引用前先看 mtime。
-- `results/metrics_bace.json`（10-10 12:02）与 `rf_preds_bace_*`（10-08）属 fallback 数据集，不在 8-tag 面板内。
+- **`results/_archive-2026-10-09/_diag_tasks1/`**（10-04；2026-10-12 随 re-review 整改从 `results/_diag_tasks1/` 移入归档目录，同批移入的还有 `egfr` tuneA/B 的 metrics/preds/ckpt）与 `results/{afp_panel,fairness,fp_ablation,multi_target}` 等目录含更早的诊断/面板产物，引用前先看 mtime。
+- `results/metrics_bace.json`（10-10 12:02）与 `rf_preds_bace_*`（原 10-08；**2026-10-12 重生成**，与 `metrics_bace.json` 复算一致）属 fallback 数据集，不在 8-tag 面板内。
 
 ---
 
@@ -439,7 +475,11 @@
 | hivpr | 2,799 | **2,573** | −226 |
 | mpro | 4,424 | **3,410** | −1,014 |
 | vegfr2 | 11,797 | **9,643** | −2,154 |
-| **合计** | 45,145 | **42,796** | −2,349 |
+| **合计** | 55,145 | **42,804** | −12,341 |
+
+（2026-10-12 更正：合计行原写 45,145 / 42,796 / −2,349，与本表逐行求和不符；
+新值 = 八行直接相加，且新 n 一列等于八个 ChEMBL tag 的
+`data/processed/*_pic50_clean.csv` 行数之和，不含 `bace`。）
 
 ---
 

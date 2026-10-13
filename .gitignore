@@ -9,6 +9,9 @@ data/raw/
 *.sdf
 *.zip
 
+# fetch_artifacts.py 的下载缓存（~391 MB 归档）
+.artifacts_cache/
+
 # 训练中间产物
 checkpoints/
 models/*.joblib

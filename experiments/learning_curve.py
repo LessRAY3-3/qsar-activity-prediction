@@ -139,7 +139,11 @@ def make_figure(csv_path, fig_path, tag):
         sub = df[df["split"] == split]
         for model, color, marker in (("rf", "tab:blue", "o"),
                                      ("gin", "tab:orange", "s")):
-            g = sub[sub["model"] == model].groupby("n_train")["r2"].agg(["mean", "std"])
+            grp = sub[sub["model"] == model].groupby("n_train")["r2"]
+            # population std (ddof=0): the committed summary_{TAG}.json
+            # records np.std (ddof=0) - pandas' default .agg("std") is
+            # ddof=1 and would draw a band that disagrees with the summary
+            g = pd.DataFrame({"mean": grp.mean(), "std": grp.std(ddof=0)})
             ax.plot(g.index, g["mean"], marker=marker, color=color,
                     label=model.upper())
             ax.fill_between(g.index, g["mean"] - g["std"], g["mean"] + g["std"],
@@ -225,6 +229,9 @@ def main():
     for r in rows:
         key = f"{r['split']}/{r['model']}/n={r['n_train']}"
         summary.setdefault(key, []).append(r)
+    # np.std defaults to ddof=0 (population std) - the repo-wide std
+    # convention; the committed summary_{TAG}.json values reproduce with
+    # exactly this ddof, so keep it in lockstep with make_figure's band
     summary = {k: {"r2_mean": float(np.mean([r["r2"] for r in v])),
                    "r2_std": float(np.std([r["r2"] for r in v])),
                    "rmse_mean": float(np.mean([r["rmse"] for r in v])),

@@ -19,7 +19,20 @@ Outputs:
                                                     by side, coloured by
                                                     Bemis-Murcko scaffold
   results/scaffold_color_map_{TAG}_{split}.csv      colour legend -> scaffold
+
+CLI: --skip-model-check skips the RF-vs-split verification that would
+otherwise run before results/rf_preds_{TAG}_{split}.npz is rewritten.
+gnn_04 derives those preds from the regenerated split itself, so once it
+has written them every downstream "rf_preds.test_idx == split.test_idx"
+comparison is self-referential; the only independent evidence that the
+split matches the RF's original test set is reproducing
+metrics_{TAG}.json, exactly what gnn_01_make_splits verifies (and what
+--skip-model-check there disables). Pass the same flag here during a
+refresh window where models/metrics predate the split data: the check
+is then skipped and announced as "[not checked]" instead of silently
+passing.
 """
+import argparse
 import json
 import os
 
@@ -29,6 +42,7 @@ import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
+from sklearn.metrics import mean_squared_error, r2_score
 
 BASE = os.path.join(os.path.dirname(__file__), "..")
 TAG = os.environ.get("QSAR_TAG", "egfr")
@@ -40,7 +54,7 @@ FIG_DIR = os.path.join(BASE, "figures")
 N_COLOR_SCAFFOLDS = 8  # distinct colours; everything else is grey
 
 
-def load_split_data(split):
+def load_split_data(split, verify=True):
     d = np.load(SPLIT_NPZ.format(split))
     fp = np.load(FP_NPZ)
     X, y, test_idx = fp["X"], fp["y"], d["test_idx"]
@@ -48,6 +62,38 @@ def load_split_data(split):
 
     rf = joblib.load(os.path.join(BASE, "models", f"rf_{split}_split_{TAG}.joblib"))
     rf_pred = rf.predict(X[test_idx])
+    # Verify BEFORE overwriting rf_preds: re-predicting on this split must
+    # reproduce metrics_{TAG}.json, which is the non-circular RF-vs-split
+    # check (the metrics were stored by 04's own run, independently of the
+    # regenerated split). Without it -- and gnn_01 --skip-model-check
+    # disables the same verification upstream -- the only remaining
+    # "checks" would compare files this script itself derives from the
+    # split, i.e. a self-loop.
+    if verify:
+        mj = json.load(open(RF_METRICS))
+        if split not in mj:
+            print(f"  [not checked] {TAG}/{split}: no '{split}' entry in "
+                  f"{os.path.relpath(RF_METRICS, BASE)}")
+        else:
+            r2 = r2_score(y[test_idx], rf_pred)
+            rmse = float(np.sqrt(mean_squared_error(y[test_idx], rf_pred)))
+            exp = mj[split]
+            if abs(r2 - exp["r2"]) > 1e-6 or abs(rmse - exp["rmse"]) > 1e-6:
+                raise SystemExit(
+                    f"{TAG}/{split}: RF re-predicts R2={r2:.7f} "
+                    f"RMSE={rmse:.7f} but metrics_{TAG}.json records "
+                    f"R2={exp['r2']:.7f} RMSE={exp['rmse']:.7f} - the "
+                    "regenerated split does not match the RF's original "
+                    "test set (or models/metrics are stale). Not "
+                    "overwriting rf_preds. Re-run gnn_01_make_splits "
+                    "without --skip-model-check, or rerun this script "
+                    "with --skip-model-check to accept unverified preds.")
+            print(f"  [ok] {TAG}/{split}: RF re-prediction reproduces "
+                  f"metrics_{TAG}.json (R2={r2:.6f})")
+    else:
+        print(f"  [not checked] {TAG}/{split}: RF-vs-split verification "
+              "skipped (--skip-model-check); rf_preds are written from "
+              "the regenerated split without independent evidence")
     np.savez(os.path.join(BASE, "results", f"rf_preds_{TAG}_{split}.npz"),
              test_idx=test_idx, y_true=y[test_idx], y_pred=rf_pred)
 
@@ -152,8 +198,8 @@ def scaffold_colors(scaf):
     return colors, legend_rows
 
 
-def scatter_split(split):
-    y, rf_pred, gin_pred, scaf = load_split_data(split)
+def scatter_split(split, verify=True):
+    y, rf_pred, gin_pred, scaf = load_split_data(split, verify=verify)
     colors, legend_rows = scaffold_colors(scaf)
     import csv
     with open(os.path.join(BASE, "results", f"scaffold_color_map_{TAG}_{split}.csv"), "w", newline="") as f:
@@ -190,12 +236,25 @@ def scatter_split(split):
     print(f"saved -> {os.path.relpath(out, BASE)}")
 
 
-def main():
+def parse_args(argv=None):
+    p = argparse.ArgumentParser(
+        description="GNN step 4: RF-vs-GIN comparison table + scatter")
+    p.add_argument("--skip-model-check", action="store_true",
+                   help="do not verify the regenerated split by "
+                        "re-predicting with the saved RF against "
+                        "metrics_{TAG}.json before rewriting rf_preds "
+                        "(same flag as gnn_01_make_splits; the skipped "
+                        "check is announced as [not checked])")
+    return p.parse_args(argv)
+
+
+def main(argv=None):
+    args = parse_args(argv)
     os.makedirs(FIG_DIR, exist_ok=True)
     rows = comparison_table()
     write_table_csv(rows)
     for split in ("random", "scaffold"):
-        scatter_split(split)
+        scatter_split(split, verify=not args.skip_model_check)
 
 
 if __name__ == "__main__":

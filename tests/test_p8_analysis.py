@@ -349,12 +349,216 @@ def test_summary_merge_accepts_legacy_campaign_file(load_experiment,
         mod.merge_summary(smoke, str(path), n_boot=300)
 
 
+def test_legacy_p_one_sided_renamed_on_kept_rows(load_experiment, tmp_path):
+    """The L1 rename must survive on KEPT legacy rows (rows the update does
+    not touch): a pre-rename schema summary carrying p_one_sided is loaded,
+    a different cell is merged in, and the untouched legacy row must come
+    back under frac_boot_gin_better -- not silently NaN."""
+    mod = load_experiment("paired_bootstrap")
+    legacy = pd.DataFrame([
+        {"tag": "legacy", "split": "random", "pair": "seed42", "d_r2": 0.1,
+         "ci_lo": 0.0, "ci_hi": 0.2, "significant": True, "winner": "gin",
+         "p_one_sided": 0.9, "d_rmse": -0.1, "d_rmse_ci_lo": -0.2,
+         "d_rmse_ci_hi": 0.0},
+    ])
+    path = tmp_path / "summary.csv"
+    legacy.to_csv(path, index=False)
+
+    # update touches ONLY another cell -> the legacy row survives as kept
+    update = pd.DataFrame([
+        {"tag": "fresh", "split": "scaffold", "pair": "mean3", "d_r2": 0.2,
+         "ci_lo": 0.1, "ci_hi": 0.3, "significant": True, "winner": "gin",
+         "frac_boot_gin_better": 0.95, "d_rmse": -0.2, "d_rmse_ci_lo": -0.3,
+         "d_rmse_ci_hi": -0.1, "n_boot": mod.N_BOOT},
+    ], columns=mod.SUMMARY_COLS)
+
+    merged = mod.merge_summary(update, str(path), n_boot=mod.N_BOOT)
+
+    assert "p_one_sided" not in merged.columns
+    assert list(merged.columns) == mod.SUMMARY_COLS
+    assert len(merged) == 2
+    kept = merged.set_index(list(mod.SUMMARY_KEYS)).loc[
+        ("legacy", "random", "seed42")]
+    # the retired column's value rides along under the current name
+    assert kept["frac_boot_gin_better"] == pytest.approx(0.9)
+    # pre-n_boot legacy rows are validated as B=N_BOOT on the way through
+    assert kept["n_boot"] == mod.N_BOOT
+    fresh = merged.set_index(list(mod.SUMMARY_KEYS)).loc[
+        ("fresh", "scaffold", "mean3")]
+    assert fresh["frac_boot_gin_better"] == pytest.approx(0.95)
+
+
 def test_is_campaign_run_flags_partial_invocations(load_experiment):
     mod = load_experiment("paired_bootstrap")
     assert mod.is_campaign_run(list(mod.TAGS), mod.N_BOOT)
     assert not mod.is_campaign_run(["egfr"], mod.N_BOOT)
     assert not mod.is_campaign_run(list(mod.TAGS), 300)
     assert not mod.is_campaign_run(["egfr"], 300)
+
+
+# ---------------------------------------------------------------- per-cell / coverage guards
+
+def test_check_cell_csv_refuses_stored_b_mismatch(load_experiment, tmp_path):
+    """A cell stored at a different n_boot is never overwritten without --force."""
+    mod = load_experiment("paired_bootstrap")
+    cell = tmp_path / "tiny_random.csv"
+    cell.write_text("tag,split,model_pair,n_boot\ntiny,random,mean3,10000\n")
+
+    with pytest.raises(SystemExit):
+        mod.check_cell_csv(str(cell), 300)
+    assert "10000" in cell.read_text()          # refusal leaves the file alone
+    mod.check_cell_csv(str(cell), 10_000)       # same B: allowed
+    mod.check_cell_csv(str(cell), 300, force=True)   # --force: allowed
+    mod.check_cell_csv(str(tmp_path / "absent.csv"), 300)  # new file: allowed
+
+    # a pre-n_boot cell counts as B=N_BOOT, matching read_existing_summary
+    legacy = tmp_path / "legacy.csv"
+    legacy.write_text("tag,split\nx,random\n")
+    mod.check_cell_csv(str(legacy), mod.N_BOOT)
+    with pytest.raises(SystemExit):
+        mod.check_cell_csv(str(legacy), 300)
+
+
+def test_main_aborts_before_overwriting_cell_with_different_b(
+        load_experiment, tmp_path, monkeypatch
+):
+    """End-to-end: a B=300 smoke run must not replace a stored B=10000 cell.
+
+    The stored cell file is also the sentinel: without the guard the run
+    rewrites it with the smoke-run rows (mutant: no SystemExit, file clobbered).
+    """
+    mod = load_experiment("paired_bootstrap")
+    _write_cell(tmp_path, "tiny", "random")
+    monkeypatch.setattr(mod, "BASE", str(tmp_path))
+    out = tmp_path / "out"
+    out.mkdir()
+    cell = out / "tiny_random.csv"
+    cell.write_text("tag,split,model_pair,n_boot\ntiny,random,mean3,10000\n")
+
+    with pytest.raises(SystemExit):
+        mod.main(["--tags", "tiny", "--splits", "random", "--n-boot", "300",
+                  "--out-dir", str(out), "--fig", str(tmp_path / "fig.png")])
+    assert cell.read_text() == "tag,split,model_pair,n_boot\ntiny,random,mean3,10000\n"
+
+
+def test_campaign_coverage_guard_refuses_subset(load_experiment, tmp_path):
+    """A campaign run covering a strict subset of stored cells needs --force."""
+    mod = load_experiment("paired_bootstrap")
+    stored = pd.DataFrame([
+        {"tag": "t1", "split": "random", "pair": "seed42", "n_boot": mod.N_BOOT},
+        {"tag": "t1", "split": "scaffold", "pair": "seed42", "n_boot": mod.N_BOOT},
+        {"tag": "t2", "split": "random", "pair": "seed42", "n_boot": mod.N_BOOT},
+    ])
+    path = tmp_path / "summary.csv"
+    stored.to_csv(path, index=False)
+
+    # full coverage and a missing summary are both fine
+    mod.guard_campaign_coverage(str(path), ["t1", "t2"], ["random", "scaffold"])
+    mod.guard_campaign_coverage(str(tmp_path / "absent.csv"), ["t1"], ["random"])
+
+    # strict subset: refused without --force, allowed with it
+    with pytest.raises(SystemExit):
+        mod.guard_campaign_coverage(str(path), ["t1", "t2"], ["random"])
+    mod.guard_campaign_coverage(str(path), ["t1", "t2"], ["random"], force=True)
+
+
+def test_check_cell_csv_refuses_stored_seed_mismatch(load_experiment, tmp_path):
+    """Guard key is (n_boot, boot_seed): same-B different-seed is refused.
+
+    Mutant killed: check_cell_csv ignoring boot_seed -- a --seed 7 rerun
+    would silently replace campaign cells whose CIs were drawn from the
+    seed-42 resample matrices (PR #5 Low: "it ignores the bootstrap seed").
+    """
+    mod = load_experiment("paired_bootstrap")
+    cell = tmp_path / "tiny_random.csv"
+    cell.write_text("tag,split,model_pair,n_boot,boot_seed\n"
+                    "tiny,random,mean3,300,42\n")
+
+    with pytest.raises(SystemExit, match="boot_seed"):
+        mod.check_cell_csv(str(cell), 300, seed=7)
+    assert "300,42" in cell.read_text()              # refusal leaves it alone
+    mod.check_cell_csv(str(cell), 300, seed=42)      # same (B, seed): allowed
+    mod.check_cell_csv(str(cell), 300, seed=7, force=True)   # --force: allowed
+
+    # a pre-boot_seed cell validates as the campaign seed (BOOT_SEED)
+    legacy = tmp_path / "legacy.csv"
+    legacy.write_text("tag,split,model_pair,n_boot\ntiny,random,mean3,10000\n")
+    mod.check_cell_csv(str(legacy), mod.N_BOOT, seed=mod.BOOT_SEED)
+    with pytest.raises(SystemExit, match="boot_seed"):
+        mod.check_cell_csv(str(legacy), mod.N_BOOT, seed=7)
+
+
+def test_main_preflights_every_cell_before_writing_any(
+        load_experiment, tmp_path, monkeypatch
+):
+    """The per-cell guard runs BEFORE the write loop, never inside it.
+
+    A two-cell run whose SECOND cell carries a stored mismatch must abort
+    with the FIRST cell's file byte-for-byte untouched. Mutant killed: the
+    old in-loop check aborted only after the first cell had been rewritten
+    (PR #5 Low: "a later mismatch aborts after earlier cells were
+    rewritten").
+    """
+    mod = load_experiment("paired_bootstrap")
+    _write_cell(tmp_path, "tiny1", "random")
+    _write_cell(tmp_path, "tiny2", "random")
+    monkeypatch.setattr(mod, "BASE", str(tmp_path))
+    out = tmp_path / "out"
+    out.mkdir()
+    # tiny1 matches the run's (n_boot, boot_seed): the write loop would
+    # rewrite it; tiny2 carries a stored B=10000 the run must refuse
+    ok_cell = out / "tiny1_random.csv"
+    ok_cell.write_text("tag,split,model_pair,n_boot,boot_seed\n"
+                       "tiny1,random,mean3,300,42\n")
+    bad_cell = out / "tiny2_random.csv"
+    bad_cell.write_text("tag,split,model_pair,n_boot,boot_seed\n"
+                        "tiny2,random,mean3,10000,42\n")
+    ok_sentinel = ok_cell.read_text()
+    bad_sentinel = bad_cell.read_text()
+
+    with pytest.raises(SystemExit):
+        mod.main(["--tags", "tiny1,tiny2", "--splits", "random",
+                  "--n-boot", "300", "--out-dir", str(out),
+                  "--fig", str(tmp_path / "fig.png")])
+
+    # the OK cell was never reached by a write: preflight refused first
+    assert ok_cell.read_text() == ok_sentinel
+    assert bad_cell.read_text() == bad_sentinel
+
+
+@pytest.mark.filterwarnings("ignore:invalid value encountered in subtract")
+def test_bootstrap_records_requested_n_boot_with_degenerate_resamples(
+        load_experiment
+):
+    """n_boot is the REQUESTED size, not the post-degenerate-filter count.
+
+    Resamples with zero y-variance are dropped from the percentiles; if the
+    recorded n_boot were len(filtered), an identical rerun would fail the
+    stored-rows n_boot comparison in merge_summary. y is 7x5.0 + one 8.0 so
+    an all-same draw happens with probability ~0.34 per resample.
+    """
+    mod = load_experiment("paired_bootstrap")
+    y = np.array([5.0] * 7 + [8.0])
+    rng = np.random.default_rng(3)
+    gin = y + rng.normal(0.0, 0.1, len(y))
+    rf = y + rng.normal(0.0, 0.1, len(y))
+    n_boot = 300
+
+    # independent proof that THIS run (same seed, same draw sequence)
+    # drops degenerate resamples, so the requested count differs from the
+    # post-filter count
+    gen = np.random.default_rng(mod.BOOT_SEED)
+    n_degenerate = 0
+    pos = 0
+    while pos < n_boot:
+        b = min(mod.CHUNK, n_boot - pos)
+        idx = gen.integers(0, len(y), size=(b, len(y)))
+        n_degenerate += int((y[idx].std(axis=1) == 0).sum())
+        pos += b
+    assert n_degenerate > 0
+
+    res = mod.paired_bootstrap(y, gin, rf, n_boot=n_boot, seed=mod.BOOT_SEED)
+    assert res["n_boot"] == n_boot             # mutant: n_boot - n_degenerate
 
 
 # ---------------------------------------------------------------- uncertainty / AD

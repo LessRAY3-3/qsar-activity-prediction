@@ -1,4 +1,9 @@
 #!/bin/bash
+# HOST-SPECIFIC EXAMPLE - not part of the reproducible pipeline.
+# Kept as a record of how this campaign was launched on the original
+# author's machine (pre-2026-10-11 refresh; PY/paths were host state).
+# Do not run as-is to reproduce the published numbers; use the commands
+# documented in README/docs instead.
 # P8 Phase 2c (MPS arm): GIN time-split, 8 targets x 3 seeds. Runs AFTER the
 # GINE driver to keep MPS serial. Per-seed suffixes (artifact-naming lesson).
 set -u

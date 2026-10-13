@@ -8,8 +8,11 @@ artifact that already exists on disk.
 
 Inputs (per tag):
   data/processed/splits/{tag}_time.npz               sizes + test years
+  data/processed/{tag}_fingerprints.npz              y for the constant
+                                                     (no-skill) baseline
   results/metrics_{tag}.json                         RF "time" r2/rmse
-  results/gnn_metrics_{tag}{,_seed1,_seed2}.json     GIN "time" r2 (3 seeds)
+  results/gnn_metrics_{tag}{,_seed1,_seed2}.json     GIN "time" r2 +
+                                                     best_epoch (3 seeds)
   results/comparison_{tag}.csv                       RF/GIN random+scaffold R2
   results/significance/summary_time.csv              paired bootstrap (mean3)
 
@@ -18,22 +21,31 @@ Outputs:
                                            reported as-is (a2a 0.62 and
                                            mpro 0.51 exceed 0.5 because the
                                            test set cumulates the newest
-                                           years to reach ~20%)
+                                           years to reach ~20%);
+                                           constant_r2 is the test R2 of
+                                           predicting the mean pIC50 of all
+                                           non-test rows, gin_best_epochs
+                                           the comma-joined time-split
+                                           early-stop epochs of the 3 GIN
+                                           seeds (N4)
   figures/time_split/panel_3splits.png     2 facets (RF | GIN), 3 bars per
                                            tag: random / scaffold / time
 Console: headline conclusions.
 
-Caveats documented in the log/report, not in the numbers: targets whose
-RF time R² drops below 0 (e.g. egfr_full, herg) are flagged from the
-data as genuine temporal-drift signals, not bugs.
+Negative R2 and performance relative to a constant baseline are descriptive
+statistics. Neither establishes temporal drift or rules out pipeline errors.
+Committed pre-as-of time results are historical and require retraining.
 """
 import json
 import os
+import sys
 
 import numpy as np
 import pandas as pd
 
 BASE = os.path.join(os.path.dirname(__file__), "..")
+sys.path.insert(0, os.path.join(BASE, "scripts"))
+from time_labels import load_time_split  # noqa: E402
 
 TAGS = ("a2a", "abl1", "egfr", "egfr_full", "herg", "hivpr", "mpro", "vegfr2")
 SPLITS = ("random", "scaffold", "time")
@@ -50,7 +62,8 @@ SUMMARY_COLS = [
     "frac_boot_gin_better",
     "rf_random_r2", "gin_random_r2_mean",
     "rf_scaffold_r2", "gin_scaffold_r2_mean",
-    "delta_convention",
+    "constant_r2", "gin_best_epochs",
+    "delta_convention", "label_policy", "label_id", "n_excluded",
 ]
 
 
@@ -65,17 +78,24 @@ def time_split_stats(tag):
     """Sizes, test fraction and test-year span of {tag}_time.npz."""
     sp = np.load(os.path.join(BASE, "data", "processed", "splits",
                               f"{tag}_time.npz"))
+    if os.path.exists(os.path.join(BASE, "data", "processed", "splits", f"{tag}_time_NA.json")):
+        raise ValueError(f"{tag}: time split is NA; cannot summarize stale predictions")
+    if "label_policy" in sp:
+        sp = load_time_split(os.path.join(BASE, "data", "processed", "splits"), tag)
     n_total = int(len(sp["year"]))
     n_train = int(len(sp["train_idx"]))
     n_valid = int(len(sp["valid_idx"]))
     n_test = int(len(sp["test_idx"]))
-    if n_train + n_valid + n_test != n_total:
+    n_excluded = len(sp.get("excluded_idx", []))
+    if n_train + n_valid + n_test + n_excluded != n_total:
         raise ValueError(f"{tag}: train/valid/test do not sum to n_total")
     years = np.asarray(sp["year"], dtype=np.float64)[sp["test_idx"]]
     if np.isnan(years).any():
         raise ValueError(f"{tag}: test set has molecules without a year")
     return {
         "n_total": n_total, "n_train": n_train, "n_valid": n_valid,
+        "n_excluded": n_excluded, "label_id": str(sp.get("label_id", "")),
+        "label_policy": str(sp.get("label_policy", "legacy-all-year; historical-only")),
         "n_test": n_test, "test_frac": n_test / n_total,
         "test_year_start": int(years.min()),
         "test_year_end": int(years.max()),
@@ -87,6 +107,41 @@ def gin_time_r2(tag):
     vals = np.array([_load_json(f"gnn_metrics_{tag}{suf}.json")["time"]["r2"]
                      for suf in SEED_SUFFIXES], dtype=np.float64)
     return float(vals.mean()), float(vals.std(ddof=0))
+
+
+def constant_r2(tag):
+    """Test R2 of the no-skill baseline (N4): predict the mean pIC50 of
+    every non-test row (train+valid) for all test rows."""
+    y = np.asarray(np.load(os.path.join(BASE, "data", "processed",
+                                        f"{tag}_fingerprints.npz"))["y"],
+                   dtype=np.float64)
+    sp = np.load(os.path.join(BASE, "data", "processed", "splits",
+                              f"{tag}_time.npz"))
+    test = np.asarray(sp["test_idx"])
+    if len(y) != len(sp["year"]):
+        raise ValueError(f"{tag}: y and split index spaces differ")
+    if "label_policy" in sp:
+        y = np.asarray(sp["y"], dtype=np.float64)
+        pool = np.concatenate([sp["train_idx"], sp["valid_idx"]])
+    else:
+        pool = np.ones(len(y), dtype=bool)
+        pool[test] = False
+    yt = y[test]
+    pred = np.full_like(yt, y[pool].mean())
+    return float(1.0 - np.sum((yt - pred) ** 2) / np.sum((yt - yt.mean()) ** 2))
+
+
+def gin_best_epochs(tag):
+    """Time-split early-stop epochs of the 3 committed GIN seeds, as a
+    comma-joined string. Read directly (not via _load_json) so callers
+    that stub the metrics payload for r2/rmse are not forced to carry
+    best_epoch too."""
+    epochs = []
+    for suf in SEED_SUFFIXES:
+        with open(os.path.join(BASE, "results",
+                               f"gnn_metrics_{tag}{suf}.json")) as fh:
+            epochs.append(int(json.load(fh)["time"]["best_epoch"]))
+    return ",".join(str(e) for e in epochs)
 
 
 def comparison_reference(tag):
@@ -130,13 +185,27 @@ def build_summary():
         gin_mean, gin_std = gin_time_r2(tag)
         ref = comparison_reference(tag)
         s = sig.loc[tag]
+        expected = stats.get("label_id", "")
+        metrics = [rf] + [_load_json(f"gnn_metrics_{tag}{suf}.json")["time"]
+                          for suf in SEED_SUFFIXES]
+        if any(m.get("label_id", "") != expected for m in metrics):
+            raise ValueError(f"{tag}: time metrics and split label versions differ; retrain all models")
+        sig_id = s.get("label_id", "")
+        if pd.isna(sig_id):
+            sig_id = ""
+        if sig_id != expected:
+            raise ValueError(f"{tag}: stale time bootstrap; recompute after retraining")
         rows.append({
             "tag": tag,
+            "label_policy": "legacy-all-year; historical-only",
+            "label_id": "", "n_excluded": 0,
             **stats,
             "rf_time_r2": float(rf["r2"]),
             "rf_time_rmse": float(rf["rmse"]),
             "gin_time_r2_mean": gin_mean,
             "gin_time_r2_std": gin_std,
+            "constant_r2": constant_r2(tag),
+            "gin_best_epochs": gin_best_epochs(tag),
             "d_r2_mean3": float(s["d_r2"]),
             "ci_lo": float(s["ci_lo"]),
             "ci_hi": float(s["ci_hi"]),
@@ -224,6 +293,11 @@ def print_conclusion(df):
     rf_neg = df.loc[df["rf_time_r2"] < 0, "tag"].tolist()
     gin_neg = df.loc[df["gin_time_r2_mean"] < 0, "tag"].tolist()
     print(f"  negative time R²: RF {rf_neg or 'none'}; GIN {gin_neg or 'none'}")
+    rf_const = df.loc[df["rf_time_r2"] < df["constant_r2"],
+                      ["tag", "rf_time_r2", "constant_r2"]]
+    cells = ", ".join(f"{r.tag} {r.rf_time_r2:+.3f} < {r.constant_r2:+.3f}"
+                      for r in rf_const.itertuples())
+    print(f"  RF below constant baseline: {cells or 'none'}")
 
     sig = df[df["significant"]]
     rf_wins = sig.loc[sig["winner"] == "rf", "tag"].tolist()
@@ -236,16 +310,23 @@ def print_conclusion(df):
         print(f"  caveat: {r.tag} test_frac={r.test_frac:.2f} > 0.5 "
               "(newest-year data concentration under the cumulative-20% rule)")
 
-    extreme = df.loc[df["rf_time_r2"] < 0, ["tag", "rf_time_r2"]]
+    extreme = df.loc[df["rf_time_r2"] < 0,
+                     ["tag", "rf_time_r2", "constant_r2"]]
     if len(extreme):
-        cells = ", ".join(f"{r.tag} RF {r.rf_time_r2:+.3f}"
-                          for r in extreme.itertuples())
-        print(f"  note: negative time-split R² ({cells}) reads as genuine "
-              "temporal drift, not a bug")
+        above = extreme[extreme["rf_time_r2"] >= extreme["constant_r2"]]
+        below = extreme[extreme["rf_time_r2"] < extreme["constant_r2"]]
+        for subset, relation in ((above, "at/above"), (below, "below")):
+            if len(subset):
+                cells = ", ".join(f"{r.tag} RF {r.rf_time_r2:+.3f}, constant {r.constant_r2:+.3f}"
+                                  for r in subset.itertuples())
+                print(f"  note: {cells}: {relation} the constant baseline. "
+                      "These scores alone do not establish temporal drift or its cause.")
 
 
 def main():
     df = build_summary()
+    if df["label_policy"].str.startswith("legacy").any():
+        print("WARNING: legacy all-year labels: historical results only, not prospective validation; retrain time models.")
     out_csv = os.path.join(BASE, "results", "time_split", "summary.csv")
     os.makedirs(os.path.dirname(out_csv), exist_ok=True)
     df.to_csv(out_csv, index=False)

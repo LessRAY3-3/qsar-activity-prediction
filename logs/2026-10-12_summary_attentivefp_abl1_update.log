@@ -1,0 +1,171 @@
+================================================================================
+2026-10-12 -- summary_attentivefp.csv abl1/scaffold update (review N3)
+logs/2026-10-12_summary_attentivefp_abl1_update.log
+================================================================================
+
+STATUS OF THIS FILE: this is NOT a terminal transcript.  It was written on
+2026-10-13 (PR #5 artifact pass) as an after-the-fact record of work that
+already happened on 2026-10-12.  Every number under "final key values" is
+TRANSCRIBED from the committed result files named there -- nothing was
+retrained or re-bootstrapped for this log.  Reconstructed steps are
+labelled as such.
+
+Background: the AttentiveFP abl1/scaffold seed-42 run had stopped at
+epoch 15 with train MSE still high (the convergence flag added in N3),
+which dragged the cell to RF-significant -0.048.  On 2026-10-12 the run
+was redone with the new --min-epochs floor and the cell was
+re-bootstrapped, then the campaign summary was updated.
+
+ANNOTATION (2026-10-13, PR #6 finding R1/P1 -- correcting the paragraph
+above, which is left as written):
+  * "had stopped at epoch 15" conflates two things: the original CUDA
+    run EARLY-STOPPED AT EPOCH 35 with best epoch 15 and train MSE 0.57
+    (logs/win4070_/win4070_overnight_train_attentivefp_abl1_scaffold_s42.log,
+    device=cuda; README.md and docs/methodology.md now say this).
+  * "redone with the new --min-epochs floor" misattributes the flip.
+    The flip came from the independent rerun ITSELF -- fresh randomness
+    on another device (device=mps, printed at line 6 of the stdout log
+    cited in Step 1 below); the two runs already diverge at epoch 2.
+    The --min-epochs 60 floor never bound: the rerun's longest
+    non-improving stretch is 46 -> 62, below patience 20, so it reaches
+    100 epochs with or without the floor (README.md, docs/methodology.md).
+  * The numbers below (0.6745 / best epoch 82 / +0.020 [-0.018, +0.057])
+    are unaffected; only the attribution changes.
+
+--------------------------------------------------------------------------------
+1. Step 1 -- retrain the one run (completed 2026-10-12 09:40)
+--------------------------------------------------------------------------------
+
+Command (reconstructed from the script's argparse defaults,
+scripts/gnn_03_train_gin.py:70-86, plus the flags visible in the run's
+stdout; the stdout itself is committed, the exact shell line is not):
+
+    QSAR_TAG=abl1 .venv/bin/python scripts/gnn_03_train_gin.py \
+        --model attentivefp --split scaffold --seed 42 --min-epochs 60
+
+Other parameters in force (script defaults, unchanged): --epochs 100,
+--patience 20, --hidden 128, --num-layers 4, --dropout 0.2, --lr 1e-3,
+--batch-size 128.
+
+Stdout (committed at run time):
+    logs/review11_n3_afp_abl1_scaffold_s42_min60.log   (2026-10-12 09:40)
+
+That log ends with:
+    TEST  R2=0.6745  RMSE=0.7164  MAE=0.5357  (212s)
+    saved -> results/gnn_models/abl1_attentivefp_scaffold.pt,
+             results/gnn_preds_abl1_attentivefp_scaffold.npz,
+             results/gnn_metrics_abl1_attentivefp.json
+
+Inputs: data/processed/abl1_graphs.npz +
+        data/processed/splits/abl1_scaffold.npz
+Outputs (mtimes 2026-10-12 09:40):
+    results/gnn_models/abl1_attentivefp_scaffold.pt
+    results/gnn_preds_abl1_attentivefp_scaffold.npz
+    results/gnn_metrics_abl1_attentivefp.json
+    (seed1/seed2 files untouched -- only seed 42 was rerun)
+
+State recorded in results/gnn_metrics_abl1_attentivefp.json ->
+"scaffold" (transcribed 2026-10-13):
+    r2 0.6744612455, rmse 0.7164004942, best_epoch 82, max_epochs 100,
+    train_mse 0.3037706453, convergence_flag False
+Before the fix: test R2 0.260 (best epoch 15) -- source is
+experiments/LOG.md:867 (written at run time), not reproducible from the
+tree now because the old run was overwritten in place.
+
+--------------------------------------------------------------------------------
+2. Step 2 -- re-bootstrap that one cell (completed 2026-10-12 09:40)
+--------------------------------------------------------------------------------
+
+Command (reconstructed: 1 tag x 1 split, campaign defaults otherwise;
+the run's stdout proves the tag/split and that it was treated as a
+partial run):
+
+    .venv/bin/python experiments/paired_bootstrap.py \
+        --model attentivefp --tags abl1 --splits scaffold \
+        --n-boot 10000 --seed 42
+
+(--n-boot 10000 and --seed 42 are also the script defaults; both are
+recorded in the written files as n_boot=10000, boot_seed=42.)
+
+Stdout (committed at run time):
+    logs/review11_n3_paired_bootstrap_afp_abl1_scaffold.log
+    (2026-10-12 09:40), which prints:
+        [abl1/scaffold] n=425  mean3 dR2=+0.0202
+            CI[-0.0179, +0.0570]  frac_boot_gin_better=0.8565
+        partial run (1 tag(s), n_boot=10000): campaign summary/figure
+            left untouched -- only a full-tag run at the default
+            --n-boot merges into them
+        summary -> results/significance/summary_partial_attentivefp.csv
+            (6 rows)
+        figure  -> figures/significance/ci_panel_partial_attentivefp.png
+
+Inputs:
+    results/rf_preds_abl1_scaffold.npz
+    results/gnn_preds_abl1_attentivefp_scaffold.npz        (seed 42, new)
+    results/gnn_preds_abl1_attentivefp_scaffold_seed1.npz
+    results/gnn_preds_abl1_attentivefp_scaffold_seed2.npz
+Outputs (mtimes 2026-10-12 09:40):
+    results/significance/abl1_scaffold_attentivefp.csv   (rewritten)
+    results/_archive-2026-10-09/partial_summaries/summary_partial_attentivefp.csv
+    results/_archive-2026-10-09/partial_summaries/ci_panel_partial_attentivefp.png
+    (the partial pair was moved into the archive later the same day,
+     2026-10-12 12:37)
+
+--------------------------------------------------------------------------------
+3. Step 3 -- campaign summary row updated (2026-10-12 09:43)
+--------------------------------------------------------------------------------
+
+results/significance/summary_attentivefp.csv has mtime 2026-10-12 09:43
+and now carries the new abl1/scaffold rows; the other 15 cells keep their
+2026-10-11 values and their cell CSVs were NOT rewritten (mtimes unchanged).
+
+No stdout log for this merge exists in the tree, and the command that
+produced it was not recorded.  For the record: a 1-tag run is refused by
+the campaign-coverage guard, so the row merge did not go through the
+normal full-run path of experiments/paired_bootstrap.py -- it was merged
+outside that path (the resulting file is internally consistent: its
+abl1/scaffold rows are byte-equal to the rows in the archived
+summary_partial_attentivefp.csv, and the remaining 14 cells still match
+their per-cell CSVs).
+
+This is stated as a gap: the merge step has no committed log; the values
+below are verified by transcription from the committed file, not by
+rerunning anything.
+
+--------------------------------------------------------------------------------
+4. Step 4 -- panels regenerated (2026-10-12 09:46 / 10:06)
+--------------------------------------------------------------------------------
+
+    09:46  experiments/afp_panel.py -> results/afp_panel/summary.csv and
+           figures/afp_panel/panel_dR2.png +
+           figures/significance/ci_panel_with_afp.png (all three mtime
+           2026-10-12 09:46)
+    10:06  figures/significance/ci_panel_attentivefp.png re-rendered
+           (mtime 2026-10-12 10:06); producing command not logged.
+
+--------------------------------------------------------------------------------
+5. Final key values -- TRANSCRIBED from the committed result files
+--------------------------------------------------------------------------------
+
+Source files, read on 2026-10-13 (nothing recomputed):
+    results/significance/summary_attentivefp.csv
+        5435 bytes, sha256 prefix d0f636e34cf951ba, mtime 2026-10-12 09:43
+    results/significance/abl1_scaffold_attentivefp.csv
+        605 bytes, sha256 prefix 44ebfaa5071efe69, mtime 2026-10-12 09:40
+
+The updated cell (n_test 425):
+
+    pair    d_r2 (AFP - RF)  95% CI                significant  winner  frac
+    seed42     -0.0399       [-0.1022, +0.0109]     False        tie     0.0664
+    mean3      +0.0202       [-0.0179, +0.0570]     False        tie     0.8565
+
+  (experiments/LOG.md:868-870 records the same move: from RF-significant
+  -0.048 to undecided +0.020 [-0.018, +0.057].)
+
+Panel tallies recounted from the committed file on 2026-10-13
+(matches experiments/LOG.md:871-873):
+    mean3 : 7 RF wins / 2 AttentiveFP wins / 7 undecided
+            the two AFP wins are herg/random +0.0343 [+0.0022, +0.0648]
+            and herg/scaffold +0.0617 [+0.0304, +0.0923]
+    seed42: 12/16 cells significant
+    n_boot = 10000 and boot_seed = 42 on all 32 rows.

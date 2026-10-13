@@ -1,31 +1,53 @@
-"""QC: salt forms, parent-level duplicates and censored activities (audit only).
+"""QC: parent-level salts, split leakage and censored activities (audit only).
 
 What / why:
-  1. ChEMBL ``canonical_smiles`` keeps counter-ions ("Cl.", "Br.", "[Na+]" ...).
-     ``02_clean_data.py`` deduplicates on the raw SMILES string, so a free base
-     and its hydrochloride are two "unique compounds" with two labels, their
-     fingerprints/graphs carry the counter-ion atoms, and the same parent can
-     sit on both sides of a split (an analogue leak the scaffold split cannot
-     see because the scaffold is identical).  This script strips every SMILES
-     to its largest organic fragment (RDKit LargestFragmentChooser), counts
-     how many rows collapse onto an already-present parent, and - when the
-     persisted split indices exist - how many parents straddle train/test.
+  1. Since review finding M1, ``02_clean_data.py`` standardizes every record
+     to ``parent_smiles`` (RDKit LargestFragmentChooser + Uncharger) and
+     deduplicates on it, so the committed clean CSV is one row per parent:
+     single-fragment, unique, and assigned to exactly one split. This script
+     audits the committed ``parent_smiles`` column directly - multi-fragment
+     parents (must be 0), duplicate parents (must be 0), and cross-split
+     parent overlap (must be 0) - and recomputes parents from the provenance
+     ``canonical_smiles`` variant with the same standardization to confirm
+     the stored column. It also reports provenance-side numbers (counter-ions
+     still visible in ``canonical_smiles``) as context, clearly labelled:
+     the 2026-10-10 version audited the provenance variant itself, whose
+     ">1 fragment" headline counted counter-ions that 02 already strips and
+     whose duplicate/leakage checks were 0 by construction.
   2. ChEMBL stores censored measurements ("IC50 > 10000 nM") with a
-     ``standard_relation`` of ">" / "<" / ">=" / "<=".  The downloaders do not
-     pull that column, so such rows enter the regression as exact values.
-     If the raw CSV carries ``standard_relation`` (only once the downloader
-     is extended to request it) the censored rows are counted directly;
-     otherwise the exact-value striations at 10^3/10^4/10^5 nM are reported
-     as a proxy.  ``chembl_censoring_counts.py`` in this folder quantifies
-     censoring straight from the ChEMBL API instead.
+     ``standard_relation`` of ">" / "<" / ">=" / "<=".  Since the 2026-10-11
+     refresh the downloaders request that column and 02 keeps only "=" rows.
+     This script counts removed rows with 02's own inclusion rule, verbatim:
+     the pool is filtered exactly like 02 (unit nM, non-missing non-empty
+     SMILES, value > 0) and a row counts as censored/removed iff
+     ``standard_relation != "="`` (no stripping; empty/other values such as
+     ">>" are removed by 02 and are counted here too).  When the column is
+     absent (older/bace-style download) the exact-value striations at
+     10^3/10^4/10^5 nM are reported as a proxy.  ``chembl_censoring_counts.py``
+     in this folder additionally audits censoring at the parent level
+     (every modelled parent keeps >= 1 "=" record) and quantifies upstream
+     censoring straight from the ChEMBL API.
+
+Exit code: the "must be 0" invariants are real checks - multi-fragment
+parent_smiles, duplicated parent_smiles, and cross-split parent overlap each
+make the script exit 1 when violated.  A split check that cannot run prints
+an explicit SKIP note and exits 1 by default - never "OK" for checks that
+did not run: no ``parent_smiles`` column (bace, which predates the M1
+parent standardization), a missing split file, or a split file whose
+molecule count differs from the clean CSV.  Pass ``--allow-skip`` to accept
+skipped checks (exit 0, SKIP notes still printed).  A split file with the
+right count but smiles that do not align with the clean CSV's
+``parent_smiles`` is a misalignment and always exits 1.
 
 Nothing is filtered or rewritten - like ``07_qc_checks.py`` the audit is the
-deliverable.  Output: console, plus a JSON summary when --out is given.
+deliverable.  Output: console, plus a JSON summary when --out is given
+(``results/``, ``data/``, ``models/`` and ``figures/`` are refused as --out).
 
 Usage (from anywhere; the repo root is found by walking up to
 scripts/qsar_common.py, or pass --repo):
     QSAR_TAG=egfr python .claude/skills/qsar-review/scripts/qc_salts_censoring.py
     python .claude/skills/qsar-review/scripts/qc_salts_censoring.py --tag herg --out /tmp/herg.json
+    python .claude/skills/qsar-review/scripts/qc_salts_censoring.py --tag bace --allow-skip
 """
 import argparse
 import json
@@ -54,24 +76,55 @@ def find_repo_root(start):
 # module-level paths are (re)bound in main() from --repo/--tag
 BASE = TAG = CLEAN_CSV = RAW_CSV = SPLIT_DIR = None
 
-CENSOR_RELATIONS = (">", "<", ">=", "<=", "~")
+CENSOR_RELATIONS = (">", "<", ">=", "<=", "~")  # reported breakdown only
 STRIATION_NM = (1000.0, 10000.0, 100000.0)  # exact pIC50 6 / 5 / 4
 
+
+def is_protected(path):
+    """True when path is inside results/, figures/, models/ or data/.
+
+    Paths are compared after os.path.realpath + lowercasing so that
+    case-insensitive filesystems (macOS) cannot be bypassed with e.g.
+    ``--out Results/x``, and ``..``/symlink tricks are resolved first.
+    """
+    p = os.path.realpath(path).lower()
+    protected = (
+        os.path.realpath(os.path.join(BASE, d)).lower()
+        for d in ("results", "figures", "models", "data"))
+    return any(p == d or p.startswith(d + os.sep) for d in protected)
+
+
 _CHOOSER = rdMolStandardize.LargestFragmentChooser()
+_UNCHARGER = rdMolStandardize.Uncharger()
 
 
 def parent_smiles(smi):
-    """Canonical SMILES of the largest fragment (None if RDKit cannot parse)."""
+    """Parent SMILES via largest fragment + Uncharge (same as 02's _parent_smiles)."""
     mol = Chem.MolFromSmiles(smi)
     if mol is None:
         return None
-    return Chem.MolToSmiles(_CHOOSER.choose(mol))
+    return Chem.MolToSmiles(_UNCHARGER.uncharge(_CHOOSER.choose(mol)))
 
 
 def check_salts(df):
-    smiles = df["canonical_smiles"].astype(str).to_numpy()
-    multi = np.array(["." in s for s in smiles])
-    parents = np.array([parent_smiles(s) or s for s in smiles], dtype=object)
+    if "parent_smiles" not in df.columns:
+        print("== 1. parent_smiles / salt forms ==")
+        print(f"  no parent_smiles column in {os.path.relpath(CLEAN_CSV, BASE)} - "
+              "parent-level salt audit skipped. This clean CSV predates the M1 "
+              "parent standardization (bace: 02's parent handling was added for "
+              "the ChEMBL panel; bace keeps the original download format), so "
+              "there is no stored parent column to audit. Multi-fragment and "
+              "duplicate checks below are vacuous - rerun 02 on this tag if a "
+              "parent-level audit is needed.")
+        return None, {"n_rows": int(len(df)), "parent_column_present": False,
+                      "skipped": "no parent_smiles column (pre-M1 clean CSV)"}
+    parents = df["parent_smiles"].astype(str).to_numpy()
+    prov = df["canonical_smiles"].astype(str).to_numpy()
+
+    multi_parent = np.array(["." in s for s in parents])
+    multi_prov = np.array(["." in s for s in prov])
+    recomputed = np.array([parent_smiles(s) or s for s in prov], dtype=object)
+    mismatch = recomputed != parents
     counts = pd.Series(parents).value_counts()
     dup_parents = counts[counts > 1]
     n_rows_in_dups = int(dup_parents.sum())
@@ -80,27 +133,38 @@ def check_salts(df):
         vals = df.loc[parents == p, "pic50"].to_numpy()
         spread.append(float(vals.max() - vals.min()))
     ions = pd.Series(
-        [frag for s in smiles[multi] for frag in s.split(".") if len(frag) <= 12]
+        [frag for s in prov[multi_prov] for frag in s.split(".") if len(frag) <= 12]
     ).value_counts()
 
-    print("== 1. salt forms / parent-level duplicates ==")
-    print(f"  {int(multi.sum())} / {len(df)} SMILES ({multi.mean():.1%}) contain more "
-          "than one fragment (counter-ion / solvate)")
+    print("== 1. parent_smiles / salt forms ==")
+    print(f"  {int(multi_parent.sum())} / {len(df)} modelled parent_smiles contain more "
+          "than one fragment (must be 0: 02 strips counter-ions before dedup)")
+    print(f"    provenance canonical_smiles (first variant per parent): "
+          f"{int(multi_prov.sum())} contain '.' - counter-ions visible in provenance, "
+          "already stripped from parent_smiles")
     if len(ions):
-        print("  most common small fragments: "
+        print("  most common small fragments in provenance: "
               + ", ".join(f"{k} x{v}" for k, v in ions.head(6).items()))
-    print(f"  {len(dup_parents)} parents appear under >1 SMILES "
-          f"({n_rows_in_dups} rows -> {len(df) - n_rows_in_dups + len(dup_parents)} "
-          "rows after parent-level dedup)")
+    print(f"  {len(dup_parents)} duplicated parent_smiles (must be 0: 02 dedups by "
+          f"parent; rows would collapse to "
+          f"{len(df) - n_rows_in_dups + len(dup_parents)} on dedup)")
     if spread:
         print(f"  pIC50 spread inside those parent groups: median {np.median(spread):.2f}, "
               f"max {np.max(spread):.2f}")
+    print(f"  recomputed parent from provenance canonical_smiles (largest fragment + "
+          f"Uncharger, same fn as 02): {int(mismatch.sum())} / {len(df)} mismatches")
+    if mismatch.any():
+        for i in np.flatnonzero(mismatch)[:5]:
+            print(f"    stored={parents[i]!r} recomputed={recomputed[i]!r}")
     return parents, {
+        "parent_column_present": True,
         "n_rows": int(len(df)),
-        "n_multifragment": int(multi.sum()),
+        "n_parent_multifragment": int(multi_parent.sum()),
+        "n_provenance_multifragment": int(multi_prov.sum()),
         "n_parents_duplicated": int(len(dup_parents)),
         "n_rows_in_duplicated_parents": n_rows_in_dups,
         "n_rows_after_parent_dedup": int(len(df) - n_rows_in_dups + len(dup_parents)),
+        "n_provenance_parent_mismatch": int(mismatch.sum()),
         "pic50_spread_median": float(np.median(spread)) if spread else None,
         "pic50_spread_max": float(np.max(spread)) if spread else None,
         "top_fragments": {str(k): int(v) for k, v in ions.head(10).items()},
@@ -108,18 +172,46 @@ def check_salts(df):
 
 
 def check_split_leakage(parents):
-    """Parents with at least one member in train AND one in test, per split."""
+    """Cross-split parent overlap. Must be 0: each parent is exactly one clean-CSV row.
+
+    Returns ``(results, skips)``.  ``results`` maps split -> outcome for
+    checks that actually ran, plus a ``split_matches_clean_order: False``
+    record for a split file whose smiles do not align with the clean CSV
+    (a misalignment: always a failure).  ``skips`` lists the split checks
+    that could not run at all; each is printed as SKIP and makes main()
+    exit 1 unless --allow-skip is given - a skipped check never counts as
+    "OK".
+    """
     print("\n== 2. parent-level train/test leakage ==")
-    out = {}
+    out, skips = {}, []
+    if parents is None:
+        reason = "no parent_smiles column to check against (see section 1)"
+        print(f"  SKIP: {reason} - leakage check not run")
+        skips.append(f"all splits: {reason}")
+        return out, skips
     for split in ("random", "scaffold", "time"):
         path = os.path.join(SPLIT_DIR, f"{TAG}_{split}.npz")
         if not os.path.exists(path):
-            print(f"  {split:9s} no split file ({os.path.relpath(path, BASE)}), skipped")
+            reason = f"no split file ({os.path.relpath(path, BASE)})"
+            print(f"  {split:9s} SKIP: {reason} - leakage check not run")
+            skips.append(f"{split}: {reason}")
             continue
         d = np.load(path)
-        if len(d["smiles"]) != len(parents):
-            print(f"  {split:9s} split file has {len(d['smiles'])} molecules, "
-                  f"clean CSV has {len(parents)} - skipped")
+        smiles = np.asarray(d["smiles"], dtype=object)
+        if len(smiles) != len(parents):
+            reason = (f"split file has {len(smiles)} molecules, clean CSV has "
+                      f"{len(parents)} (split/CSV out of sync?)")
+            print(f"  {split:9s} SKIP: {reason} - leakage check not run")
+            skips.append(f"{split}: {reason}")
+            continue
+        order_mismatch = int(np.sum(smiles != parents))
+        if order_mismatch:
+            out[split] = {"split_matches_clean_order": False,
+                          "n_smiles_differing_from_parents": order_mismatch}
+            print(f"  {split:9s} MISALIGNED: split smiles differ from clean "
+                  f"parent_smiles in {order_mismatch} / {len(parents)} positions "
+                  "- leakage numbers are not interpretable (split file predates "
+                  "the clean CSV?) - FAIL")
             continue
         train = set(parents[d["train_idx"]])
         if "valid_idx" in d.files:
@@ -127,32 +219,54 @@ def check_split_leakage(parents):
         test_parents = parents[d["test_idx"]]
         leaked = np.array([p in train for p in test_parents])
         n_leak = int(leaked.sum())
-        print(f"  {split:9s} {n_leak} / {len(test_parents)} test molecules "
-              f"({n_leak / len(test_parents):.1%}) share a parent with a train molecule")
-        out[split] = {"n_test": int(len(test_parents)), "n_test_with_parent_in_train": n_leak}
-    return out
+        print(f"  {split:9s} {n_leak} / {len(test_parents)} test parents also in train "
+              "(expected 0: rows are unique parents assigned to one split; non-zero "
+              "means split/clean misalignment)")
+        out[split] = {"n_test": int(len(test_parents)),
+                      "n_test_with_parent_in_train": n_leak,
+                      "split_matches_clean_order": True}
+    return out, skips
 
 
 def check_censoring():
-    print("\n== 3. censored activities ==")
+    print("\n== 3. censored activities in the raw pull ==")
     if not os.path.exists(RAW_CSV):
         print(f"  raw CSV missing ({os.path.relpath(RAW_CSV, BASE)}); run "
               "scripts/fetch_artifacts.py --raw or re-download, skipped")
         return {"raw_available": False}
     raw = pd.read_csv(RAW_CSV)
+    # mirror 02's record pool exactly (unit / value / SMILES filters) so the
+    # removed-row count below is directly comparable to 02's own printout
+    if "standard_units" in raw.columns:
+        raw = raw[raw["standard_units"] == "nM"].copy()
     raw["standard_value"] = pd.to_numeric(raw["standard_value"], errors="coerce")
-    raw = raw.dropna(subset=["standard_value"])
-    raw = raw[raw["standard_value"] > 0]
+    raw = raw.dropna(subset=["standard_value", "canonical_smiles"])
+    raw = raw[raw["canonical_smiles"].str.strip() != ""]
+    raw = raw[raw["standard_value"] > 0].copy()
     out = {"raw_available": True, "n_raw_rows": int(len(raw))}
 
     if "standard_relation" in raw.columns:
-        rel = raw["standard_relation"].astype(str).str.strip()
-        censored = rel.isin(CENSOR_RELATIONS)
+        # 02's inclusion rule, verbatim: keep only standard_relation == "="
+        # (no stripping). Everything else - including empty and odd values
+        # like ">>" - is removed by 02 and counts as censored/removed here.
+        removed = raw["standard_relation"] != "="
         out["standard_relation_available"] = True
-        out["n_censored"] = int(censored.sum())
-        out["by_relation"] = {str(k): int(v) for k, v in rel.value_counts().items()}
-        print(f"  {int(censored.sum())} / {len(raw)} raw rows ({censored.mean():.1%}) carry a "
-              f"censored standard_relation ({', '.join(out['by_relation'])})")
+        out["n_removed_by_relation_rule"] = int(removed.sum())
+        out["by_relation"] = {("(empty)" if pd.isna(k) else str(k)): int(v)
+                              for k, v in raw.loc[removed, "standard_relation"]
+                              .value_counts(dropna=False).items()}
+        n_bounds = int(raw["standard_relation"].isin(CENSOR_RELATIONS).sum())
+        out["n_censored_bounds"] = n_bounds  # >, <, >=, <=, ~ subset of removed
+        bounds = {k: v for k, v in out["by_relation"].items() if k in CENSOR_RELATIONS}
+        other = {k: v for k, v in out["by_relation"].items() if k not in CENSOR_RELATIONS}
+        print(f"  {int(removed.sum())} / {len(raw)} raw rows ({removed.mean():.1%}) removed by "
+              f"02's rule (standard_relation != '='), on 02's own unit/value/SMILES pool; "
+              "these never become labels")
+        print(f"    classic censored bounds: "
+              f"{', '.join(f'{k} x{v}' for k, v in bounds.items()) or 'none'}"
+              + (f"; other non-'=' values: "
+                 f"{', '.join(f'{k} x{v}' for k, v in other.items())}"
+                 if other else ""))
     else:
         out["standard_relation_available"] = False
         print("  standard_relation column not in the raw CSV (older download) - "
@@ -176,6 +290,9 @@ def parse_args(argv=None):
     p.add_argument("--tag", default=os.environ.get("QSAR_TAG", "egfr"))
     p.add_argument("--repo", default=None, help="repo root (default: auto-detect)")
     p.add_argument("--out", default=None, help="optional JSON summary path")
+    p.add_argument("--allow-skip", action="store_true",
+                   help="exit 0 even when a split check was skipped "
+                        "(default: skipped split checks exit 1)")
     return p.parse_args(argv)
 
 
@@ -188,19 +305,65 @@ def main(argv=None):
     RAW_CSV = os.path.join(BASE, "data", "raw", f"{TAG}_activities.csv")
     SPLIT_DIR = os.path.join(BASE, "data", "processed", "splits")
 
+    if args.out and is_protected(args.out):
+        raise SystemExit(f"--out {os.path.abspath(args.out)} points into a "
+                         "protected directory (results/ figures/ models/ data/); refusing")
+
     df = pd.read_csv(CLEAN_CSV)
     print(f"[{TAG}] {len(df)} cleaned compounds")
     parents, salts = check_salts(df)
-    leakage = check_split_leakage(parents)
+    leakage, split_skips = check_split_leakage(parents)
     censoring = check_censoring()
+
+    # the "must be 0" invariants are real checks: any violation exits 1.
+    # Skipped split checks never pass as OK (exit 1 unless --allow-skip),
+    # and a split file misaligned with the clean CSV always fails.
+    violations = []
+    if salts.get("parent_column_present"):
+        if salts["n_parent_multifragment"]:
+            violations.append(
+                f"{salts['n_parent_multifragment']} multi-fragment parent_smiles (must be 0)")
+        if salts["n_parents_duplicated"]:
+            violations.append(
+                f"{salts['n_parents_duplicated']} duplicated parent_smiles (must be 0)")
+    for split, info in leakage.items():
+        if not info.get("split_matches_clean_order", True):
+            violations.append(
+                f"{split}: split smiles differ from clean parent_smiles in "
+                f"{info['n_smiles_differing_from_parents']} positions "
+                "(misaligned - leakage not interpretable)")
+        elif info["n_test_with_parent_in_train"]:
+            violations.append(
+                f"{split}: {info['n_test_with_parent_in_train']} test parents also in train "
+                "(expected 0)")
+    if violations:
+        status = "FAIL"
+        print("\nFAIL - 'must be 0' invariants violated:")
+        for v in violations:
+            print(f"  - {v}")
+        for s in split_skips:
+            print(f"  - (skipped check: {s})")
+    elif split_skips and not args.allow_skip:
+        status = "SKIP"
+        print("\nSKIP - split checks did not run, so this is not OK "
+              "(exit 1; pass --allow-skip to accept):")
+        for s in split_skips:
+            print(f"  - {s}")
+    else:
+        status = "OK"
+        print("\nOK - all checked 'must be 0' invariants hold")
+        for s in split_skips:
+            print(f"  - skipped check accepted via --allow-skip: {s}")
 
     if args.out:
         os.makedirs(os.path.dirname(os.path.abspath(args.out)), exist_ok=True)
         with open(args.out, "w") as f:
             json.dump({"tag": TAG, "salts": salts, "split_leakage": leakage,
-                       "censoring": censoring}, f, indent=2)
-        print(f"\nsaved -> {args.out}")
+                       "split_skips": split_skips, "censoring": censoring,
+                       "violations": violations, "status": status}, f, indent=2)
+        print(f"saved -> {args.out}")
+    return 0 if status == "OK" else 1
 
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())

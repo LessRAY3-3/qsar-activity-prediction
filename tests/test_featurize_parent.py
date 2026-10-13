@@ -9,6 +9,7 @@ fallback with a printed note.
 """
 import numpy as np
 import pandas as pd
+import pytest
 from rdkit import Chem
 
 from qsar_common import morgan_fp_numpy
@@ -66,3 +67,32 @@ def test_missing_parent_column_falls_back_to_canonical(
     assert "parent_smiles" in out and "falling back" in out  # printed notice
     assert d["smiles"].tolist() == [SALT, CAFFEINE]  # unchanged legacy behaviour
     assert d["X"].shape == (2, 2048)
+
+
+def test_invalid_smiles_aborts_and_writes_no_npz(tmp_path, monkeypatch, load_script):
+    """Any unparseable SMILES aborts 03 instead of silently dropping rows.
+
+    Splits and rf_preds test_idx are positions into THIS row order, so a
+    dropped row would shift every downstream index while still exiting 0.
+    The abort is checked as behaviour (SystemExit + no output file), never
+    as message wording. Mutant killed: the old silent-drop path completes
+    normally and writes fingerprints.npz.
+    """
+    df = pd.DataFrame(
+        {
+            "parent_smiles": [PARENT, "INVALID_SMILES_XYZ"],
+            "canonical_smiles": [SALT, "INVALID_SMILES_XYZ"],
+            "pic50": [7.0, 6.5],
+            "target": ["Test Kinase", "Test Kinase"],
+        }
+    )
+    in_csv = tmp_path / "clean.csv"
+    out_npz = tmp_path / "fingerprints.npz"
+    df.to_csv(in_csv, index=False)
+
+    mod = load_script("03_featurize")
+    monkeypatch.setattr(mod, "IN_CSV", str(in_csv))
+    monkeypatch.setattr(mod, "OUT_NPZ", str(out_npz))
+    with pytest.raises(SystemExit):
+        mod.main()
+    assert not out_npz.exists()

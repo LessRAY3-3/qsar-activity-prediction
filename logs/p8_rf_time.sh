@@ -1,4 +1,9 @@
 #!/bin/bash
+# HOST-SPECIFIC EXAMPLE - not part of the reproducible pipeline.
+# Kept as a record of how this campaign was launched on the original
+# author's machine (pre-2026-10-11 refresh; the "model exists" skip below
+# reflects the artifact state of that run). Do not run as-is to reproduce
+# the published numbers; use the commands documented in README/docs instead.
 # P8 Phase 2c (CPU arm): RF time-split retraining, 8 targets, serial (RAM-safe).
 set -u
 cd "$(dirname "$0")/.."

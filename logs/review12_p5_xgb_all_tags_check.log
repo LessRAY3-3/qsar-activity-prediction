@@ -1,0 +1,153 @@
+# review12 P5: full-panel XGBoost rerun with fingerprint same_pool code
+# date: 2026-10-13 10:13:34  python: Python 3.12.14  xgboost: 3.4.1
+# cmd: .venv/bin/python experiments/xgboost_baseline.py --tag TAG --out /tmp/p5_out --fig-dir /tmp/p5_fig
+
+===== QSAR_TAG=a2a =====
+[a2a] RF control: {"random": 0.7099535296263921, "scaffold": 0.7024594756345401}
+[a2a/random] same_pool=True xgb_sha=93aeed61cd73 rf_sha=93aeed61cd73
+[a2a/scaffold] same_pool=True xgb_sha=ab70e0b0f307 rf_sha=ab70e0b0f307
+[a2a] seeds=[42, 1, 2] splits=['random', 'scaffold'] n_est=500 lr=0.05 depth=6 device=cpu/hist (xgboost 3.4.1)
+[a2a/random] fit_pool=1092 test=274
+  seed=42 R2=0.6953 RMSE=0.6196 (1s)
+  seed=1 R2=0.6953 RMSE=0.6196 (1s)
+  seed=2 R2=0.6953 RMSE=0.6196 (1s)
+[a2a/scaffold] fit_pool=1067 test=299
+  seed=42 R2=0.6803 RMSE=0.5855 (1s)
+  seed=1 R2=0.6803 RMSE=0.5855 (1s)
+  seed=2 R2=0.6803 RMSE=0.5855 (1s)
+summary -> ../../../../../tmp/p5_out/summary_a2a.json
+figure  -> ../../../../../tmp/p5_fig/xgboost_a2a.png
+csv     -> ../../../../../tmp/p5_out/xgboost_a2a.csv (6 rows)
+
+===== QSAR_TAG=abl1 =====
+[abl1] RF control: {"random": 0.8221851002242336, "scaffold": 0.714350780366555}
+[abl1/random] same_pool=True xgb_sha=47f00eaf19fa rf_sha=47f00eaf19fa
+[abl1/scaffold] same_pool=True xgb_sha=bbb662843eab rf_sha=bbb662843eab
+[abl1] seeds=[42, 1, 2] splits=['random', 'scaffold'] n_est=500 lr=0.05 depth=6 device=cpu/hist (xgboost 3.4.1)
+[abl1/random] fit_pool=1696 test=424
+  seed=42 R2=0.8280 RMSE=0.6042 (1s)
+  seed=1 R2=0.8280 RMSE=0.6042 (1s)
+  seed=2 R2=0.8280 RMSE=0.6042 (1s)
+[abl1/scaffold] fit_pool=1695 test=425
+  seed=42 R2=0.6967 RMSE=0.6915 (1s)
+  seed=1 R2=0.6967 RMSE=0.6915 (1s)
+  seed=2 R2=0.6967 RMSE=0.6915 (1s)
+summary -> ../../../../../tmp/p5_out/summary_abl1.json
+figure  -> ../../../../../tmp/p5_fig/xgboost_abl1.png
+csv     -> ../../../../../tmp/p5_out/xgboost_abl1.csv (6 rows)
+
+===== QSAR_TAG=egfr =====
+[egfr] RF control: {"random": 0.7213518493696289, "scaffold": 0.6492034396686062}
+[egfr/random] same_pool=True xgb_sha=3a22a030039c rf_sha=3a22a030039c
+[egfr/scaffold] same_pool=True xgb_sha=31e24bb199eb rf_sha=31e24bb199eb
+[egfr] seeds=[42, 1, 2] splits=['random', 'scaffold'] n_est=500 lr=0.05 depth=6 device=cpu/hist (xgboost 3.4.1)
+[egfr/random] fit_pool=3648 test=912
+  seed=42 R2=0.7108 RMSE=0.7470 (1s)
+  seed=1 R2=0.7108 RMSE=0.7470 (1s)
+  seed=2 R2=0.7108 RMSE=0.7470 (1s)
+[egfr/scaffold] fit_pool=3648 test=912
+  seed=42 R2=0.6039 RMSE=1.0789 (1s)
+  seed=1 R2=0.6039 RMSE=1.0789 (1s)
+  seed=2 R2=0.6039 RMSE=1.0789 (1s)
+summary -> ../../../../../tmp/p5_out/summary_egfr.json
+figure  -> ../../../../../tmp/p5_fig/xgboost_egfr.png
+csv     -> ../../../../../tmp/p5_out/xgboost_egfr.csv (6 rows)
+
+===== QSAR_TAG=egfr_full =====
+[egfr_full] RF control: {"random": 0.7288614787245249, "scaffold": 0.6081481592074331}
+[egfr_full/random] same_pool=True xgb_sha=d430f2b8c3b5 rf_sha=d430f2b8c3b5
+[egfr_full/scaffold] same_pool=True xgb_sha=4d93ef85214e rf_sha=4d93ef85214e
+[egfr_full] seeds=[42, 1, 2] splits=['random', 'scaffold'] n_est=500 lr=0.05 depth=6 device=cpu/hist (xgboost 3.4.1)
+[egfr_full/random] fit_pool=8583 test=2146
+  seed=42 R2=0.6814 RMSE=0.7536 (2s)
+  seed=1 R2=0.6814 RMSE=0.7536 (2s)
+  seed=2 R2=0.6814 RMSE=0.7536 (2s)
+[egfr_full/scaffold] fit_pool=8563 test=2166
+  seed=42 R2=0.5678 RMSE=0.9393 (2s)
+  seed=1 R2=0.5678 RMSE=0.9393 (2s)
+  seed=2 R2=0.5678 RMSE=0.9393 (2s)
+summary -> ../../../../../tmp/p5_out/summary_egfr_full.json
+figure  -> ../../../../../tmp/p5_fig/xgboost_egfr_full.png
+csv     -> ../../../../../tmp/p5_out/xgboost_egfr_full.csv (6 rows)
+
+===== QSAR_TAG=herg =====
+[herg] RF control: {"random": 0.6066868678540435, "scaffold": 0.3844663110464861}
+[herg/random] same_pool=True xgb_sha=c25b4929f45b rf_sha=c25b4929f45b
+[herg/scaffold] same_pool=True xgb_sha=295c4beb758f rf_sha=295c4beb758f
+[herg] seeds=[42, 1, 2] splits=['random', 'scaffold'] n_est=500 lr=0.05 depth=6 device=cpu/hist (xgboost 3.4.1)
+[herg/random] fit_pool=6722 test=1681
+  seed=42 R2=0.5826 RMSE=0.6155 (2s)
+  seed=1 R2=0.5826 RMSE=0.6155 (2s)
+  seed=2 R2=0.5826 RMSE=0.6155 (2s)
+[herg/scaffold] fit_pool=6721 test=1682
+  seed=42 R2=0.4168 RMSE=0.8646 (2s)
+  seed=1 R2=0.4168 RMSE=0.8646 (2s)
+  seed=2 R2=0.4168 RMSE=0.8646 (2s)
+summary -> ../../../../../tmp/p5_out/summary_herg.json
+figure  -> ../../../../../tmp/p5_fig/xgboost_herg.png
+csv     -> ../../../../../tmp/p5_out/xgboost_herg.csv (6 rows)
+
+===== QSAR_TAG=hivpr =====
+[hivpr] RF control: {"random": 0.692191224981888, "scaffold": 0.5380349887188622}
+[hivpr/random] same_pool=True xgb_sha=8b753089ca91 rf_sha=8b753089ca91
+[hivpr/scaffold] same_pool=True xgb_sha=b6f0fb53b41a rf_sha=b6f0fb53b41a
+[hivpr] seeds=[42, 1, 2] splits=['random', 'scaffold'] n_est=500 lr=0.05 depth=6 device=cpu/hist (xgboost 3.4.1)
+[hivpr/random] fit_pool=2058 test=515
+  seed=42 R2=0.7024 RMSE=0.8704 (1s)
+  seed=1 R2=0.7024 RMSE=0.8704 (1s)
+  seed=2 R2=0.7024 RMSE=0.8704 (1s)
+[hivpr/scaffold] fit_pool=2049 test=524
+  seed=42 R2=0.4578 RMSE=0.9970 (1s)
+  seed=1 R2=0.4578 RMSE=0.9970 (1s)
+  seed=2 R2=0.4578 RMSE=0.9970 (1s)
+summary -> ../../../../../tmp/p5_out/summary_hivpr.json
+figure  -> ../../../../../tmp/p5_fig/xgboost_hivpr.png
+csv     -> ../../../../../tmp/p5_out/xgboost_hivpr.csv (6 rows)
+
+===== QSAR_TAG=mpro =====
+[mpro] RF control: {"random": 0.6016693541674416, "scaffold": 0.43324947067186403}
+[mpro/random] same_pool=True xgb_sha=cd04e7106122 rf_sha=cd04e7106122
+[mpro/scaffold] same_pool=True xgb_sha=bbbf8a080c1c rf_sha=bbbf8a080c1c
+[mpro] seeds=[42, 1, 2] splits=['random', 'scaffold'] n_est=500 lr=0.05 depth=6 device=cpu/hist (xgboost 3.4.1)
+[mpro/random] fit_pool=2728 test=682
+  seed=42 R2=0.6064 RMSE=0.6635 (1s)
+  seed=1 R2=0.6064 RMSE=0.6635 (1s)
+  seed=2 R2=0.6064 RMSE=0.6635 (1s)
+[mpro/scaffold] fit_pool=2728 test=682
+  seed=42 R2=0.4100 RMSE=0.7024 (2s)
+  seed=1 R2=0.4100 RMSE=0.7024 (2s)
+  seed=2 R2=0.4100 RMSE=0.7024 (2s)
+summary -> ../../../../../tmp/p5_out/summary_mpro.json
+figure  -> ../../../../../tmp/p5_fig/xgboost_mpro.png
+csv     -> ../../../../../tmp/p5_out/xgboost_mpro.csv (6 rows)
+
+===== QSAR_TAG=vegfr2 =====
+[vegfr2] RF control: {"random": 0.669503776041366, "scaffold": 0.5853499750696074}
+[vegfr2/random] same_pool=True xgb_sha=5a0a30674fec rf_sha=5a0a30674fec
+[vegfr2/scaffold] same_pool=True xgb_sha=cbfb0306f329 rf_sha=cbfb0306f329
+[vegfr2] seeds=[42, 1, 2] splits=['random', 'scaffold'] n_est=500 lr=0.05 depth=6 device=cpu/hist (xgboost 3.4.1)
+[vegfr2/random] fit_pool=7714 test=1929
+  seed=42 R2=0.6250 RMSE=0.6912 (3s)
+  seed=1 R2=0.6250 RMSE=0.6912 (3s)
+  seed=2 R2=0.6250 RMSE=0.6912 (3s)
+[vegfr2/scaffold] fit_pool=7698 test=1945
+  seed=42 R2=0.5888 RMSE=0.6791 (3s)
+  seed=1 R2=0.5888 RMSE=0.6791 (3s)
+  seed=2 R2=0.5888 RMSE=0.6791 (3s)
+summary -> ../../../../../tmp/p5_out/summary_vegfr2.json
+figure  -> ../../../../../tmp/p5_fig/xgboost_vegfr2.png
+csv     -> ../../../../../tmp/p5_out/xgboost_vegfr2.csv (6 rows)
+
+===== time-split annotation check: egfr --splits time =====
+# cmd: .venv/bin/python experiments/xgboost_baseline.py --tag egfr --splits time --out /tmp/p5_time_out --fig-dir /tmp/p5_time_fig
+[egfr] RF control: {"time": 0.12299040041609577}
+[egfr/time] same_pool=False xgb_sha=94e061f4ec8e rf_sha=d6919c722b40
+WARNING: [egfr/time] control pool mismatch: pool sha256 mismatch: XGB 3327 rows (94e061f4ec8e...) vs RF 2987 rows (d6919c722b40...) - NOT same-pool (time RF trains train_idx only; XGB fits train+valid)
+[egfr] seeds=[42, 1, 2] splits=['time'] n_est=500 lr=0.05 depth=6 device=cpu/hist (xgboost 3.4.1)
+[egfr/time] fit_pool=3327 test=1233
+  seed=42 R2=-0.0139 RMSE=1.2890 (1s)
+  seed=1 R2=-0.0139 RMSE=1.2890 (1s)
+  seed=2 R2=-0.0139 RMSE=1.2890 (1s)
+summary -> ../../../../../tmp/p5_time_out/summary_egfr.json
+figure  -> ../../../../../tmp/p5_time_fig/xgboost_egfr.png
+csv     -> ../../../../../tmp/p5_time_out/xgboost_egfr.csv (3 rows)

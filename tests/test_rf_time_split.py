@@ -70,16 +70,18 @@ def _setup(tmp_path, monkeypatch, load_script):
 
 
 def _write_time_split(split_dir, tag):
+    from time_labels import LABEL_POLICY, dataset_signature, label_signature
     train_idx = np.arange(0, TRAIN_N, dtype=np.int64)
     valid_idx = np.arange(TRAIN_N, TRAIN_N + VALID_N, dtype=np.int64)
     test_idx = np.arange(TRAIN_N + VALID_N, N, dtype=np.int64)
-    np.savez(
-        split_dir / f"{tag}_time.npz",
-        train_idx=train_idx,
-        valid_idx=valid_idx,
-        test_idx=test_idx,
-        scaffold_smiles=np.array([f"scaf_{i % 5}" for i in range(N)]),
-    )
+    fp = np.load(split_dir.parent / "fingerprints.npz")
+    payload = dict(train_idx=train_idx, valid_idx=valid_idx, test_idx=test_idx,
+                   excluded_idx=np.array([], dtype=int), smiles=fp["smiles"],
+                   y=fp["y"] + 0.25, original_y=fp["y"], year=np.arange(N, dtype=float), label_policy=LABEL_POLICY,
+                   dataset_signature=dataset_signature(fp["smiles"], fp["y"]),
+                   source_sha256="synthetic", cutoff_valid=2010, cutoff_test=2020)
+    payload["label_id"] = label_signature(payload)
+    np.savez(split_dir / f"{tag}_time.npz", **payload)
     return train_idx, test_idx
 
 
@@ -97,10 +99,10 @@ def test_time_split_trains_and_merges_only_time_key(tmp_path, monkeypatch, load_
     assert joblib.load(model_path).predict  # loads and is a usable estimator
     assert preds_path.exists()
     preds = np.load(preds_path)
-    assert set(preds.files) == {"test_idx", "y_true", "y_pred"}
+    assert set(preds.files) == {"test_idx", "y_true", "y_pred", "label_id"}
     np.testing.assert_array_equal(preds["test_idx"], test_idx)
     assert preds["test_idx"].dtype == np.int64
-    np.testing.assert_array_equal(preds["y_true"], y[test_idx])
+    np.testing.assert_array_equal(preds["y_true"], y[test_idx] + 0.25)
     assert preds["y_pred"].dtype == np.float64
     assert preds["y_pred"].shape == (TEST_N,)
     assert (tmp_path / "figures" / f"pred_vs_actual_time_{mod.TAG}.png").exists()
@@ -148,3 +150,37 @@ def test_time_split_missing_both_errors(tmp_path, monkeypatch, load_script):
 
     assert not (tmp_path / "models" / f"rf_time_split_{mod.TAG}.joblib").exists()
     assert metrics_path.read_bytes() == before
+
+
+def test_plot_only_time_rejects_tampered_split(tmp_path, monkeypatch, load_script):
+    mod, _, _, split_dir, _ = _setup(tmp_path, monkeypatch, load_script)
+    _write_time_split(split_dir, mod.TAG)
+    path = split_dir / f"{mod.TAG}_time.npz"
+    sp = dict(np.load(path))
+    np.savez(tmp_path / "results" / f"rf_preds_{mod.TAG}_time.npz",
+             test_idx=sp["test_idx"], y_true=sp["y"][sp["test_idx"]],
+             y_pred=np.zeros(TEST_N), label_id=sp["label_id"])
+    sp["source_sha256"] = "changed-without-new-label-id"
+    np.savez(path, **sp)
+    monkeypatch.setattr(sys, "argv", ["rf", "--plot-only", "--split", "time"])
+    with pytest.raises(ValueError, match="signature mismatch"):
+        mod.main()
+    assert not (tmp_path / "figures").exists()
+
+
+def test_plot_only_random_uses_current_model_not_stale_predictions(tmp_path, monkeypatch, load_script):
+    from sklearn.dummy import DummyRegressor
+    mod, _, _, _, _ = _setup(tmp_path, monkeypatch, load_script)
+    model = DummyRegressor(strategy="constant", constant=7).fit(np.zeros((2, 32)), [7, 7])
+    models = tmp_path / "models"
+    models.mkdir()
+    joblib.dump(model, models / f"rf_random_split_{mod.TAG}.joblib")
+    np.savez(tmp_path / "results" / f"rf_preds_{mod.TAG}_random.npz",
+             y_true=[99.], y_pred=[-99.], test_idx=[0])
+    plotted = []
+    monkeypatch.setattr(mod, "scatter", lambda y, p, split, *args: plotted.append((y, p, split)))
+    monkeypatch.setattr(sys, "argv", ["rf", "--plot-only", "--split", "random"])
+    mod.main()
+    assert len(plotted) == 1 and plotted[0][2] == "random"
+    assert len(plotted[0][0]) == N // 5
+    np.testing.assert_array_equal(plotted[0][1], np.full(N // 5, 7))

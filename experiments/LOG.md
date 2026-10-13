@@ -2,7 +2,17 @@
 
 Running log of the deep-dive experiments. Each entry: what ran, headline
 numbers (3-seed mean +/- std unless noted), and the commit holding the
-artifacts. Newest first. Maintained by M4 Air; results produced on M3 Max.
+artifacts. Newest first. Maintained by M4 Air (this machine, Apple M4
+MacBook Air); the 2026-10-10/11 refresh-campaign panel trainings ran on
+the win4070 CUDA host (logs committed under `logs/win4070_/`) and the
+auxiliary batches (learning curve, y-randomization, multitask) on this
+M4 Air under MPS; older 2026-09/10 entries also record M3 Max runs.
+
+**Status pointer (2026-10-13): entries are newest first, but the two
+latest entries sit at the *bottom* of this file — first the 2026-10-13
+PR #6 review-remediation entry, below it the 2026-10-12
+review-remediation campaign; superseded status lines are marked in
+place.**
 
 ## 2026-10-11
 
@@ -14,7 +24,7 @@ artifacts. Newest first. Maintained by M4 Air; results produced on M3 Max.
   labels; salts collapse to the **parent structure before dedup**
   (`parent_smiles`), and `03_featurize` + the `document_years` join
   follow the parent too. 7 ChEMBL targets re-pulled raw, `egfr`
-  rebuilt; panel size 45,145 -> **42,796** unique compounds (`herg`
+  rebuilt; panel size 55,145 -> **42,804** unique compounds (`herg`
   12,019 -> 8,403, `egfr` 6,165 -> 4,560, `egfr_full` 13,497 -> 10,729,
   `vegfr2` 11,797 -> 9,643). Records: `docs/reviews/fixes-2026-10-11.md`,
   `docs/reviews/h1-sensitivity-2026-10-10.md`, and the fill-in number
@@ -76,14 +86,20 @@ artifacts. Newest first. Maintained by M4 Air; results produced on M3 Max.
     (`abl1`/`herg`/`vegfr2`) have no per-seed GINE predictions yet and
     are point estimates only (2 of them positive: `abl1`/scaffold
     +0.028, `herg`/random +0.006).
+    *(superseded 2026-10-12 — see bottom entry: full-panel bootstrap, all
+    16 cells carry CIs; mean3 now 1 GINE win / 7 RF wins / 8 undecided)*
   - **AttentiveFP panel**: wins **2 of 16** (`herg`/scaffold +0.062
     [+0.030, +0.092], `herg`/random +0.034 [+0.002, +0.065]), 8 cells
     favour RF, 6 undecided; all 8 random point estimates negative.
+    *(superseded 2026-10-12 — see bottom entry: after the `abl1`/scaffold
+    seed-42 rerun the mean3 tally is 7 RF / 2 AFP / 7 undecided)*
   - **Fingerprint ablation**: random grid stays within **−0.019 …
     +0.003** of the r=2/2048 anchor on all 8 tags; scaffold spreads
     **−0.043 … +0.041**, worst cells all r3/1024 (`vegfr2` −0.043,
     `hivpr` −0.042, `abl1` −0.040).
   - **XGBoost**: 13/16 cells ≤ RF (worst `egfr`/scaffold **−0.132**).
+    *(superseded 2026-10-12 — see bottom entry: same-pool rerun, 11/16
+    cells ≤ RF, worst `hivpr`/scaffold **−0.080**)*
   - **Multi-task pool**: 22,492 rows / 21,093 unique SMILES / 1,193 =
     **5.66%** appear under >1 target (pre-refresh 10.0%).
   - **Fairness campaign completed (3 tags)**: `experiments/gnn_fairness.py`
@@ -98,18 +114,57 @@ artifacts. Newest first. Maintained by M4 Air; results produced on M3 Max.
     estimates without bootstrap CIs; `results/gine_panel/summary.csv`
     was rebuilt from these refreshed `gine_runs` (10-11 19:35), so the
     three tags now read the fairness numbers.
+    *(superseded 2026-10-12 — see bottom entry: the full-panel bootstrap
+    gave every GINE cell a CI, so the point-estimate-only caveat above no
+    longer holds)*
 - **In progress / not re-run**:
   - **`scripts/07_qc_checks.py` not re-run**: `figures/testset_hist_*.png`
     still predate the refresh (flagged in `docs/methodology.md`).
+    *(superseded 2026-10-13 — 07 has since run for every tag:
+    testset-hist + `permutation_importance_*` + importance figures for
+    7 tags 2026-10-11 evening, bace 2026-10-12, vegfr2 2026-10-13
+    (`logs/2026-10-13_art_refresh.log` §2); the methodology flag is
+    gone)*
   - `results/significance/summary_time.csv` and the per-cell `*_time.csv`
     are still the 10-10 pre-refresh merge (old `p_one_sided` schema);
     the refreshed time CIs live in `results/time_split/summary.csv`.
   - `vegfr2` is outside the aux driver, so its y-randomization /
     learning curve / interpretability / error analysis remain pre-refresh;
     `permutation_importance_*` and `top_bits_*` were not re-run either.
+    *(superseded 2026-10-13 — `top_bits_{bace,egfr,vegfr2}.csv`
+    regenerated in the N13 sweep and `permutation_importance_*` re-run
+    for all 8 tags (7 tags 10-11, bace 10-12, vegfr2 10-13); the
+    vegfr2 y-randomization / learning curve / interpretability claim
+    still holds)*
   - README: top Status note, the architecture-comparison section
     (GINE/AFP counts) and the fingerprint-ablation section were rewritten
     against these artifacts; QC stays flagged inline.
+  - *(2026-10-13 status note — superseded in part by the bottom
+    2026-10-12 entry: `results/significance/summary_time.csv` and the
+    per-cell `*_time.csv` were re-merged onto the new schema with the
+    refreshed values (`p_one_sided` now 0 hits anywhere under
+    `results/`); `top_bits_{bace,egfr,vegfr2}.csv` and
+    `permutation_importance_bace.csv` were regenerated and the vegfr2
+    error analysis re-run (N13); README was re-stamped with the 10-12
+    counts (GINE "1 of 16", XGBoost "11 of 16"). Still open as stated
+    above: the QC testset-hist figures, vegfr2 y-randomization /
+    learning curve / interpretability, and
+    `permutation_importance_vegfr2.csv` (still built from the old
+    vegfr2 RF).)*
+  - *(2026-10-13 PR #6 status update — that "Still open" list is itself
+    now stale in part: QC `figures/testset_hist_*.png` and
+    `results/permutation_importance_*.csv` are re-run for every tag
+    (7 tags 2026-10-11, bace 2026-10-12, vegfr2 2026-10-13 —
+    `permutation_importance_vegfr2.csv` now comes from the refreshed RF,
+    R² 0.6695, `logs/2026-10-13_art_refresh.log` §2); the seven
+    `figures/learning_curve/learning_curve_*.png` were redrawn
+    2026-10-13 with ddof=0 bands; pre-refresh
+    `scaling_{egfr,egfr_full}.png` now live under
+    `results/_archive-2026-10-09/scaling_ep300/` and the six
+    zero-molecule interpretability findings under
+    `results/_archive-2026-10-09/interpretability_flat/`
+    (`by_tag/` untouched). Still open: vegfr2 y-randomization /
+    learning curve / interpretability.)*
 
 ## 2026-10-10
 
@@ -810,3 +865,251 @@ backfilled metrics + panel summaries), `7457cda` (raw manifest),
   3-seed means 0.690+/-0.001 / 0.526+/-0.016.
 - Headline finding: on this dataset the GIN does not beat fingerprint+RF;
   both lose ~0.2 R2 from random to scaffold split.
+
+## 2026-10-12
+
+### 2026-10-12 review-remediation campaign (PR #3 follow-up) — DELIVERED
+
+Batch answering the 2026-10-11 re-review's N1-N14 findings (PR #3
+follow-up) on branch `fix/review-2026-10-11`. Commits landed so far:
+`7fb8478` (N1-N14 medium findings) and `920763d` (all-8-tag XGBoost
+rerun + refreshed AttentiveFP forest plot); this entry's documentation
+edits were still uncommitted at write time.
+Appended at the end of this file rather than above the 2026-10-11
+header, so the "newest first" order holds only for the older entries.
+
+- **GINE full-panel bootstrap (N1/N2)**: `experiments/paired_bootstrap.py
+  --model gine --n-boot 10000 --force` over all 8 tags x
+  random/scaffold rewrote `results/significance/summary_gine.csv` to 32
+  rows (seed42 + mean3 for 16 cells) - **every one of the 16 cells now
+  carries a CI**, replacing the 5-tag partial. Mean3 tally **1 GINE win
+  / 7 RF wins / 8 undecided**; the single win is `abl1`/scaffold
+  **+0.058 [+0.028, +0.092]**. `figures/significance/ci_panel_with_{gine,afp}.png`
+  regenerated from it, the pre-refresh `figures/significance/ci_panel_gine.png`
+  deleted, `gine_panel.py`'s point-only path removed, and
+  `tests/test_gine_panel.py` now asserts 16 CI-bearing rows.
+- **AttentiveFP `abl1`/scaffold convergence fix (N3)**:
+  `scripts/gnn_03_train_gin.py` gained `--min-epochs N` (defers the
+  early-stop check) and writes `convergence_flag` + `best_epoch` /
+  `max_epochs` / `train_mse` into the metrics json (flag = best epoch
+  < 30% of max epochs while train MSE > 0.5). Seed 42 rerun with
+  `--min-epochs 60` (log `logs/review11_n3_afp_abl1_scaffold_s42_min60.log`):
+  test R2 0.260 (best epoch 15) -> **0.675** (best epoch 82), and the
+  cell in `results/significance/summary_attentivefp.csv` moves from
+  RF-significant −0.048 to **undecided +0.020 [−0.018, +0.057]**. The
+  mean3 panel now reads **7 RF / 2 AFP / 7 undecided** (seed42: 12/16
+  significant).
+  *(2026-10-13 correction, PR #6/P1: attributing this flip to the
+  `--min-epochs 60` floor is wrong — the flip came from the **independent
+  MPS rerun itself** (fresh randomness, `device=mps`, printed at
+  `logs/review11_n3_afp_abl1_scaffold_s42_min60.log:6`; the two runs
+  already diverge at epoch 2). The floor never bound: the rerun's
+  longest non-improving stretch is 46 -> 62, below patience 20, so it
+  reaches 100 epochs with or without the floor. The original CUDA run
+  **early-stopped at epoch 35 with best epoch 15 and train MSE 0.57**
+  (not "stopped at epoch 15"). `README.md` and `docs/methodology.md`
+  now say this; the N3 rerun json carries no `device` field.)*
+- **Time-split no-skill baseline (N4)**: `experiments/time_split_summary.py`
+  output gains `constant_r2` (R2 of always predicting the mean pIC50 of
+  all non-test rows) and `gin_best_epochs`; `results/time_split/summary.csv`
+  regenerated (8 rows, 25 columns, `d_r2_mean3` semantics unchanged).
+  RF is below the constant predictor on **4 of 8** tags (`a2a` −0.301 vs
+  −0.004, `egfr_full` −0.736 vs −0.455, `herg` −0.058 vs −0.003, `hivpr`
+  −0.027 vs −0.006) and **20 of 24** GIN time runs stop before epoch 24
+  (median best epoch 10; random/scaffold median is 80) - the "GIN
+  degrades less" story is largely shrinkage toward the mean.
+  *(2026-10-13 correction, PR #6/R2: the "largely shrinkage" mechanism
+  label is withdrawn — time splits are now read through the exact **MSE
+  error decomposition** (level / spread / correlation, Shapley split of
+  the cross-term, residual ≤ 9e-16; `logs/2026-10-13_time_split_mse_decomposition.log`,
+  mirrored in `README.md` / `docs/methodology.md`): a2a Δ +0.326 =
+  level **+0.580** + spread +0.008 + corr −0.263 (RF predicts 0.83 log
+  units low — a level effect, not shrinkage), only egfr is spread-led
+  (+0.079 of +0.039), and on herg the GIN has *more* spread than RF
+  (0.44 vs 0.41). The 20-of-24 early-stop count above stays as a fact
+  (`gin_best_epochs`) but is no longer used as a mechanism claim.)*
+- **XGBoost all-8-tag same-pool rerun (N7)**:
+  `experiments/xgboost_baseline.py` now fits on train+valid (the full
+  non-test pool, matching the headline RF), only marks `same_pool: true`
+  when the sizes actually match, and can no longer pick a learning-curve
+  RF as control. All 8 tags x 2 splits rerun -> `results/xgboost/`
+  (16/16 `same_pool: true`, 3 bit-identical seeds as always). **11/16
+  cells <= RF**; worst cell **`hivpr`/scaffold −0.080** (0.458 vs the
+  RF's 0.538); the five cells above RF are all <= +0.032
+  (`herg`/scaffold +0.032, `hivpr`/random +0.010, `abl1`/random +0.006,
+  `mpro`/random +0.005, `vegfr2`/scaffold +0.003). `egfr` is now
+  −0.011 / −0.045 (was +0.010 / −0.132 against a stale-pool control).
+  *(2026-10-13 update: `same_pool` is no longer a size check — since
+  6c1e3bb `experiments/xgboost_baseline.py:107` compares
+  `pool_fingerprint` hashes of the two row-index sets and only falls
+  back to a row-count comparison (with a printed WARNING) when the RF
+  fingerprint is unavailable. PR #6 Low notes the remaining circularity:
+  the RF pool is rebuilt from the same split npz as the XGB pool, so for
+  random/scaffold the two can never disagree; a strict verdict needs the
+  RF pool derived from `results/rf_preds_{tag}_{split}.npz` instead.)*
+- **GINE uncertainty / AD, all 8 tags (N8)**:
+  `experiments/uncertainty_ad.py --model gine` regenerated **58 files**
+  (16 `results/uncertainty/*_gine.csv`, 8 `summary_*_gine.json`, 34
+  `figures/uncertainty/*_gine.png`), ending the pre-refresh vintage
+  (test sizes now match, e.g. `egfr` 912, `herg` 1,681). Across the 16
+  cells the RF calibration is monotone in **8/16** (mean slope 0.736,
+  mean Spearman(std, |err|) 0.356).
+- **Notebook rebuild + drift test (N11)**: `scripts/06_build_notebook.py`
+  Step 2/3/4 markdown and snippets updated to the current policy,
+  `notebooks/qsar_pipeline.ipynb` rebuilt (all 6 code cells byte-identical
+  to `scripts/01d/02/03/04/05/07`), and `tests/test_notebook_sync.py`
+  (4 AST-based invariant tests) added; it is collected by the existing
+  CI `pytest -q`.
+- **Fail-closed artifacts path (N5)**: `scripts/02_clean_data.py` no
+  longer skips the censoring filter silently - a ChEMBL-format raw file
+  without `standard_relation` exits non-zero saying it predates the
+  2026-10-11 refresh (only `TAG=bace` / non-CHEMBL ids may skip).
+  `scripts/fetch_artifacts.py` verifies every extracted raw file against
+  the repo's `data/raw/sha256sums.txt` (`verify_extracted_raw`), and
+  `.artifacts_cache/` joined `.gitignore`. Consequence: `--raw/--all`
+  now aborts on the stale `artifacts-v1` release until a refreshed one
+  is published.
+- **Stale-artifact regeneration (N13)**: multitask `vegfr2` `st_rf`
+  row refreshed to **0.670 random / 0.585 scaffold** (was 0.736 / 0.617,
+  so every vegfr2 `delta_vs_st_rf` is re-based); `results/rf_preds_bace_{random,scaffold}.npz`,
+  `results/permutation_importance_bace.csv` (top-100 MDI-vs-permutation
+  Spearman 0.349 -> **0.543**; bit 964 now ranks *second* by permutation
+  behind bit 650) and `results/top_bits_{bace,egfr,vegfr2}.csv` +
+  figures regenerated; `results/error_analysis_vegfr2_{random,scaffold}.csv`
+  rerun (n 1,929 / 1,945, worst-50 overlap 23 / 20). Pre-refresh
+  diagnostics moved to `results/_archive-2026-10-09/`:
+  `gnn_metrics_egfr_tune{A,B}.json`, `gnn_preds_egfr_scaffold_tune{A,B}.npz`,
+  `egfr_gin_scaffold_tune{A,B}.pt` (from `results/gnn_models/`), and
+  `_diag_tasks1/` (now `results/_archive-2026-10-09/_diag_tasks1/`).
+- **M4 regression test rewritten (N12)**:
+  `tests/test_time_split_summary.py` no longer pins stale herg
+  constants - it recomputes `d_r2_mean3` from the committed per-seed
+  prediction npz for all 8 tags and matches
+  `results/time_split/summary.csv` to 1e-9 (stored `herg` value
+  **+0.032304**), plus a synthetic `build_summary` behavioural test that
+  kills the "store the column difference instead of the ensemble delta"
+  mutant. `pytest tests/test_time_split_summary.py` -> **3 passed**
+  (this file's previous state was 1 failed).
+- **qsar-review skill folder (N14)**: `.claude/skills/qsar-review/`
+  repaired - `chembl_censoring_counts.py --overlap` rewritten as an
+  offline raw-CSV parent-level audit, `qc_salts_censoring.py` audits
+  `parent_smiles` with `Uncharger` (matching 02), `SKILL.md` re-stamped
+  (test count, downloaders do request `standard_relation`, dedup is on
+  `parent_smiles`, `artifacts-v1` staleness warning), the four author
+  audit scripts given `--out/--dry-run` and pinned baselines, and
+  `references/findings-2026-10-10.md` given a dated amendment note.
+  `verify_readme_tables.py` was extended **332 -> 431 cells** (adds the
+  BACE detail, GIN-vs-RF, fairness incl. GINE and dataset-size tables)
+  and now **exits 1 on any mismatch** (final check here: 431 cells, 0
+  mismatches, exit 0; mid-batch it correctly exited 1 on the README's
+  then-stale XGBoost delta column, which the README owner has since
+  updated).
+- **Documentation corrections in this batch**: panel-size totals fixed
+  from 45,145 -> 42,796 to **55,145 -> 42,804** (the eight per-tag rows
+  sum to those; in this file's `2026-10-11` section and in
+  `docs/reviews/{fixes,readme-numbers}-2026-10-11.md`), `data/README.md`
+  now records the `egfr` re-pull (8,936 -> 8,000 raw rows, `e37c572`) and
+  the S3 mirror's return to HTTP 200, `docs/interview.md` was re-stamped
+  against the refreshed numbers, and the fixes doc's open-issue list and
+  M4 test records were brought up to date (2026-10-12 addendum).
+  2026-10-12 (later): `artifacts-v2` release published (refreshed raw CSVs +
+  26 RF models + `document_years.csv`); `scripts/fetch_artifacts.py` now
+  points at it, and the README fast-path staleness warning was removed —
+  the release manifest + repo `data/raw/sha256sums.txt` double verification
+  stays in place.
+
+## 2026-10-13
+
+### PR #6 review-remediation (findings-2026-10-13, R1-R5 + Low) — batch record (nine parallel fix batches)
+
+Answers the third-round review (PR #6; `findings-2026-10-13.md`,
+baseline `6c1e3bb`: 165 tests passed, ruff clean, CI green, README 431
+cells / 0 mismatches at review time). The reviewer retracted two of
+their own earlier items — P5 (under the pinned xgboost 3.4.1 the
+`egfr_full`/random 0.6814376116 reproduces) and P2's per-tag "mechanism"
+labels (partly wrong). Main conclusion unchanged and strengthened:
+**tuned RF >= GIN**, now shown robust to dropping any single training
+seed in 20 of its 21 win cells. Items R1-R5 were split across the
+fetch / README / methodology / docs-records / interpretability / code /
+tests / skill batches working concurrently; per-item state below is as
+observed at this entry's write time.
+
+- **R1 single-seed dependence** (analysis: README owner,
+  `logs/2026-10-13_single_seed_dependence.log`): the repo's own paired
+  bootstrap (B=10,000, seed=42, ensemble = mean of the kept seeds) over
+  all 48 GIN/GINE/AttentiveFP random+scaffold cells reproduces every
+  committed mean3 row (max |dev| 9.7e-17) and finds **14 cells whose
+  verdict changes when any one training seed is dropped**: 4 of the 5
+  GNN wins (all but GINE `abl1`/scaffold), 1 of the 21 RF wins (AFP
+  `hivpr`/scaffold — per-seed 0.201/0.508/0.377 vs RF 0.538; drop
+  seed 42 and the ensemble Δ is −0.013 [−0.076, +0.046], a tie), and
+  9 of the 22 ties (all nine become RF-significant). Standard set for
+  the docs: verdicts come from the 3-seed ensemble CI; any-drop
+  changes ⇒ marked *conditional* — wording landed in `README.md` as
+  the *Conditional verdicts* section (2026-10-13); the methodology side
+  is owned by the METH batch.
+- **R2 time-split error decomposition replaces mechanism labels**
+  (analysis: README owner,
+  `logs/2026-10-13_time_split_mse_decomposition.log`): GIN-ens − RF R²
+  splits exactly (residual ≤ 8.9e-16) into level / spread / correlation
+  (Shapley split of the cross-term) from the committed time
+  predictions: `a2a` +0.326 = **+0.580** +0.008 −0.263 (RF predicts
+  0.83 log units low — a level effect, not shrinkage), `egfr_full`
+  +0.592 = +0.392 +0.032 +0.168, `abl1` −0.236 = −0.002 −0.115 −0.119;
+  only `egfr` is spread-led (+0.079 of +0.039), and on `herg` the GIN
+  spreads *more* than RF (0.44 vs 0.41), so "compression" never fitted.
+  The P2-era labels are withdrawn — the N4 annotation at the 2026-10-12
+  entry above marks the superseded text; README/methodology carry the
+  table (owner batches).
+- **R3 trust-anchor hardening** (FETCH): `scripts/fetch_artifacts.py`
+  now refuses symlink/hardlink/special-file archive members outright,
+  matches the trust anchor case-insensitively, confines every member to
+  a per-asset prefix allowlist, and installs only verified regular-file
+  copies with backup/rollback (verified present in the tree at write
+  time; `tests/test_fetch_artifacts.py` owned by the FETCH/TESTS
+  batches).
+- **R4 stale-local lockout** (FETCH): a failed skip-path check no
+  longer aborts the run — stale files are named, left untouched, and
+  the asset falls through to download+verify (`(R4)`-tagged in the
+  `fetch_artifacts.py` docstring and skip path at write time).
+- **R5 egfr GIN provenance** (methodology batch): the nine committed
+  `egfr` GIN results have no training log and the "panel trained on
+  CUDA" sentence does not hold for them; fix = commit/rescope (egfr GIN
+  logs absent from `logs/` at write time).
+- **Artifacts** (ART — full record in `logs/2026-10-13_art_refresh.log`):
+  the seven `figures/learning_curve/learning_curve_*.png` redrawn with
+  ddof=0 bands; `results/permutation_importance_vegfr2.csv` +
+  `figures/importance_mdi_vs_perm_vegfr2.png` recomputed against the
+  refreshed RF (R² 0.6695, was pre-refresh 0.736); 15 ep300 files and
+  `scaling_{egfr,egfr_full}.{png,json}` moved to
+  `results/_archive-2026-10-09/scaling_ep300/` (the scaling pngs left
+  `figures/learning_curve/`); the six zero-molecule interpretability
+  findings moved to
+  `results/_archive-2026-10-09/interpretability_flat/` (`by_tag/`
+  untouched).
+- **Release**: the `artifacts-v2` assets were re-uploaded **in place on
+  2026-10-13** to add `processed_cache.tar.gz` (P4 fast path;
+  `fetch_artifacts.py --cache` / `--all`). This entry is the repo-side
+  record of that re-upload — nothing in the tree logged it before.
+- **Docs/records (this batch, MISC)**: in-place annotations above (N3
+  min-epochs attribution, N4 shrinkage reading, N7 `same_pool`
+  description, stale-open claims for 07 outputs / learning-curve /
+  permutation); `data/README.md` gains the `raw/document_years.csv` row
+  (4,147 data rows, `scripts/fetch_document_years.py`, in the manifest
+  and the release); `docs/reviews/fixes-2026-10-11.md` test counts and
+  status labels synced; `docs/interview.md` tuning pass re-dated to
+  2026-09-24 (the `results/_archive-2026-10-09/` folder name is the
+  archive date); `docs/reviews/readme-numbers-2026-10-11.md` status
+  block gains this round's line; `logs/2026-10-12_summary_attentivefp_abl1_update.log`
+  annotated (original run early-stopped at epoch 35 / best epoch 15;
+  the flip came from the independent MPS rerun, not the `--min-epochs`
+  floor).
+- **Verification**: no Python changed by this batch (docs/records only).
+  Full `pytest -q` at final re-run (2026-10-13 14:04): **198 passed,
+  1 failed** — the failure is another batch's in-flight file
+  (`tests/test_time_split_summary.py::test_print_conclusion_labels_drift_conditionally`,
+  a new drift-wording test against `experiments/time_split_summary.py`
+  owned by the CODE batch; `test_fetch_artifacts.py` failures seen at
+  13:56 were green again by 14:04). The suite grew from the review's
+  165 to 199 tests while this batch ran; ruff untouched (no `.py`
+  edits).

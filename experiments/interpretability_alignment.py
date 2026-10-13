@@ -1,14 +1,32 @@
 """Interpretability alignment: what parts of a molecule do the two models
 actually look at, on the chemotypes where their failures are asymmetric?
 
-Background (README 7.5, scaffold test set): the chromone series (n=37)
-costs the GIN more (mean |err| 1.12 vs RF 0.64); the thienopyrimidine
-series (n=47) costs the RF more (1.60 vs 1.16). This experiment asks:
-do the two architectures attend to the same atoms?
+Background (README 7.5, scaffold test split): on EGFR the two
+architectures fail on different chemotype series - the thienopyrimidine
+series costs the RF more, other series cost the GIN more. This experiment
+asks: do the two architectures attend to the same atoms?
 
-Molecule selection: within each family (RDKit substructure match; the two
-SMILES below, parsed with MolFromSmiles, reproduce the documented 37 / 47
-counts exactly), take the top-N molecules by |err_GIN - err_RF| - the largest
+Family selection is PER TAG (review N10): a family is only analysed for a
+tag whose held-out test set really contains it.
+
+  * The two documented EGFR queries below (chromone, thienopyrimidine)
+    are tried on every tag and kept only where they match at least one
+    test molecule; a query with 0 matches is skipped with a printed note
+    and produces no figures. On the refreshed data chromone matches 0 of
+    912 egfr scaffold-test molecules, so egfr / egfr_full run on
+    thienopyrimidine alone, while herg (30 matches) and mpro (17) still
+    run on chromone.
+  * A tag where neither documented query matches (a2a, abl1, hivpr) falls
+    back to its own chemotypes: the --num-families most frequent Murcko
+    scaffolds of its test set, grouped on the stereo-free canonical
+    scaffold SMILES, named murcko1..K, each queried with that scaffold.
+  * Family figures left in --fig-dir by an earlier run for a family that
+    is no longer selected are pruned, so a figure folder can never keep a
+    family that analysed 0 molecules.
+
+Molecule selection: within each family (RDKit substructure match for the
+documented queries, exact Murcko-scaffold grouping for the murcko*
+families), take the top-N molecules by |err_GIN - err_RF| - the largest
 disagreement is where "different parts" is most plausible.
 
   GNN side: PyG GNNExplainer (edge-mask attribution aggregated per atom,
@@ -23,11 +41,15 @@ disagreement is where "different parts" is most plausible.
            inside the RF's top-bit atom coverage? Plus a core-vs-
            substituent split (do attentions sit on the scaffold core?).
 
-Outputs:
-  figures/interpretability/<family>_<i>_<short>_{gnn,rf}.png
-  figures/interpretability/alignment_summary.png
-  results/interpretability/alignment.json
-  results/interpretability/findings.md
+Outputs (schema unchanged). Both directories default to the per-tag
+by_tag layout (a bare run must not write into the flat folder); pass
+--out / --fig-dir to override:
+  <fig-dir>/<family>_<i>_<short>_{gnn,rf}.png   (default
+      figures/interpretability/by_tag/<tag>/)
+  <fig-dir>/alignment_summary.png
+  <out>/alignment.json   (default results/interpretability/by_tag/<tag>/;
+      tag, split, families, selection, params, molecules)
+  <out>/findings.md
 
 Partial success is allowed: a molecule that fails one method is recorded
 in alignment.json and skipped in figures; findings.md reports what ran.
@@ -36,6 +58,7 @@ import argparse
 import io
 import json
 import os
+import re
 import sys
 import time
 
@@ -46,11 +69,90 @@ sys.path.insert(0, os.path.join(BASE, "scripts"))
 from gnn_03_train_gin import GINRegressor  # noqa: E402
 from qsar_common import morgan_fp_with_info, select_device  # noqa: E402
 
-# substructure queries - reproduce the README's 37 / 47 series sizes exactly
-FAMILIES = {
+# Documented EGFR example queries (README 7.5). NOT applied blindly to
+# every tag: each query is used only for tags whose test set contains it
+# (review N10) - see select_families().
+DOCUMENTED_FAMILIES = {
     "chromone": "O=c1ccoc2ccccc12",
     "thienopyrimidine": "c1ncc2ccsc2n1",
 }
+
+_FIG_FAMILY_RE = re.compile(r"^(?P<fam>.+)_mol\d+_(?:gnn|rf)\.png$")
+
+
+def _substructure_mask(smiles_list, query_smiles):
+    """Boolean mask of rows whose molecule contains the query substructure."""
+    from rdkit import Chem
+
+    pat = Chem.MolFromSmiles(query_smiles)
+    if pat is None:
+        raise ValueError(f"unparsable family query: {query_smiles!r}")
+    mols = (Chem.MolFromSmiles(s) for s in smiles_list)
+    return np.asarray(
+        [bool(m is not None and m.HasSubstructMatch(pat)) for m in mols],
+        dtype=bool)
+
+
+def select_families(tag, smiles_list, num_families):
+    """Chemotype families for THIS tag.
+
+    Returns {family: {"query": <smiles>, "mask": <bool ndarray over rows>}}.
+    Documented EGFR example queries are used where they occur in the tag's
+    test set; when neither occurs the tag's most frequent Murcko scaffolds
+    are used instead. Queries matching 0 molecules are dropped here, so
+    they are never analysed and never produce figures.
+    """
+    from rdkit import Chem
+    from rdkit.Chem.Scaffolds import MurckoScaffold
+
+    families = {}
+    n_rows = len(smiles_list)
+    for fam, qsmi in DOCUMENTED_FAMILIES.items():
+        mask = _substructure_mask(smiles_list, qsmi)
+        if mask.any():
+            families[fam] = {"query": qsmi, "mask": mask}
+        else:
+            print(f"[{fam}] skipped for {tag}: 0/{n_rows} test molecules "
+                  f"match (query {qsmi}) - documented EGFR example family "
+                  f"absent from this tag's test set")
+    if families:
+        return families
+
+    groups = []
+    for s in smiles_list:
+        mol = Chem.MolFromSmiles(s)
+        scaf = MurckoScaffold.GetScaffoldForMol(mol) if mol is not None else None
+        groups.append(
+            Chem.MolToSmiles(scaf, isomericSmiles=False)
+            if scaf is not None and scaf.GetNumAtoms() else "")
+    counts = {}
+    for g in groups:
+        if g:
+            counts[g] = counts.get(g, 0) + 1
+    top = sorted(counts.items(), key=lambda kv: (-kv[1], kv[0]))[:num_families]
+    for i, (scaf_smi, cnt) in enumerate(top, 1):
+        fam = f"murcko{i}"
+        mask = np.asarray([g == scaf_smi for g in groups], dtype=bool)
+        families[fam] = {"query": scaf_smi, "mask": mask}
+        print(f"[{fam}] Murcko scaffold family for {tag}: n={cnt} "
+              f"(query {scaf_smi})")
+    if not families:
+        print(f"[{tag}] no analysable family (empty test set or no "
+              f"molecule with a ring scaffold)")
+    return families
+
+
+def prune_stale_figures(fig_dir, keep_families):
+    """Remove family heatmaps in fig_dir left by an earlier run for a
+    family that is not part of the current selection (e.g. a 0-match
+    family). alignment_summary.png is left alone - it is rewritten below."""
+    if not keep_families or not os.path.isdir(fig_dir):
+        return
+    for name in sorted(os.listdir(fig_dir)):
+        m = _FIG_FAMILY_RE.match(name)
+        if m and m.group("fam") not in keep_families:
+            os.remove(os.path.join(fig_dir, name))
+            print(f"  pruned stale family figure: {name}")
 
 
 def parse_args():
@@ -58,13 +160,27 @@ def parse_args():
     p.add_argument("--tag", default=os.environ.get("QSAR_TAG", "egfr"))
     p.add_argument("--split", default="scaffold")
     p.add_argument("--n-per-family", type=int, default=5)
+    p.add_argument("--num-families", type=int, default=2,
+                   help="Murcko fallback: how many scaffold families for a "
+                        "tag where neither documented query matches")
     p.add_argument("--top-bits", type=int, default=5)
     p.add_argument("--top-atom-frac", type=float, default=0.25)
     p.add_argument("--gnn-epochs", type=int, default=100)
     p.add_argument("--seed", type=int, default=42)
-    p.add_argument("--out", default=os.path.join(BASE, "results", "interpretability"))
-    p.add_argument("--fig-dir", default=os.path.join(BASE, "figures", "interpretability"))
-    return p.parse_args()
+    p.add_argument("--out", default=None,
+                   help="where alignment.json/findings.md are written "
+                        "(default: results/interpretability/by_tag/<tag>)")
+    p.add_argument("--fig-dir", default=None,
+                   help="where the per-molecule/summary figures are written "
+                        "(default: figures/interpretability/by_tag/<tag>)")
+    args = p.parse_args()
+    if args.out is None:
+        args.out = os.path.join(BASE, "results", "interpretability",
+                                "by_tag", args.tag)
+    if args.fig_dir is None:
+        args.fig_dir = os.path.join(BASE, "figures", "interpretability",
+                                    "by_tag", args.tag)
+    return args
 
 
 # ---------------------------------------------------------------- helpers
@@ -260,18 +376,16 @@ def main():
     test_idx = sp["test_idx"]
     assert len(df) == len(test_idx), "error analysis csv does not match split"
 
-    # ---- molecule selection: families by substructure, top-N disagreement
+    # ---- molecule selection: families for THIS tag, top-N disagreement
+    famsel = select_families(args.tag, df["smiles"].tolist(), args.num_families)
     selections = {}
-    for fam, qsmi in FAMILIES.items():
-        pat = Chem.MolFromSmiles(qsmi)
-        mask = np.array([bool(Chem.MolFromSmiles(s) is not None and
-                              Chem.MolFromSmiles(s).HasSubstructMatch(pat))
-                         for s in df["smiles"]], dtype=bool)
-        fam_df = df[mask].copy()
+    for fam, spec in famsel.items():
+        fam_df = df[spec["mask"]].copy()
         fam_df["disagree"] = (fam_df["err_gin"] - fam_df["err_rf"]).abs()
         fam_df = fam_df.sort_values("disagree", ascending=False)
         selections[fam] = fam_df.head(args.n_per_family)
-        print(f"[{fam}] family size={mask.sum()} (query {qsmi}), "
+        print(f"[{fam}] family size={int(spec['mask'].sum())} "
+              f"(query {spec['query']}), "
               f"selected top-{len(selections[fam])} by |err_gin - err_rf|")
 
     # ---- models
@@ -288,7 +402,7 @@ def main():
     # ---- per-molecule analysis
     records = []
     for fam, fam_df in selections.items():
-        pat = Chem.MolFromSmiles(FAMILIES[fam])
+        pat = Chem.MolFromSmiles(famsel[fam]["query"])
         for i, row in enumerate(fam_df.itertuples(), 1):
             global_pos = int(row.Index)          # position within test set
             gid = int(test_idx[global_pos])      # global molecule id
@@ -356,12 +470,15 @@ def main():
                     len(gnn_top & core) / max(1, len(gnn_top)), 4)
             records.append(rec)
 
+    # ---- drop family figures from earlier runs that are no longer selected
+    prune_stale_figures(args.fig_dir, set(selections))
+
     # ---- summary figure
     summary_figure(records, os.path.join(args.fig_dir, "alignment_summary.png"))
 
     # ---- outputs
     out = {"tag": args.tag, "split": args.split,
-           "families": FAMILIES,
+           "families": {f: s["query"] for f, s in famsel.items()},
            "selection": f"top-{args.n_per_family} per family by |err_gin - err_rf|",
            "params": {"top_bits": args.top_bits,
                       "top_atom_frac": args.top_atom_frac,
@@ -369,7 +486,8 @@ def main():
            "molecules": records}
     json.dump(out, open(os.path.join(args.out, "alignment.json"), "w"), indent=2)
     write_findings(records, os.path.join(args.out, "findings.md"), args)
-    print(f"records: {len(records)}  -> results/interpretability/")
+    print(f"records: {len(records)}  -> "
+          f"{os.path.relpath(args.out, BASE)}/alignment.json")
 
 
 def torch_from_numpy_int(arr):

@@ -223,7 +223,10 @@ def print_conclusion(rows):
     """Console verdict under the 3-seed mean convention (README section 8).
 
     A cell is a tie when it rounds to 0.000 at 3 decimals - that is the
-    band README calls "no clear lead".
+    band README calls "no clear lead". No bootstrap CI exists at this
+    level (the significance campaign covers the paired_bootstrap cells),
+    so the positive/negative verdicts are labelled "no CI" - a point-estimate
+    lead must not be read as a significant one.
     """
     cells = [(r["tag"], split, float(r[f"d_r2_{split}"]))
              for split in SPLITS for r in rows
@@ -248,9 +251,10 @@ def print_conclusion(rows):
     if pos:
         lead = ", ".join(f"{t}/{s}" for t, s in pos)
         print(f"  verdict   : the GIN has a clear lead on {len(pos)} cell(s): "
-              f"{lead}")
+              f"{lead} (point estimates, no CI)")
     else:
-        print("  verdict   : no target gives the GIN a clear lead")
+        print("  verdict   : no target gives the GIN a clear lead "
+              "(point estimates, no CI)")
     seed42_scaf_wins = [r["tag"] for r in rows
                         if np.isfinite(r.get("d_r2_seed42_scaffold", np.nan))
                         and r["d_r2_seed42_scaffold"] > 0]

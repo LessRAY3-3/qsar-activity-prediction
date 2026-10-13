@@ -15,7 +15,8 @@ Split protocol mirrors EGFR: random (seed 42, 80/10/10) and scaffold
 (whole Bemis-Murcko scaffolds into test until ~20%, then 10% of train as
 validation). No RF baseline exists for ESOL; the numbers are compared to
 published ESOL results in the README instead.
-MoleculeNet's official S3 mirror (deepchemdata) now returns 403, so we
+MoleculeNet's official S3 mirror (deepchemdata) serves the file again
+(HTTP 200 re-verified 2026-10-12 after an earlier 403 outage); we still
 use the identical delaney-processed.csv vendored in the DeepChem GitHub
 repo (same MoleculeNet file, widely mirrored).
 """

@@ -162,8 +162,12 @@ def analyse_split(df, split, seeds, tag):
     means = {}
     fits = {}
     for model in MODELS:
-        g = (sub[sub["model"] == model].groupby("n_train")["r2"]
-             .agg(["mean", "std"]).sort_index())
+        grp = sub[sub["model"] == model].groupby("n_train")["r2"]
+        # population std (ddof=0): repo-wide convention (np.std in the
+        # committed learning_curve summaries); pandas' default .agg("std")
+        # is ddof=1 and would disagree with gap_std below
+        g = pd.DataFrame({"mean": grp.mean(), "std": grp.std(ddof=0)})
+        g = g.sort_index()
         means[model] = g
         fits[model] = fit_power_law(g.index.values, g["mean"].values)
         if fits[model] is None:
@@ -177,6 +181,8 @@ def analyse_split(df, split, seeds, tag):
     tail = piv.xs(n_max, level="n_train").dropna()
     gaps = tail["gin"] - tail["rf"]
     measured = {"n": n_max, "gap_mean": float(gaps.mean()),
+                # ddof=0 (population std): repo-wide convention, same as
+                # the mean-curve bands above and the JSON summaries
                 "gap_std": float(gaps.std(ddof=0)), "n_pairs": int(len(gaps))}
     print(f"[{tag}/{split}] measured gap at n={n_max} (paired, {len(gaps)} seeds): "
           f"{measured['gap_mean']:+.4f} +/- {measured['gap_std']:.4f}")
@@ -230,7 +236,9 @@ def analyse_split(df, split, seeds, tag):
         "n_star_values": [round(v, 1) for v in per_seed_n],
         "skipped": skipped,
         "n_star_mean": float(np.mean(per_seed_n)) if per_seed_n else None,
-        "n_star_std": float(np.std(per_seed_n, ddof=1)) if len(per_seed_n) > 1 else None,
+        # ddof=0 (population std): repo-wide convention; the pre-refresh
+        # JSONs recorded ddof=1 here, so a rerun reports std * sqrt((n-1)/n)
+        "n_star_std": float(np.std(per_seed_n)) if len(per_seed_n) > 1 else None,
         "ci95_percentile": ([float(v) for v in np.percentile(per_seed_n, [2.5, 97.5])]
                             if len(per_seed_n) >= 2 else None),
     }

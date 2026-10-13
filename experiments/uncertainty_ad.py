@@ -6,19 +6,23 @@ far from the training set (low max Tanimoto similarity) drive the errors,
 and (3) does filtering a virtual screen by AD / uncertainty lift precision?
 Analysis only: every artifact (RF forest, GIN checkpoints, cached
 fingerprints/graphs) already exists; nothing here is retrained and no
-existing result file is touched.
+trained prediction artifact is changed. AD-only refresh updates derived CSVs,
+summaries and plots after checking their prediction/label alignment.
 
 Run:
   python experiments/uncertainty_ad.py                 # --model gin (default)
-  python experiments/uncertainty_ad.py --model gine    # cells skip cleanly
-                                                       # when the gine .pt
-                                                       # set is absent OR
-                                                       # partial (recorded as
-                                                       # RF-only, n_gnn_seeds)
+  python experiments/uncertainty_ad.py --model gine    # all 8 tags have a
+                                                       # full 3-seed gine
+                                                       # checkpoint set;
+                                                       # cells still skip
+                                                       # cleanly if a .pt set
+                                                       # is absent or partial
+                                                       # (recorded as RF-only,
+                                                       # n_gnn_seeds)
 
 Inputs (per tag x split):
   results/rf_preds_{tag}_{split}.npz / models/rf_{split}_split_{tag}.joblib
-  results/gnn_models/{tag}_{gin}_{split}[_seedN].pt     3-seed checkpoints
+  results/gnn_models/{tag}_{gin|gine}_{split}[_seedN].pt  3-seed checkpoints
   results/gnn_preds_{tag}[_gin]_{split}*.npz            cross-check only
   data/processed/{tag}_fingerprints.npz, {tag}_graphs.npz
   data/processed/splits/{tag}_{split}.npz
@@ -32,7 +36,7 @@ Uncertainty definitions (both in original pIC50 units):
         then the per-molecule std across the 3 seeds (population std).
 
 AD = per test molecule, max Morgan r=2/2048 Tanimoto similarity against the
-SAME split's train molecules (qsar_common's generator, ExplicitBitVect +
+model's fitted molecules (RF: train + valid; GNN: train) (qsar_common's generator, ExplicitBitVect +
 BulkTanimotoSimilarity, one molecule at a time -- never a full n_test x
 n_train matrix).
 
@@ -440,23 +444,24 @@ def plot_ad_error(tag, split, y_true, preds, max_sim, ad_thr, fig_path):
 
     os.makedirs(os.path.dirname(os.path.abspath(fig_path)), exist_ok=True)
     fig, ax = plt.subplots(figsize=(6.5, 5.0))
-    finite = np.isfinite(max_sim)
     for model, pred, color in preds:
+        sim = max_sim[model] if isinstance(max_sim, dict) else max_sim
+        finite = np.isfinite(sim)
         abs_err = np.abs(np.asarray(y_true, float) - np.asarray(pred, float))
-        ax.scatter(max_sim[finite], abs_err[finite], s=8, alpha=0.3,
+        ax.scatter(sim[finite], abs_err[finite], s=8, alpha=0.3,
                    color=color, linewidths=0,
                    label=f"{model.upper()} molecules" if model == "rf" else None)
         # binned mean line over 10 quantile bins of max_sim
         idx = np.flatnonzero(finite)
-        groups = [b for b in np.array_split(idx[np.argsort(max_sim[idx])], 10)
+        groups = [b for b in np.array_split(idx[np.argsort(sim[idx])], 10)
                   if len(b)]
-        means_x = [max_sim[b].mean() for b in groups]
+        means_x = [sim[b].mean() for b in groups]
         means_y = [abs_err[b].mean() for b in groups]
         ax.plot(means_x, means_y, marker="s", color=color, linewidth=2,
                 label=f"{model.upper()} binned |error| mean")
     ax.axvline(ad_thr, color="black", linestyle="--", linewidth=1,
                label=f"AD threshold {ad_thr}")
-    ax.set_xlabel("max Tanimoto similarity to train set")
+    ax.set_xlabel("max Tanimoto similarity to fitted molecules")
     ax.set_ylabel("|error| (pIC50)")
     ax.set_title(f"{tag}/{split}: error vs applicability domain")
     ax.grid(alpha=0.3)
@@ -530,15 +535,104 @@ def jsonable(obj):
     return obj
 
 
+def model_ad_similarities(smiles, split, fp_cache=None, *, split_name):
+    """RF fits the whole non-test pool; the GNN fits train only."""
+    if split_name not in SPLITS:
+        raise ValueError("AD supports random/scaffold only; time uses a different RF fit pool")
+    query = morgan_fingerprints(list(smiles[split["test_idx"]]), cache=fp_cache)
+    pools = {"rf": np.concatenate([split["train_idx"], split["valid_idx"]]),
+             "gin": split["train_idx"]}
+    return {model: max_similarities(query, morgan_fingerprints(list(smiles[idx]), cache=fp_cache))
+            for model, idx in pools.items()}
+
+
+def refresh_stored_ad(tag, split, model_kind, out_dir, fig_dir, fp_cache=None):
+    """Recompute AD from saved predictions/std; no inference or retraining."""
+    suffix = "" if model_kind == "gin" else f"_{model_kind}"
+    csv_path = os.path.join(out_dir, f"{tag}_{split}{suffix}.csv")
+    summary_path = os.path.join(out_dir, f"summary_{tag}{suffix}.json")
+    if split not in SPLITS:
+        raise ValueError("AD refresh supports random/scaffold only")
+    original_text = pd.read_csv(csv_path, dtype=str, keep_default_na=False)
+    frame = pd.read_csv(csv_path)
+    with open(summary_path) as fh:
+        summary = json.load(fh)
+    if summary.get("tag") != tag or summary.get("model_kind") != model_kind:
+        raise ValueError("stored uncertainty summary identifies a different campaign")
+    cell = summary["splits"][split]
+    models = set(frame["model"])
+    if not models <= {"rf", "gin"} or "rf" not in models:
+        raise ValueError("stored uncertainty rows must contain RF and optional GNN only")
+    with np.load(os.path.join(BASE, "data", "processed", "splits", f"{tag}_{split}.npz")) as sp:
+        with np.load(os.path.join(BASE, "data", "processed", f"{tag}_fingerprints.npz")) as fp:
+            test_idx = sp["test_idx"]
+            for model in models:
+                part = frame[frame["model"] == model]
+                if not np.array_equal(part["test_idx"], test_idx):
+                    raise ValueError("stored uncertainty rows differ from split")
+                if not np.array_equal(part["smiles"], fp["smiles"][test_idx]):
+                    raise ValueError("stored uncertainty structures differ from cache")
+                if not np.allclose(part["y_true"], fp["y"][test_idx], rtol=0, atol=1e-4):
+                    raise ValueError("stored uncertainty labels differ from cache")
+                values = part[["y_true", "pred", "std", "abs_err"]].to_numpy()
+                if not np.isfinite(values).all() or (part["std"] < 0).any():
+                    raise ValueError("invalid stored uncertainty values")
+                if not np.allclose(part["abs_err"], abs(part["y_true"] - part["pred"]), rtol=0, atol=1e-8):
+                    raise ValueError("stored uncertainty errors are stale")
+            # Validate saved predictions before expensive fingerprint comparisons or writes.
+            with np.load(os.path.join(BASE, "results", f"rf_preds_{tag}_{split}.npz")) as rf:
+                part = frame[frame["model"] == "rf"]
+                if (not np.array_equal(rf["test_idx"], test_idx)
+                        or not np.allclose(part["y_true"], rf["y_true"], rtol=0, atol=1e-4)
+                        or not np.allclose(part["pred"], rf["y_pred"], rtol=0, atol=1e-8)):
+                    raise ValueError("stored RF predictions are stale or misaligned")
+            if "gin" in models:
+                stack = []
+                part = frame[frame["model"] == "gin"]
+                for seed_suffix in SEED_SUFFIXES:
+                    with np.load(gnn_preds_path(tag, split, model_kind, seed_suffix)) as pred:
+                        if (not np.array_equal(pred["test_idx"], test_idx)
+                                or not np.allclose(part["y_true"], pred["y_true"], rtol=0, atol=1e-4)):
+                            raise ValueError("stored GNN predictions are misaligned")
+                        stack.append(np.asarray(pred["y_pred"], dtype=float))
+                # The saved CSV was inferred separately; permit float32/device roundoff.
+                stack = np.stack(stack)
+                if (not np.allclose(part["pred"], stack.mean(axis=0), rtol=0, atol=1e-5)
+                        or not np.allclose(part["std"], stack.std(axis=0), rtol=0, atol=1e-5)):
+                    raise ValueError("stored GNN predictions or uncertainty are stale")
+            sims = model_ad_similarities(fp["smiles"], sp, fp_cache, split_name=split)
+    plot_inputs = []
+    for model, color in (("rf", "tab:orange"), ("gin", "tab:green")):
+        mask = frame["model"] == model
+        if not mask.any():
+            continue
+        frame.loc[mask, "max_sim"] = sims[model]
+        part = frame[mask]
+        cell["ad"][model] = ad_metrics(part["y_true"].to_numpy(), part["pred"].to_numpy(), sims[model])
+        plot_inputs.append((model, part["pred"].to_numpy(), color))
+    rf_rows = frame[frame["model"] == "rf"]
+    y = rf_rows["y_true"].to_numpy()
+    cell["screening"] = screening_summary(rf_rows["pred"].to_numpy(), rf_rows["std"].to_numpy(), sims["rf"], y)
+    cell["ad_reference"] = {"rf": "train+valid", "gin": "train"}
+    # Preserve the exact prediction/std text; refreshing AD must not churn it.
+    original_text["max_sim"] = frame["max_sim"].map(str)
+    original_text.to_csv(csv_path, index=False)
+    plot_ad_error(tag, split, y, plot_inputs, sims, AD_PRIMARY,
+                  os.path.join(fig_dir, f"ad_error_{tag}_{split}{suffix}.png"))
+    return cell
+
+
 # ---------------------------------------------------------------- cell
 
 def process_cell(tag, split, model_kind, out_dir, fig_dir, fp_cache=None,
                  batch_size=BATCH_SIZE):
     """Run one (tag, split): CSV + two figures + summary dict."""
+    if split not in SPLITS:
+        raise ValueError("AD supports random/scaffold only")
     t0 = time.time()
     sp = np.load(os.path.join(BASE, "data", "processed", "splits",
                               f"{tag}_{split}.npz"))
-    train_idx, test_idx = sp["train_idx"], sp["test_idx"]
+    test_idx = sp["test_idx"]
     fp = np.load(os.path.join(BASE, "data", "processed",
                               f"{tag}_fingerprints.npz"))
     smiles = fp["smiles"]
@@ -589,11 +683,8 @@ def process_cell(tag, split, model_kind, out_dir, fig_dir, fp_cache=None,
         print(f"  [{tag}/{split}] no {model_kind} checkpoints -> "
               f"GNN rows omitted (RF-only cell)")
 
-    # ---- AD: max Tanimoto vs this split's train set
-    #     (fp_cache is shared across cells so each SMILES is fingerprinted once)
-    q_fps = morgan_fingerprints(list(smiles[test_idx]), cache=fp_cache)
-    r_fps = morgan_fingerprints(list(smiles[train_idx]), cache=fp_cache)
-    max_sim = max_similarities(q_fps, r_fps)
+    # Each model's actual fitted molecule pool defines its AD.
+    max_sim = model_ad_similarities(smiles, sp, fp_cache, split_name=split)
 
     # ---- per-molecule CSV
     frames = []
@@ -608,7 +699,7 @@ def process_cell(tag, split, model_kind, out_dir, fig_dir, fp_cache=None,
             "y_true": y_true,
             "pred": pred,
             "std": std,
-            "max_sim": max_sim,
+            "max_sim": max_sim[model],
             "abs_err": np.abs(y_true - pred),
         }))
     suffix = "" if model_kind == "gin" else f"_{model_kind}"
@@ -623,7 +714,7 @@ def process_cell(tag, split, model_kind, out_dir, fig_dir, fp_cache=None,
             continue
         calib[model] = quintile_calibration(y_true, pred, std=(rf_std if model == "rf"
                                                                else gin_std))
-        ad[model] = ad_metrics(y_true, pred, max_sim, AD_PRIMARY)
+        ad[model] = ad_metrics(y_true, pred, max_sim[model], AD_PRIMARY)
 
     plot_calibration(tag, split, calib,
                      os.path.join(fig_dir, f"calib_{tag}_{split}{suffix}.png"))
@@ -634,7 +725,7 @@ def process_cell(tag, split, model_kind, out_dir, fig_dir, fp_cache=None,
                   AD_PRIMARY,
                   os.path.join(fig_dir, f"ad_error_{tag}_{split}{suffix}.png"))
 
-    screening = screening_summary(rf_pred, rf_std, max_sim, y_true)
+    screening = screening_summary(rf_pred, rf_std, max_sim["rf"], y_true)
     print(f"  [{tag}/{split}] n={len(y_true)}  "
           f"std med rf={np.median(rf_std):.3f}"
           + (f" gin={np.median(gin_std):.3f}" if gin_std is not None else "")
@@ -645,6 +736,7 @@ def process_cell(tag, split, model_kind, out_dir, fig_dir, fp_cache=None,
           f"({time.time() - t0:.0f}s)")
 
     return {
+        "ad_reference": {"rf": "train+valid", "gin": "train"},
         "n_test": int(len(y_true)),
         "rf_tree_mean_max_diff": tree_diff,
         "gnn_ensemble_max_diff": gnn_diff,
@@ -700,28 +792,36 @@ def print_conclusion(tag_summaries, model_kind):
 
 # ---------------------------------------------------------------- main
 
-def parse_args():
+def parse_args(argv=None):
     p = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     p.add_argument("--model", choices=["gin", "gine"], default="gin",
                    help="GNN checkpoints to build the deep ensemble from")
     p.add_argument("--tags", default=",".join(TAGS))
     p.add_argument("--splits", default=",".join(SPLITS))
     p.add_argument("--batch-size", type=int, default=BATCH_SIZE)
+    p.add_argument("--refresh-ad-only", action="store_true",
+                   help="reuse stored predictions/std and refresh AD/screening only")
     p.add_argument("--out-dir", default=os.path.join(BASE, "results",
                                                      "uncertainty"))
     p.add_argument("--fig-dir", default=os.path.join(BASE, "figures",
                                                      "uncertainty"))
-    return p.parse_args()
+    return p.parse_args(argv)
 
 
-def main():
-    args = parse_args()
+def main(argv=None):
+    args = parse_args(argv)
     tags = [t.strip() for t in args.tags.split(",") if t.strip()]
     splits = [s.strip() for s in args.splits.split(",") if s.strip()]
+    if not tags or not splits or len(set(tags)) != len(tags) or len(set(splits)) != len(splits):
+        raise ValueError("tags and splits must be nonempty without duplicates")
+    if not set(splits) <= set(SPLITS):
+        raise ValueError("AD supports random/scaffold only")
+    if args.batch_size < 1:
+        raise ValueError("batch size must be positive")
     model_kind = args.model
     suffix = "" if model_kind == "gin" else f"_{model_kind}"
 
-    if not any(available_seed_suffixes(t, s, model_kind)
+    if not args.refresh_ad_only and not any(available_seed_suffixes(t, s, model_kind)
                for t in tags for s in splits):
         print(f"no {model_kind} checkpoints under results/gnn_models "
               f"({tags[0]}... x {splits}) - nothing to analyse, exiting 0")
@@ -738,21 +838,31 @@ def main():
     for tag in tags:
         per_split = {}
         for split in splits:
-            cell = process_cell(tag, split, model_kind, out_dir, fig_dir,
-                                fp_cache=fp_cache, batch_size=args.batch_size)
+            if args.refresh_ad_only:
+                cell = refresh_stored_ad(tag, split, model_kind, out_dir, fig_dir, fp_cache)
+            else:
+                cell = process_cell(tag, split, model_kind, out_dir, fig_dir,
+                                    fp_cache=fp_cache, batch_size=args.batch_size)
             per_split[split] = cell
             screen_by_split[split][tag] = cell["screening"]
         tag_summaries[tag] = per_split
         json_path = os.path.join(out_dir, f"summary_{tag}{suffix}.json")
+        payload = {"tag": tag, "model_kind": model_kind,
+                   "ad_threshold": AD_PRIMARY, "splits": {}}
+        if os.path.exists(json_path):
+            with open(json_path) as fh:
+                previous = json.load(fh)
+            if previous.get("tag") != tag or previous.get("model_kind") != model_kind:
+                raise ValueError("existing summary identifies a different campaign")
+            payload.update(previous)
+        payload["splits"].update(per_split)
         with open(json_path, "w") as fh:
-            json.dump(jsonable({"tag": tag, "model_kind": model_kind,
-                                "ad_threshold": AD_PRIMARY,
-                                "splits": per_split}),
-                      fh, indent=2)
+            json.dump(jsonable(payload), fh, indent=2)
         print(f"  summary -> {os.path.relpath(json_path, BASE)}")
 
     for split in splits:
-        fig_path = os.path.join(fig_dir, f"vs_screen_panel_{split}{suffix}.png")
+        partial = "" if set(tags) == set(TAGS) else "_partial"
+        fig_path = os.path.join(fig_dir, f"vs_screen_panel_{split}{suffix}{partial}.png")
         made = plot_vs_screen_panel(split, screen_by_split[split], fig_path)
         if made:
             print(f"  figure  -> {os.path.relpath(made, BASE)}")

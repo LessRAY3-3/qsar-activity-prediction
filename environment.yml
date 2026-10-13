@@ -17,3 +17,7 @@ dependencies:
       - torch_geometric==2.8.0.post1
       - xgboost==3.4.1
       - shap==0.52.0
+      # imported directly by scripts/01d, scripts/01e, scripts/fetch_document_years.py
+      - requests==2.34.2
+      # imported directly by experiments/scaling_analysis.py, scripts/07_qc_checks.py
+      - scipy==1.18.1

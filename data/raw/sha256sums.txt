@@ -1,7 +1,8 @@
-# sha256  rows  filename  --  generated 2026-10-10; sha256 = file bytes, rows = total lines incl. header; sorted by filename
+# sha256  rows  filename  --  generated 2026-10-10; 2026-10-12 added document_years.csv; 2026-10-13 hardened fetch verification (R3/R4); sha256 = file bytes, rows = total lines incl. header; sorted by filename
 145f6505eb4572bcf385877142d3da1468efce62ed6e7ec988ba71580fdabbe2  2137  a2a_activities.csv
 b273a1b5ccf623b94dacc5bb146d31f0ec30b6481c0d59a9c9c2b65844ed69c8  5143  abl1_activities.csv
 db1cbba25344133b30625a5a17f747bb10fe4ee0afcdfec030b4fc38a6b553d2  1514  bace_activities.csv
+98f08219c7bda9653528dc092dc1dc9a4ff9809abe76ab84e02b8131bd2b187b  4148  document_years.csv
 563c20bfa618513f4ccd61c86737acf42316e97d6fb43e668bfef416b8966f66  8001  egfr_activities.csv
 2bed86f6f2eba9eb6e535051ca44b19607cfcbb00ed9490a822477369dc8878a  24561  egfr_full_activities.csv
 8c06a76f0c6487d29ab0f903e6a7a7139f189ab3c1178f159c8be8964602f189  1129  esol_delaney.csv

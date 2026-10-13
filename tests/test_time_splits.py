@@ -11,8 +11,8 @@ index-dependent carbon tail), one document per molecule with a synthetic
     one-line summary;
   * guards: 3-year span -> {TAG}_time_NA.json marker, no npz, exit 0;
     busiest year < 100 molecules -> same marker; 2 of 200 SMILES
-    unjoinable (99.0% coverage) -> pinned to year_min on the train side
-    and the split proceeds; 12 of 200 unjoinable (94%, below
+    unjoinable (99.0% coverage) -> pinned for cutoff selection, then
+    excluded from training for lack of dated labels; 12 of 200 unjoinable (94%, below
     FILL_YEAR_COVERAGE) -> SystemExit; missing
     document_years.csv -> SystemExit naming fetch_document_years.py;
   * M1/03 regime: activities rows written as salt forms while the npz
@@ -98,8 +98,11 @@ def _write_inputs(tmp_path, years, broken=(), salt=()):
         year_rows.append((f"DOC{i:03d}", int(years[i])))
         if i % 7 == 0:
             year_rows.append((f"DOCX{i:03d}", int(years[i]) + 5))  # newer -> min() unchanged
-    pd.DataFrame(act_rows, columns=["canonical_smiles", "document_chembl_id"]).to_csv(
-        raw / "egfr_activities.csv", index=False)
+    acts = pd.DataFrame(act_rows, columns=["canonical_smiles", "document_chembl_id"])
+    acts["standard_value"] = 100.0
+    acts["standard_units"] = "nM"
+    acts["standard_relation"] = "="
+    acts.to_csv(raw / "egfr_activities.csv", index=False)
     pd.DataFrame(year_rows, columns=["document_chembl_id", "document_year"]).to_csv(
         raw / "document_years.csv", index=False)
 
@@ -142,7 +145,7 @@ def test_happy_path_disjoint_exhaustive_and_artifacts(tmp_path, monkeypatch, mod
     assert mod.main([]) is None  # exit 0
 
     out = np.load(paths["splits"] / f"{mod.TAG}_time.npz")
-    assert set(out.files) == {"train_idx", "valid_idx", "test_idx",
+    assert set(out.files) >= {"train_idx", "valid_idx", "test_idx",
                               "scaffold_smiles", "smiles", "year"}
     tr, va, te = out["train_idx"], out["valid_idx"], out["test_idx"]
     assert all(idx.dtype.kind == "i" for idx in (tr, va, te))
@@ -210,6 +213,7 @@ def test_salt_activities_join_years_on_parent_keys(tmp_path, monkeypatch, mod, c
 
 def test_short_year_span_writes_na_marker(tmp_path, monkeypatch, mod, capsys):
     paths = _setup(tmp_path, monkeypatch, mod, years=_years_short())
+    np.savez(paths["splits"] / f"{mod.TAG}_time.npz", train_idx=[0], test_idx=[1])
     assert mod.main([]) is None  # NA is a normal, successful exit
 
     payload = json.loads((paths["splits"] / f"{mod.TAG}_time_NA.json").read_text())
@@ -233,7 +237,7 @@ def test_sparse_busiest_year_writes_na_marker(tmp_path, monkeypatch, mod):
     assert not (paths["splits"] / f"{mod.TAG}_time.npz").exists()
 
 
-def test_two_unjoinable_smiles_filled_to_train(tmp_path, monkeypatch, mod, capsys):
+def test_two_unjoinable_smiles_excluded_after_cutoff_selection(tmp_path, monkeypatch, mod, capsys):
     paths = _setup(tmp_path, monkeypatch, mod, broken=(30, 77))
     mod.main([])
     printed = capsys.readouterr().out
@@ -243,7 +247,8 @@ def test_two_unjoinable_smiles_filled_to_train(tmp_path, monkeypatch, mod, capsy
     assert not np.isnan(d["year"]).any()
     filled = {_smiles()[30], _smiles()[77]}
     train_smiles = set(np.asarray(d["smiles"], dtype=str)[d["train_idx"]].tolist())
-    assert filled <= train_smiles  # pinned to year_min -> always train side
+    assert not (filled & train_smiles)
+    assert set(d["excluded_idx"]) == {30, 77}
 
 
 def test_massive_undated_share_aborts(tmp_path, monkeypatch, mod, capsys):
@@ -263,3 +268,54 @@ def test_missing_years_file_points_to_fetch_script(tmp_path, monkeypatch, mod):
     with pytest.raises(SystemExit) as exc:
         mod.main([])
     assert "fetch_document_years" in str(exc.value)
+
+
+def test_successful_regeneration_clears_na(tmp_path, monkeypatch, mod):
+    paths = _setup(tmp_path, monkeypatch, mod)
+    marker = paths["splits"] / f"{mod.TAG}_time_NA.json"
+    marker.write_text('{"reason": "previous failure"}')
+    mod.main([])
+    assert not marker.exists()
+
+
+def test_versioned_split_self_validates_without_external_cache(tmp_path, monkeypatch, mod):
+    from time_labels import label_signature, load_time_split
+    paths = _setup(tmp_path, monkeypatch, mod)
+    mod.main([])
+    path = paths["splits"] / f"{mod.TAG}_time.npz"
+    good = load_time_split(paths["splits"], mod.TAG)
+    for key, changed, message in (
+        ("year", good["year"][:-1], "label count"),
+        ("smiles", good["smiles"][:-1], "label count"),
+        ("original_y", good["original_y"] + 1, "source dataset signature"),
+    ):
+        bad = {**good, key: changed}
+        bad["label_id"] = label_signature(bad)
+        np.savez(path, **bad)
+        with pytest.raises(ValueError, match=message):
+            load_time_split(paths["splits"], mod.TAG)
+
+
+def test_prediction_version_checks_rows_and_actual_labels(tmp_path, monkeypatch, mod):
+    from time_labels import load_time_split, require_prediction_version
+    paths = _setup(tmp_path, monkeypatch, mod)
+    mod.main([])
+    sp = load_time_split(paths["splits"], mod.TAG)
+    good = dict(label_id=sp["label_id"], test_idx=sp["test_idx"],
+                y_true=sp["y"][sp["test_idx"]])
+    require_prediction_version(good, sp)
+    with pytest.raises(ValueError, match="test indices"):
+        require_prediction_version({**good, "test_idx": good["test_idx"][::-1]}, sp)
+    with pytest.raises(ValueError, match="labels differ"):
+        require_prediction_version({**good, "y_true": good["y_true"] + 0.1}, sp)
+
+
+def test_failed_regeneration_invalidates_old_split(tmp_path, monkeypatch, mod):
+    paths = _setup(tmp_path, monkeypatch, mod)
+    stale = paths["splits"] / f"{mod.TAG}_time.npz"
+    np.savez(stale, train_idx=[0], test_idx=[1])
+    paths["years"].unlink()
+    with pytest.raises(SystemExit):
+        mod.main([])
+    assert not stale.exists()
+    assert (paths["splits"] / f"{mod.TAG}_time_NA.json").exists()
