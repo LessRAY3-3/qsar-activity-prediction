@@ -1,0 +1,43 @@
+Verified and restored 8 frozen time splits
+[a2a/time] n=802  mean3 dR2=+0.3886 CI[+0.2917, +0.4903]  frac_boot_gin_better=1.0000
+[abl1/time] n=531  mean3 dR2=-0.3021 CI[-0.3518, -0.2522]  frac_boot_gin_better=0.0000
+[egfr/time] n=1233  mean3 dR2=-0.0169 CI[-0.0678, +0.0347]  frac_boot_gin_better=0.2563
+[egfr_full/time] n=3043  mean3 dR2=+0.5646 CI[+0.5129, +0.6233]  frac_boot_gin_better=1.0000
+[herg/time] n=2325  mean3 dR2=+0.0219 CI[-0.0158, +0.0605]  frac_boot_gin_better=0.8744
+[hivpr/time] n=529  mean3 dR2=+0.1378 CI[+0.0608, +0.2174]  frac_boot_gin_better=0.9991
+[mpro/time] n=1750  mean3 dR2=+0.0766 CI[+0.0335, +0.1215]  frac_boot_gin_better=0.9997
+[vegfr2/time] n=2038  mean3 dR2=-0.1025 CI[-0.1305, -0.0741]  frac_boot_gin_better=0.0000
+
+=== Paired bootstrap significance: GIN vs RF ===
+  dR2 = R2_GIN - R2_RF (positive favours GIN); significant = 95% CI excludes 0
+
+  [seed42] 5/8 cells with CI excluding 0
+    RF significantly ahead (2): abl1/time, vegfr2/time
+    GIN significantly ahead (3): a2a/time, egfr_full/time, hivpr/time
+    dR2 point range: [-0.4672, +0.4277]
+
+  [mean3] 6/8 cells with CI excluding 0
+    RF significantly ahead (2): abl1/time, vegfr2/time
+    GIN significantly ahead (4): a2a/time, egfr_full/time, hivpr/time, mpro/time
+    dR2 point range: [-0.3021, +0.5646]
+
+  mean3 (primary): RF significantly wins in 2/8 cells; GIN in 4/8; 2/8 inconclusive
+
+split suffix '_time': shared outputs kept separate from the random/scaffold campaign files
+
+summary -> results/significance/summary_time.csv (16 rows)
+figure  -> figures/significance/ci_panel_time.png
+
+=== P8 time-split final summary (8 targets) ===
+  RF  time R² range : [-0.753, +0.559]
+  GIN time R² range : [-0.233, +0.203]
+  mean ΔR² (time − random): RF -0.728, GIN -0.621
+  negative time R²: RF ['a2a', 'egfr_full', 'herg', 'hivpr']; GIN ['egfr_full', 'herg', 'vegfr2']
+  RF below constant baseline: a2a -0.273 < -0.007, egfr_full -0.753 < -0.460, herg -0.056 < -0.003, hivpr -0.044 < -0.002
+  paired bootstrap (mean3): 6/8 CIs exclude 0 | GIN ahead: ['a2a', 'egfr_full', 'hivpr', 'mpro']; RF ahead: ['abl1', 'vegfr2']
+  caveat: a2a test_frac=0.59 > 0.5 (newest-year data concentration under the cumulative-20% rule)
+  caveat: mpro test_frac=0.51 > 0.5 (newest-year data concentration under the cumulative-20% rule)
+  note: a2a RF -0.273, constant -0.007, egfr_full RF -0.753, constant -0.460, herg RF -0.056, constant -0.003, hivpr RF -0.044, constant -0.002: below the constant baseline. These scores alone do not establish temporal drift or its cause.
+
+summary -> results/time_split/summary.csv (8 rows)
+figure  -> figures/time_split/panel_3splits.png

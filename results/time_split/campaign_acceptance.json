@@ -24,7 +24,7 @@
     "frozen_input_manifest_sha256": "d341acc273682f75482370359597ed7970387ea2ca174e0c8ba7d6823d9dc697",
     "label_audit_sha256": "df4f9b0d4fea753d3065757263b82354d14b4897a9035de58dceb342ca587d49",
     "paired_bootstrap_replicates": 10000,
-    "source_commit": "0b4fb29"
+    "source_commit": "0b4fb296568452b86b74eb82b12177f289661957"
   },
   "checks": {
     "checkpoint_loading": true,
@@ -4193,5 +4193,19 @@
   "source_commits": [
     "7ce15c1f0849ae69e0ca208f781a9824517eb328",
     "d13f9125af56028f60e099ec2e914dd2509c239e"
-  ]
+  ],
+  "verification": {
+    "all_current_labels_independently_recomputed": 42636,
+    "bootstrap_replicates_per_row": 10000,
+    "bootstrap_rows_independently_recomputed": 16,
+    "clean_checkout_pytest_passed": 327,
+    "diff_check": "passed",
+    "excluded_rows_audited": 168,
+    "fresh_checkout_reproduction": "results/time_split/repair_reproduction_verification.json",
+    "independent_data_audit": "logs/time_asof_repair_20261014/independent_data_audit.log",
+    "non_time_metrics_unchanged": true,
+    "pytest_passed": 327,
+    "pytest_warnings": 3,
+    "ruff": "passed"
+  }
 }

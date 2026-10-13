@@ -1,0 +1,38 @@
+{
+  "source_commit": "4159476527de2460b962239b4a50b8672357af84",
+  "commands": [
+    [
+      "scripts/restore_time_inputs.py"
+    ],
+    [
+      "experiments/paired_bootstrap.py",
+      "--model",
+      "gin",
+      "--splits",
+      "time",
+      "--n-boot",
+      "10000"
+    ],
+    [
+      "experiments/time_split_summary.py"
+    ]
+  ],
+  "raw_tables_present": false,
+  "feature_caches_present": false,
+  "time_splits_initially_present": false,
+  "output_files_byte_identical": [
+    "results/time_split/summary.csv",
+    "results/significance/summary_time.csv",
+    "figures/time_split/panel_3splits.png",
+    "figures/significance/ci_panel_time.png",
+    "results/significance/a2a_time.csv",
+    "results/significance/abl1_time.csv",
+    "results/significance/egfr_time.csv",
+    "results/significance/egfr_full_time.csv",
+    "results/significance/herg_time.csv",
+    "results/significance/hivpr_time.csv",
+    "results/significance/mpro_time.csv",
+    "results/significance/vegfr2_time.csv"
+  ],
+  "frozen_split_count": 8
+}

@@ -1,0 +1,18 @@
+PASS a2a {'tag': 'a2a', 'labels': 1344, 'excluded': 22, 'bootstrap_rows_verified': 2, 'exclusion_mismatches': []}
+PASS abl1 {'tag': 'abl1', 'labels': 2120, 'excluded': 0, 'bootstrap_rows_verified': 2, 'exclusion_mismatches': []}
+PASS egfr {'tag': 'egfr', 'labels': 4521, 'excluded': 39, 'bootstrap_rows_verified': 2, 'exclusion_mismatches': []}
+PASS egfr_full {'tag': 'egfr_full', 'labels': 10672, 'excluded': 57, 'bootstrap_rows_verified': 2, 'exclusion_mismatches': []}
+PASS herg {'tag': 'herg', 'labels': 8384, 'excluded': 19, 'bootstrap_rows_verified': 2, 'exclusion_mismatches': []}
+PASS hivpr {'tag': 'hivpr', 'labels': 2573, 'excluded': 0, 'bootstrap_rows_verified': 2, 'exclusion_mismatches': []}
+PASS mpro {'tag': 'mpro', 'labels': 3410, 'excluded': 0, 'bootstrap_rows_verified': 2, 'exclusion_mismatches': []}
+PASS vegfr2 {'tag': 'vegfr2', 'labels': 9612, 'excluded': 31, 'bootstrap_rows_verified': 2, 'exclusion_mismatches': []}
+{
+  "tags": 8,
+  "labels": 42636,
+  "excluded": 168,
+  "prediction_files": 32,
+  "bootstrap_replicates_per_row": 10000,
+  "bootstrap_rows": 16,
+  "source_and_artifact_hashes": "match",
+  "non_time_metrics": "unchanged"
+}

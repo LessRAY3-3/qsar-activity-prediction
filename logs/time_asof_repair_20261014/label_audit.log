@@ -1,0 +1,15 @@
+/Users/lessray/.matplotlib is not a writable directory
+Matplotlib created a temporary cache directory at /var/folders/60/f144lgn97zg1y9wcvg2v5thh0000gn/T/matplotlib-p9ddxzjc because there was an issue with the default path (/Users/lessray/.matplotlib); it is highly recommended to set the MPLCONFIGDIR environment variable to a writable directory, in particular to speed up the import of Matplotlib and to better support multiprocessing.
+Matplotlib is building the font cache; this may take a moment.
+  22 of 1366 smiles have no publication year (coverage 98.4%); pinning them to year_min=1998 (cutoff selection only; no dated label means exclusion)
+  note: year 2022 alone holds 685 molecules (> 20% of n) - test fraction will be slightly above 20%
+[a2a] excluded=22 changed train/valid/test=26/1/0
+[abl1] excluded=0 changed train/valid/test=27/1/0
+[egfr] excluded=39 changed train/valid/test=28/4/0
+[egfr_full] excluded=57 changed train/valid/test=116/32/0
+[herg] excluded=19 changed train/valid/test=41/14/1
+[hivpr] excluded=0 changed train/valid/test=9/0/0
+  note: year 2024 alone holds 1664 molecules (> 20% of n) - test fraction will be slightly above 20%
+[mpro] excluded=0 changed train/valid/test=65/11/0
+[vegfr2] excluded=31 changed train/valid/test=139/14/0
+/Users/lessray/Desktop/kimi code/qsar-time-retrain-20261013/results/time_split/asof_label_audit.csv

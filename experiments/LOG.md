@@ -48,6 +48,12 @@ are historical only.**
   split labels directly, so raw tables and feature caches are unnecessary for
   bootstrap/summary reproduction. CI restores and validates the package before
   running tests. Analysis code is recorded at `0b4fb29`.
+- **Final verification:** 327 tests passed in both the coordinator worktree and
+  a clean exported checkout; Ruff and diff checks passed. Without raw tables or
+  feature caches, restore → B=10,000 bootstrap → summary reproduced all 12 CSV
+  and PNG outputs byte-for-byte. An independent raw-record audit recomputed
+  42,636 labels, checked all 168 exclusions and 32 predictions, and reproduced
+  all 16 bootstrap intervals. Logs and reproduction evidence are committed.
 - **Records:** `results/time_split/campaign_acceptance.json`,
   `repair_split_comparison.json`, `repair_independent_review.json`, repair input
   manifests and `logs/time_asof_repair_20261014/`. The original acceptance is
@@ -71,7 +77,7 @@ are historical only.**
 - **Acceptance:** 32/32 jobs passed source/input/label hash checks, test-row
   alignment, checkpoint loading and metric recomputation. RF checkpoint
   replay matched exactly; maximum CUDA GIN prediction difference was
-  9.54e-7. Records: `results/time_split/campaign_acceptance.json`, both
+  9.54e-7. Records: `results/time_split/initial_campaign_acceptance.json`, both
   `input_manifest_*.json` files and `logs/time_asof_20261013/`.
 - **Results:** B=10,000 paired molecule bootstrap of the three-seed
   ensemble favours GIN on a2a/egfr_full/hivpr/mpro and RF on abl1/vegfr2;
