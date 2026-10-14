@@ -16,6 +16,29 @@ results. The initial 2026-10-13 entry records the preceding campaign; its hERG
 scores and aggregate means are superseded. Earlier all-year-label time scores
 are historical only.**
 
+## 2026-10-14 — CUDA delivery prepared; connection still blocked
+
+- Prepared separate queues for the 128 frozen environment/budget jobs and
+  the 18 missing-log replacement fits. Full logs, exact source/input hashes,
+  checkpoint/output validation, serial GPU execution and return packaging
+  are implemented. Frozen training code and existing results are unchanged.
+- Added independent CPU replay for all 18 replacement fits / 42 result cells,
+  including normalization, test membership and pooled-task offsets. Seven
+  tests use real small untrained models, including the full receipt-to-report
+  flow; they are verification fixtures, not new project experiments.
+- Independent review reproduced a supervisor-termination bug that could leave
+  a training subprocess alive. The fix records process ownership, handles
+  SIGTERM cleanup and refuses live/uncertain prior phases before CUDA smoke.
+  Actual subprocess tests cover both SIGTERM and SIGKILL cases.
+- M3 SSH and its CPU environment were verified read-only. The configured
+  win4070 address, 10.0.2.2, returned “No route to host” on repeated probes;
+  no remote CUDA training started. User reconnection is required.
+- Final local validation: 667 tests passed, 3 existing warnings; Ruff and
+  diff checks passed. The reviewed delivery archive passed all 143 member
+  hashes and relocated offline checks. The archive is identified by
+  `logs/win4070_ready_20261014/readiness.json`; earlier preparation archives
+  are superseded. README still has 447 checked cells with zero mismatches.
+
 ## 2026-10-14 — Explicit replacement of unavailable review evidence
 
 - Clarified that “447 cells, zero mismatches” means covered README entries

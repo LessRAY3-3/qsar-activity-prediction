@@ -1,0 +1,45 @@
+{
+  "status": "prepared_remote_cuda_unreachable",
+  "observed_utc": "2026-10-14T11:48:25.571499+00:00",
+  "project_training_started": false,
+  "m3": {
+    "ssh": "reachable",
+    "python": "3.12.14",
+    "torch": "2.14.0",
+    "torch_geometric": "2.8.0.post1",
+    "numpy": "2.5.3",
+    "existing_checkout_modified": false
+  },
+  "win4070": {
+    "ssh": "unreachable",
+    "configured_hostname": "10.0.2.2",
+    "error": "ssh: connect to host 10.0.2.2 port 22: No route to host"
+  },
+  "jobs": {
+    "frozen_cuda_budget": 128,
+    "independent_provenance_reconstruction": 18
+  },
+  "selected_delivery": {
+    "state": "prepared_not_connected_or_trained",
+    "directory": "/Users/lessray/Desktop/kimi code/qsar-time-retrain-20261013/.scratch/win4070-ready-reviewed-20261014",
+    "jobs": 146,
+    "delivery_manifest_sha256": "52aba68d3fd794de376daeecb2017e50db22d405175b88d3f5f30d7c992dd44c",
+    "archive": "/Users/lessray/Desktop/kimi code/qsar-time-retrain-20261013/.scratch/win4070-ready-reviewed-20261014.tar.gz",
+    "archive_sha256": "867266319667d8b629db6c8876fe7bc524045935c8bac2beb364a222551cccd7",
+    "archive_bytes": 8354538
+  },
+  "superseded_preparation_logs": [
+    "build.log",
+    "build_final.log",
+    "roundtrip.json"
+  ],
+  "verification": {
+    "pytest_passed": 667,
+    "pytest_warnings": 3,
+    "ruff": "passed",
+    "archive_roundtrip": "roundtrip_reviewed.json",
+    "readme": "readme.log"
+  },
+  "review_fix": "Record phase PID/process group; handle SIGTERM cleanup; refuse live or uncertain prior processes before CUDA smoke.",
+  "acceptance": "Return packages still require independent CPU checkpoint replay. No CUDA scores or complete four-cell study have been produced."
+}

@@ -889,6 +889,11 @@ CUDA's fresh **128 jobs remain pending** host availability;
 no cross-environment result is available. The documented
 [post-pilot amendment](results/time_budget_sensitivity/replication_extension.json)
 retains its actual decision chronology.
+The [portable CUDA queue](docs/methodology.md#portable-cuda-execution-and-return-checks)
+stages these 128 frozen jobs followed by 18 separate missing-log replacement
+fits. It checks source/input hashes, rejects CPU fallback and preserves
+per-job logs. Returned models require independent CPU replay before results
+can be accepted; a successful queue exit alone does not complete the study.
 The pilot's historical CUDA references do not fill a new study cell. Main
 campaign results below are unchanged.
 

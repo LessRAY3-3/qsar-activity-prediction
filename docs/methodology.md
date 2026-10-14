@@ -1902,3 +1902,61 @@ exit status and output hashes. The multitask trainer's automatic device choice
 requires supervision to prohibit fallback. These 18 supplementary jobs are
 separate from the 128 frozen CUDA budget-comparison jobs; their training code
 and results must not replace that frozen study's inputs or outputs.
+
+### Portable CUDA execution and return checks
+
+`scripts/win4070_handoff.py` prepares the two queues in separate directories:
+128 frozen CUDA budget-comparison jobs first, then the 18 missing-log
+replacement jobs. Preparation and `--check` never connect to a host or train:
+
+```bash
+python scripts/win4070_handoff.py --prepare .scratch/cuda-delivery-new
+python .scratch/cuda-delivery-new/handoff.py \
+  --root .scratch/cuda-delivery-new --check
+```
+
+The delivery archive has a SHA256 inventory. The frozen study archive,
+manifest, training source and inputs are verified before staging; a dry run
+checks the complete 128-job cohort. On the CUDA host, preflight verifies the
+pinned Python/packages, CUDA version and visible 4070 GPU, records the driver
+and memory, and exercises forward/backward passes on the largest training
+batches and forward passes on the largest validation/test batches for all
+eight targets. These checks run separately from the seeded experiments.
+
+After transfer and verification in a fresh remote directory, the explicitly
+authorized launch is:
+
+```bash
+<verified-python> handoff.py --root <delivery-directory> --execute --detach
+```
+
+Detached execution requires a working `systemd-inhibit` idle/sleep inhibitor.
+The queue runs one GPU job at a time with the frozen 4 intra-op / 1 inter-op
+thread settings. A phase failure stops subsequent phases. Completed jobs are
+reused only after receipt/hash verification; incomplete jobs restart their
+fit, not an arbitrary saved epoch. Frozen-worker locks/backups left by an
+uncatchable interruption require inspection before retrying.
+
+The return packages preserve checkpoints, predictions, isolated source/input
+identities, and training logs. Packaging is not acceptance: the supervisor
+ends in `completed_pending_independent_replay`. The returned 128 jobs must
+pass `experiments/time_budget_report.py` CPU checkpoint replay before
+`experiments/time_environment_comparison.py` compares them with the accepted
+M3 cohort. The 18 replacement fits require their own independent CPU replay;
+they do not establish the identity or computing environment of missing
+historical experiments:
+
+```bash
+python experiments/provenance_reconstruction_report.py \
+  --run-dir <returned-provenance> \
+  --plan <delivery>/supplement/source/results/provenance_reconstruction/plan.json \
+  --runner <delivery>/tools/run_provenance_reconstruction.py \
+  --out-dir <new-provenance-report>
+```
+
+This independent inference checks all 18 fits and 42 task/result cells,
+including training-label normalization and pooled-task offsets. Its default
+prediction tolerance is absolute 1e-4 / relative 1e-5; metric tolerances are
+1e-5. A failed comparison is rejected and investigated, not silently accepted
+by widening a tolerance. Initial offline validation passed 649 tests and a
+143-file archive round trip; evidence is in `logs/win4070_ready_20261014/`.
