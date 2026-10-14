@@ -1,0 +1,78 @@
+{
+  "schema": 1,
+  "status": "M3 two arms accepted (48 jobs); matched CUDA arms pending user connection",
+  "source_commit": "90a470050367cebc4cd83dfe8d3f7fb37d53e6de",
+  "environments": [
+    "M3 Max CPU",
+    "RTX 4070 Laptop CUDA"
+  ],
+  "m3_hardware": {
+    "performance_cores": 12,
+    "efficiency_cores": 4,
+    "memory_gib": 64
+  },
+  "arms": {
+    "control": {
+      "epochs": 100,
+      "min_epochs": 0,
+      "patience": 20
+    },
+    "extended": {
+      "epochs": 200,
+      "min_epochs": 60,
+      "patience": 40
+    }
+  },
+  "tags": [
+    "a2a",
+    "egfr_full",
+    "abl1",
+    "egfr",
+    "herg",
+    "hivpr",
+    "mpro",
+    "vegfr2"
+  ],
+  "seeds": [
+    42,
+    1,
+    2
+  ],
+  "jobs_per_cell": 24,
+  "planned_total_jobs": 96,
+  "m3_scheduling": {
+    "parallel_workers": 4,
+    "torch_intra_threads": 4,
+    "torch_interop_threads": 1,
+    "affinity": "macOS scheduling; no per-core pinning",
+    "thread_settings_fixed_across_arms": true
+  },
+  "primary_outcomes": [
+    "best-checkpoint standardized train MSE",
+    "best-checkpoint standardized validation RMSE"
+  ],
+  "secondary_outcomes": [
+    "test R2",
+    "test RMSE",
+    "test MAE",
+    "best epoch",
+    "common diagnostic flag"
+  ],
+  "contrasts": {
+    "budget_effect_within_environment": "extended minus control for each target and seed",
+    "environment_difference_within_budget": "CUDA minus M3 for each target and seed",
+    "interaction": "(CUDA extended - CUDA control) - (M3 extended - M3 control)"
+  },
+  "selection": "Validation-only best checkpoint; no seed selection, no test-driven retraining or main-result replacement",
+  "common_diagnostic": "best_epoch < 30 and eval train MSE > 0.5, independent of budget cap",
+  "limitations": [
+    "Environment difference includes OS, architecture, numerical libraries and CPU/CUDA kernels; not a pure hardware causal effect",
+    "Three seeds provide limited precision; report paired values and spread without treating 24 pairs as independent targets",
+    "EGFR and EGFR_full overlap; eight-target means are descriptive",
+    "Wall times depend on different concurrency and P/E-core scheduling; not a controlled hardware speed benchmark",
+    "Historical CUDA outputs remain a separate reference, not a matched cell of this experiment",
+    "More training can leave the same early best checkpoint and need not improve test performance"
+  ],
+  "model": "GIN",
+  "rf_policy": "Existing accepted RF models are retained; no RF training in this budget study."
+}

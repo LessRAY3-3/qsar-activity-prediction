@@ -13,15 +13,61 @@ results. The initial 2026-10-13 entry records the preceding campaign; its hERG
 scores and aggregate means are superseded. Earlier all-year-label time scores
 are historical only.**
 
+## 2026-10-14 — M3 two-budget study accepted; new CUDA cohort pending
+
+- **Scope/status:** the M3 half of the cross-computing-environment
+  reproducibility and robustness study is complete: eight targets × three seeds
+  × two budgets = 48 GIN jobs. Fixed labels/splits make this distinct from data
+  k-fold cross-validation. The two fresh 4070 CUDA arms remain pending the user's
+  connection message; the full four-cell, 96-job design is not yet complete.
+- **Execution:** source `90a470050367cebc4cd83dfe8d3f7fb37d53e6de`, CPU with four
+  concurrent workers and 4 intra-op / 1 inter-op threads per worker. Original
+  `100/0/20` and extended `200/60/40` epochs/minimum/patience share the fixed
+  model, scheduler and input versions. Training wall time was 683.063 seconds
+  (11 min 23 s), excluding setup, transfer and verification. This is not an
+  isolated hardware-speed benchmark.
+- **Acceptance:** all 48 statuses succeeded and canonical/snapshot artifacts,
+  provenance, labels and parameters passed checks. Independent CPU replay
+  matched train MSE, validation RMSE and test predictions within the 1e-5
+  tolerance (maximum test-prediction error 9.54e-7). Logs verify the actual
+  stopping epochs, including the extended minimum. All 24 paired common log
+  prefixes match at their printed precision, without a claim of bitwise
+  optimizer-state identity.
+- **Paired result:** 23/24 saved test-prediction arrays are unchanged. Only
+  `hivpr` seed 42 selects a later best epoch (44 → 84; stopping 64 → 124), with
+  standardized train MSE 0.273681 → 0.166170 and validation RMSE
+  0.741784 → 0.735256. Its secondary test R² is 0.012266 → 0.058906.
+  Across all pairs mean Δvalidation RMSE is −0.000272; common flags remain
+  9/24 → 9/24. Mean single-seed test R² changes −0.009381 → −0.007437, driven
+  by that one pair and not strong evidence of a general gain. Under the current
+  scheduler and these budgets, extending training did not broadly improve
+  selected models; this does not prove that every model has converged.
+- **Cohorts and next step:** the earlier accepted CUDA 13/24 flags are a
+  separate historical reference, not the M3 original-budget count and not a
+  matched new CUDA cell. Complete the new CUDA original/extended arms with the
+  same frozen training source and inputs, retaining every target/seed. Only
+  after the initial three seeds in all four cells, plan added seeds from
+  validation variability and precision needs, never from test performance.
+  CPU/CUDA differences combine systems, architecture, libraries and kernels;
+  report environment-associated contrasts and interactions, not pure hardware
+  causality. No main campaign weights, predictions or metric history are replaced.
+- **Offline evidence:** `results/time_budget_sensitivity/m3/analysis/` contains
+  48 diagnostics rows, 24 paired rows, eight target summaries, 24 log-prefix
+  comparisons and the acceptance report. The frozen `inputs.tar.gz` is about
+  4.6 MiB; `m3/study.tar.gz` is 29,868,373 bytes (28.5 MiB), with canonical and
+  snapshot duplicates stored as tar hardlinks. All 442 restored result files
+  matched the archive manifest and frozen input verification passed. The
+  methodology provides hash-first extraction and full offline replay commands.
+
 ## 2026-10-14 — PR #8 review corrections and an environment × budget study
 
 This entry records review corrections to the current repaired campaign. The
 published model weights, predictions and historical metric JSON entries are
-preserved. New diagnostics are separate artifacts. The authorized follow-up now
-forms a 2 × 2 environment/budget study: the M3 CPU campaign is executing its
-48-job queue; the 4070 CUDA campaign's 48 jobs must wait until the user connects
-that machine and tells the coordinator to proceed. This update supersedes the
-earlier plan's "not yet started" status; it does not report completed study results.
+preserved. New diagnostics are separate artifacts. The authorized follow-up forms
+a 2 × 2 environment/budget study. Its M3 48-job queue was running when this
+review entry was first written and has since completed acceptance, as recorded
+in the entry above; the 4070 CUDA campaign's 48 jobs still await the user's
+connection message.
 
 - **T1 — resampling-unit sensitivity:** the existing 24-cell scaffold comparison
   covers eight targets and GIN/GINE/AttentiveFP. Seven of ten molecule-bootstrap
@@ -85,8 +131,8 @@ earlier plan's "not yet started" status; it does not report completed study resu
 - **Authorized 2 × 2 follow-up:** both M3 CPU and 4070 CUDA run the original
   budget (`epochs=100, min_epochs=0, patience=20`) and the extended budget
   (`epochs=200, min_epochs=60, patience=40`). Each cell contains eight targets ×
-  seeds 42/1/2: **24 jobs per cell, 48 per environment, 96 total**. M3 is the
-  current executing campaign; the fresh 4070 pair is waiting for the user's
+  seeds 42/1/2: **24 jobs per cell, 48 per environment, 96 total**. M3 has now
+  completed acceptance; the fresh 4070 pair is waiting for the user's
   connection message. All four cells must use the same frozen current labels,
   split indices, graph inputs, training-source revision, model, optimizer,
   scheduler and validation-selection rule. Only the declared budget and

@@ -1,0 +1,62 @@
+{
+  "arms": {
+    "control": {
+      "epochs": 100,
+      "min_epochs": 0,
+      "patience": 20
+    },
+    "extended": {
+      "epochs": 200,
+      "min_epochs": 60,
+      "patience": 40
+    }
+  },
+  "common_flag": "best_epoch < 30 and best_checkpoint_train_mse > 0.5 in both arms",
+  "coordinator_sha256": "279374a06486d3260497a728c92798c878252e56ce5d5feea08353e8a5866c46",
+  "device": "cpu",
+  "environment_caveat": "CPU/CUDA contrasts include OS, architecture and numerical libraries; not an isolated hardware causal effect",
+  "interpretation": "Extra budget with unchanged scheduler; not a learning-rate or architecture search",
+  "jobs": 48,
+  "lanes": [
+    [
+      "a2a",
+      "egfr"
+    ],
+    [
+      "egfr_full",
+      "hivpr"
+    ],
+    [
+      "herg",
+      "mpro"
+    ],
+    [
+      "abl1",
+      "vegfr2"
+    ]
+  ],
+  "manifest_sha256": "daf7f1f9ee34f33c8ff478d04ff8239bdba4301032eedd3041a475f23f74ecf2",
+  "parallel_workers": 4,
+  "planned_extension": "2x2 environment x budget design: repeat both arms on RTX 4070 CUDA after user restores connection",
+  "primary_comparison": "Paired same-host best-checkpoint train MSE and validation RMSE",
+  "publication_policy": "Sensitivity study; preserve prior CUDA results and all RF results",
+  "schema": 1,
+  "seeds": [
+    42,
+    1,
+    2
+  ],
+  "selection": "Lowest validation RMSE; unchanged scheduler and 1e-5 improvement tolerance",
+  "source_commit": "90a470050367cebc4cd83dfe8d3f7fb37d53e6de",
+  "test_policy": "Secondary complete-cohort report; never select budget, seed or stopping from test scores",
+  "thread_environment": {
+    "MKL_NUM_THREADS": "4",
+    "OMP_NUM_THREADS": "4",
+    "OPENBLAS_NUM_THREADS": "1",
+    "PYTHONHASHSEED": "0",
+    "PYTHONUNBUFFERED": "1",
+    "QSAR_TORCH_INTEROP_THREADS": "1",
+    "QSAR_TORCH_THREADS": "4",
+    "VECLIB_MAXIMUM_THREADS": "4"
+  }
+}

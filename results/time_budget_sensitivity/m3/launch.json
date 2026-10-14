@@ -1,0 +1,17 @@
+{
+  "pid": 2601,
+  "command": [
+    "/usr/bin/caffeinate",
+    "-ims",
+    "/Users/leisirui/qsar-campaigns/time-budget-20261014/.venv/bin/python",
+    "-u",
+    "/Users/leisirui/qsar-campaigns/time-budget-20261014/input/scripts/run_time_budget_study.py",
+    "--bundle-root",
+    "/Users/leisirui/qsar-campaigns/time-budget-20261014/input",
+    "--output",
+    "/Users/leisirui/qsar-campaigns/time-budget-20261014/study",
+    "--execute"
+  ],
+  "started_at": "2026-10-14T01:10:31.135403+00:00",
+  "source_commit": "90a470050367cebc4cd83dfe8d3f7fb37d53e6de"
+}

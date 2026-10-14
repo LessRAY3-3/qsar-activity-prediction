@@ -804,6 +804,30 @@ three training MSEs are 0.749–0.976. See
 convergence nor establishes that more training would help. Models and test
 predictions are unchanged; no test score selected a new training budget.
 
+**M3 budget check completed; matched CUDA check pending.** A separate
+[cross-computing-environment reproducibility and robustness study](docs/methodology.md#follow-up-a-matched-environment--training-budget-study)
+keeps the data fixed; it is not data k-fold cross-validation. M3 CPU completed
+48 GIN jobs in 11 min 23 s, comparing 100/0/20 versus 200/60/40
+(`epochs/min_epochs/patience`) on all eight targets and seeds 42/1/2.
+All passed artifact checks and CPU model replay. The 24 paired early training
+logs match at printed precision; 23/24 pairs retain identical saved test
+predictions. Only `hivpr`, seed 42, selects a later best checkpoint (epoch
+44 → 84), reducing standardized validation RMSE 0.741784 → 0.735256.
+Across 24 pairs the mean validation-RMSE change is −0.000272; the common
+diagnostic flags remain **9/24 → 9/24**. These M3 counts are separate from the
+historical CUDA **13/24**, not an improvement from 13 to 9.
+
+Secondary mean single-seed test R² changes −0.009381 → −0.007437, driven by
+that one pair; this is not strong evidence of a general gain. Extending this
+budget with the current scheduler did not broadly improve the selected models,
+but does not prove that all models converged. See the complete
+[paired results](results/time_budget_sensitivity/m3/analysis/paired.csv) and
+[acceptance report](results/time_budget_sensitivity/m3/analysis/report.json).
+The new CUDA two-budget cohort (48 jobs) awaits the user's connection; old CUDA
+runs are historical references, not a matched study cell. Start with three
+seeds in all four cells, then plan any additional seeds from validation
+variability, never test performance. Main campaign results below are unchanged.
+
 **Test R2 and paired molecule-bootstrap CI** (B = 10,000). GIN time is the
 per-seed mean ± population standard deviation; GIN ens is R2 of the averaged
 prediction; Δ = GIN ens − RF. Files: `results/time_split/summary.csv` and

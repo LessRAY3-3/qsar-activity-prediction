@@ -3800,7 +3800,7 @@
     "pytest_passed": 412,
     "pytest_warnings": 3,
     "ruff": "passed",
-    "study_status": "M3 environment ready; frozen-source two-budget sensitivity study prepared; new CUDA arms await user connection"
+    "study_status": "M3 48-job CPU sensitivity study accepted; fresh CUDA arms pending user connection; see results/time_budget_sensitivity/m3/acceptance.json"
   },
   "repair": {
     "accepted_at": "2026-10-13T16:41:32.068641+00:00",

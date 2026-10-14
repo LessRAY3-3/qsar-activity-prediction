@@ -1142,14 +1142,16 @@ re-audit commands are the parameterized commands above.
 
 ### Follow-up: a matched environment × training-budget study
 
-The follow-up is part of the project as a 2 × 2 comparison, separate from the
-accepted temporal results above. The M3 CPU campaign is currently executing its
-48-job queue. The 4070 CUDA campaign will start only after the user connects that
-machine and gives the connection-ready message; its two arms are still pending.
+The follow-up is a **cross-computing-environment reproducibility and robustness
+study** with a 2 × 2 design, separate from the accepted temporal results above.
+Data and splits remain fixed; this is not data k-fold cross-validation. The M3
+CPU campaign has completed and all 48 jobs passed acceptance. The 4070 CUDA
+campaign will start only after the user connects that machine and gives the
+connection-ready message; its two new arms are still pending.
 
 | Execution environment | Original budget | Extended budget |
 | --- | --- | --- |
-| M3 Max CPU | 24 jobs in the current M3 campaign | 24 jobs in the current M3 campaign |
+| M3 Max CPU | 24 completed and accepted | 24 completed and accepted |
 | Ubuntu / RTX 4070 Laptop CUDA | 24 fresh jobs, awaiting connection | 24 fresh jobs, awaiting connection |
 
 Each cell covers all eight targets and seeds 42/1/2. The original budget is
@@ -1162,6 +1164,12 @@ and published outputs, records its protocol, and resumes only verified jobs.
 The pending CUDA deployment must use the same frozen training source and input
 versions as the M3 study; the historical accepted CUDA runs are reference data,
 not substitutes for a newly matched cell in this design.
+
+The M3 host reports 12 performance cores and 4 efficiency cores. The CPU study
+uses four concurrent workers, each with four PyTorch intra-op threads and one
+inter-op thread, with identical limits in both arms. macOS schedules these threads;
+they are not pinned to performance cores. Thread count is not achieved core
+utilization, and these runs are not a controlled hardware-speed benchmark.
 
 Freeze the labels, split indices, graph caches, model architecture, optimizer,
 scheduler, seeds and lowest-validation-RMSE checkpoint-selection rule across all
@@ -1194,8 +1202,89 @@ aggregate tables or uncertainty summaries; four grand means alone conceal
 heterogeneity. Lower loss and higher R² have opposite favorable directions.
 Targets include overlapping datasets and three seeds provide limited training
 replication, so aggregate uncertainty must not treat all rows as independent.
-No study outcome or improvement is claimed in advance, and the original accepted
-weights, predictions and metric history remain unchanged.
+Begin with the three declared seeds in all four cells. Only after that complete
+cohort, plan any additional seeds using validation variability and the precision
+needed for the paired contrasts; do not use test scores to decide which cells,
+seeds or budgets to expand. No outcome for the pending CUDA cells is assumed,
+and the original accepted weights, predictions and metric history remain unchanged.
+
+**Observed M3 result (2026-10-14).** Frozen training source
+`90a470050367cebc4cd83dfe8d3f7fb37d53e6de` completed both arms in 683.063 seconds
+(11 min 23 s), excluding environment setup, transfer and acceptance. All 48
+success statuses, canonical/snapshot hashes, source/input versions, parameters
+and recorded CPU thread counts passed independent acceptance. CPU replay of the
+saved checkpoints reproduced training MSE, validation RMSE and test predictions;
+the maximum test-prediction difference was 9.54e-7. Stopping logs establish that
+the extended arm actually met its minimum-epoch requirement.
+
+| Descriptive outcome over 24 target/seed pairs | Original | Extended |
+| --- | ---: | ---: |
+| Mean standardized validation RMSE (primary) | 0.808139 | 0.807867 |
+| Common fitting-diagnostic flags | 9/24 | 9/24 |
+| Mean single-seed test R² (secondary) | −0.009381 | −0.007437 |
+
+All 24 shared logged trajectory prefixes agree at printed precision; this does
+not establish bitwise identity of unprinted optimizer states. Saved test
+predictions are array-identical in 23/24 pairs. The only changed pair is
+`hivpr`, seed 42: best epoch 44 → 84, actual stopping epoch 64 → 124,
+standardized train MSE 0.273681 → 0.166170, and standardized validation RMSE
+0.741784 → 0.735256 (Δ −0.006528). Its secondary test R² changes
+0.012266 → 0.058906. Across all 24 pairs, mean Δvalidation RMSE is −0.000272;
+the small aggregate test change is driven by this single pair and is not strong
+evidence of a general gain. Under this scheduler and these budgets, extending
+training did not broadly improve the selected models. This does not prove all
+models converged, nor predict the result of other optimization changes.
+
+The M3 9/24 diagnostic count is not a reduction from the earlier CUDA 13/24:
+those are different cohorts and environments. The newly matched CUDA arms are
+still required before estimating the environment contrasts or interaction.
+Full rows, paired differences, target summaries and rounded-log comparisons are
+in `results/time_budget_sensitivity/m3/analysis/{diagnostics,paired,targets,prefix_logs}.csv`;
+`report.json` records the verification and explicitly marks only two of four
+planned factorial cells complete. No selected subset replaces the main results.
+
+**Offline model replay.** The repository includes
+`results/time_budget_sensitivity/inputs.tar.gz` (about 4.6 MiB: frozen source,
+eight graphs and eight splits) and `m3/study.tar.gz` (29,868,373 bytes, about
+28.5 MiB: all 48 models, predictions, logs, statuses and snapshots). The result
+archive uses tar hardlinks to deduplicate identical canonical/snapshot files.
+Its manifest records 442 file hashes; extraction was checked against all of
+them. Install the project's Python/PyTorch dependencies first. Then, from the
+repository root, verify both archive hashes before extracting into new paths:
+
+```bash
+python - <<'PY'
+from pathlib import Path
+import hashlib
+import json
+import tarfile
+
+base = Path("results/time_budget_sensitivity")
+dest = Path(".scratch/m3-budget-replay")
+archives = [
+    (base / "inputs.tar.gz", base / "inputs_archive.json", dest / "input"),
+    (base / "m3/study.tar.gz", base / "m3/study.tar.gz.manifest.json", dest / "returned"),
+]
+for archive, metadata, _ in archives:
+    expected = json.loads(metadata.read_text())["sha256"]
+    if hashlib.sha256(archive.read_bytes()).hexdigest() != expected:
+        raise SystemExit(f"SHA256 mismatch: {archive}")
+dest.mkdir(parents=True, exist_ok=False)
+for archive, _, target in archives:
+    target.mkdir()
+    with tarfile.open(archive, "r:gz") as stream:
+        stream.extractall(target, filter="data")
+PY
+python experiments/time_budget_report.py \
+  --study-root .scratch/m3-budget-replay/returned/study \
+  --input-root .scratch/m3-budget-replay/input \
+  --out-dir .scratch/m3-budget-replay/report --threads 2
+```
+
+This replay needs no network, raw activity tables or remote machine, and does
+not train any model. Use the frozen `90a4700` scripts inside the input archive;
+future edited training scripts must not silently replace them. An existing
+replay directory is refused; choose a new directory for another run.
 
 ### Frozen inputs and local preparation
 
