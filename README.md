@@ -331,7 +331,7 @@ have no committed training logs and an unrecorded original device. The review
 originally counted nine, including three historical time runs; those time
 runs have since been replaced by the accepted as-of campaign with separate
 provenance. New CUDA fits of the six remaining runs belong to the separate
-18-fit missing-log supplement, currently awaiting independent acceptance;
+18-fit missing-log supplement, now independently accepted (18 models / 42 result cells);
 their logs describe the new fits and cannot establish the historical device.
 
 **On this dataset the GIN does not beat the fingerprint RF.** The random

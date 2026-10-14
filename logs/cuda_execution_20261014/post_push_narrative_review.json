@@ -1,0 +1,124 @@
+{
+  "schema": "post-push-narrative-review-v1",
+  "reviewed_at": "2026-10-14T14:52:03.408024+00:00",
+  "reviewed_commit": "45b0fa1adcfc8a836bdf093fd7651fe121b05d0a",
+  "mode": "Read-only narrative/data review; only this review record written; no SSH, training, model replay or full-suite rerun.",
+  "reviewed_files_sha256_after_correction": {
+    "README.md": "35da152b713dad16423f9f169e8f093972e47f20166479f9b8ac7aa4320f22d5",
+    "docs/methodology.md": "ed13d7306a1c5c7c5764bac2c8a6be3e026f12b84c28ff12c65558bc812e607d",
+    "experiments/LOG.md": "83b7253e236aac1f21408ec93b95af15520f2c83844fa2c3116a45eb33931288"
+  },
+  "original_findings": [
+    {
+      "file": "README.md",
+      "line_in_45b0fa1": 334,
+      "issue": "Current EGFR paragraph incorrectly called the accepted 18-fit supplement pending.",
+      "status": "corrected_in_worktree_and_rechecked",
+      "correction": "Now independently accepted 18 models / 42 result cells, historical device still unknown."
+    },
+    {
+      "file": "docs/methodology.md",
+      "line_in_45b0fa1": 1347,
+      "issue": "Current design paragraph incorrectly called 18-fit supplement pending.",
+      "status": "corrected_in_worktree_and_rechecked",
+      "correction": "Independent CPU replay of all 42 supplement result cells explicitly accepted."
+    },
+    {
+      "file": "docs/methodology.md",
+      "line_in_45b0fa1": 1363,
+      "issue": "All M3 fits were described as using extension_inputs.tar.gz, conflating pilot and extension bundle provenance.",
+      "status": "corrected_in_worktree_and_rechecked",
+      "correction": "48 CPU pilot fits used original inputs.tar.gz; 80 CPU extension and 128 CUDA fits used extension_inputs.tar.gz, retaining equal frozen training core/data."
+    }
+  ],
+  "checks": {
+    "four_cells_independently_recomputed_from_diagnostics": [
+      {
+        "device": "cpu",
+        "arm": "control",
+        "jobs": 64,
+        "means": {
+          "train_mse": 0.5189340219367296,
+          "valid_rmse_std": 0.8133573522791266,
+          "test_r2": 0.007337285205721855
+        },
+        "flags": 27
+      },
+      {
+        "device": "cpu",
+        "arm": "extended",
+        "jobs": 64,
+        "means": {
+          "train_mse": 0.5120362835004926,
+          "valid_rmse_std": 0.8118995521217585,
+          "test_r2": 0.006741845980286598
+        },
+        "flags": 26
+      },
+      {
+        "device": "cuda",
+        "arm": "control",
+        "jobs": 64,
+        "means": {
+          "train_mse": 0.506190502550453,
+          "valid_rmse_std": 0.8141748905181885,
+          "test_r2": 0.011844742111861706
+        },
+        "flags": 23
+      },
+      {
+        "device": "cuda",
+        "arm": "extended",
+        "jobs": 64,
+        "means": {
+          "train_mse": 0.4990288254339248,
+          "valid_rmse_std": 0.8094954006373882,
+          "test_r2": 0.027442497201263905
+        },
+        "flags": 22
+      }
+    ],
+    "budget_prediction_replay_max_abs_error": 1.9073486328125e-06,
+    "budget_train_mse_replay_max_abs_error": 1.7881393432617188e-07,
+    "budget_valid_rmse_replay_max_abs_error": 1.1920928955078125e-07,
+    "supplement_models": 18,
+    "supplement_result_cells": 42,
+    "supplement_historical_r2_difference_range": [
+      -0.08223484096476863,
+      0.1295180909707555
+    ],
+    "supplement_prediction_replay_max_abs_error": 2.384185791015625e-06,
+    "supplement_label_replay_max_abs_error": 4.76837158203125e-07,
+    "cuda_phase_seconds_including_preflight": 1609.582413,
+    "cuda_training_status_first_utc": "2026-10-14T13:52:13.904796+00:00",
+    "cuda_training_status_last_utc": "2026-10-14T14:18:56.521163+00:00",
+    "cuda_training_status_seconds": 1602.616367,
+    "training_prefixes": {
+      "cpu": {
+        "pairs": 64,
+        "matching_rounded_prefixes": 64,
+        "interpretation": "Only printed epochs and rounded train/validation/lr values are compared; no bitwise-equivalence requirement. Differences are reported, not suppressed or used to select runs."
+      },
+      "cuda": {
+        "pairs": 64,
+        "matching_rounded_prefixes": 0,
+        "interpretation": "Only printed epochs and rounded train/validation/lr values are compared; no bitwise-equivalence requirement. Differences are reported, not suppressed or used to select runs."
+      }
+    },
+    "existing_dependency_versions_changed": {},
+    "cuda_smoke_checks": 24,
+    "power_description_matches_record": true,
+    "replay_archive_paths_exist": [
+      "results/time_budget_sensitivity/cuda_eight_seed/artifacts/study.tar.gz",
+      "results/time_budget_sensitivity/cuda_eight_seed/artifacts/study.tar.gz.manifest.json",
+      "results/provenance_reconstruction/cuda_20261014/artifacts/provenance-20261014T143337822825.tar.gz",
+      "results/provenance_reconstruction/cuda_20261014/artifacts/provenance-20261014T143337822825.tar.gz.manifest.json",
+      "results/time_budget_sensitivity/inputs.tar.gz",
+      "results/time_budget_sensitivity/inputs_archive.json",
+      "results/provenance_reconstruction/plan.json"
+    ],
+    "scope_and_limitations": "18 replacements remain separate from the four 64-job cells and cannot recover historical identity. Fixed-split seeds are optimization replicates, not k-fold. CUDA prefix mismatch and unmeasured same-seed variability are disclosed. Inference replay is not deterministic retraining. Historical LOG pending statements are explicitly time-scoped."
+  },
+  "unresolved_findings": [],
+  "limitation": "Verified stored evidence and current corrected prose, not independent hardware causality, retraining determinism or fresh execution of replay commands."
+}

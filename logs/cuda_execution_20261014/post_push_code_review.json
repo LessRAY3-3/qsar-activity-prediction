@@ -1,0 +1,118 @@
+{
+  "reviewed_commit": "45b0fa1adcfc8a836bdf093fd7651fe121b05d0a",
+  "status": "no_actionable_findings",
+  "findings": [],
+  "checks": {
+    "protected_artifacts": {
+      "baseline": "d7864b0636848a5fd0130b5830aab5d9e25c8ce6",
+      "paths": 904,
+      "changed_paths": [],
+      "working_tree_matches_commit": true
+    },
+    "cuda_budget_archive": {
+      "members": 3426,
+      "hardlinks": 2161,
+      "archive_sha256": "ad770666def4edbcbb51778e538480d3f6f8b949b9d1d12940c952307fb374b2",
+      "archive_bytes": 88569135,
+      "manifest_sha256": "23185c21fbfa26c42d3efa20bae7e22d7b44ce67f44b1607a8f4713310ef6685",
+      "every_member_rehashed": true,
+      "extracted_tree_exact_inventory_and_hashes": true,
+      "acceptance_report_and_output_hashes_match": true
+    },
+    "provenance_archive": {
+      "members": 931,
+      "hardlinks": 0,
+      "archive_sha256": "ef6788b1ac778e5e09cf56ac2a41a0b3767c95f98c27d2bf44f4f02dd434ca23",
+      "archive_bytes": 42777090,
+      "manifest_sha256": "cc92f9c42bd693a7dcb6674c2f27803d3b69f5e7877583f6d26a62a293470c8a",
+      "every_member_rehashed": true,
+      "extracted_tree_exact_inventory_and_hashes": true,
+      "acceptance_report_and_output_hashes_match": true
+    },
+    "provenance_receipts": {
+      "jobs": 18,
+      "task_cells": 42,
+      "receipt_source_input_output_evidence_hashes_match": true,
+      "report_receipt_prediction_links_match": true,
+      "plan_job_tag_cells_exact": true,
+      "all_four_pass_columns_true": true,
+      "max_prediction_abs_error": 2.384185791015625e-06,
+      "max_label_abs_error": 4.76837158203125e-07,
+      "identity": {
+        "plan_sha256": "017361607030902d20f7ef6faa605bbbe8bcb61bfcaddb7828f040d628256f6e",
+        "runner_sha256": "cebcb554103afb64babb5d0fe5319869c1f1eaaff4e0006651e7869f93943139",
+        "threads": 4,
+        "backend": "cuda"
+      }
+    },
+    "comparison": {
+      "four_cells": [
+        {
+          "device": "cpu",
+          "arm": "control",
+          "jobs": 64,
+          "mean_train_mse": 0.5189340219367296,
+          "mean_valid_rmse_std": 0.8133573522791266,
+          "mean_test_r2": 0.0073372852057218396,
+          "common_flags": 27
+        },
+        {
+          "device": "cpu",
+          "arm": "extended",
+          "jobs": 64,
+          "mean_train_mse": 0.5120362835004926,
+          "mean_valid_rmse_std": 0.8118995521217585,
+          "mean_test_r2": 0.006741845980286584,
+          "common_flags": 26
+        },
+        {
+          "device": "cuda",
+          "arm": "control",
+          "jobs": 64,
+          "mean_train_mse": 0.506190502550453,
+          "mean_valid_rmse_std": 0.8141748905181885,
+          "mean_test_r2": 0.011844742111861692,
+          "common_flags": 23
+        },
+        {
+          "device": "cuda",
+          "arm": "extended",
+          "jobs": 64,
+          "mean_train_mse": 0.4990288254339248,
+          "mean_valid_rmse_std": 0.8094954006373882,
+          "mean_test_r2": 0.02744249720126389,
+          "common_flags": 22
+        }
+      ],
+      "paired_rows": 64,
+      "target_rows": 8,
+      "across_target_rows": 25,
+      "all_published_tables_recomputed": true,
+      "source_input_report_output_hashes_match": true,
+      "cpu_prefix_matches": 64,
+      "cuda_prefix_matches": 0
+    },
+    "committed_readme_four_cell_table": {
+      "cells_checked": 20,
+      "all_passed": true
+    },
+    "targeted_tests": {
+      "command": "python -m pytest -q tests/test_unpack_verified_return.py tests/test_time_environment_comparison.py tests/test_review_skill.py",
+      "passed": 92,
+      "seconds": 1.36
+    }
+  },
+  "manual_code_review": [
+    "New unpacker: both manifests, canonical paths, duplicate keys/members, file and hardlink restrictions, exact inventory/bytes/hashes, staging cleanup and non-overwrite publication.",
+    "Comparator: complete four-cell pairing, source/input/label identity, common-flag definition, metric directions, equal weighting and descriptive limitations.",
+    "README T10: independent diagnostics aggregation, exact four-cell coverage and accepted report identity.",
+    "18-job replay: frozen plan and source/input verification, per-job receipt/evidence/output linkage, 42 unique declared task cells and committed prediction/output hashes."
+  ],
+  "limitations": [
+    "No SSH, training, repeated checkpoint inference or full test suite. The 92 focused tests passed.",
+    "Previously executed independent CPU replay accepted predictions; this review revalidated returned evidence and all output links instead of repeating inference.",
+    "CUDA rounded prefixes differ in all 64 pairs; budget contrasts and interaction include run variation and cannot establish pure causal budget or hardware effects.",
+    "Parent is separately correcting stale documentation passages; numeric README table verified at exact reviewed commit.",
+    "Archive checks establish supplied-manifest byte integrity, not authenticity or recovery of historical training identity."
+  ]
+}

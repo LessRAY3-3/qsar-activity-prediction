@@ -1344,7 +1344,7 @@ additional jobs for seeds 3/4/5/6/7 in 1,113.540 seconds
 artifact checks and CPU checkpoint replay**. The fresh 4070 CUDA campaign
 also completed and independently passed all 128 jobs. All four cells and
 64 paired target/seed environment contrasts are now accepted; the separate
-18-fit missing-log supplement is still awaiting its own acceptance.
+18-fit missing-log supplement also passed independent CPU replay of all 42 result cells.
 
 Both budgets retain the same learning-rate scheduler. Trainer, original
 worker, label loader, graph dataset, common helpers, training mathematics
@@ -1360,10 +1360,12 @@ published outputs. The CUDA deployment verified the same frozen training/input
 versions. Historical accepted CUDA runs remain reference data and were not
 substituted for any of the newly matched 128 CUDA jobs.
 
-**Frozen-comparison boundary after the Low fixes.** The accepted eight-seed
-M3 cohort and matched CUDA training both used
+**Frozen-comparison boundary after the Low fixes.** The M3 80-fit extension
+and all 128 matched CUDA fits used
 `results/time_budget_sensitivity/extension_inputs.tar.gz`: bundle revision
-`8521063` contains the unchanged training core from `90a4700`. This revision's
+`8521063` contains the unchanged training core from `90a4700`. The retained
+48-fit M3 pilot used its original `inputs.tar.gz` archive with the same frozen
+training core and data, as checked before combining the CPU cohorts. This revision's
 repairs to the current worker/label utilities change source hashes even though
 training mathematics are unchanged. Do not substitute current source or a
 newly built bundle for the frozen comparison input: that would introduce a
