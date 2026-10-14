@@ -1,0 +1,170 @@
+{
+  "evidence_sha256": {
+    "README.md": "9d690ed4346725f635cba420654e991a11f8a3ee86d6293f62eadf1aa71f7faf",
+    "docs/methodology.md": "ab7d3ba81c4806ae9dfe5016a8244f5f9442b5c0d73a80a9334b4423801020d1",
+    "experiments/LOG.md": "c4dd27857e3713f25ab3d04fcfaa1c57733742181b6063219bdef21e4549979b",
+    "experiments/low_review_diagnostics.py": "4ddf8a0f6cf5ad47733b0c7d8a4fb91ec9da1011bdefa99d7b4bf8b484495eda",
+    "experiments/time_split_summary.py": "8b1474249d46e5d2fcc4d10fbf6269e4b443d4c01bc75c52f6d151f2ee7dd9af",
+    "figures/time_split/panel_3splits.png": "11f7570c89703d17116c3416f9d86741764d2c307c21dc4d2974205475c0d38d",
+    "logs/pr8_low_20261014/legacy_compatibility.json": "97e9ba4dbacded456cf5189f6b4124ade0fae0e550d45562503d9e326260dfd1",
+    "logs/pr8_low_20261014/mutations/report.json": "9dc9f0cbe24ed520e09796d52b951b4113e44c6230336370569ba93fca9e443f",
+    "logs/pr8_low_20261014/pytest.log": "557c406306ddb654beb97ffac8e541a608b5bc8745eb4b0c4f23641655a86830",
+    "results/review_low_diagnostics/a2a_source_groups.csv": "81604ffa2d81361b429239cbf2ebf0e4b6deca289dd61eb4bdd04d1ba19650ea",
+    "results/review_low_diagnostics/ad_subset_metrics.csv": "2f15cd87505768096cd5fb521e60932d0627ba66f963d7ad33ac39723cac040c",
+    "results/review_low_diagnostics/summary.json": "ba1c3e0c9587d892c3e2f16c3bafd1c13565b78ae798e407d9a11663a3984899",
+    "results/time_split/pr8_low_audit.json": "faa7ff9ab4dca419255e588dabbbe48ba5085bf5c2ef342e85b06481c703ad99",
+    "scripts/check_time_tooling_mutations.py": "5fc51d751970acda27d67bdf55bafa9e01cbe81b67eccdc1d36ae9d32d116176",
+    "scripts/gnn_08_time_splits.py": "1fed3cd090fa0d71f5723c8a2ed109f96d0a2d5fce97b109022c7210196d0524",
+    "scripts/restore_time_inputs.py": "812e184c2456d4a2ffb4a904b218dd5f486983d8c385cc17b22c463e7d7cb4f1",
+    "scripts/run_time_campaign.py": "885da208868cf7d1441027972a2be2583b2b0371bcb665645b09d0e1d3ef8231",
+    "scripts/time_campaign_bundle.py": "4a2fff55e1cf833f4124af8fc567b1cf1859ccfcd01c31267d78e068247b3343",
+    "scripts/time_labels.py": "aa2c47560527d24813c58f3456e6766e27482c50b28a669d6c59c7dfbbe5e8a7",
+    "tests/test_latent_robustness.py": "f952de9eeb575dd06b4898222130c17802f5f7482229f836d1050ecc666c54e0",
+    "tests/test_p8_analysis.py": "5b297a9dc093ec2b78ee8a7017952bdfda95865de02449813a9abcf513f03430",
+    "tests/test_restore_time_inputs.py": "85b27a5656423b6fdbce3112b9b43d27c624a0da5f9fd480ae8905ec3e833893",
+    "tests/test_time_campaign.py": "3893d001514e4ffcd3d1ebfc8e75691a08ca9de70d8c7d2326d8aab1d98856ad",
+    "tests/test_time_campaign_bundle.py": "ad81f4fc915d4354d17fa1e1fdcb72baf410b4ec8ed98f1edde51964df087a35",
+    "tests/test_time_campaign_real.py": "90a50bc7328671d1f03e57826bfd32461bab4b56ea4da14af1273004d5d31571",
+    "tests/test_time_splits.py": "fd9f986d01706bde5e93eb2373afb294cf5a3a68202ab71be17aacf8f5a45642"
+  },
+  "items": [
+    {
+      "change": "Unsupported all-year-label auxiliary time paths explicitly fail.",
+      "evidence": [
+        "tests/test_p8_analysis.py"
+      ],
+      "id": "auxiliary_time_paths",
+      "status": "previously_fixed"
+    },
+    {
+      "change": "Stage first; preserve existing valid split on failure; journal NPZ/timeline publication and recover after interruption.",
+      "evidence": [
+        "scripts/gnn_08_time_splits.py",
+        "tests/test_time_splits.py"
+      ],
+      "id": "split_regeneration",
+      "status": "fixed"
+    },
+    {
+      "change": "Full-manifest checks, source provenance, interruption recovery and matched checkpoint normalization.",
+      "evidence": [
+        "scripts/run_time_campaign.py",
+        "scripts/time_campaign_bundle.py",
+        "tests/test_time_campaign.py",
+        "tests/test_time_campaign_bundle.py"
+      ],
+      "id": "campaign_worker",
+      "status": "fixed"
+    },
+    {
+      "change": "Atomic complete-file no-clobber installation and all 24 published GIN checkpoint compatibility checks.",
+      "evidence": [
+        "scripts/restore_time_inputs.py",
+        "tests/test_restore_time_inputs.py"
+      ],
+      "id": "restore",
+      "status": "fixed"
+    },
+    {
+      "change": "New full-payload integrity includes scaffolds; legacy label IDs retained; unkeyed hashes explicitly are not issuer authentication.",
+      "evidence": [
+        "scripts/time_labels.py",
+        "docs/methodology.md",
+        "logs/pr8_low_20261014/legacy_compatibility.json"
+      ],
+      "id": "split_integrity",
+      "status": "fixed_with_legacy_compatibility"
+    },
+    {
+      "change": "Real tiny CPU GIN/RF artifacts and kill tests; ten disclosed mutants caught; signing fixture fixed and RDKit premise explicit. Original sixteen mutants not reproduced because their source was not supplied.",
+      "evidence": [
+        "tests/test_time_campaign_real.py",
+        "scripts/check_time_tooling_mutations.py",
+        "logs/pr8_low_20261014/mutations/report.json"
+      ],
+      "id": "test_strength",
+      "status": "improved_original_mutants_unavailable"
+    },
+    {
+      "change": "Single seed-42 RF and initial versus repaired hERG results distinguished. Review-reported five-fit SD not independently verified; fixed-input supplement documented only.",
+      "evidence": [
+        "results/review_low_diagnostics/summary.json",
+        "docs/methodology.md"
+      ],
+      "id": "rf_seed_uncertainty",
+      "status": "documented_not_retrained"
+    },
+    {
+      "change": "Console, figure and prose distinguish all-year from as-of labels; existing metric values unchanged.",
+      "evidence": [
+        "experiments/time_split_summary.py",
+        "figures/time_split/panel_3splits.png"
+      ],
+      "id": "protocol_comparison",
+      "status": "fixed"
+    },
+    {
+      "change": "Paired absolute RMSE/MAE and subset label variances supplement R2.",
+      "evidence": [
+        "results/review_low_diagnostics/ad_subset_metrics.csv"
+      ],
+      "id": "ad_subset_r2",
+      "status": "fixed"
+    },
+    {
+      "change": "Raw data verifies dominant 2022 document and discretized measurements; source grouping does not prove a single experimental batch.",
+      "evidence": [
+        "results/review_low_diagnostics/a2a_source_groups.csv",
+        "results/review_low_diagnostics/summary.json"
+      ],
+      "id": "a2a_source_dependence",
+      "status": "fixed"
+    },
+    {
+      "change": "Historical/current records scoped; actual 1.350 MiB package and A2A 58.71% test fraction stated; methodological claims qualified.",
+      "evidence": [
+        "README.md",
+        "docs/methodology.md",
+        "experiments/LOG.md"
+      ],
+      "id": "documentation",
+      "status": "fixed"
+    }
+  ],
+  "limitations": [
+    "Original sixteen mutation sources unavailable; ten new specified mutations are a separate audit.",
+    "Review-reported RF five-fit standard deviation not independently reproduced; no new project RF training.",
+    "Multi-file journal publication has a short mixed-version window and needs recovery after abrupt death; it is not instantaneous atomic visibility.",
+    "Historical split label IDs remain compatible and do not acquire the new optional payload digest; complete frozen archive/file hashes remain checked."
+  ],
+  "preservation": {
+    "baseline_commit": "c2e2e5a5cd4574f75a2ecb47cb55507ac930228e",
+    "frozen_extension_bundle": "85210630c475e8733089a476b8d5bf4852dbf773",
+    "frozen_training_core": "90a470050367cebc4cd83dfe8d3f7fb37d53e6de",
+    "pending_cuda_jobs": 128,
+    "project_training_performed": false,
+    "remote_training_hosts_contacted": false,
+    "test_only_tiny_cpu_fits": true,
+    "unchanged_git_paths": [
+      "results/time_budget_sensitivity",
+      "results/gnn_models",
+      "results/time_split/summary.csv",
+      "results/significance/summary_time.csv"
+    ]
+  },
+  "scope": "PR #8 Low findings only; implementation PR #7. This does not close every earlier PR #6 suggestion.",
+  "source_commit": "314447da0b56969c639bcc418e0fec3b5f535f95",
+  "validation": {
+    "compatibility": "logs/pr8_low_20261014/legacy_compatibility.json",
+    "full_read_only_audit": "results/time_split/pr8_low_audit.json",
+    "full_read_only_audit_status": "passed",
+    "git_diff_check": "passed",
+    "mutation_audit": "logs/pr8_low_20261014/mutations/report.json",
+    "pytest": {
+      "log": "logs/pr8_low_20261014/pytest.log",
+      "passed": 553,
+      "warnings": 3
+    },
+    "ruff": "passed"
+  }
+}

@@ -13,7 +13,7 @@
       },
       {
         "path": "figures/time_split/panel_3splits.png",
-        "sha256": "50783d490a69e0631d297623d1f824b9000fc1f6630f357b75db2f068d8fe187"
+        "sha256": "11f7570c89703d17116c3416f9d86741764d2c307c21dc4d2974205475c0d38d"
       },
       {
         "path": "figures/significance/ci_panel_time.png",
@@ -24,10 +24,17 @@
     "frozen_input_manifest_sha256": "d341acc273682f75482370359597ed7970387ea2ca174e0c8ba7d6823d9dc697",
     "label_audit_sha256": "df4f9b0d4fea753d3065757263b82354d14b4897a9035de58dceb342ca587d49",
     "paired_bootstrap_replicates": 10000,
+    "presentation_history": [
+      {
+        "change": "Panel title updated to describe protocol comparison; numerical CSVs unchanged.",
+        "script_sha256": "c6a54e0e516ad1ed816102c5f8f6cb5cb4be308a308695a9e5e9240b6a432ff2",
+        "source_commit": "3da94f118a8c68dd2d1d5ec98e6e9278751b4be8"
+      }
+    ],
     "presentation_revision": {
-      "change": "Panel title updated to describe protocol comparison; numerical CSVs unchanged.",
-      "script_sha256": "c6a54e0e516ad1ed816102c5f8f6cb5cb4be308a308695a9e5e9240b6a432ff2",
-      "source_commit": "3da94f118a8c68dd2d1d5ec98e6e9278751b4be8"
+      "change": "Added explicit all-year versus as-of label protocol caveat to the panel and console; numerical CSVs unchanged.",
+      "script_sha256": "8b1474249d46e5d2fcc4d10fbf6269e4b443d4c01bc75c52f6d151f2ee7dd9af",
+      "source_commit": "314447da0b56969c639bcc418e0fec3b5f535f95"
     },
     "source_commit": "0b4fb296568452b86b74eb82b12177f289661957"
   },
