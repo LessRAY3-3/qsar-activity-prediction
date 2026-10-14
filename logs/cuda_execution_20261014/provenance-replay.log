@@ -1,0 +1,21 @@
+/Users/leisirui/qsar-activity-prediction/.venv/lib/python3.12/site-packages/torch/jit/_script.py:1491: FutureWarning: `torch.jit.script` is deprecated. Please switch to `torch.compile` or `torch.export`.
+  warnings.warn(
+CPU replay: egfr_gin_random_seed42
+CPU replay: egfr_gin_scaffold_seed42
+CPU replay: mt_random_seed42
+CPU replay: mt_scaffold_seed42
+CPU replay: pooled_random_seed42
+CPU replay: pooled_scaffold_seed42
+CPU replay: egfr_gin_random_seed1
+CPU replay: egfr_gin_scaffold_seed1
+CPU replay: mt_random_seed1
+CPU replay: mt_scaffold_seed1
+CPU replay: pooled_random_seed1
+CPU replay: pooled_scaffold_seed1
+CPU replay: egfr_gin_random_seed2
+CPU replay: egfr_gin_scaffold_seed2
+CPU replay: mt_random_seed2
+CPU replay: mt_scaffold_seed2
+CPU replay: pooled_random_seed2
+CPU replay: pooled_scaffold_seed2
+{"status": "accepted_independent_cpu_replay", "jobs": 18, "rows": 42, "report": "/Users/leisirui/qsar-campaigns/cuda-acceptance-20261014/provenance-analysis/report.json"}

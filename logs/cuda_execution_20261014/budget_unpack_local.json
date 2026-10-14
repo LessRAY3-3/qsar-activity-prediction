@@ -1,0 +1,11 @@
+{
+  "state": "verified_return_archive",
+  "format": "study-with-hardlinks",
+  "archive_sha256": "ad770666def4edbcbb51778e538480d3f6f8b949b9d1d12940c952307fb374b2",
+  "archive_bytes": 88569135,
+  "manifest_sha256": "23185c21fbfa26c42d3efa20bae7e22d7b44ce67f44b1607a8f4713310ef6685",
+  "files": 3426,
+  "hardlinks": 2161,
+  "out_dir": "/Users/lessray/Desktop/kimi code/qsar-time-retrain-20261013/.scratch/cuda-return-20261014",
+  "acceptance_scope": "Archive/member byte integrity only; independent numerical replay remains required."
+}

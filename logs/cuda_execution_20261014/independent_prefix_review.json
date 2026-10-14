@@ -1,0 +1,3027 @@
+{
+  "schema": "independent-cuda-prefix-review-v1",
+  "reviewed_at": "2026-10-14T14:37:24.430863+00:00",
+  "mode": "read-only returned evidence review; no SSH, model inference, training, source change or numeric artifact rewrite",
+  "cohort_pairs": 64,
+  "verified_command_differences_only": {
+    "--epochs": [
+      "100",
+      "200"
+    ],
+    "--patience": [
+      "20",
+      "40"
+    ],
+    "--min-epochs": [
+      "0",
+      "60"
+    ]
+  },
+  "all_other_recorded_provenance_equal_within_pair": true,
+  "cpu_cuda_frozen_source_and_input_hashes_equal": true,
+  "matching_cuda_rounded_prefixes": 0,
+  "matching_cpu_rounded_prefixes_from_audited_report": 64,
+  "pairs_with_real_common_epoch_value_differences": 64,
+  "first_differing_common_epoch_counts": {
+    "1": 60,
+    "2": 1,
+    "3": 1,
+    "10": 2
+  },
+  "epoch1_value_difference_counts": {
+    "train_mse": 50,
+    "valid_rmse": 58,
+    "lr": 0
+  },
+  "all_first_observed_differences_precede_earliest_possible_control_stopping_epoch": 21,
+  "arithmetic_checks": {
+    "paired_rows": 64,
+    "metrics": [
+      "train_mse",
+      "valid_rmse_std",
+      "test_r2",
+      "test_rmse",
+      "test_mae"
+    ],
+    "contrast_types": 5,
+    "cell_means_checked": 12,
+    "all_passed_at_absolute_tolerance": 1e-12
+  },
+  "cuda_direction_counts": {
+    "train_mse": {
+      "extended_lower": 29,
+      "equal": 0,
+      "extended_higher": 35
+    },
+    "valid_rmse_std": {
+      "extended_lower": 36,
+      "equal": 0,
+      "extended_higher": 28
+    },
+    "test_r2": {
+      "extended_lower": 34,
+      "equal": 0,
+      "extended_higher": 30
+    }
+  },
+  "frozen_training_source": {
+    "path": ".scratch/cuda-return-20261014/study/control/lane0/scripts/gnn_03_train_gin.py",
+    "sha256": "da5d897e71efab75cc30c8f805198ece1e43bb435fffc1652fbef951f5f95c3c",
+    "evidence": [
+      "torch.manual_seed(args.seed), numpy seed and explicit DataLoader generator are set.",
+      "The frozen GIN uses GINConv default add aggregation and global_mean_pool. Installed PyG 2.8.0.post1 sum/mean scatter implementation calls scatter_add_.",
+      "The frozen training script does not enable torch.use_deterministic_algorithms; recorded CUBLAS_WORKSPACE_CONFIG is null.",
+      "Scheduler is ReduceLROnPlateau with unchanged patience=7; three budget/stopping settings differ between arms."
+    ]
+  },
+  "interpretation": [
+    "No configuration/input/report arithmetic error was found in these checks.",
+    "Observed CUDA prefix divergence is consistent with nondeterministic floating-point reductions, but the recorded evidence does not isolate one kernel or prove that this is the sole cause.",
+    "CUDA extended/control are separately initialized training runs indexed by the same target and integer seed, not a continuation of the identical saved optimization trajectory.",
+    "The CUDA budget contrast and interaction include run-to-run trajectory variation. They must not be attributed solely to longer training.",
+    "The manipulation is a joint budget/stopping policy change (100/0/20 to 200/60/40), not only an epoch-limit change.",
+    "CPU matching rounded log prefixes are supportive descriptive evidence, not bitwise determinism or a hardware-causal guarantee.",
+    "No same-budget same-seed CUDA repeats were included, so this cohort cannot separately quantify same-seed CUDA nondeterminism.",
+    "Successful CPU inference replay establishes saved-model/prediction consistency; it does not establish deterministic training."
+  ],
+  "suggested_wording": "Across the 64 matched target/seed pairs, CUDA control and extended runs all differed at common logged epochs; 60 pairs differed already at epoch 1. Their descriptive contrast combines the declared budget/stopping-policy change with run-to-run optimization variation. Input and source hashes match, and CPU replay validates saved outputs, but neither establishes that differences are caused solely by the additional training budget.",
+  "primary_references": [
+    "https://docs.pytorch.org/docs/main/generated/torch.use_deterministic_algorithms.html",
+    "https://github.com/pytorch/pytorch/blob/main/docs/source/notes/randomness.md",
+    "https://pytorch-geometric.readthedocs.io/en/latest/_modules/torch_geometric/utils/_scatter.html"
+  ],
+  "pairs": [
+    {
+      "tag": "a2a",
+      "seed": 1,
+      "command_differences": {
+        "--epochs": [
+          "100",
+          "200"
+        ],
+        "--patience": [
+          "20",
+          "40"
+        ],
+        "--min-epochs": [
+          "0",
+          "60"
+        ]
+      },
+      "provenance_other_than_hyperparameters_equal": true,
+      "first_differing_common_epoch": 10,
+      "common_epochs_with_different_values": [
+        10,
+        20
+      ],
+      "control_epoch1": {
+        "train_mse": 1.0875,
+        "valid_rmse": 0.7947,
+        "lr": 0.001
+      },
+      "extended_epoch1": {
+        "train_mse": 1.0875,
+        "valid_rmse": 0.7947,
+        "lr": 0.001
+      },
+      "log_sha256": {
+        "control": "320d763f54d990bf89df7742f444cd1de8095308143963fc00fc0f14a774b942",
+        "extended": "e368563a6a19d59eb680838d7f304731583676e458ce37291bf96e6099aad895"
+      },
+      "status_sha256": {
+        "control": "5a5bd8057164209fe1f102d2399f3de0bd63bfd36003251bbe9bba06afe0c184",
+        "extended": "3432ec69719f3e87024177682f604171ca37d963fd283b60e05a27da950ed377"
+      }
+    },
+    {
+      "tag": "a2a",
+      "seed": 2,
+      "command_differences": {
+        "--epochs": [
+          "100",
+          "200"
+        ],
+        "--patience": [
+          "20",
+          "40"
+        ],
+        "--min-epochs": [
+          "0",
+          "60"
+        ]
+      },
+      "provenance_other_than_hyperparameters_equal": true,
+      "first_differing_common_epoch": 1,
+      "common_epochs_with_different_values": [
+        1,
+        4,
+        10,
+        20
+      ],
+      "control_epoch1": {
+        "train_mse": 1.003,
+        "valid_rmse": 0.8022,
+        "lr": 0.001
+      },
+      "extended_epoch1": {
+        "train_mse": 1.003,
+        "valid_rmse": 0.8017,
+        "lr": 0.001
+      },
+      "log_sha256": {
+        "control": "157034105c0892e15e714e566d46c33d9c00a1f763a3dc77b9b777638d1a58e5",
+        "extended": "447093a63d5a4e5bd05597b2b0533fbe5de185cab316407c201a4d792b6ea005"
+      },
+      "status_sha256": {
+        "control": "f2c8423122f5fd3a31a862effec9dc115aa4d0f26f06a18a32d65561c69b5b81",
+        "extended": "71faaaa0e423d07126a088dca575c00825c1fe2baa461fb504ed06559793141e"
+      }
+    },
+    {
+      "tag": "a2a",
+      "seed": 3,
+      "command_differences": {
+        "--epochs": [
+          "100",
+          "200"
+        ],
+        "--patience": [
+          "20",
+          "40"
+        ],
+        "--min-epochs": [
+          "0",
+          "60"
+        ]
+      },
+      "provenance_other_than_hyperparameters_equal": true,
+      "first_differing_common_epoch": 1,
+      "common_epochs_with_different_values": [
+        1,
+        10,
+        20
+      ],
+      "control_epoch1": {
+        "train_mse": 1.0465,
+        "valid_rmse": 0.7681,
+        "lr": 0.001
+      },
+      "extended_epoch1": {
+        "train_mse": 1.0464,
+        "valid_rmse": 0.7681,
+        "lr": 0.001
+      },
+      "log_sha256": {
+        "control": "cde5e212ed6f0255eda7334fc5d25161b71e0a5efcd3ad208c2554ec3c97cf33",
+        "extended": "8dafa371cd86148da38c9bd5be6d636e02f9b34f16ea66a9b4217015fd0e13cf"
+      },
+      "status_sha256": {
+        "control": "bfd2593f9cac06389b782c5f7c092ecc9cfa8cf3bd6fad451c7eeb03772a1745",
+        "extended": "7e71a0764bf9bc6fc1c7cce8c3b245058e3ffdc7c6e9af71d790e90107773ce4"
+      }
+    },
+    {
+      "tag": "a2a",
+      "seed": 4,
+      "command_differences": {
+        "--epochs": [
+          "100",
+          "200"
+        ],
+        "--patience": [
+          "20",
+          "40"
+        ],
+        "--min-epochs": [
+          "0",
+          "60"
+        ]
+      },
+      "provenance_other_than_hyperparameters_equal": true,
+      "first_differing_common_epoch": 1,
+      "common_epochs_with_different_values": [
+        1,
+        3,
+        10,
+        20
+      ],
+      "control_epoch1": {
+        "train_mse": 0.9327,
+        "valid_rmse": 0.8293,
+        "lr": 0.001
+      },
+      "extended_epoch1": {
+        "train_mse": 0.9327,
+        "valid_rmse": 0.8291,
+        "lr": 0.001
+      },
+      "log_sha256": {
+        "control": "46e8dc74f5e11f3c63f3935c16f7474b9364f63c4383d8f19c3af28ec769a84c",
+        "extended": "ef59ee032957d4f203c660556d16006ac060c73171a30e1b0c372c9ac16645ad"
+      },
+      "status_sha256": {
+        "control": "18e98dfdb7ca5f2fb7f43987c0a922afcf2fba4561bc8131cb408daf9ee18cc7",
+        "extended": "be855c41f014a7c8335203153c14ffdc839af8fa45cbf2c8332f4e8b0cc57019"
+      }
+    },
+    {
+      "tag": "a2a",
+      "seed": 5,
+      "command_differences": {
+        "--epochs": [
+          "100",
+          "200"
+        ],
+        "--patience": [
+          "20",
+          "40"
+        ],
+        "--min-epochs": [
+          "0",
+          "60"
+        ]
+      },
+      "provenance_other_than_hyperparameters_equal": true,
+      "first_differing_common_epoch": 1,
+      "common_epochs_with_different_values": [
+        1,
+        2,
+        3,
+        8,
+        10,
+        20
+      ],
+      "control_epoch1": {
+        "train_mse": 1.0464,
+        "valid_rmse": 0.8509,
+        "lr": 0.001
+      },
+      "extended_epoch1": {
+        "train_mse": 1.0465,
+        "valid_rmse": 0.8511,
+        "lr": 0.001
+      },
+      "log_sha256": {
+        "control": "ce751312afa4c94f6b534e0d2feb6abcb9b79d00da62266dcd14618910389047",
+        "extended": "c8ba4b505c64fe87e240e14b01e885b455e1f08c853b44fe9a8476608b7ece32"
+      },
+      "status_sha256": {
+        "control": "82d5c2b69ea046348ccfb2797aa7e65f4966553dd7ff7321e9133697d14d3222",
+        "extended": "6d3840fae00dfaeb092995dd10f29698a335e30200d6a5b4be33c183a50d8bee"
+      }
+    },
+    {
+      "tag": "a2a",
+      "seed": 6,
+      "command_differences": {
+        "--epochs": [
+          "100",
+          "200"
+        ],
+        "--patience": [
+          "20",
+          "40"
+        ],
+        "--min-epochs": [
+          "0",
+          "60"
+        ]
+      },
+      "provenance_other_than_hyperparameters_equal": true,
+      "first_differing_common_epoch": 3,
+      "common_epochs_with_different_values": [
+        3,
+        10,
+        20
+      ],
+      "control_epoch1": {
+        "train_mse": 0.9599,
+        "valid_rmse": 0.7721,
+        "lr": 0.001
+      },
+      "extended_epoch1": {
+        "train_mse": 0.9599,
+        "valid_rmse": 0.7721,
+        "lr": 0.001
+      },
+      "log_sha256": {
+        "control": "1706bb8a938ddf1dc9a55454c394572b3996efaed7cccba8b0fedc4afb328f5e",
+        "extended": "30d72be92003612c40ede637ccf1a33d868899ea063d53b541f3be7dd1e4e1ef"
+      },
+      "status_sha256": {
+        "control": "de7973848e9c13d0c73c52bda580a4e407e47d2b6b69dbc30e765088f9ea3606",
+        "extended": "ff3ee2615f2914a8802dff55347180269dc89c06df5e9c7f354ab8bd9d6e32c1"
+      }
+    },
+    {
+      "tag": "a2a",
+      "seed": 7,
+      "command_differences": {
+        "--epochs": [
+          "100",
+          "200"
+        ],
+        "--patience": [
+          "20",
+          "40"
+        ],
+        "--min-epochs": [
+          "0",
+          "60"
+        ]
+      },
+      "provenance_other_than_hyperparameters_equal": true,
+      "first_differing_common_epoch": 1,
+      "common_epochs_with_different_values": [
+        1,
+        2,
+        3,
+        5,
+        6,
+        10,
+        20
+      ],
+      "control_epoch1": {
+        "train_mse": 0.9694,
+        "valid_rmse": 0.829,
+        "lr": 0.001
+      },
+      "extended_epoch1": {
+        "train_mse": 0.9694,
+        "valid_rmse": 0.8288,
+        "lr": 0.001
+      },
+      "log_sha256": {
+        "control": "70b19ffe99e5bc516f9ecf58629a3f5c56223200793624c96e831ba97b99582e",
+        "extended": "3487b08e94c01ecd1e589aea475e5d3890642fa25fc3ec9d0c57840f419040e4"
+      },
+      "status_sha256": {
+        "control": "0e98463fbc083c31b8734f262da9cf72fbd11998fa90d105baa1088a9ab63e74",
+        "extended": "8ab5d90439804a8defb1ece553a798277f17522f93c50328dec4eaf43d5fb6b6"
+      }
+    },
+    {
+      "tag": "a2a",
+      "seed": 42,
+      "command_differences": {
+        "--epochs": [
+          "100",
+          "200"
+        ],
+        "--patience": [
+          "20",
+          "40"
+        ],
+        "--min-epochs": [
+          "0",
+          "60"
+        ]
+      },
+      "provenance_other_than_hyperparameters_equal": true,
+      "first_differing_common_epoch": 2,
+      "common_epochs_with_different_values": [
+        2,
+        3,
+        8,
+        10,
+        20
+      ],
+      "control_epoch1": {
+        "train_mse": 0.9765,
+        "valid_rmse": 0.8299,
+        "lr": 0.001
+      },
+      "extended_epoch1": {
+        "train_mse": 0.9765,
+        "valid_rmse": 0.8299,
+        "lr": 0.001
+      },
+      "log_sha256": {
+        "control": "d65cba35e97ae93ee40bb64d5f6c6479a04d4598cd91336b2c51c377ab2a4aae",
+        "extended": "1d3b78e6f70cbcbcea6c00a8e6275f71d743641c14b9d9f10ccbf8b6fa7e0d16"
+      },
+      "status_sha256": {
+        "control": "9c0a8e31eb36dc63820c4137fc446c5a4a4b8a202f97671e64ba003afb7eaeaf",
+        "extended": "6c8f43a47e4d055dbd6b9b80e339cb7eb2fe11f70c30582fb1db4256f07316f3"
+      }
+    },
+    {
+      "tag": "abl1",
+      "seed": 1,
+      "command_differences": {
+        "--epochs": [
+          "100",
+          "200"
+        ],
+        "--patience": [
+          "20",
+          "40"
+        ],
+        "--min-epochs": [
+          "0",
+          "60"
+        ]
+      },
+      "provenance_other_than_hyperparameters_equal": true,
+      "first_differing_common_epoch": 1,
+      "common_epochs_with_different_values": [
+        1,
+        2,
+        10,
+        20,
+        30
+      ],
+      "control_epoch1": {
+        "train_mse": 0.7445,
+        "valid_rmse": 0.8342,
+        "lr": 0.001
+      },
+      "extended_epoch1": {
+        "train_mse": 0.7446,
+        "valid_rmse": 0.8364,
+        "lr": 0.001
+      },
+      "log_sha256": {
+        "control": "a4fba3b5d550e2014a59b1b6617c41bc27656d75e471683ad3128a59aa29945a",
+        "extended": "7cba07ddda2537964b9ef38ab7547949ba28385c8bc365772c282fb4c76cdbb5"
+      },
+      "status_sha256": {
+        "control": "a1fd31e7684f5fabede5f5e3062df38344a862e9725a81da8b40032bf4d7cf84",
+        "extended": "b21520a88a194b0feff8ea827a4237590ca0daa7f85092c110fc5bd0cbe34ae8"
+      }
+    },
+    {
+      "tag": "abl1",
+      "seed": 2,
+      "command_differences": {
+        "--epochs": [
+          "100",
+          "200"
+        ],
+        "--patience": [
+          "20",
+          "40"
+        ],
+        "--min-epochs": [
+          "0",
+          "60"
+        ]
+      },
+      "provenance_other_than_hyperparameters_equal": true,
+      "first_differing_common_epoch": 1,
+      "common_epochs_with_different_values": [
+        1,
+        2,
+        3,
+        10,
+        20,
+        30
+      ],
+      "control_epoch1": {
+        "train_mse": 0.7746,
+        "valid_rmse": 0.7964,
+        "lr": 0.001
+      },
+      "extended_epoch1": {
+        "train_mse": 0.7758,
+        "valid_rmse": 0.7982,
+        "lr": 0.001
+      },
+      "log_sha256": {
+        "control": "e74d8ad2ed8946707aa219726fb6c64bea202728c06f775c80dd9bc6a7f6d2bc",
+        "extended": "ce9640de4a5f7756530bf798b52143334a64da6fcbbfffb2bfade84bce3a142a"
+      },
+      "status_sha256": {
+        "control": "18784f0926c451657ab6039f1f56b9e06c4f4faa593dd7100f7934ee2ded5305",
+        "extended": "9da88199478bf6cc80e41956cf287335f3fce1963ea85a0a8600132a4ac772c8"
+      }
+    },
+    {
+      "tag": "abl1",
+      "seed": 3,
+      "command_differences": {
+        "--epochs": [
+          "100",
+          "200"
+        ],
+        "--patience": [
+          "20",
+          "40"
+        ],
+        "--min-epochs": [
+          "0",
+          "60"
+        ]
+      },
+      "provenance_other_than_hyperparameters_equal": true,
+      "first_differing_common_epoch": 1,
+      "common_epochs_with_different_values": [
+        1,
+        2,
+        3,
+        5,
+        10,
+        20
+      ],
+      "control_epoch1": {
+        "train_mse": 0.815,
+        "valid_rmse": 0.7896,
+        "lr": 0.001
+      },
+      "extended_epoch1": {
+        "train_mse": 0.8152,
+        "valid_rmse": 0.7919,
+        "lr": 0.001
+      },
+      "log_sha256": {
+        "control": "11588db7563768a9e4f65ac24267b9930091ed7e4d034e60caeed63116387102",
+        "extended": "918ca8142c7991128dd7c71869781ec20df21908781eecf8ebdeda947b0e0285"
+      },
+      "status_sha256": {
+        "control": "2c8a35e74acedf3c4d6ea614ecded10d1ab12162cf0af14ec707a35eb5eda5cc",
+        "extended": "79b4e965165389e94a557751b54206862e610654a8a8a957d68f36ed89255fca"
+      }
+    },
+    {
+      "tag": "abl1",
+      "seed": 4,
+      "command_differences": {
+        "--epochs": [
+          "100",
+          "200"
+        ],
+        "--patience": [
+          "20",
+          "40"
+        ],
+        "--min-epochs": [
+          "0",
+          "60"
+        ]
+      },
+      "provenance_other_than_hyperparameters_equal": true,
+      "first_differing_common_epoch": 1,
+      "common_epochs_with_different_values": [
+        1,
+        2,
+        4,
+        10,
+        20,
+        30
+      ],
+      "control_epoch1": {
+        "train_mse": 0.6759,
+        "valid_rmse": 0.8575,
+        "lr": 0.001
+      },
+      "extended_epoch1": {
+        "train_mse": 0.6759,
+        "valid_rmse": 0.8524,
+        "lr": 0.001
+      },
+      "log_sha256": {
+        "control": "e59d5106cfcef84c61089af586612e892dd6b453a7f00a018807a35a945fc0d1",
+        "extended": "10a5947be14c845f6e56f3e766047127e67f19fadb5a417806994a301c2ed4d7"
+      },
+      "status_sha256": {
+        "control": "6e477c375f37dddc419290d73da75d1ac63eb2f40ce6e5fc29e27fae18462b43",
+        "extended": "f3aca39e555b3bd47f6504c38bffde3784dba42cd35c0bd0a41705911c30da34"
+      }
+    },
+    {
+      "tag": "abl1",
+      "seed": 5,
+      "command_differences": {
+        "--epochs": [
+          "100",
+          "200"
+        ],
+        "--patience": [
+          "20",
+          "40"
+        ],
+        "--min-epochs": [
+          "0",
+          "60"
+        ]
+      },
+      "provenance_other_than_hyperparameters_equal": true,
+      "first_differing_common_epoch": 1,
+      "common_epochs_with_different_values": [
+        1,
+        6,
+        10,
+        20
+      ],
+      "control_epoch1": {
+        "train_mse": 0.7318,
+        "valid_rmse": 0.7653,
+        "lr": 0.001
+      },
+      "extended_epoch1": {
+        "train_mse": 0.732,
+        "valid_rmse": 0.7654,
+        "lr": 0.001
+      },
+      "log_sha256": {
+        "control": "b6072bc52ad19f4f4668bd18ddb776bdb0a6d9c71c7abd72fbb0e7ed1cf525ee",
+        "extended": "9f3779018a5c112cc69a89251638d62dbac5092b5cdcecee0bbbc45f4efd1608"
+      },
+      "status_sha256": {
+        "control": "3c0514f297b7b648a98a057e0ee57111109d348d460eee3e89ccb8c39b2ac2da",
+        "extended": "a5831e0e9e97b2ce450f5fc5dd8639597e6705044ad9d1b6d57eaba21f9dc3f1"
+      }
+    },
+    {
+      "tag": "abl1",
+      "seed": 6,
+      "command_differences": {
+        "--epochs": [
+          "100",
+          "200"
+        ],
+        "--patience": [
+          "20",
+          "40"
+        ],
+        "--min-epochs": [
+          "0",
+          "60"
+        ]
+      },
+      "provenance_other_than_hyperparameters_equal": true,
+      "first_differing_common_epoch": 1,
+      "common_epochs_with_different_values": [
+        1,
+        3,
+        10,
+        20
+      ],
+      "control_epoch1": {
+        "train_mse": 0.745,
+        "valid_rmse": 0.7647,
+        "lr": 0.001
+      },
+      "extended_epoch1": {
+        "train_mse": 0.7452,
+        "valid_rmse": 0.7663,
+        "lr": 0.001
+      },
+      "log_sha256": {
+        "control": "6bf4514fcef82f471b815c103b2f1b51ad5acd0d97dc5761739a2390e76b8c77",
+        "extended": "c3b9c11387b7e1415d88dedf939b7a4f1ea889f6eb8ba4dd9ae2c80480d69ded"
+      },
+      "status_sha256": {
+        "control": "be80a7cdef9d028d6c48df8e7fb59381654a5e1dbe20d2b83992454f0b139646",
+        "extended": "056f6afa6b816bc301dc97a5ec0c83c11a356f51ea479628a5c1c29a587b78bc"
+      }
+    },
+    {
+      "tag": "abl1",
+      "seed": 7,
+      "command_differences": {
+        "--epochs": [
+          "100",
+          "200"
+        ],
+        "--patience": [
+          "20",
+          "40"
+        ],
+        "--min-epochs": [
+          "0",
+          "60"
+        ]
+      },
+      "provenance_other_than_hyperparameters_equal": true,
+      "first_differing_common_epoch": 1,
+      "common_epochs_with_different_values": [
+        1,
+        10,
+        20
+      ],
+      "control_epoch1": {
+        "train_mse": 0.796,
+        "valid_rmse": 0.7691,
+        "lr": 0.001
+      },
+      "extended_epoch1": {
+        "train_mse": 0.7958,
+        "valid_rmse": 0.7691,
+        "lr": 0.001
+      },
+      "log_sha256": {
+        "control": "fe81fe6e801219a604fe209996aa226daedabe859603e91979121cbbcc6f3a58",
+        "extended": "789d045ace5046b6ab19afc37533e24512ccb22adadd46a760cb89bfa6ea464f"
+      },
+      "status_sha256": {
+        "control": "3c47a28adf844f65465a39c482b80cbb12de5b3aabc8d04b9498e36d1011568b",
+        "extended": "b3ef503e9d2de68fa250715b9bc9833c152c0aabc5783de4fb2b31277404bcc2"
+      }
+    },
+    {
+      "tag": "abl1",
+      "seed": 42,
+      "command_differences": {
+        "--epochs": [
+          "100",
+          "200"
+        ],
+        "--patience": [
+          "20",
+          "40"
+        ],
+        "--min-epochs": [
+          "0",
+          "60"
+        ]
+      },
+      "provenance_other_than_hyperparameters_equal": true,
+      "first_differing_common_epoch": 1,
+      "common_epochs_with_different_values": [
+        1,
+        10,
+        20,
+        30
+      ],
+      "control_epoch1": {
+        "train_mse": 0.7853,
+        "valid_rmse": 0.7596,
+        "lr": 0.001
+      },
+      "extended_epoch1": {
+        "train_mse": 0.7852,
+        "valid_rmse": 0.7583,
+        "lr": 0.001
+      },
+      "log_sha256": {
+        "control": "6193c11399ca80cbe4574fa48921c834cd50be01c120d1a3059956501c3e797d",
+        "extended": "9cc7549cfd54d221328cf082dc098ffee3678eab012aa59d922c6d8269421ab2"
+      },
+      "status_sha256": {
+        "control": "dc264ddac890fa082ac4eb3844fc096fed53e15db947e5981c89eee968577366",
+        "extended": "4c9b90b0eb360fc8c8feea33f3d93494333f71352650e56f5f349c462f3d347d"
+      }
+    },
+    {
+      "tag": "egfr",
+      "seed": 1,
+      "command_differences": {
+        "--epochs": [
+          "100",
+          "200"
+        ],
+        "--patience": [
+          "20",
+          "40"
+        ],
+        "--min-epochs": [
+          "0",
+          "60"
+        ]
+      },
+      "provenance_other_than_hyperparameters_equal": true,
+      "first_differing_common_epoch": 1,
+      "common_epochs_with_different_values": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        10,
+        20,
+        27,
+        30,
+        40
+      ],
+      "control_epoch1": {
+        "train_mse": 0.6678,
+        "valid_rmse": 1.6182,
+        "lr": 0.001
+      },
+      "extended_epoch1": {
+        "train_mse": 0.6685,
+        "valid_rmse": 1.6695,
+        "lr": 0.001
+      },
+      "log_sha256": {
+        "control": "11dd6f90a26dd4ac5bce74b5a99443461678130eaa8df921488cfbd856a00ee3",
+        "extended": "18f7a4ddbd8709fc9c2404685737248cf76f4c2ec1a2affbb2d2ba570d1df324"
+      },
+      "status_sha256": {
+        "control": "8262fd1b4a4357489f134483ae84f4cb4514b2c45522fddfe60da3a739c9de38",
+        "extended": "8be6c7b0f0ff7eaadcbd3e00b6cb7b1793d041acfa23f7e911cc21d494c8edeb"
+      }
+    },
+    {
+      "tag": "egfr",
+      "seed": 2,
+      "command_differences": {
+        "--epochs": [
+          "100",
+          "200"
+        ],
+        "--patience": [
+          "20",
+          "40"
+        ],
+        "--min-epochs": [
+          "0",
+          "60"
+        ]
+      },
+      "provenance_other_than_hyperparameters_equal": true,
+      "first_differing_common_epoch": 1,
+      "common_epochs_with_different_values": [
+        1,
+        2,
+        7,
+        10,
+        20
+      ],
+      "control_epoch1": {
+        "train_mse": 0.6633,
+        "valid_rmse": 0.9361,
+        "lr": 0.001
+      },
+      "extended_epoch1": {
+        "train_mse": 0.6624,
+        "valid_rmse": 0.9332,
+        "lr": 0.001
+      },
+      "log_sha256": {
+        "control": "17b27acb03307312863f38bf239ebc10289e47ef14716b198d5d63034141233d",
+        "extended": "1fd26c5c433f603a51d09b90760c7cf0543bee23b0a9cb7376c037cf513934ea"
+      },
+      "status_sha256": {
+        "control": "7f5a23ccdcbd37bcfb87ff35696d61e24068885a0700a930fc4d224e43decff5",
+        "extended": "a915eb06b6f7a789bee2a7c3d13a5abbe2f145a87c15b23cb2d17c1b6c439433"
+      }
+    },
+    {
+      "tag": "egfr",
+      "seed": 3,
+      "command_differences": {
+        "--epochs": [
+          "100",
+          "200"
+        ],
+        "--patience": [
+          "20",
+          "40"
+        ],
+        "--min-epochs": [
+          "0",
+          "60"
+        ]
+      },
+      "provenance_other_than_hyperparameters_equal": true,
+      "first_differing_common_epoch": 1,
+      "common_epochs_with_different_values": [
+        1,
+        6,
+        10,
+        20
+      ],
+      "control_epoch1": {
+        "train_mse": 0.6716,
+        "valid_rmse": 1.0041,
+        "lr": 0.001
+      },
+      "extended_epoch1": {
+        "train_mse": 0.6712,
+        "valid_rmse": 0.9634,
+        "lr": 0.001
+      },
+      "log_sha256": {
+        "control": "bad6bd5b1625193fb29f00b70b5b83e2c8f2ea7e1ca7f0e6c636d5f3718b39ca",
+        "extended": "9b756a23ca1b613f6f07456d6f22a90066ebe0089acf0622ec2293e82aa4d51e"
+      },
+      "status_sha256": {
+        "control": "33a7905f1dca97ec4398adc64737b0cd7fac07b4a3c387a67577377df21c09e4",
+        "extended": "82f836911a0325627e60fb6105ce2d8ea6aad02f745445477d755750ba0a3a5d"
+      }
+    },
+    {
+      "tag": "egfr",
+      "seed": 4,
+      "command_differences": {
+        "--epochs": [
+          "100",
+          "200"
+        ],
+        "--patience": [
+          "20",
+          "40"
+        ],
+        "--min-epochs": [
+          "0",
+          "60"
+        ]
+      },
+      "provenance_other_than_hyperparameters_equal": true,
+      "first_differing_common_epoch": 1,
+      "common_epochs_with_different_values": [
+        1,
+        2,
+        4,
+        6,
+        10,
+        13,
+        20,
+        30
+      ],
+      "control_epoch1": {
+        "train_mse": 0.6749,
+        "valid_rmse": 1.1291,
+        "lr": 0.001
+      },
+      "extended_epoch1": {
+        "train_mse": 0.6763,
+        "valid_rmse": 1.0789,
+        "lr": 0.001
+      },
+      "log_sha256": {
+        "control": "ba1750ec1dbb980decac54a15a332746fce61e92edc36d8ba1cd0d24335e2aeb",
+        "extended": "be7a9ea9489984d9dd62d51863cddf3771ca187fe4469e583f94d009e6a6cdb0"
+      },
+      "status_sha256": {
+        "control": "5a2d5de11664541e33bd5a4482714a6d491a190aa184cbf44a97961f6f5dec24",
+        "extended": "c4ddaa7e005aae8ca8c32b972f39ff76827985a6c3277abc2639e8c426bc665b"
+      }
+    },
+    {
+      "tag": "egfr",
+      "seed": 5,
+      "command_differences": {
+        "--epochs": [
+          "100",
+          "200"
+        ],
+        "--patience": [
+          "20",
+          "40"
+        ],
+        "--min-epochs": [
+          "0",
+          "60"
+        ]
+      },
+      "provenance_other_than_hyperparameters_equal": true,
+      "first_differing_common_epoch": 1,
+      "common_epochs_with_different_values": [
+        1,
+        3,
+        8,
+        10,
+        20
+      ],
+      "control_epoch1": {
+        "train_mse": 0.675,
+        "valid_rmse": 1.0765,
+        "lr": 0.001
+      },
+      "extended_epoch1": {
+        "train_mse": 0.6747,
+        "valid_rmse": 1.0565,
+        "lr": 0.001
+      },
+      "log_sha256": {
+        "control": "7675d14e5fc34ad8c3a75a8d0ab0a328dc475ba4dda58a13a53fcfe9b807167c",
+        "extended": "9173eb325b19d9dabab3280d1602e772169d1603ca5ce072b6f6e86a247d09d8"
+      },
+      "status_sha256": {
+        "control": "b0d4f17aa5c3f1830b829ec2403605b14008b9f6778256b68451def246cb688f",
+        "extended": "bfc1894f6bd751000d686e326bbd402a26d9518d81bbaee861bda057b43ace6e"
+      }
+    },
+    {
+      "tag": "egfr",
+      "seed": 6,
+      "command_differences": {
+        "--epochs": [
+          "100",
+          "200"
+        ],
+        "--patience": [
+          "20",
+          "40"
+        ],
+        "--min-epochs": [
+          "0",
+          "60"
+        ]
+      },
+      "provenance_other_than_hyperparameters_equal": true,
+      "first_differing_common_epoch": 1,
+      "common_epochs_with_different_values": [
+        1,
+        2,
+        7,
+        10,
+        20,
+        30
+      ],
+      "control_epoch1": {
+        "train_mse": 0.6576,
+        "valid_rmse": 1.1844,
+        "lr": 0.001
+      },
+      "extended_epoch1": {
+        "train_mse": 0.6579,
+        "valid_rmse": 1.1893,
+        "lr": 0.001
+      },
+      "log_sha256": {
+        "control": "bb16f00ea2bb611f3fbb6c38271082e989a3472e47c83eb1136464af1a10012e",
+        "extended": "fa8a2fdc18978fb415634427841c2d45f0f3cbb6585c7a12e4dda907b032403d"
+      },
+      "status_sha256": {
+        "control": "5d3ea996d03c73368585535c060ddf89390123fd426b887064f88fd065aa8ed8",
+        "extended": "ecd1313503027a33308fc3da89228975112337e7bf19e68d5ad77cb267db98ac"
+      }
+    },
+    {
+      "tag": "egfr",
+      "seed": 7,
+      "command_differences": {
+        "--epochs": [
+          "100",
+          "200"
+        ],
+        "--patience": [
+          "20",
+          "40"
+        ],
+        "--min-epochs": [
+          "0",
+          "60"
+        ]
+      },
+      "provenance_other_than_hyperparameters_equal": true,
+      "first_differing_common_epoch": 1,
+      "common_epochs_with_different_values": [
+        1,
+        2,
+        10,
+        20,
+        25,
+        30,
+        40
+      ],
+      "control_epoch1": {
+        "train_mse": 0.6539,
+        "valid_rmse": 0.978,
+        "lr": 0.001
+      },
+      "extended_epoch1": {
+        "train_mse": 0.6538,
+        "valid_rmse": 0.9702,
+        "lr": 0.001
+      },
+      "log_sha256": {
+        "control": "e6dc2f7eec4e821bd73dee439bdc55b8a21a1de53d8c8fe06a9bdf63ff194c03",
+        "extended": "c481f18c1b73f88d032115a184eb1430d3f26da75be861c38910b7fef44a5d92"
+      },
+      "status_sha256": {
+        "control": "31c2c6ad112b77283dc10932140d9bc54fa641bcefee4dca78cf4fb5f5356975",
+        "extended": "a8f6fa7e6fac2057332a972e634add6a5bcc6751d5b66a49221f54a7c0bd09dd"
+      }
+    },
+    {
+      "tag": "egfr",
+      "seed": 42,
+      "command_differences": {
+        "--epochs": [
+          "100",
+          "200"
+        ],
+        "--patience": [
+          "20",
+          "40"
+        ],
+        "--min-epochs": [
+          "0",
+          "60"
+        ]
+      },
+      "provenance_other_than_hyperparameters_equal": true,
+      "first_differing_common_epoch": 1,
+      "common_epochs_with_different_values": [
+        1,
+        2,
+        5,
+        10,
+        20
+      ],
+      "control_epoch1": {
+        "train_mse": 0.6202,
+        "valid_rmse": 1.0733,
+        "lr": 0.001
+      },
+      "extended_epoch1": {
+        "train_mse": 0.6206,
+        "valid_rmse": 1.1226,
+        "lr": 0.001
+      },
+      "log_sha256": {
+        "control": "efa36f18e84a13c0cba9c2eb1a7df7a17a449387f885f7cb18636b1aadf1dcbb",
+        "extended": "07844bcd1d9f0647d2ef862025e1566785f40c230821abe2c81bcdba30f71939"
+      },
+      "status_sha256": {
+        "control": "749e9288062c9f1cd685ec0665758ded166bd99b758adc9ea440862c152baa29",
+        "extended": "bbfdcd4354582d4702e5a9f588e5066e062fb790d2d546e2d24f286213057f1e"
+      }
+    },
+    {
+      "tag": "egfr_full",
+      "seed": 1,
+      "command_differences": {
+        "--epochs": [
+          "100",
+          "200"
+        ],
+        "--patience": [
+          "20",
+          "40"
+        ],
+        "--min-epochs": [
+          "0",
+          "60"
+        ]
+      },
+      "provenance_other_than_hyperparameters_equal": true,
+      "first_differing_common_epoch": 1,
+      "common_epochs_with_different_values": [
+        1,
+        6,
+        10,
+        20,
+        30,
+        40
+      ],
+      "control_epoch1": {
+        "train_mse": 0.7297,
+        "valid_rmse": 0.829,
+        "lr": 0.001
+      },
+      "extended_epoch1": {
+        "train_mse": 0.7287,
+        "valid_rmse": 0.7494,
+        "lr": 0.001
+      },
+      "log_sha256": {
+        "control": "33d892b8f4ad7ad190b44d4624ba68d7781e1f50adcf54581c1486dd15055c25",
+        "extended": "e33dcdffd887037eec9b89cdd7212637376a650be1f37dcbe89584bb2ec7ade1"
+      },
+      "status_sha256": {
+        "control": "66d64ba04ebc8804f9996e202db55655f077296716437e3ee4ef157d9b3cb412",
+        "extended": "dc42fabd3e730ba63defffb54e8a94464a1f40a32a67bc3264ab45a1a0ed1f32"
+      }
+    },
+    {
+      "tag": "egfr_full",
+      "seed": 2,
+      "command_differences": {
+        "--epochs": [
+          "100",
+          "200"
+        ],
+        "--patience": [
+          "20",
+          "40"
+        ],
+        "--min-epochs": [
+          "0",
+          "60"
+        ]
+      },
+      "provenance_other_than_hyperparameters_equal": true,
+      "first_differing_common_epoch": 1,
+      "common_epochs_with_different_values": [
+        1,
+        2,
+        4,
+        10,
+        12,
+        20,
+        30
+      ],
+      "control_epoch1": {
+        "train_mse": 0.7159,
+        "valid_rmse": 0.8373,
+        "lr": 0.001
+      },
+      "extended_epoch1": {
+        "train_mse": 0.7174,
+        "valid_rmse": 0.9098,
+        "lr": 0.001
+      },
+      "log_sha256": {
+        "control": "30995bcc26bd6cde7b777c1c60cf46fec444d8d345318e30d280232c4446f667",
+        "extended": "f35e191f7460429959d01969ae0c79f80d0c54bde179dea10e88ded14e8328ba"
+      },
+      "status_sha256": {
+        "control": "e534be174aaae1810f03e9ea1b978f15fffbfa1b93efbae2cba79da00d69b15b",
+        "extended": "2f48bf31ae06971ddd40abfd3dae558b3e2bce6e105ab6c80cbff0e7617573d8"
+      }
+    },
+    {
+      "tag": "egfr_full",
+      "seed": 3,
+      "command_differences": {
+        "--epochs": [
+          "100",
+          "200"
+        ],
+        "--patience": [
+          "20",
+          "40"
+        ],
+        "--min-epochs": [
+          "0",
+          "60"
+        ]
+      },
+      "provenance_other_than_hyperparameters_equal": true,
+      "first_differing_common_epoch": 1,
+      "common_epochs_with_different_values": [
+        1,
+        2,
+        10,
+        20
+      ],
+      "control_epoch1": {
+        "train_mse": 0.7252,
+        "valid_rmse": 0.8112,
+        "lr": 0.001
+      },
+      "extended_epoch1": {
+        "train_mse": 0.7252,
+        "valid_rmse": 0.8989,
+        "lr": 0.001
+      },
+      "log_sha256": {
+        "control": "a0335d52eb07f89c12b2a7b1ab9bba1c7949e61b0f333276761be66bcb087d37",
+        "extended": "57f88699cb1210ca04a5c54a6036e6f2344f31019e917d8e03add5cb238f2ae2"
+      },
+      "status_sha256": {
+        "control": "abe26b00480353fb65e4a7666023c0592eb9c51f397a388da27db05da8d435f4",
+        "extended": "17dabbcf5036bcf37cd192206e396b0050d42dc5c4bdbb58a11b162a12b1684e"
+      }
+    },
+    {
+      "tag": "egfr_full",
+      "seed": 4,
+      "command_differences": {
+        "--epochs": [
+          "100",
+          "200"
+        ],
+        "--patience": [
+          "20",
+          "40"
+        ],
+        "--min-epochs": [
+          "0",
+          "60"
+        ]
+      },
+      "provenance_other_than_hyperparameters_equal": true,
+      "first_differing_common_epoch": 1,
+      "common_epochs_with_different_values": [
+        1,
+        2,
+        10,
+        20
+      ],
+      "control_epoch1": {
+        "train_mse": 0.7285,
+        "valid_rmse": 1.021,
+        "lr": 0.001
+      },
+      "extended_epoch1": {
+        "train_mse": 0.7297,
+        "valid_rmse": 0.9655,
+        "lr": 0.001
+      },
+      "log_sha256": {
+        "control": "d604cacc3b195904b435fa8cc16d8f80fb1e6118596714191b1650e937bbba80",
+        "extended": "a8550e7727080ebcd3b959da16ce1621e104c0d8ab0c31d8ef211bd3bdb38e21"
+      },
+      "status_sha256": {
+        "control": "ef359911a035b5f0982e6941b4f314cbb10bdd360b089dee6e3e4470d39ac79f",
+        "extended": "c19532189636a0e1a7dcab8b458ab6d17f580b2886812ffc8f4d1b841fefa81c"
+      }
+    },
+    {
+      "tag": "egfr_full",
+      "seed": 5,
+      "command_differences": {
+        "--epochs": [
+          "100",
+          "200"
+        ],
+        "--patience": [
+          "20",
+          "40"
+        ],
+        "--min-epochs": [
+          "0",
+          "60"
+        ]
+      },
+      "provenance_other_than_hyperparameters_equal": true,
+      "first_differing_common_epoch": 1,
+      "common_epochs_with_different_values": [
+        1,
+        9,
+        10,
+        20
+      ],
+      "control_epoch1": {
+        "train_mse": 0.7239,
+        "valid_rmse": 0.7562,
+        "lr": 0.001
+      },
+      "extended_epoch1": {
+        "train_mse": 0.7239,
+        "valid_rmse": 0.7691,
+        "lr": 0.001
+      },
+      "log_sha256": {
+        "control": "025ed301c022b54bdff438bed2236d4577dc2f7f09e3e981f53692cca95f15b5",
+        "extended": "1ad2379550f6d69710e1595e2b19a68ce2b747f986b3d7e53d703dbf581355ca"
+      },
+      "status_sha256": {
+        "control": "1e96bac1793f78399c6ec8980758789140475391f122f37972fde1b37246b0d4",
+        "extended": "6242d9d455d33ff9dd0d4005227b19cd84eddd70525841dac284d004657c0a89"
+      }
+    },
+    {
+      "tag": "egfr_full",
+      "seed": 6,
+      "command_differences": {
+        "--epochs": [
+          "100",
+          "200"
+        ],
+        "--patience": [
+          "20",
+          "40"
+        ],
+        "--min-epochs": [
+          "0",
+          "60"
+        ]
+      },
+      "provenance_other_than_hyperparameters_equal": true,
+      "first_differing_common_epoch": 1,
+      "common_epochs_with_different_values": [
+        1,
+        10,
+        20,
+        30
+      ],
+      "control_epoch1": {
+        "train_mse": 0.6933,
+        "valid_rmse": 0.7517,
+        "lr": 0.001
+      },
+      "extended_epoch1": {
+        "train_mse": 0.6929,
+        "valid_rmse": 0.7304,
+        "lr": 0.001
+      },
+      "log_sha256": {
+        "control": "b6c41377c0153feb98d092e41aae2c5ecc800d3a26d963e6bbbe08e0381d9857",
+        "extended": "8a5a03428edc87db8fccf3f7d4e2759b192917a74e1418bb88c7d046f0c7fc03"
+      },
+      "status_sha256": {
+        "control": "528eb998763ffb9a8c926f9ba4c1d89ded37c607ec80eb15f54b645d32899ae4",
+        "extended": "d4ed3e29bdf8b691b09eb4801d1682faec19b8884c50265409dd4205053e4de8"
+      }
+    },
+    {
+      "tag": "egfr_full",
+      "seed": 7,
+      "command_differences": {
+        "--epochs": [
+          "100",
+          "200"
+        ],
+        "--patience": [
+          "20",
+          "40"
+        ],
+        "--min-epochs": [
+          "0",
+          "60"
+        ]
+      },
+      "provenance_other_than_hyperparameters_equal": true,
+      "first_differing_common_epoch": 1,
+      "common_epochs_with_different_values": [
+        1,
+        3,
+        6,
+        8,
+        10,
+        20,
+        30
+      ],
+      "control_epoch1": {
+        "train_mse": 0.7174,
+        "valid_rmse": 0.8791,
+        "lr": 0.001
+      },
+      "extended_epoch1": {
+        "train_mse": 0.7161,
+        "valid_rmse": 0.902,
+        "lr": 0.001
+      },
+      "log_sha256": {
+        "control": "ae87bead81e13620ed8b12c15b1e9db819ce64a6fcb3adb4ba78aa69defe8125",
+        "extended": "6648ed32e374744a2572a8f6f107c5a875693c57d9d8c480b44fbc16071b369b"
+      },
+      "status_sha256": {
+        "control": "b24ad6345d191cb1b5f9703188bdd40b4a5471a8e59c7b3e74423c173fc18bc1",
+        "extended": "8c7da43edf7faa7cebf33ba96c8d6232fb6fec32018a00d1943f740e75045514"
+      }
+    },
+    {
+      "tag": "egfr_full",
+      "seed": 42,
+      "command_differences": {
+        "--epochs": [
+          "100",
+          "200"
+        ],
+        "--patience": [
+          "20",
+          "40"
+        ],
+        "--min-epochs": [
+          "0",
+          "60"
+        ]
+      },
+      "provenance_other_than_hyperparameters_equal": true,
+      "first_differing_common_epoch": 1,
+      "common_epochs_with_different_values": [
+        1,
+        10,
+        20,
+        30
+      ],
+      "control_epoch1": {
+        "train_mse": 0.7173,
+        "valid_rmse": 0.7389,
+        "lr": 0.001
+      },
+      "extended_epoch1": {
+        "train_mse": 0.7175,
+        "valid_rmse": 0.8462,
+        "lr": 0.001
+      },
+      "log_sha256": {
+        "control": "0a5f3bcee7d8af110323ec880bb91f09d21dece8e02a78d974db4b9e9f6a138b",
+        "extended": "f15d4897550320c2f2996862acfca7cce34552c8175bd62f5a2f754c13957329"
+      },
+      "status_sha256": {
+        "control": "6aaf8c65fb44f1d6a75c9e896ea7780acf371317d795c275e1f679657940297c",
+        "extended": "cbcbd4f82ca3468769121eec0871fba5be23e00c27bde21f33f9c3b835b7324e"
+      }
+    },
+    {
+      "tag": "herg",
+      "seed": 1,
+      "command_differences": {
+        "--epochs": [
+          "100",
+          "200"
+        ],
+        "--patience": [
+          "20",
+          "40"
+        ],
+        "--min-epochs": [
+          "0",
+          "60"
+        ]
+      },
+      "provenance_other_than_hyperparameters_equal": true,
+      "first_differing_common_epoch": 1,
+      "common_epochs_with_different_values": [
+        1,
+        2,
+        8,
+        10,
+        16,
+        20,
+        30,
+        40
+      ],
+      "control_epoch1": {
+        "train_mse": 0.9183,
+        "valid_rmse": 0.7717,
+        "lr": 0.001
+      },
+      "extended_epoch1": {
+        "train_mse": 0.9205,
+        "valid_rmse": 0.7597,
+        "lr": 0.001
+      },
+      "log_sha256": {
+        "control": "32b8e17c42757405e90b499ed91cc9103e3b1a8dbe9284262e76102aff1086a2",
+        "extended": "e6f089dc20729fcac38f2373df43b7f86aa71cbca0d786e64c9e1b7e98371e61"
+      },
+      "status_sha256": {
+        "control": "59e8c088fe5c450c8e7f6cfb9ee46ba489bfe5ddf66b1eb2bbdebbff51840880",
+        "extended": "fa879452fde758830e903f05593487b12687a18c0dfaf1ec8045878af462c381"
+      }
+    },
+    {
+      "tag": "herg",
+      "seed": 2,
+      "command_differences": {
+        "--epochs": [
+          "100",
+          "200"
+        ],
+        "--patience": [
+          "20",
+          "40"
+        ],
+        "--min-epochs": [
+          "0",
+          "60"
+        ]
+      },
+      "provenance_other_than_hyperparameters_equal": true,
+      "first_differing_common_epoch": 1,
+      "common_epochs_with_different_values": [
+        1,
+        2,
+        10,
+        13,
+        20,
+        30
+      ],
+      "control_epoch1": {
+        "train_mse": 0.9195,
+        "valid_rmse": 0.8872,
+        "lr": 0.001
+      },
+      "extended_epoch1": {
+        "train_mse": 0.919,
+        "valid_rmse": 0.8935,
+        "lr": 0.001
+      },
+      "log_sha256": {
+        "control": "fa6b76430695e29780ab4a736d8657bc4515296adf6c2191ebeae045eacba954",
+        "extended": "17d9573ddb723dd9c0776de8c91d621d5117a7adb08bba6c349224ad007947de"
+      },
+      "status_sha256": {
+        "control": "817cde112feae86702ebee531139a72adcc235ccc65c069489ffddfc8ddbc383",
+        "extended": "2c939a78d6903171b5ce0ebe8b76dedce01b800170ce34cc91cb2c39610146d4"
+      }
+    },
+    {
+      "tag": "herg",
+      "seed": 3,
+      "command_differences": {
+        "--epochs": [
+          "100",
+          "200"
+        ],
+        "--patience": [
+          "20",
+          "40"
+        ],
+        "--min-epochs": [
+          "0",
+          "60"
+        ]
+      },
+      "provenance_other_than_hyperparameters_equal": true,
+      "first_differing_common_epoch": 1,
+      "common_epochs_with_different_values": [
+        1,
+        2,
+        4,
+        10,
+        20,
+        30
+      ],
+      "control_epoch1": {
+        "train_mse": 0.9361,
+        "valid_rmse": 0.8441,
+        "lr": 0.001
+      },
+      "extended_epoch1": {
+        "train_mse": 0.9347,
+        "valid_rmse": 0.9561,
+        "lr": 0.001
+      },
+      "log_sha256": {
+        "control": "440c5fa7b8971902f2b969d84fe3199205836b9cd82bdc0a3664f81e3d1831f6",
+        "extended": "e7e64f020cbc29d853295bc2e668d02c93513e4adebbdf34d813ae225a60671a"
+      },
+      "status_sha256": {
+        "control": "2e27daf31001bd32cba9d930d1ef3b38c66a4a4d344ae9bb15f014408af5f9d8",
+        "extended": "b8298b3eaa2a920882d81196dfc706f67603fcb5bb6a5bcda9b3b3fc7d7b1635"
+      }
+    },
+    {
+      "tag": "herg",
+      "seed": 4,
+      "command_differences": {
+        "--epochs": [
+          "100",
+          "200"
+        ],
+        "--patience": [
+          "20",
+          "40"
+        ],
+        "--min-epochs": [
+          "0",
+          "60"
+        ]
+      },
+      "provenance_other_than_hyperparameters_equal": true,
+      "first_differing_common_epoch": 1,
+      "common_epochs_with_different_values": [
+        1,
+        3,
+        4,
+        10,
+        20,
+        30,
+        40
+      ],
+      "control_epoch1": {
+        "train_mse": 0.9098,
+        "valid_rmse": 0.8453,
+        "lr": 0.001
+      },
+      "extended_epoch1": {
+        "train_mse": 0.9088,
+        "valid_rmse": 0.8334,
+        "lr": 0.001
+      },
+      "log_sha256": {
+        "control": "c800247fb9861950f91e10c44f39e7a244e37cc0ed7c9bcbee1c91385c330099",
+        "extended": "4de9ab1fe677c83fcf980b857d52e750a79cf6be7e670c796e5e59c8ff8b7a91"
+      },
+      "status_sha256": {
+        "control": "9f5a295b61167f616e8be1ab40c1b23fcd0dfe80067e4dcf2a7b775f4d59f35c",
+        "extended": "733810d38900f958ea67ee863591516939ae45ba5d1beec35ca34c62a4d99778"
+      }
+    },
+    {
+      "tag": "herg",
+      "seed": 5,
+      "command_differences": {
+        "--epochs": [
+          "100",
+          "200"
+        ],
+        "--patience": [
+          "20",
+          "40"
+        ],
+        "--min-epochs": [
+          "0",
+          "60"
+        ]
+      },
+      "provenance_other_than_hyperparameters_equal": true,
+      "first_differing_common_epoch": 1,
+      "common_epochs_with_different_values": [
+        1,
+        2,
+        10,
+        20,
+        30,
+        31,
+        40,
+        50
+      ],
+      "control_epoch1": {
+        "train_mse": 0.9233,
+        "valid_rmse": 0.8417,
+        "lr": 0.001
+      },
+      "extended_epoch1": {
+        "train_mse": 0.922,
+        "valid_rmse": 0.8295,
+        "lr": 0.001
+      },
+      "log_sha256": {
+        "control": "736f0ac33f7dcc6131835b2d5019580d2e16ec917b00dc190823fcbf4f47aee3",
+        "extended": "2adf885c4329bdd790ad72142fea5eac49e93881f01e3b5480d897a1610fbfa4"
+      },
+      "status_sha256": {
+        "control": "92270c8ed7efee6c8038052332af6839f2add264bcdc0af62fbb9a6ac6b43d4e",
+        "extended": "174003d61e10d3867aed5a07c0a9f8d6f7dae4cfc2e8fc6830983f010b0eee9d"
+      }
+    },
+    {
+      "tag": "herg",
+      "seed": 6,
+      "command_differences": {
+        "--epochs": [
+          "100",
+          "200"
+        ],
+        "--patience": [
+          "20",
+          "40"
+        ],
+        "--min-epochs": [
+          "0",
+          "60"
+        ]
+      },
+      "provenance_other_than_hyperparameters_equal": true,
+      "first_differing_common_epoch": 1,
+      "common_epochs_with_different_values": [
+        1,
+        2,
+        3,
+        10,
+        12,
+        20,
+        30
+      ],
+      "control_epoch1": {
+        "train_mse": 0.911,
+        "valid_rmse": 0.7903,
+        "lr": 0.001
+      },
+      "extended_epoch1": {
+        "train_mse": 0.9128,
+        "valid_rmse": 0.8064,
+        "lr": 0.001
+      },
+      "log_sha256": {
+        "control": "e28efa7e334f7c37ef05a27eb4f630502033e946a5f3e7c971d50f8340fc3316",
+        "extended": "0855453bb0ec8fd463cdb2349705e7d3bd6e7b30ff67dc78ce7dd73ab9e100ed"
+      },
+      "status_sha256": {
+        "control": "336e83a1a21e32d41731f972baf84c64d7014a97a69bef909c55263e9b338588",
+        "extended": "c87657122d103b74654940e3c36696f970d9eccd61801b6b1fbaba6a5bbf0a47"
+      }
+    },
+    {
+      "tag": "herg",
+      "seed": 7,
+      "command_differences": {
+        "--epochs": [
+          "100",
+          "200"
+        ],
+        "--patience": [
+          "20",
+          "40"
+        ],
+        "--min-epochs": [
+          "0",
+          "60"
+        ]
+      },
+      "provenance_other_than_hyperparameters_equal": true,
+      "first_differing_common_epoch": 1,
+      "common_epochs_with_different_values": [
+        1,
+        4,
+        10,
+        12,
+        20,
+        30,
+        40,
+        50
+      ],
+      "control_epoch1": {
+        "train_mse": 0.9078,
+        "valid_rmse": 0.776,
+        "lr": 0.001
+      },
+      "extended_epoch1": {
+        "train_mse": 0.9081,
+        "valid_rmse": 0.7808,
+        "lr": 0.001
+      },
+      "log_sha256": {
+        "control": "56fae115dcc860ba51b41e3f94cfc6e7df8ef526fe472046e2ab2f178f9cf7ad",
+        "extended": "e1758ef7a17aec6a720d1fba4041d82a7f9749fd8ba40bc88c04153d815efa1b"
+      },
+      "status_sha256": {
+        "control": "6fb291617db99a2f8c3c1d7138cf87e80ec5281641e07bb552d2ca09a350f04e",
+        "extended": "99d21da7a2be96b34196d0ed6a03364a5b77536b1ba3ca6b37a45bee5dbd9767"
+      }
+    },
+    {
+      "tag": "herg",
+      "seed": 42,
+      "command_differences": {
+        "--epochs": [
+          "100",
+          "200"
+        ],
+        "--patience": [
+          "20",
+          "40"
+        ],
+        "--min-epochs": [
+          "0",
+          "60"
+        ]
+      },
+      "provenance_other_than_hyperparameters_equal": true,
+      "first_differing_common_epoch": 1,
+      "common_epochs_with_different_values": [
+        1,
+        2,
+        10,
+        20,
+        23,
+        30,
+        40
+      ],
+      "control_epoch1": {
+        "train_mse": 0.9333,
+        "valid_rmse": 0.8355,
+        "lr": 0.001
+      },
+      "extended_epoch1": {
+        "train_mse": 0.9327,
+        "valid_rmse": 0.8479,
+        "lr": 0.001
+      },
+      "log_sha256": {
+        "control": "ab9760ad68bfb060adb64480e7c95600778e9d94bcc7c5ea316a63e9eeeb9354",
+        "extended": "96189123e4bdab08df3b845288b6bd33fa75b372235598f2fba71ac8a08daa78"
+      },
+      "status_sha256": {
+        "control": "f50eea2c942440353d571577670d7c58b043002c484363daba806186b0254c94",
+        "extended": "c0383ea5b8913f73f93b53b90e4b74d785d824aa8a9904734e34c131ae5da7b8"
+      }
+    },
+    {
+      "tag": "hivpr",
+      "seed": 1,
+      "command_differences": {
+        "--epochs": [
+          "100",
+          "200"
+        ],
+        "--patience": [
+          "20",
+          "40"
+        ],
+        "--min-epochs": [
+          "0",
+          "60"
+        ]
+      },
+      "provenance_other_than_hyperparameters_equal": true,
+      "first_differing_common_epoch": 1,
+      "common_epochs_with_different_values": [
+        1,
+        2,
+        3,
+        4,
+        10,
+        20,
+        30
+      ],
+      "control_epoch1": {
+        "train_mse": 0.9021,
+        "valid_rmse": 1.1728,
+        "lr": 0.001
+      },
+      "extended_epoch1": {
+        "train_mse": 0.902,
+        "valid_rmse": 1.1731,
+        "lr": 0.001
+      },
+      "log_sha256": {
+        "control": "125dd384f7a49a208508a846d12edbbbf2c430b0a438c1fdb9a5b864d0f8f28c",
+        "extended": "978c10d4c715ea14c07d09ff8543bd69cbe4c44f259f37f9267ff888d0554b05"
+      },
+      "status_sha256": {
+        "control": "d51090f66ac5f56585f85ed7173cbe332570306e0663a43a0804cfd97ffb0f91",
+        "extended": "3da35154a9df6dbcf61cf688263f1dce0dffd296d4c7358f72ea1470764b4740"
+      }
+    },
+    {
+      "tag": "hivpr",
+      "seed": 2,
+      "command_differences": {
+        "--epochs": [
+          "100",
+          "200"
+        ],
+        "--patience": [
+          "20",
+          "40"
+        ],
+        "--min-epochs": [
+          "0",
+          "60"
+        ]
+      },
+      "provenance_other_than_hyperparameters_equal": true,
+      "first_differing_common_epoch": 1,
+      "common_epochs_with_different_values": [
+        1,
+        3,
+        7,
+        10,
+        11,
+        15,
+        20,
+        30
+      ],
+      "control_epoch1": {
+        "train_mse": 0.8809,
+        "valid_rmse": 1.1739,
+        "lr": 0.001
+      },
+      "extended_epoch1": {
+        "train_mse": 0.8811,
+        "valid_rmse": 1.1706,
+        "lr": 0.001
+      },
+      "log_sha256": {
+        "control": "f9981a18965ae13c81d3510d9ebc3f895051a34aa62299b602d083b5cc0a555e",
+        "extended": "47404bd7cd375b4fac83c8ced2567299daaf884d4fd97139ca93199f1f1b5224"
+      },
+      "status_sha256": {
+        "control": "bf6d5b0153fced81135cfc64a9061f6ca0c3ed11a83f683fcf82eb73e58bc541",
+        "extended": "2b79eed4b3ce892bb30b32851bb35226b4dfff56989abb88f3edfe8d91e25416"
+      }
+    },
+    {
+      "tag": "hivpr",
+      "seed": 3,
+      "command_differences": {
+        "--epochs": [
+          "100",
+          "200"
+        ],
+        "--patience": [
+          "20",
+          "40"
+        ],
+        "--min-epochs": [
+          "0",
+          "60"
+        ]
+      },
+      "provenance_other_than_hyperparameters_equal": true,
+      "first_differing_common_epoch": 1,
+      "common_epochs_with_different_values": [
+        1,
+        2,
+        5,
+        10,
+        20,
+        30,
+        40
+      ],
+      "control_epoch1": {
+        "train_mse": 0.9355,
+        "valid_rmse": 1.1718,
+        "lr": 0.001
+      },
+      "extended_epoch1": {
+        "train_mse": 0.9353,
+        "valid_rmse": 1.172,
+        "lr": 0.001
+      },
+      "log_sha256": {
+        "control": "b816ad22513b4a9a8c754bcb3a6fa0a89739de9179d359af572e44fe5d0cabbb",
+        "extended": "5f42fe10adbad79e80ac33555c54cf09f00566d5dd1319808404eaecff4de0e2"
+      },
+      "status_sha256": {
+        "control": "7b8fba3a5ba542cc3e0235760de4a98811a04dda10615bf204b517888d8376b3",
+        "extended": "5940930d098445381855519e96ce92885d84b9accce4490e60488917c4b09542"
+      }
+    },
+    {
+      "tag": "hivpr",
+      "seed": 4,
+      "command_differences": {
+        "--epochs": [
+          "100",
+          "200"
+        ],
+        "--patience": [
+          "20",
+          "40"
+        ],
+        "--min-epochs": [
+          "0",
+          "60"
+        ]
+      },
+      "provenance_other_than_hyperparameters_equal": true,
+      "first_differing_common_epoch": 1,
+      "common_epochs_with_different_values": [
+        1,
+        2,
+        4,
+        8,
+        10,
+        13,
+        20,
+        30,
+        40,
+        50,
+        60
+      ],
+      "control_epoch1": {
+        "train_mse": 0.8783,
+        "valid_rmse": 1.1728,
+        "lr": 0.001
+      },
+      "extended_epoch1": {
+        "train_mse": 0.8783,
+        "valid_rmse": 1.174,
+        "lr": 0.001
+      },
+      "log_sha256": {
+        "control": "5eca71d334dc6998354546a3f3738a4342b41820e0751aeedeccc5036dd73c0f",
+        "extended": "fb917e2f854ce3ded6ceedc63100984f5ea1891dbd7b000a1a80eaade335bf20"
+      },
+      "status_sha256": {
+        "control": "44ae069e128b6b58b9e0516e36479a684eaed588ba757782bd2a96737a069198",
+        "extended": "6b35c3ad443149e79a2ac3ffc45b2f79f1f8882628b49cfb1c4feabf10133f69"
+      }
+    },
+    {
+      "tag": "hivpr",
+      "seed": 5,
+      "command_differences": {
+        "--epochs": [
+          "100",
+          "200"
+        ],
+        "--patience": [
+          "20",
+          "40"
+        ],
+        "--min-epochs": [
+          "0",
+          "60"
+        ]
+      },
+      "provenance_other_than_hyperparameters_equal": true,
+      "first_differing_common_epoch": 1,
+      "common_epochs_with_different_values": [
+        1,
+        2,
+        3,
+        10,
+        14,
+        20,
+        30
+      ],
+      "control_epoch1": {
+        "train_mse": 0.8981,
+        "valid_rmse": 1.2562,
+        "lr": 0.001
+      },
+      "extended_epoch1": {
+        "train_mse": 0.8974,
+        "valid_rmse": 1.2462,
+        "lr": 0.001
+      },
+      "log_sha256": {
+        "control": "75d9ca95cd68e981e3a590ed8938ceb27cb0ec18528518903dd5e01ac4582b5f",
+        "extended": "7c100e850ea15fbe0937eb3e887be2df326380b6107dfca9e384256b10eb358b"
+      },
+      "status_sha256": {
+        "control": "c4cb92937cdfd03ccd4b60fa276aaddd5def983030d3aa8720828fb165e91f8d",
+        "extended": "b578cd936f0a65a497aa861e3af0b9d6e2b196205f7734aa6379a878e09ed77e"
+      }
+    },
+    {
+      "tag": "hivpr",
+      "seed": 6,
+      "command_differences": {
+        "--epochs": [
+          "100",
+          "200"
+        ],
+        "--patience": [
+          "20",
+          "40"
+        ],
+        "--min-epochs": [
+          "0",
+          "60"
+        ]
+      },
+      "provenance_other_than_hyperparameters_equal": true,
+      "first_differing_common_epoch": 1,
+      "common_epochs_with_different_values": [
+        1,
+        2,
+        4,
+        10,
+        20,
+        29,
+        30,
+        33,
+        40,
+        50,
+        60,
+        70
+      ],
+      "control_epoch1": {
+        "train_mse": 0.8644,
+        "valid_rmse": 1.2417,
+        "lr": 0.001
+      },
+      "extended_epoch1": {
+        "train_mse": 0.8646,
+        "valid_rmse": 1.2424,
+        "lr": 0.001
+      },
+      "log_sha256": {
+        "control": "cac85a85092d3ea09257fbc2e69326adf2cf2de8e07c3fcdc886f5025b535f6a",
+        "extended": "93f0cf34ecd05944cc6d6882f9356600cebbe23ca6a48ecf1168763013c29999"
+      },
+      "status_sha256": {
+        "control": "31223ad7c4a038548f42c6ad180a9c198454d52b230b0f0ce4e24b230310f2ed",
+        "extended": "975dee05c050f338d4149a3bbd6404cd508b3e0bf778021adb18080c3824e18d"
+      }
+    },
+    {
+      "tag": "hivpr",
+      "seed": 7,
+      "command_differences": {
+        "--epochs": [
+          "100",
+          "200"
+        ],
+        "--patience": [
+          "20",
+          "40"
+        ],
+        "--min-epochs": [
+          "0",
+          "60"
+        ]
+      },
+      "provenance_other_than_hyperparameters_equal": true,
+      "first_differing_common_epoch": 1,
+      "common_epochs_with_different_values": [
+        1,
+        2,
+        3,
+        5,
+        10,
+        20
+      ],
+      "control_epoch1": {
+        "train_mse": 0.8634,
+        "valid_rmse": 1.2702,
+        "lr": 0.001
+      },
+      "extended_epoch1": {
+        "train_mse": 0.8639,
+        "valid_rmse": 1.2779,
+        "lr": 0.001
+      },
+      "log_sha256": {
+        "control": "1e1d1873c1735d86254e482101965f95bfe1b191a0e4573b5408d2e99d860bf9",
+        "extended": "c8d5cbd5f01c1be4206eafa89d07371afd454f4bb69a3f9eebe45b6a168278ee"
+      },
+      "status_sha256": {
+        "control": "fc8b442342f842a957746e0b954fa945e49e5990fcb86fe2d16f8ff4ac8a05fd",
+        "extended": "6d5e12aef0edffef752a23bf2ae0299b80730957295301848de1ac1fcf589bc3"
+      }
+    },
+    {
+      "tag": "hivpr",
+      "seed": 42,
+      "command_differences": {
+        "--epochs": [
+          "100",
+          "200"
+        ],
+        "--patience": [
+          "20",
+          "40"
+        ],
+        "--min-epochs": [
+          "0",
+          "60"
+        ]
+      },
+      "provenance_other_than_hyperparameters_equal": true,
+      "first_differing_common_epoch": 1,
+      "common_epochs_with_different_values": [
+        1,
+        2,
+        3,
+        5,
+        10,
+        20,
+        30,
+        40
+      ],
+      "control_epoch1": {
+        "train_mse": 0.9093,
+        "valid_rmse": 1.1809,
+        "lr": 0.001
+      },
+      "extended_epoch1": {
+        "train_mse": 0.9096,
+        "valid_rmse": 1.18,
+        "lr": 0.001
+      },
+      "log_sha256": {
+        "control": "026c2e87af48c0cac767f1fadcb6d1a590a0960438600ace1ba76cf88e3ed672",
+        "extended": "197c50bdc5e97103d83e70ec84540e58ba87620e5e78295031527985698680d1"
+      },
+      "status_sha256": {
+        "control": "67f034b4b045e9a8604da2def5650354bdc350e26409b632a87f32bb3c568950",
+        "extended": "d35e876e8b74936185fffb2d8515fad79927ca7239e6f3bfeb0175133f7c6898"
+      }
+    },
+    {
+      "tag": "mpro",
+      "seed": 1,
+      "command_differences": {
+        "--epochs": [
+          "100",
+          "200"
+        ],
+        "--patience": [
+          "20",
+          "40"
+        ],
+        "--min-epochs": [
+          "0",
+          "60"
+        ]
+      },
+      "provenance_other_than_hyperparameters_equal": true,
+      "first_differing_common_epoch": 1,
+      "common_epochs_with_different_values": [
+        1,
+        5,
+        9,
+        10,
+        20
+      ],
+      "control_epoch1": {
+        "train_mse": 0.9276,
+        "valid_rmse": 1.0988,
+        "lr": 0.001
+      },
+      "extended_epoch1": {
+        "train_mse": 0.9276,
+        "valid_rmse": 1.0982,
+        "lr": 0.001
+      },
+      "log_sha256": {
+        "control": "b4a6d2aa570bbb2736bd9c16f3efb6625f739a3575e67652af15c28d975787b7",
+        "extended": "10c8a3aad12a9195b4335e8a6e43ac4fead22e5c8b1a45d4fdaadaad8ecb2b97"
+      },
+      "status_sha256": {
+        "control": "3a260044c4262bb66235c99c6f95391081a144642854f492e4a335b6209c5697",
+        "extended": "eaf510461639e02ed62ca31bc8a7d854cd94ad073f8ba3756f8bc0946f506863"
+      }
+    },
+    {
+      "tag": "mpro",
+      "seed": 2,
+      "command_differences": {
+        "--epochs": [
+          "100",
+          "200"
+        ],
+        "--patience": [
+          "20",
+          "40"
+        ],
+        "--min-epochs": [
+          "0",
+          "60"
+        ]
+      },
+      "provenance_other_than_hyperparameters_equal": true,
+      "first_differing_common_epoch": 1,
+      "common_epochs_with_different_values": [
+        1,
+        2,
+        3,
+        7,
+        10,
+        20,
+        30,
+        40
+      ],
+      "control_epoch1": {
+        "train_mse": 0.9097,
+        "valid_rmse": 1.0632,
+        "lr": 0.001
+      },
+      "extended_epoch1": {
+        "train_mse": 0.9106,
+        "valid_rmse": 1.063,
+        "lr": 0.001
+      },
+      "log_sha256": {
+        "control": "7cc84b8df822a2c86358a00c5ee0137bac8efcaa57dec8f11431e1db4de4f490",
+        "extended": "df0fdd070c9b32c1364a726a1c25016cbf55b3d7e503dfa73eb058ea4f26b9af"
+      },
+      "status_sha256": {
+        "control": "b82035112a4aba2a8b4ebacb8b42f76155691ddfe75add106586381aa1f7e99b",
+        "extended": "c5cf904c19f587d4522ed242ec33914293f49682557d00de48a5a16cb176fed7"
+      }
+    },
+    {
+      "tag": "mpro",
+      "seed": 3,
+      "command_differences": {
+        "--epochs": [
+          "100",
+          "200"
+        ],
+        "--patience": [
+          "20",
+          "40"
+        ],
+        "--min-epochs": [
+          "0",
+          "60"
+        ]
+      },
+      "provenance_other_than_hyperparameters_equal": true,
+      "first_differing_common_epoch": 1,
+      "common_epochs_with_different_values": [
+        1,
+        2,
+        10,
+        20
+      ],
+      "control_epoch1": {
+        "train_mse": 1.0035,
+        "valid_rmse": 1.057,
+        "lr": 0.001
+      },
+      "extended_epoch1": {
+        "train_mse": 1.0035,
+        "valid_rmse": 1.0572,
+        "lr": 0.001
+      },
+      "log_sha256": {
+        "control": "64ba6ec7312b044fc0cd72895bd108cbfd1af3478a2ec2ed9762f1f19507746b",
+        "extended": "4cd2e2ac64c0c6282256a26ca2feaebc1877942a9f76bf738fbfcc411220da4e"
+      },
+      "status_sha256": {
+        "control": "9b1a285028bb9fbc17be36f5b19a2ffb7f0ada6e9e8004892cf7789dc175d8e0",
+        "extended": "a00bb524c2f8e395634d0d40b0f340546cedd9f101577401ddaafa5a8946c565"
+      }
+    },
+    {
+      "tag": "mpro",
+      "seed": 4,
+      "command_differences": {
+        "--epochs": [
+          "100",
+          "200"
+        ],
+        "--patience": [
+          "20",
+          "40"
+        ],
+        "--min-epochs": [
+          "0",
+          "60"
+        ]
+      },
+      "provenance_other_than_hyperparameters_equal": true,
+      "first_differing_common_epoch": 10,
+      "common_epochs_with_different_values": [
+        10,
+        20,
+        30
+      ],
+      "control_epoch1": {
+        "train_mse": 0.8831,
+        "valid_rmse": 1.0781,
+        "lr": 0.001
+      },
+      "extended_epoch1": {
+        "train_mse": 0.8831,
+        "valid_rmse": 1.0781,
+        "lr": 0.001
+      },
+      "log_sha256": {
+        "control": "a6ff8cd5314d096768a7097795d5f2799645f04c9e384de4688a95c9f7152cab",
+        "extended": "59ea88f050f5f6d9c2488e89a8c573ceb719b866bdce9a74950cdadd62bdac2a"
+      },
+      "status_sha256": {
+        "control": "d5ea433baab9b097213c6d1a0fe15f8bdb93859072d31543bf09939e39a6d42d",
+        "extended": "8eae32b5b604365960c02caf49e4545bcc0a54df948f46aef865eb82df27207e"
+      }
+    },
+    {
+      "tag": "mpro",
+      "seed": 5,
+      "command_differences": {
+        "--epochs": [
+          "100",
+          "200"
+        ],
+        "--patience": [
+          "20",
+          "40"
+        ],
+        "--min-epochs": [
+          "0",
+          "60"
+        ]
+      },
+      "provenance_other_than_hyperparameters_equal": true,
+      "first_differing_common_epoch": 1,
+      "common_epochs_with_different_values": [
+        1,
+        3,
+        10,
+        20
+      ],
+      "control_epoch1": {
+        "train_mse": 0.9273,
+        "valid_rmse": 1.0659,
+        "lr": 0.001
+      },
+      "extended_epoch1": {
+        "train_mse": 0.9274,
+        "valid_rmse": 1.0662,
+        "lr": 0.001
+      },
+      "log_sha256": {
+        "control": "d87cbecd84da3fd30be6de5cb8a130520dbb3170e155f5008c74d108c9619545",
+        "extended": "fbe279c72ceb63a6d34100d0bfdc568a0a877b97e5dff11b8088cddafe146377"
+      },
+      "status_sha256": {
+        "control": "3297e9e316f487c78348f9b213133eef7add19f01fac1a60e7f324784fb6dd72",
+        "extended": "e4f91525352cb40a1d086e250eee4bc8514eba3ef637cbbee274204aeb6a5988"
+      }
+    },
+    {
+      "tag": "mpro",
+      "seed": 6,
+      "command_differences": {
+        "--epochs": [
+          "100",
+          "200"
+        ],
+        "--patience": [
+          "20",
+          "40"
+        ],
+        "--min-epochs": [
+          "0",
+          "60"
+        ]
+      },
+      "provenance_other_than_hyperparameters_equal": true,
+      "first_differing_common_epoch": 1,
+      "common_epochs_with_different_values": [
+        1,
+        4,
+        5,
+        10,
+        20
+      ],
+      "control_epoch1": {
+        "train_mse": 0.9122,
+        "valid_rmse": 1.0675,
+        "lr": 0.001
+      },
+      "extended_epoch1": {
+        "train_mse": 0.9122,
+        "valid_rmse": 1.0673,
+        "lr": 0.001
+      },
+      "log_sha256": {
+        "control": "e46278374d617ad779cf4c94f86a20b19ef5a732fddef3f17cf7b8749a824333",
+        "extended": "573cdaf821cb441714eb5f3859f68de4fa225121a3e04f8c0b61b1ce791c3a7e"
+      },
+      "status_sha256": {
+        "control": "6697f828207d688e5d76f3540b9d7dd4a68e43a13f3d990725d9aad796ec271a",
+        "extended": "badae72c8391bb10ce8fade5b961d76dc88c4c256b1edd2ae6550e507e9754d5"
+      }
+    },
+    {
+      "tag": "mpro",
+      "seed": 7,
+      "command_differences": {
+        "--epochs": [
+          "100",
+          "200"
+        ],
+        "--patience": [
+          "20",
+          "40"
+        ],
+        "--min-epochs": [
+          "0",
+          "60"
+        ]
+      },
+      "provenance_other_than_hyperparameters_equal": true,
+      "first_differing_common_epoch": 1,
+      "common_epochs_with_different_values": [
+        1,
+        3,
+        5,
+        10,
+        20
+      ],
+      "control_epoch1": {
+        "train_mse": 0.8979,
+        "valid_rmse": 1.0841,
+        "lr": 0.001
+      },
+      "extended_epoch1": {
+        "train_mse": 0.898,
+        "valid_rmse": 1.0847,
+        "lr": 0.001
+      },
+      "log_sha256": {
+        "control": "92931ed984f698fbe0006c00913f9750fd1d5bc353bc54ac21bdfa030a91e292",
+        "extended": "f9d2ee061714984a146d97fb14a301a4ace9c8566a9587f59943b00c73ae7fe7"
+      },
+      "status_sha256": {
+        "control": "4796992d16cea58d2a32783ef07e2ba645c535116f3ce7bd9d9ab2d4b0feeaf4",
+        "extended": "1853346840505794228d4ce0608a0016dbd2d91e2aa5fd89e5453c1030e27586"
+      }
+    },
+    {
+      "tag": "mpro",
+      "seed": 42,
+      "command_differences": {
+        "--epochs": [
+          "100",
+          "200"
+        ],
+        "--patience": [
+          "20",
+          "40"
+        ],
+        "--min-epochs": [
+          "0",
+          "60"
+        ]
+      },
+      "provenance_other_than_hyperparameters_equal": true,
+      "first_differing_common_epoch": 1,
+      "common_epochs_with_different_values": [
+        1,
+        4,
+        10,
+        20
+      ],
+      "control_epoch1": {
+        "train_mse": 0.8975,
+        "valid_rmse": 1.0513,
+        "lr": 0.001
+      },
+      "extended_epoch1": {
+        "train_mse": 0.8979,
+        "valid_rmse": 1.0514,
+        "lr": 0.001
+      },
+      "log_sha256": {
+        "control": "c060c41a6c99cd5a399ac96ca7a4beae9e1f6c3904227a7ab59c57500119eb29",
+        "extended": "7e241bbdf55c07ed87341f1daa8636a729f7314b331bc49d36831436eef44c62"
+      },
+      "status_sha256": {
+        "control": "ae86dcaf59be33c82d81c6a0e8fc0ffe6e2704a08dd660e0106d8657c422d260",
+        "extended": "c7042a4baf0b0ae09b2e875f1e3abc58606c76a49f49142ebc9f2875c833407e"
+      }
+    },
+    {
+      "tag": "vegfr2",
+      "seed": 1,
+      "command_differences": {
+        "--epochs": [
+          "100",
+          "200"
+        ],
+        "--patience": [
+          "20",
+          "40"
+        ],
+        "--min-epochs": [
+          "0",
+          "60"
+        ]
+      },
+      "provenance_other_than_hyperparameters_equal": true,
+      "first_differing_common_epoch": 1,
+      "common_epochs_with_different_values": [
+        1,
+        10,
+        12,
+        19,
+        20,
+        29,
+        30,
+        40
+      ],
+      "control_epoch1": {
+        "train_mse": 0.8819,
+        "valid_rmse": 1.0206,
+        "lr": 0.001
+      },
+      "extended_epoch1": {
+        "train_mse": 0.8831,
+        "valid_rmse": 1.0391,
+        "lr": 0.001
+      },
+      "log_sha256": {
+        "control": "e5b97701fdc79b61e0e65d4fa321b8797418132ba375f7d35bd7134d6bf89de6",
+        "extended": "60ab582c27ec660aa1006d90b102db5bec4792ca6406db562e064bb792c7e016"
+      },
+      "status_sha256": {
+        "control": "318ef220759197572adc0247f922c16dc64dd810b1fc383b2c3af1d1b2be29ff",
+        "extended": "079c79d12055bf8133a29695e7cc6fbfc4b9941ffebd42b154cf4b34fb78ba78"
+      }
+    },
+    {
+      "tag": "vegfr2",
+      "seed": 2,
+      "command_differences": {
+        "--epochs": [
+          "100",
+          "200"
+        ],
+        "--patience": [
+          "20",
+          "40"
+        ],
+        "--min-epochs": [
+          "0",
+          "60"
+        ]
+      },
+      "provenance_other_than_hyperparameters_equal": true,
+      "first_differing_common_epoch": 1,
+      "common_epochs_with_different_values": [
+        1,
+        7,
+        10,
+        20,
+        30,
+        40
+      ],
+      "control_epoch1": {
+        "train_mse": 0.8782,
+        "valid_rmse": 1.0663,
+        "lr": 0.001
+      },
+      "extended_epoch1": {
+        "train_mse": 0.8793,
+        "valid_rmse": 1.1075,
+        "lr": 0.001
+      },
+      "log_sha256": {
+        "control": "90bd5cefd152404d054c66174f4556776dc6a37fc7297b68280b1e102ac40cb7",
+        "extended": "266f5ede3159142e803b7b145b0a470d05485b062b47831698789e35e86da4a1"
+      },
+      "status_sha256": {
+        "control": "3bf5d29dbe9819384fd69410b0ba199d0214b217f17bcff4d5dd60c59441031c",
+        "extended": "769fe50c6f650f5a3d2b49b2e9037aa12ae0485cc17c9fbe97978b42eee95456"
+      }
+    },
+    {
+      "tag": "vegfr2",
+      "seed": 3,
+      "command_differences": {
+        "--epochs": [
+          "100",
+          "200"
+        ],
+        "--patience": [
+          "20",
+          "40"
+        ],
+        "--min-epochs": [
+          "0",
+          "60"
+        ]
+      },
+      "provenance_other_than_hyperparameters_equal": true,
+      "first_differing_common_epoch": 1,
+      "common_epochs_with_different_values": [
+        1,
+        2,
+        3,
+        10,
+        20,
+        30
+      ],
+      "control_epoch1": {
+        "train_mse": 0.8868,
+        "valid_rmse": 1.3982,
+        "lr": 0.001
+      },
+      "extended_epoch1": {
+        "train_mse": 0.8871,
+        "valid_rmse": 1.3821,
+        "lr": 0.001
+      },
+      "log_sha256": {
+        "control": "88a9c05c8cbbdbfd002db86cc0a060fffa84f71fb48a314d447614acdfa197a2",
+        "extended": "645a210ae9a71823e340b858951a28f3cb86aa1fb50a4c29208ea11e57c20bd6"
+      },
+      "status_sha256": {
+        "control": "906f2db3a16df55025f32fed40fdd0f68f9060d3e5628d298d93cbf65f6529c2",
+        "extended": "f0a05f08f0d0820becc1274869e3c86be5b9e85f98391ba9052a187bbadb610a"
+      }
+    },
+    {
+      "tag": "vegfr2",
+      "seed": 4,
+      "command_differences": {
+        "--epochs": [
+          "100",
+          "200"
+        ],
+        "--patience": [
+          "20",
+          "40"
+        ],
+        "--min-epochs": [
+          "0",
+          "60"
+        ]
+      },
+      "provenance_other_than_hyperparameters_equal": true,
+      "first_differing_common_epoch": 1,
+      "common_epochs_with_different_values": [
+        1,
+        6,
+        8,
+        10,
+        13,
+        20,
+        30
+      ],
+      "control_epoch1": {
+        "train_mse": 0.8697,
+        "valid_rmse": 1.0427,
+        "lr": 0.001
+      },
+      "extended_epoch1": {
+        "train_mse": 0.8706,
+        "valid_rmse": 1.114,
+        "lr": 0.001
+      },
+      "log_sha256": {
+        "control": "150690a5a237a626b567b1c887f3ac7ffef7cf8a0a62d9984528cf89c0ef361d",
+        "extended": "f4fffad68be6890c68396e4cca60dad89e7a589e0c3e078da26a1624d7899d43"
+      },
+      "status_sha256": {
+        "control": "7fd18d49e2a2824518379fcd17330b298d3e5e4b1fe1749fa6a604d283e5e6f6",
+        "extended": "4a76da01bfe021d475ea56e9670f0618506dbfdd2fe714ad6fb67ee8d3504052"
+      }
+    },
+    {
+      "tag": "vegfr2",
+      "seed": 5,
+      "command_differences": {
+        "--epochs": [
+          "100",
+          "200"
+        ],
+        "--patience": [
+          "20",
+          "40"
+        ],
+        "--min-epochs": [
+          "0",
+          "60"
+        ]
+      },
+      "provenance_other_than_hyperparameters_equal": true,
+      "first_differing_common_epoch": 1,
+      "common_epochs_with_different_values": [
+        1,
+        10,
+        20,
+        30,
+        40
+      ],
+      "control_epoch1": {
+        "train_mse": 0.889,
+        "valid_rmse": 1.0193,
+        "lr": 0.001
+      },
+      "extended_epoch1": {
+        "train_mse": 0.8865,
+        "valid_rmse": 0.9952,
+        "lr": 0.001
+      },
+      "log_sha256": {
+        "control": "0de504d2177375b4a81bbc87434f5ce7c5f38b82bd98b39e714887e1e43d4939",
+        "extended": "4e1436601950bea258ef21f6dba1c68aa39520a321de6be8544c203f51f1b283"
+      },
+      "status_sha256": {
+        "control": "9771ee9e93f555d25e95cd292f2394088331ec22e49d50c919ccbc0e85dfbb29",
+        "extended": "8213888cc831788808b50c4a101b55fbdd640cfc28b68d89670626dbc804a6a7"
+      }
+    },
+    {
+      "tag": "vegfr2",
+      "seed": 6,
+      "command_differences": {
+        "--epochs": [
+          "100",
+          "200"
+        ],
+        "--patience": [
+          "20",
+          "40"
+        ],
+        "--min-epochs": [
+          "0",
+          "60"
+        ]
+      },
+      "provenance_other_than_hyperparameters_equal": true,
+      "first_differing_common_epoch": 1,
+      "common_epochs_with_different_values": [
+        1,
+        10,
+        20,
+        25,
+        30,
+        40
+      ],
+      "control_epoch1": {
+        "train_mse": 0.8774,
+        "valid_rmse": 0.9755,
+        "lr": 0.001
+      },
+      "extended_epoch1": {
+        "train_mse": 0.8772,
+        "valid_rmse": 1.0128,
+        "lr": 0.001
+      },
+      "log_sha256": {
+        "control": "bc45eecbbd0b5bfa298938043dd93ec1ad50b44f0bb7f2f648941fdb5b74844f",
+        "extended": "e821cbed0090a1f60e455fece59682e20d62df293d4ca62e4d03c62cd1d199e1"
+      },
+      "status_sha256": {
+        "control": "68eb652dec613732edfa69f6c4551cf83abd9f4591b29d44b121ae6545e0f1d0",
+        "extended": "3cd994a7882d7b0bd0673d2909cfee007b65ead33beeb60a766ce34bd9ba42e4"
+      }
+    },
+    {
+      "tag": "vegfr2",
+      "seed": 7,
+      "command_differences": {
+        "--epochs": [
+          "100",
+          "200"
+        ],
+        "--patience": [
+          "20",
+          "40"
+        ],
+        "--min-epochs": [
+          "0",
+          "60"
+        ]
+      },
+      "provenance_other_than_hyperparameters_equal": true,
+      "first_differing_common_epoch": 1,
+      "common_epochs_with_different_values": [
+        1,
+        5,
+        10,
+        11,
+        20,
+        30,
+        40
+      ],
+      "control_epoch1": {
+        "train_mse": 0.8884,
+        "valid_rmse": 1.0303,
+        "lr": 0.001
+      },
+      "extended_epoch1": {
+        "train_mse": 0.8893,
+        "valid_rmse": 1.0603,
+        "lr": 0.001
+      },
+      "log_sha256": {
+        "control": "e6f3a745b21da65a28867b7f860d6a52a9e75095b6274da5cd05e83ec153e4a8",
+        "extended": "0425293721131b27c7c0196e3642e62d2aa6f022ba59c670fa63cc6c50dbf95f"
+      },
+      "status_sha256": {
+        "control": "d8599d61af1ba8c2308d0c6a6a4f28732b9335d59e91f71a1a16da1dbfdc3b0a",
+        "extended": "40cec849193cdbcded2b56f2ec473ebb301279df77376b9abe0c86e99ab5d601"
+      }
+    },
+    {
+      "tag": "vegfr2",
+      "seed": 42,
+      "command_differences": {
+        "--epochs": [
+          "100",
+          "200"
+        ],
+        "--patience": [
+          "20",
+          "40"
+        ],
+        "--min-epochs": [
+          "0",
+          "60"
+        ]
+      },
+      "provenance_other_than_hyperparameters_equal": true,
+      "first_differing_common_epoch": 1,
+      "common_epochs_with_different_values": [
+        1,
+        10,
+        20,
+        30
+      ],
+      "control_epoch1": {
+        "train_mse": 0.8878,
+        "valid_rmse": 0.9781,
+        "lr": 0.001
+      },
+      "extended_epoch1": {
+        "train_mse": 0.889,
+        "valid_rmse": 1.0029,
+        "lr": 0.001
+      },
+      "log_sha256": {
+        "control": "1bd34951aa1c1d38341250dcdc45da5964f3b04639a0e716cc917f1d24da1305",
+        "extended": "2023923923a8ffc500c5a294a06f18f5b8953fa561e23c91e062ceeeefe2c34b"
+      },
+      "status_sha256": {
+        "control": "e0df6b9537f3badd26b49c6d1c23566df4f39cd7f10360086f0499732310502e",
+        "extended": "aa896738a5ce94f4616600a9ed40c3fbbebccea8054f9ee750fb438b4f6175c1"
+      }
+    }
+  ]
+}

@@ -155,3 +155,125 @@ def test_readme_time_verifier_includes_constant_baseline():
     mod.check_t2()
     failures = [r for r in mod.results if not r[4]]
     assert len(failures) == 1 and failures[0][1].endswith('/constant')
+
+
+@pytest.fixture
+def environment_readme(tmp_path, load_experiment):
+    """Complete accepted synthetic jobs with distinct means and flag counts."""
+    import hashlib
+    import json
+
+    comparator = load_experiment('time_environment_comparison')
+    mod = load_skill('verify_readme_tables')
+    mod.BASE = str(tmp_path)
+    header = '| Environment | Budget | Jobs | Train MSE | Validation RMSE | Test R² | Flags |'
+    mod.lines = [header, '| --- | --- | --- | --- | --- | --- | --- |',
+                 '| CPU | original | 64 | 0.139 | 0.239 | -0.362 | 0 |',
+                 '| CPU | extended | 64 | 0.339 | 0.439 | -0.162 | 0 |',
+                 '| CUDA | original | 64 | 0.539 | 0.639 | 0.039 | 63 |',
+                 '| CUDA | extended | 64 | 0.739 | 0.839 | 0.239 | 64 |']
+    roots = {}
+    def digest(name):
+        return hashlib.sha256(name.encode()).hexdigest()
+    for device, directory in [('cpu', 'm3_eight_seed'), ('cuda', 'cuda_eight_seed')]:
+        root = tmp_path / 'results/time_budget_sensitivity' / directory / 'analysis'
+        root.mkdir(parents=True)
+        roots[device] = root
+        rows = []
+        for arm in comparator.ARMS:
+            for tag_i, tag in enumerate(comparator.TAGS):
+                for seed_i, seed in enumerate(comparator.SEEDS):
+                    offset = .01 * tag_i + .001 * seed_i
+                    offset += .4 if device == 'cuda' else 0
+                    offset += .2 if arm == 'extended' else 0
+                    mse = .1 + offset
+                    rows.append(dict(arm=arm, tag=tag, seed=seed, label_id=digest(tag),
+                                     device=device, best_epoch=29, common_flag=mse > .5,
+                                     train_mse=mse, valid_rmse_std=.2 + offset,
+                                     test_r2=-.4 + offset, test_rmse=.6 + offset,
+                                     test_mae=.5 + offset))
+        pd.DataFrame(rows).to_csv(root / 'diagnostics.csv', index=False)
+        for name in comparator.REPORT_FILES - {'diagnostics.csv'}:
+            (root / name).write_text('fixture\n')
+        provenance = {'source_sha256': {name: digest(name) for name in comparator.CODE_FILES},
+                      'input_sha256': {name: digest(name) for name in comparator.INPUT_FILES},
+                      'host': device + '-host', 'training_environment': {'platform': device},
+                      'protocol': {'device': device, 'arms': comparator.ARMS,
+                                   'seeds': list(comparator.SEEDS), 'jobs': 128}}
+        report = {'schema': 'm3-time-budget-report-v1', 'status': 'accepted',
+                  'training_device': device, 'training_host': provenance['host'],
+                  'training_platform': device, 'seeds': list(comparator.SEEDS), 'n_seeds': 8,
+                  'jobs_accepted': 128, 'paired_rows': 64, 'targets': 8, 'factorial_cells_complete': 2,
+                  **comparator.OUTCOME_DEFINITIONS, 'provenance': provenance,
+                  'output_sha256': {name: comparator.digest(root / name)
+                                    for name in comparator.REPORT_FILES}}
+        (root / 'report.json').write_text(json.dumps(report))
+        # An intentionally wrong preaggregated table must not influence the audit.
+        (root / 'cells.csv').write_text('all values are incorrect\n')
+    return mod, roots
+
+
+def test_environment_table_independently_checks_all_twenty_values(environment_readme):
+    mod, _ = environment_readme
+    mod.check_environment_table()
+    assert len(mod.results) == 20
+    assert all(cell[4] for cell in mod.results)
+    assert {cell[0] for cell in mod.results} == {'T10_environment'}
+    values = {cell[1]: cell[3] for cell in mod.results}
+    assert values['CPU/original/train_mse'] == pytest.approx(.1385)
+    assert values['CUDA/extended/valid_rmse_std'] == pytest.approx(.8385)
+    assert values['CUDA/original/flags'] == 63
+
+
+@pytest.mark.parametrize('column', range(2, 7))
+def test_environment_table_catches_each_numeric_column(environment_readme, column):
+    mod, _ = environment_readme
+    cells = mod.lines[2].split('|')
+    cells[column + 1] = ' 999 '
+    mod.lines[2] = '|'.join(cells)
+    mod.check_environment_table()
+    bad = [cell for cell in mod.results if not cell[4]]
+    assert len(bad) == 1
+    assert bad[0][1].startswith('CPU/original/')
+
+
+@pytest.mark.parametrize('fault', ['missing_report', 'pending', 'partial', 'hash', 'source'])
+def test_environment_table_requires_accepted_complete_matching_reports(environment_readme, fault):
+    import json
+
+    mod, roots = environment_readme
+    report_path = roots['cuda'] / 'report.json'
+    report = json.loads(report_path.read_text())
+    if fault == 'missing_report':
+        report_path.unlink()
+    elif fault == 'pending':
+        report['status'] = 'pending'
+    elif fault == 'partial':
+        report['jobs_accepted'] = 48
+    elif fault == 'hash':
+        (roots['cuda'] / 'diagnostics.csv').write_text('changed\n')
+    elif fault == 'source':
+        key = next(iter(report['provenance']['source_sha256']))
+        report['provenance']['source_sha256'][key] = '0' * 64
+    if fault != 'missing_report':
+        report_path.write_text(json.dumps(report))
+    with pytest.raises(ValueError):
+        mod.check_environment_table()
+    assert mod.results == []
+
+
+def test_environment_table_absent_is_explicitly_not_checked(tmp_path, capsys):
+    mod = load_skill('verify_readme_tables')
+    mod.BASE = str(tmp_path)
+    mod.lines = ['# No four-cell table yet']
+    mod.check_environment_table()
+    assert mod.results == []
+    assert 'no checks performed' in capsys.readouterr().out
+
+
+def test_environment_table_rejects_duplicate_or_missing_cells(environment_readme):
+    mod, _ = environment_readme
+    mod.lines[-1] = mod.lines[-2]
+    with pytest.raises(ValueError, match='exactly CPU/CUDA'):
+        mod.check_environment_table()
+    assert mod.results == []

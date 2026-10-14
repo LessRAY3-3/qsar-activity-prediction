@@ -32,7 +32,12 @@ def fake_report(root, comparator, device, merged=False):
                 offset = (0.5 if device == "cuda" else 0)
                 if arm == "extended":
                     offset += (0.4 + index/50) if device == "cuda" else (0.2 + index/100)
+                # Distinct flag counts per cell; boundary epoch 30 never flags.
+                flagged_seeds = {("cpu", "control"): 1, ("cpu", "extended"): 2,
+                                 ("cuda", "control"): 3, ("cuda", "extended"): 4}
+                best_epoch = 29 if index < flagged_seeds[(device, arm)] else 30
                 rows.append(dict(tag=tag, arm=arm, seed=seed, label_id=sha(tag), device=device,
+                                 best_epoch=best_epoch, common_flag=best_epoch < 30,
                                  **{metric: (-2 if metric == "test_r2" else j + 1) + offset
                                     for j, metric in enumerate(comparator.METRICS)}))
     pd.DataFrame(rows).to_csv(root / "diagnostics.csv", index=False)
@@ -57,6 +62,9 @@ def fake_report(root, comparator, device, merged=False):
                 "training_host": provenance["host"], "training_platform": env["platform"],
                 "seeds": list(comparator.SEEDS), "n_seeds": 8, "jobs_accepted": 128,
                 "paired_rows": 64, "targets": 8, "factorial_cells_complete": 2,
+                "training_prefix_comparison": {
+                    "pairs": 64, "matching_rounded_prefixes": 64 if device == "cpu" else 0,
+                    "interpretation": "Only printed epochs and rounded train/validation/lr values are compared; no bitwise-equivalence requirement. Differences are reported, not suppressed or used to select runs."},
                 **copy.deepcopy(comparator.OUTCOME_DEFINITIONS), "provenance": provenance,
                 "output_sha256": {name: comparator.digest(root / name) for name in comparator.REPORT_FILES}}
     save_meta(root, metadata)
@@ -78,6 +86,19 @@ def test_full_four_cell_contrasts_and_descriptive_seed_summaries(reports):
     report = comparator.run(cpu, cuda, output)
     assert report["status"] == "accepted" and report["factorial_cells_complete"] == 4
     assert report["jobs_accepted"] == 256 and report["paired_target_seed_rows"] == 64
+    cells = pd.read_csv(output / "cells.csv")
+    assert list(cells.columns) == ["device", "arm", "jobs", "mean_train_mse",
+                                   "mean_valid_rmse_std", "mean_test_r2", "common_flags"]
+    assert list(cells[["device", "arm"]].itertuples(index=False, name=None)) == [
+        ("cpu", "control"), ("cpu", "extended"), ("cuda", "control"), ("cuda", "extended")]
+    assert cells.jobs.tolist() == [64] * 4
+    np.testing.assert_allclose(cells.mean_train_mse, [1, 1.235, 1.5, 1.97])
+    np.testing.assert_allclose(cells.mean_valid_rmse_std, [2, 2.235, 2.5, 2.97])
+    np.testing.assert_allclose(cells.mean_test_r2, [-2, -1.765, -1.5, -1.03])
+    assert cells.common_flags.tolist() == [8, 16, 24, 32]
+    assert set(report["output_sha256"]) == {"cells.csv", "paired.csv", "targets.csv", "cross_target_means.csv"}
+    assert "64 accepted" in report["cells_summary"]["aggregation"]
+    assert "not a standard deviation" in report["cells_summary"]["columns"]["mean_valid_rmse_std"]
     pair = pd.read_csv(output / "paired.csv")
     target = pd.read_csv(output / "targets.csv")
     across = pd.read_csv(output / "cross_target_means.csv")
@@ -139,7 +160,8 @@ def test_missing_partial_or_incompatible_reports_fail_without_output(reports, fa
     assert not output.exists()
 
 
-@pytest.mark.parametrize("failure", ["missing_row", "duplicate", "wrong_seed", "label", "device", "nan", "negative", "r2"])
+@pytest.mark.parametrize("failure", ["missing_row", "duplicate", "wrong_seed", "label", "device", "nan", "negative", "r2",
+                                     "missing_flags", "invalid_flags", "wrong_flags", "invalid_epoch"])
 def test_rehashed_diagnostics_still_require_exact_matched_outcomes(reports, failure):
     comparator, cpu, cuda, _, metadata, output = reports
     frame = pd.read_csv(cuda / "diagnostics.csv")
@@ -159,6 +181,16 @@ def test_rehashed_diagnostics_still_require_exact_matched_outcomes(reports, fail
         frame.loc[0, "test_rmse"] = -0.5
     elif failure == "r2":
         frame.loc[0, "test_r2"] = 1.5
+    elif failure == "missing_flags":
+        frame = frame.drop(columns="common_flag")
+    elif failure == "invalid_flags":
+        frame["common_flag"] = frame.common_flag.astype(str)
+        frame.loc[0, "common_flag"] = "unknown"
+    elif failure == "wrong_flags":
+        frame.loc[0, "common_flag"] = not frame.loc[0, "common_flag"]
+    elif failure == "invalid_epoch":
+        frame["best_epoch"] = frame.best_epoch.astype(float)
+        frame.loc[0, "best_epoch"] = 29.5
     write_diagnostics(cuda, metadata, frame, comparator)
     with pytest.raises(ValueError):
         comparator.run(cpu, cuda, output)
@@ -176,3 +208,29 @@ def test_existing_or_nested_output_is_never_overwritten(reports):
     with pytest.raises(ValueError, match="separate"):
         comparator.run(cpu, cuda, cpu / "new-analysis")
     assert not (cpu / "new-analysis").exists()
+
+
+@pytest.mark.parametrize("cuda_matching", [0, 17, 64])
+def test_training_prefix_summaries_preserved_without_selecting_runs(reports, cuda_matching):
+    comparator, cpu, cuda, cpu_metadata, cuda_metadata, output = reports
+    cuda_metadata["training_prefix_comparison"]["matching_rounded_prefixes"] = cuda_matching
+    save_meta(cuda, cuda_metadata)
+    before = {str(path): path.read_bytes() for root in (cpu, cuda) for path in root.iterdir()}
+    report = comparator.run(cpu, cuda, output)
+    stored = json.loads((output / "report.json").read_text())
+    assert stored["training_prefix_comparison"] == {
+        "cpu": cpu_metadata["training_prefix_comparison"],
+        "cuda": cuda_metadata["training_prefix_comparison"]}
+    assert report["status"] == "accepted"
+    assert report["jobs_accepted"] == 256
+    assert report["paired_target_seed_rows"] == 64
+    pairs = pd.read_csv(output / "paired.csv")
+    assert set(zip(pairs.tag, pairs.seed)) == {(tag, seed) for tag in comparator.TAGS for seed in comparator.SEEDS}
+    limitations = " ".join(report["limitations"])
+    assert "Within-device" in limitations
+    assert "run-to-run variation" in limitations
+    assert "cannot be attributed solely to extending training" in limitations
+    assert "interaction inherits this limitation" in limitations
+    assert "Prefix mismatches do not exclude any declared runs" in limitations
+    assert "Matching rounded prefixes do not establish bitwise-identical" in limitations
+    assert before == {str(path): path.read_bytes() for root in (cpu, cuda) for path in root.iterdir()}

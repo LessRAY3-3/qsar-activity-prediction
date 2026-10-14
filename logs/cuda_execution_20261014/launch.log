@@ -1,0 +1,12 @@
+Failed to inhibit: Access denied
+Traceback (most recent call last):
+  File "/home/lessray/qsar-campaigns/cuda-ready-20261014/handoff.py", line 392, in <module>
+    main()
+  File "/home/lessray/qsar-campaigns/cuda-ready-20261014/handoff.py", line 386, in main
+    detach(root) if args.detach else execute(root)
+    ^^^^^^^^^^^^
+  File "/home/lessray/qsar-campaigns/cuda-ready-20261014/handoff.py", line 354, in detach
+    subprocess.run([*prefix, 'true'], check=True)
+  File "/home/lessray/miniforge3/envs/amr/lib/python3.12/subprocess.py", line 571, in run
+    raise CalledProcessError(retcode, process.args,
+subprocess.CalledProcessError: Command '['/usr/bin/systemd-inhibit', '--what=idle:sleep', '--mode=block', '--who=qsar-146', '--why=QSAR CUDA experiment queues', 'true']' returned non-zero exit status 1.

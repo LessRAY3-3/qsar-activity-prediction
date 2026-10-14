@@ -1,0 +1,619 @@
+{
+  "schema": "qsar-provenance-cpu-replay-v1",
+  "status": "accepted_independent_cpu_replay",
+  "start_utc": "2026-10-14T14:39:16.996667+00:00",
+  "training_performed": false,
+  "interpretation": "Independent reconstruction and CPU inference verification; historical executable, environment and logs remain unknown. Matching scores do not establish historical run identity.",
+  "identity": {
+    "plan_sha256": "017361607030902d20f7ef6faa605bbbe8bcb61bfcaddb7828f040d628256f6e",
+    "runner_sha256": "cebcb554103afb64babb5d0fe5319869c1f1eaaff4e0006651e7869f93943139",
+    "threads": 4,
+    "backend": "cuda"
+  },
+  "report_source_sha256": "8accdd8f96781b6f846132943ba385a1ba6530aa6ae864564b28157f48cecdcb",
+  "tolerance": {
+    "prediction_atol": 0.0001,
+    "prediction_rtol": 1e-05,
+    "metric_atol": 1e-05,
+    "metric_rtol": 1e-05
+  },
+  "environment": {
+    "device": "cpu",
+    "threads": 4,
+    "python": "3.12.14 (main, Aug 12 2026, 13:57:54) [Clang 21.0.0 (clang-2100.1.1.101)]",
+    "platform": "macOS-27.0-arm64-arm-64bit",
+    "packages": {
+      "torch": "2.14.0",
+      "torch-geometric": "2.8.0.post1",
+      "numpy": "2.5.3",
+      "scikit-learn": "1.9.1",
+      "rdkit": "2026.3.6"
+    }
+  },
+  "jobs_expected": 18,
+  "jobs": [
+    {
+      "id": "egfr_gin_random_seed42",
+      "passed": true,
+      "receipt_sha256": "104818eddfd41636b4fdd0dd9bbb22e63cb4a6a9b75a4c09d185d16963a9bbd0",
+      "prediction_sha256": "8a5cef22b96f2aa6e8477a8b12691607168dc4265d4745dc147e37ae13a5d87c",
+      "training_environment": {
+        "utc": "2026-10-14T14:19:15.865449+00:00",
+        "python": "3.12.15 (main, Oct  6 2026, 23:50:18) [GCC 15.3.0]",
+        "executable": "/home/lessray/qsar-campaigns/cuda-runtime-20261014/.venv/bin/python",
+        "platform": "Linux-7.0.0-38-generic-x86_64-with-glibc2.39",
+        "packages": {
+          "torch": "2.14.0+cu126",
+          "torch-geometric": "2.8.0.post1",
+          "numpy": "2.5.3",
+          "scikit-learn": "1.9.1",
+          "rdkit": "2026.3.6"
+        },
+        "device": "cuda",
+        "device_name": "NVIDIA GeForce RTX 4070 Laptop GPU",
+        "cuda_runtime": "12.6",
+        "cudnn": 91002,
+        "torch_threads": 4,
+        "torch_interop_threads": 1,
+        "cuda_visible_devices": "0",
+        "nvidia_smi": {
+          "exit_code": 0,
+          "stdout": "Wed Oct 14 22:19:15 2026       \n+-----------------------------------------------------------------------------------------+\n| NVIDIA-SMI 580.178.04             Driver Version: 580.178.04     CUDA Version: 13.0     |\n+-----------------------------------------+------------------------+----------------------+\n| GPU  Name                 Persistence-M | Bus-Id          Disp.A | Volatile Uncorr. ECC |\n| Fan  Temp   Perf          Pwr:Usage/Cap |           Memory-Usage | GPU-Util  Compute M. |\n|                                         |                        |               MIG M. |\n|=========================================+========================+======================|\n|   0  NVIDIA GeForce RTX 4070 ...    Off |   00000000:01:00.0 Off |                  N/A |\n| N/A   54C    P8              3W /  115W |     187MiB /   8188MiB |      0%      Default |\n|                                         |                        |                  N/A |\n+-----------------------------------------+------------------------+----------------------+\n\n+-----------------------------------------------------------------------------------------+\n| Processes:                                                                              |\n|  GPU   GI   CI              PID   Type   Process name                        GPU Memory |\n|        ID   ID                                                               Usage      |\n|=========================================================================================|\n|    0   N/A  N/A            2556      G   /usr/lib/xorg/Xorg                       20MiB |\n|    0   N/A  N/A            7280      C   ...ime-20261014/.venv/bin/python        148MiB |\n+-----------------------------------------------------------------------------------------+\n",
+          "stderr": ""
+        }
+      }
+    },
+    {
+      "id": "egfr_gin_scaffold_seed42",
+      "passed": true,
+      "receipt_sha256": "8ce497084443bac8a4b834851682c1ddbe9dcbcf3f36497a84784554e4b15c85",
+      "prediction_sha256": "0f51846997341bf3e0cd98fbdf24f647f3f08262167edba2e1fb3b8aa1a397cb",
+      "training_environment": {
+        "utc": "2026-10-14T14:19:38.657455+00:00",
+        "python": "3.12.15 (main, Oct  6 2026, 23:50:18) [GCC 15.3.0]",
+        "executable": "/home/lessray/qsar-campaigns/cuda-runtime-20261014/.venv/bin/python",
+        "platform": "Linux-7.0.0-38-generic-x86_64-with-glibc2.39",
+        "packages": {
+          "torch": "2.14.0+cu126",
+          "torch-geometric": "2.8.0.post1",
+          "numpy": "2.5.3",
+          "scikit-learn": "1.9.1",
+          "rdkit": "2026.3.6"
+        },
+        "device": "cuda",
+        "device_name": "NVIDIA GeForce RTX 4070 Laptop GPU",
+        "cuda_runtime": "12.6",
+        "cudnn": 91002,
+        "torch_threads": 4,
+        "torch_interop_threads": 1,
+        "cuda_visible_devices": "0",
+        "nvidia_smi": {
+          "exit_code": 0,
+          "stdout": "Wed Oct 14 22:19:38 2026       \n+-----------------------------------------------------------------------------------------+\n| NVIDIA-SMI 580.178.04             Driver Version: 580.178.04     CUDA Version: 13.0     |\n+-----------------------------------------+------------------------+----------------------+\n| GPU  Name                 Persistence-M | Bus-Id          Disp.A | Volatile Uncorr. ECC |\n| Fan  Temp   Perf          Pwr:Usage/Cap |           Memory-Usage | GPU-Util  Compute M. |\n|                                         |                        |               MIG M. |\n|=========================================+========================+======================|\n|   0  NVIDIA GeForce RTX 4070 ...    Off |   00000000:01:00.0 Off |                  N/A |\n| N/A   55C    P5              7W /  115W |     187MiB /   8188MiB |      0%      Default |\n|                                         |                        |                  N/A |\n+-----------------------------------------+------------------------+----------------------+\n\n+-----------------------------------------------------------------------------------------+\n| Processes:                                                                              |\n|  GPU   GI   CI              PID   Type   Process name                        GPU Memory |\n|        ID   ID                                                               Usage      |\n|=========================================================================================|\n|    0   N/A  N/A            2556      G   /usr/lib/xorg/Xorg                       20MiB |\n|    0   N/A  N/A            7352      C   ...ime-20261014/.venv/bin/python        148MiB |\n+-----------------------------------------------------------------------------------------+\n",
+          "stderr": ""
+        }
+      }
+    },
+    {
+      "id": "mt_random_seed42",
+      "passed": true,
+      "receipt_sha256": "f296ce750073b1ba9d5bab31cfc89c5e1b188185b63631c5eeb95594612803cd",
+      "prediction_sha256": "7ea8221ff164bc115e5347103ad0d28667cd84242381530690867516d266236b",
+      "training_environment": {
+        "utc": "2026-10-14T14:19:57.003843+00:00",
+        "python": "3.12.15 (main, Oct  6 2026, 23:50:18) [GCC 15.3.0]",
+        "executable": "/home/lessray/qsar-campaigns/cuda-runtime-20261014/.venv/bin/python",
+        "platform": "Linux-7.0.0-38-generic-x86_64-with-glibc2.39",
+        "packages": {
+          "torch": "2.14.0+cu126",
+          "torch-geometric": "2.8.0.post1",
+          "numpy": "2.5.3",
+          "scikit-learn": "1.9.1",
+          "rdkit": "2026.3.6"
+        },
+        "device": "cuda",
+        "device_name": "NVIDIA GeForce RTX 4070 Laptop GPU",
+        "cuda_runtime": "12.6",
+        "cudnn": 91002,
+        "torch_threads": 4,
+        "torch_interop_threads": 1,
+        "cuda_visible_devices": "0",
+        "nvidia_smi": {
+          "exit_code": 0,
+          "stdout": "Wed Oct 14 22:19:56 2026       \n+-----------------------------------------------------------------------------------------+\n| NVIDIA-SMI 580.178.04             Driver Version: 580.178.04     CUDA Version: 13.0     |\n+-----------------------------------------+------------------------+----------------------+\n| GPU  Name                 Persistence-M | Bus-Id          Disp.A | Volatile Uncorr. ECC |\n| Fan  Temp   Perf          Pwr:Usage/Cap |           Memory-Usage | GPU-Util  Compute M. |\n|                                         |                        |               MIG M. |\n|=========================================+========================+======================|\n|   0  NVIDIA GeForce RTX 4070 ...    Off |   00000000:01:00.0 Off |                  N/A |\n| N/A   57C    P0             16W /  115W |     187MiB /   8188MiB |      0%      Default |\n|                                         |                        |                  N/A |\n+-----------------------------------------+------------------------+----------------------+\n\n+-----------------------------------------------------------------------------------------+\n| Processes:                                                                              |\n|  GPU   GI   CI              PID   Type   Process name                        GPU Memory |\n|        ID   ID                                                               Usage      |\n|=========================================================================================|\n|    0   N/A  N/A            2556      G   /usr/lib/xorg/Xorg                       20MiB |\n|    0   N/A  N/A            7370      C   ...ime-20261014/.venv/bin/python        148MiB |\n+-----------------------------------------------------------------------------------------+\n",
+          "stderr": ""
+        }
+      }
+    },
+    {
+      "id": "mt_scaffold_seed42",
+      "passed": true,
+      "receipt_sha256": "c64a1754448a94614118792f89829ba9f875f7d43a2db01a0f9cd841e43e2dd0",
+      "prediction_sha256": "73a6ca7032d58a4f9f7e0f644135a1c41c0a15d14734932b34898b444a63cfd0",
+      "training_environment": {
+        "utc": "2026-10-14T14:20:49.446184+00:00",
+        "python": "3.12.15 (main, Oct  6 2026, 23:50:18) [GCC 15.3.0]",
+        "executable": "/home/lessray/qsar-campaigns/cuda-runtime-20261014/.venv/bin/python",
+        "platform": "Linux-7.0.0-38-generic-x86_64-with-glibc2.39",
+        "packages": {
+          "torch": "2.14.0+cu126",
+          "torch-geometric": "2.8.0.post1",
+          "numpy": "2.5.3",
+          "scikit-learn": "1.9.1",
+          "rdkit": "2026.3.6"
+        },
+        "device": "cuda",
+        "device_name": "NVIDIA GeForce RTX 4070 Laptop GPU",
+        "cuda_runtime": "12.6",
+        "cudnn": 91002,
+        "torch_threads": 4,
+        "torch_interop_threads": 1,
+        "cuda_visible_devices": "0",
+        "nvidia_smi": {
+          "exit_code": 0,
+          "stdout": "Wed Oct 14 22:20:49 2026       \n+-----------------------------------------------------------------------------------------+\n| NVIDIA-SMI 580.178.04             Driver Version: 580.178.04     CUDA Version: 13.0     |\n+-----------------------------------------+------------------------+----------------------+\n| GPU  Name                 Persistence-M | Bus-Id          Disp.A | Volatile Uncorr. ECC |\n| Fan  Temp   Perf          Pwr:Usage/Cap |           Memory-Usage | GPU-Util  Compute M. |\n|                                         |                        |               MIG M. |\n|=========================================+========================+======================|\n|   0  NVIDIA GeForce RTX 4070 ...    Off |   00000000:01:00.0 Off |                  N/A |\n| N/A   58C    P0             16W /  115W |     187MiB /   8188MiB |      0%      Default |\n|                                         |                        |                  N/A |\n+-----------------------------------------+------------------------+----------------------+\n\n+-----------------------------------------------------------------------------------------+\n| Processes:                                                                              |\n|  GPU   GI   CI              PID   Type   Process name                        GPU Memory |\n|        ID   ID                                                               Usage      |\n|=========================================================================================|\n|    0   N/A  N/A            2556      G   /usr/lib/xorg/Xorg                       20MiB |\n|    0   N/A  N/A            7393      C   ...ime-20261014/.venv/bin/python        148MiB |\n+-----------------------------------------------------------------------------------------+\n",
+          "stderr": ""
+        }
+      }
+    },
+    {
+      "id": "pooled_random_seed42",
+      "passed": true,
+      "receipt_sha256": "7acce849fc596fe7ebf7fe07aa068fec21c8ddf9f12f065dfae2a617b5f0f42e",
+      "prediction_sha256": "0ffb1dbf4e7e359271f4685e68687664414883993f9183e5c718dbe122d068ca",
+      "training_environment": {
+        "utc": "2026-10-14T14:21:36.375020+00:00",
+        "python": "3.12.15 (main, Oct  6 2026, 23:50:18) [GCC 15.3.0]",
+        "executable": "/home/lessray/qsar-campaigns/cuda-runtime-20261014/.venv/bin/python",
+        "platform": "Linux-7.0.0-38-generic-x86_64-with-glibc2.39",
+        "packages": {
+          "torch": "2.14.0+cu126",
+          "torch-geometric": "2.8.0.post1",
+          "numpy": "2.5.3",
+          "scikit-learn": "1.9.1",
+          "rdkit": "2026.3.6"
+        },
+        "device": "cuda",
+        "device_name": "NVIDIA GeForce RTX 4070 Laptop GPU",
+        "cuda_runtime": "12.6",
+        "cudnn": 91002,
+        "torch_threads": 4,
+        "torch_interop_threads": 1,
+        "cuda_visible_devices": "0",
+        "nvidia_smi": {
+          "exit_code": 0,
+          "stdout": "Wed Oct 14 22:21:36 2026       \n+-----------------------------------------------------------------------------------------+\n| NVIDIA-SMI 580.178.04             Driver Version: 580.178.04     CUDA Version: 13.0     |\n+-----------------------------------------+------------------------+----------------------+\n| GPU  Name                 Persistence-M | Bus-Id          Disp.A | Volatile Uncorr. ECC |\n| Fan  Temp   Perf          Pwr:Usage/Cap |           Memory-Usage | GPU-Util  Compute M. |\n|                                         |                        |               MIG M. |\n|=========================================+========================+======================|\n|   0  NVIDIA GeForce RTX 4070 ...    Off |   00000000:01:00.0 Off |                  N/A |\n| N/A   58C    P0             16W /  115W |     187MiB /   8188MiB |      0%      Default |\n|                                         |                        |                  N/A |\n+-----------------------------------------+------------------------+----------------------+\n\n+-----------------------------------------------------------------------------------------+\n| Processes:                                                                              |\n|  GPU   GI   CI              PID   Type   Process name                        GPU Memory |\n|        ID   ID                                                               Usage      |\n|=========================================================================================|\n|    0   N/A  N/A            2556      G   /usr/lib/xorg/Xorg                       20MiB |\n|    0   N/A  N/A            7411      C   ...ime-20261014/.venv/bin/python        148MiB |\n+-----------------------------------------------------------------------------------------+\n",
+          "stderr": ""
+        }
+      }
+    },
+    {
+      "id": "pooled_scaffold_seed42",
+      "passed": true,
+      "receipt_sha256": "9baedcd76e50e1d0bd3e7a2e47a25029e9e029d70ab003cdd965128c26f9586d",
+      "prediction_sha256": "9b15fe870b1d5c26dae871f923f5cda7cedacd119a3387d5196c9f217ea417b9",
+      "training_environment": {
+        "utc": "2026-10-14T14:22:57.546784+00:00",
+        "python": "3.12.15 (main, Oct  6 2026, 23:50:18) [GCC 15.3.0]",
+        "executable": "/home/lessray/qsar-campaigns/cuda-runtime-20261014/.venv/bin/python",
+        "platform": "Linux-7.0.0-38-generic-x86_64-with-glibc2.39",
+        "packages": {
+          "torch": "2.14.0+cu126",
+          "torch-geometric": "2.8.0.post1",
+          "numpy": "2.5.3",
+          "scikit-learn": "1.9.1",
+          "rdkit": "2026.3.6"
+        },
+        "device": "cuda",
+        "device_name": "NVIDIA GeForce RTX 4070 Laptop GPU",
+        "cuda_runtime": "12.6",
+        "cudnn": 91002,
+        "torch_threads": 4,
+        "torch_interop_threads": 1,
+        "cuda_visible_devices": "0",
+        "nvidia_smi": {
+          "exit_code": 0,
+          "stdout": "Wed Oct 14 22:22:57 2026       \n+-----------------------------------------------------------------------------------------+\n| NVIDIA-SMI 580.178.04             Driver Version: 580.178.04     CUDA Version: 13.0     |\n+-----------------------------------------+------------------------+----------------------+\n| GPU  Name                 Persistence-M | Bus-Id          Disp.A | Volatile Uncorr. ECC |\n| Fan  Temp   Perf          Pwr:Usage/Cap |           Memory-Usage | GPU-Util  Compute M. |\n|                                         |                        |               MIG M. |\n|=========================================+========================+======================|\n|   0  NVIDIA GeForce RTX 4070 ...    Off |   00000000:01:00.0 Off |                  N/A |\n| N/A   58C    P0             16W /  115W |     187MiB /   8188MiB |      0%      Default |\n|                                         |                        |                  N/A |\n+-----------------------------------------+------------------------+----------------------+\n\n+-----------------------------------------------------------------------------------------+\n| Processes:                                                                              |\n|  GPU   GI   CI              PID   Type   Process name                        GPU Memory |\n|        ID   ID                                                               Usage      |\n|=========================================================================================|\n|    0   N/A  N/A            2556      G   /usr/lib/xorg/Xorg                       20MiB |\n|    0   N/A  N/A            7430      C   ...ime-20261014/.venv/bin/python        148MiB |\n+-----------------------------------------------------------------------------------------+\n",
+          "stderr": ""
+        }
+      }
+    },
+    {
+      "id": "egfr_gin_random_seed1",
+      "passed": true,
+      "receipt_sha256": "cd20198ad944b43c05f30b41753778b70e039db163e9edca7486e3ddc48ee8af",
+      "prediction_sha256": "c801199ad363534b71bcc4d4cf8ae74180773584c0ab81efb1cd9971627e13e1",
+      "training_environment": {
+        "utc": "2026-10-14T14:24:03.612692+00:00",
+        "python": "3.12.15 (main, Oct  6 2026, 23:50:18) [GCC 15.3.0]",
+        "executable": "/home/lessray/qsar-campaigns/cuda-runtime-20261014/.venv/bin/python",
+        "platform": "Linux-7.0.0-38-generic-x86_64-with-glibc2.39",
+        "packages": {
+          "torch": "2.14.0+cu126",
+          "torch-geometric": "2.8.0.post1",
+          "numpy": "2.5.3",
+          "scikit-learn": "1.9.1",
+          "rdkit": "2026.3.6"
+        },
+        "device": "cuda",
+        "device_name": "NVIDIA GeForce RTX 4070 Laptop GPU",
+        "cuda_runtime": "12.6",
+        "cudnn": 91002,
+        "torch_threads": 4,
+        "torch_interop_threads": 1,
+        "cuda_visible_devices": "0",
+        "nvidia_smi": {
+          "exit_code": 0,
+          "stdout": "Wed Oct 14 22:24:03 2026       \n+-----------------------------------------------------------------------------------------+\n| NVIDIA-SMI 580.178.04             Driver Version: 580.178.04     CUDA Version: 13.0     |\n+-----------------------------------------+------------------------+----------------------+\n| GPU  Name                 Persistence-M | Bus-Id          Disp.A | Volatile Uncorr. ECC |\n| Fan  Temp   Perf          Pwr:Usage/Cap |           Memory-Usage | GPU-Util  Compute M. |\n|                                         |                        |               MIG M. |\n|=========================================+========================+======================|\n|   0  NVIDIA GeForce RTX 4070 ...    Off |   00000000:01:00.0 Off |                  N/A |\n| N/A   58C    P0             16W /  115W |     187MiB /   8188MiB |      0%      Default |\n|                                         |                        |                  N/A |\n+-----------------------------------------+------------------------+----------------------+\n\n+-----------------------------------------------------------------------------------------+\n| Processes:                                                                              |\n|  GPU   GI   CI              PID   Type   Process name                        GPU Memory |\n|        ID   ID                                                               Usage      |\n|=========================================================================================|\n|    0   N/A  N/A            2556      G   /usr/lib/xorg/Xorg                       20MiB |\n|    0   N/A  N/A            7449      C   ...ime-20261014/.venv/bin/python        148MiB |\n+-----------------------------------------------------------------------------------------+\n",
+          "stderr": ""
+        }
+      }
+    },
+    {
+      "id": "egfr_gin_scaffold_seed1",
+      "passed": true,
+      "receipt_sha256": "696719618f65d8bebe1f1532ecfe41f1821cd4a04125b31487c1e700608f26ee",
+      "prediction_sha256": "e53b499d5a93de20b4b200d186acaced2057d747e4d583c3cc5d5c557f5a8f45",
+      "training_environment": {
+        "utc": "2026-10-14T14:24:24.206857+00:00",
+        "python": "3.12.15 (main, Oct  6 2026, 23:50:18) [GCC 15.3.0]",
+        "executable": "/home/lessray/qsar-campaigns/cuda-runtime-20261014/.venv/bin/python",
+        "platform": "Linux-7.0.0-38-generic-x86_64-with-glibc2.39",
+        "packages": {
+          "torch": "2.14.0+cu126",
+          "torch-geometric": "2.8.0.post1",
+          "numpy": "2.5.3",
+          "scikit-learn": "1.9.1",
+          "rdkit": "2026.3.6"
+        },
+        "device": "cuda",
+        "device_name": "NVIDIA GeForce RTX 4070 Laptop GPU",
+        "cuda_runtime": "12.6",
+        "cudnn": 91002,
+        "torch_threads": 4,
+        "torch_interop_threads": 1,
+        "cuda_visible_devices": "0",
+        "nvidia_smi": {
+          "exit_code": 0,
+          "stdout": "Wed Oct 14 22:24:24 2026       \n+-----------------------------------------------------------------------------------------+\n| NVIDIA-SMI 580.178.04             Driver Version: 580.178.04     CUDA Version: 13.0     |\n+-----------------------------------------+------------------------+----------------------+\n| GPU  Name                 Persistence-M | Bus-Id          Disp.A | Volatile Uncorr. ECC |\n| Fan  Temp   Perf          Pwr:Usage/Cap |           Memory-Usage | GPU-Util  Compute M. |\n|                                         |                        |               MIG M. |\n|=========================================+========================+======================|\n|   0  NVIDIA GeForce RTX 4070 ...    Off |   00000000:01:00.0 Off |                  N/A |\n| N/A   58C    P0             16W /  115W |     187MiB /   8188MiB |      0%      Default |\n|                                         |                        |                  N/A |\n+-----------------------------------------+------------------------+----------------------+\n\n+-----------------------------------------------------------------------------------------+\n| Processes:                                                                              |\n|  GPU   GI   CI              PID   Type   Process name                        GPU Memory |\n|        ID   ID                                                               Usage      |\n|=========================================================================================|\n|    0   N/A  N/A            2556      G   /usr/lib/xorg/Xorg                       20MiB |\n|    0   N/A  N/A            7546      C   ...ime-20261014/.venv/bin/python        148MiB |\n+-----------------------------------------------------------------------------------------+\n",
+          "stderr": ""
+        }
+      }
+    },
+    {
+      "id": "mt_random_seed1",
+      "passed": true,
+      "receipt_sha256": "e11672eed2d53c6cf2802f53b320a00f8f5f6530bb7565ae264108c3ecda9268",
+      "prediction_sha256": "308d5ba129375627ad7ea179af5258626f8277f52f4cc5ddbc98cc74006799f5",
+      "training_environment": {
+        "utc": "2026-10-14T14:24:45.078482+00:00",
+        "python": "3.12.15 (main, Oct  6 2026, 23:50:18) [GCC 15.3.0]",
+        "executable": "/home/lessray/qsar-campaigns/cuda-runtime-20261014/.venv/bin/python",
+        "platform": "Linux-7.0.0-38-generic-x86_64-with-glibc2.39",
+        "packages": {
+          "torch": "2.14.0+cu126",
+          "torch-geometric": "2.8.0.post1",
+          "numpy": "2.5.3",
+          "scikit-learn": "1.9.1",
+          "rdkit": "2026.3.6"
+        },
+        "device": "cuda",
+        "device_name": "NVIDIA GeForce RTX 4070 Laptop GPU",
+        "cuda_runtime": "12.6",
+        "cudnn": 91002,
+        "torch_threads": 4,
+        "torch_interop_threads": 1,
+        "cuda_visible_devices": "0",
+        "nvidia_smi": {
+          "exit_code": 0,
+          "stdout": "Wed Oct 14 22:24:45 2026       \n+-----------------------------------------------------------------------------------------+\n| NVIDIA-SMI 580.178.04             Driver Version: 580.178.04     CUDA Version: 13.0     |\n+-----------------------------------------+------------------------+----------------------+\n| GPU  Name                 Persistence-M | Bus-Id          Disp.A | Volatile Uncorr. ECC |\n| Fan  Temp   Perf          Pwr:Usage/Cap |           Memory-Usage | GPU-Util  Compute M. |\n|                                         |                        |               MIG M. |\n|=========================================+========================+======================|\n|   0  NVIDIA GeForce RTX 4070 ...    Off |   00000000:01:00.0 Off |                  N/A |\n| N/A   58C    P0             16W /  115W |     187MiB /   8188MiB |      0%      Default |\n|                                         |                        |                  N/A |\n+-----------------------------------------+------------------------+----------------------+\n\n+-----------------------------------------------------------------------------------------+\n| Processes:                                                                              |\n|  GPU   GI   CI              PID   Type   Process name                        GPU Memory |\n|        ID   ID                                                               Usage      |\n|=========================================================================================|\n|    0   N/A  N/A            2556      G   /usr/lib/xorg/Xorg                       20MiB |\n|    0   N/A  N/A            7564      C   ...ime-20261014/.venv/bin/python        148MiB |\n+-----------------------------------------------------------------------------------------+\n",
+          "stderr": ""
+        }
+      }
+    },
+    {
+      "id": "mt_scaffold_seed1",
+      "passed": true,
+      "receipt_sha256": "3bc4823ceefe9ff3c385b81d4f4fb3a32fb4370b497420bcd0abc8308c86d50c",
+      "prediction_sha256": "02c2c098df482ff7a25e2c2a81147666799e6b40b9b4a908daae099e13df04db",
+      "training_environment": {
+        "utc": "2026-10-14T14:25:51.971651+00:00",
+        "python": "3.12.15 (main, Oct  6 2026, 23:50:18) [GCC 15.3.0]",
+        "executable": "/home/lessray/qsar-campaigns/cuda-runtime-20261014/.venv/bin/python",
+        "platform": "Linux-7.0.0-38-generic-x86_64-with-glibc2.39",
+        "packages": {
+          "torch": "2.14.0+cu126",
+          "torch-geometric": "2.8.0.post1",
+          "numpy": "2.5.3",
+          "scikit-learn": "1.9.1",
+          "rdkit": "2026.3.6"
+        },
+        "device": "cuda",
+        "device_name": "NVIDIA GeForce RTX 4070 Laptop GPU",
+        "cuda_runtime": "12.6",
+        "cudnn": 91002,
+        "torch_threads": 4,
+        "torch_interop_threads": 1,
+        "cuda_visible_devices": "0",
+        "nvidia_smi": {
+          "exit_code": 0,
+          "stdout": "Wed Oct 14 22:25:51 2026       \n+-----------------------------------------------------------------------------------------+\n| NVIDIA-SMI 580.178.04             Driver Version: 580.178.04     CUDA Version: 13.0     |\n+-----------------------------------------+------------------------+----------------------+\n| GPU  Name                 Persistence-M | Bus-Id          Disp.A | Volatile Uncorr. ECC |\n| Fan  Temp   Perf          Pwr:Usage/Cap |           Memory-Usage | GPU-Util  Compute M. |\n|                                         |                        |               MIG M. |\n|=========================================+========================+======================|\n|   0  NVIDIA GeForce RTX 4070 ...    Off |   00000000:01:00.0 Off |                  N/A |\n| N/A   58C    P0             16W /  115W |     187MiB /   8188MiB |      0%      Default |\n|                                         |                        |                  N/A |\n+-----------------------------------------+------------------------+----------------------+\n\n+-----------------------------------------------------------------------------------------+\n| Processes:                                                                              |\n|  GPU   GI   CI              PID   Type   Process name                        GPU Memory |\n|        ID   ID                                                               Usage      |\n|=========================================================================================|\n|    0   N/A  N/A            2556      G   /usr/lib/xorg/Xorg                       20MiB |\n|    0   N/A  N/A            7694      C   ...ime-20261014/.venv/bin/python        148MiB |\n+-----------------------------------------------------------------------------------------+\n",
+          "stderr": ""
+        }
+      }
+    },
+    {
+      "id": "pooled_random_seed1",
+      "passed": true,
+      "receipt_sha256": "c20a7513efd994a9f93ef2a101aba32012248e85567e621c92a3349482004250",
+      "prediction_sha256": "da13e5472508561f56e001833a5658eec5fac3bee74226e4dffa7367b039765e",
+      "training_environment": {
+        "utc": "2026-10-14T14:26:54.155948+00:00",
+        "python": "3.12.15 (main, Oct  6 2026, 23:50:18) [GCC 15.3.0]",
+        "executable": "/home/lessray/qsar-campaigns/cuda-runtime-20261014/.venv/bin/python",
+        "platform": "Linux-7.0.0-38-generic-x86_64-with-glibc2.39",
+        "packages": {
+          "torch": "2.14.0+cu126",
+          "torch-geometric": "2.8.0.post1",
+          "numpy": "2.5.3",
+          "scikit-learn": "1.9.1",
+          "rdkit": "2026.3.6"
+        },
+        "device": "cuda",
+        "device_name": "NVIDIA GeForce RTX 4070 Laptop GPU",
+        "cuda_runtime": "12.6",
+        "cudnn": 91002,
+        "torch_threads": 4,
+        "torch_interop_threads": 1,
+        "cuda_visible_devices": "0",
+        "nvidia_smi": {
+          "exit_code": 0,
+          "stdout": "Wed Oct 14 22:26:54 2026       \n+-----------------------------------------------------------------------------------------+\n| NVIDIA-SMI 580.178.04             Driver Version: 580.178.04     CUDA Version: 13.0     |\n+-----------------------------------------+------------------------+----------------------+\n| GPU  Name                 Persistence-M | Bus-Id          Disp.A | Volatile Uncorr. ECC |\n| Fan  Temp   Perf          Pwr:Usage/Cap |           Memory-Usage | GPU-Util  Compute M. |\n|                                         |                        |               MIG M. |\n|=========================================+========================+======================|\n|   0  NVIDIA GeForce RTX 4070 ...    Off |   00000000:01:00.0 Off |                  N/A |\n| N/A   58C    P0             16W /  115W |     187MiB /   8188MiB |      0%      Default |\n|                                         |                        |                  N/A |\n+-----------------------------------------+------------------------+----------------------+\n\n+-----------------------------------------------------------------------------------------+\n| Processes:                                                                              |\n|  GPU   GI   CI              PID   Type   Process name                        GPU Memory |\n|        ID   ID                                                               Usage      |\n|=========================================================================================|\n|    0   N/A  N/A            2556      G   /usr/lib/xorg/Xorg                       20MiB |\n|    0   N/A  N/A            7714      C   ...ime-20261014/.venv/bin/python        148MiB |\n+-----------------------------------------------------------------------------------------+\n",
+          "stderr": ""
+        }
+      }
+    },
+    {
+      "id": "pooled_scaffold_seed1",
+      "passed": true,
+      "receipt_sha256": "2718ef213bccff6e891907840c24472b2131ed51fe43844d8671d10bb24910c5",
+      "prediction_sha256": "7332358f38563d8f1bf2442fda428a89404e292c811cf50573c835a4b4709eff",
+      "training_environment": {
+        "utc": "2026-10-14T14:28:01.758926+00:00",
+        "python": "3.12.15 (main, Oct  6 2026, 23:50:18) [GCC 15.3.0]",
+        "executable": "/home/lessray/qsar-campaigns/cuda-runtime-20261014/.venv/bin/python",
+        "platform": "Linux-7.0.0-38-generic-x86_64-with-glibc2.39",
+        "packages": {
+          "torch": "2.14.0+cu126",
+          "torch-geometric": "2.8.0.post1",
+          "numpy": "2.5.3",
+          "scikit-learn": "1.9.1",
+          "rdkit": "2026.3.6"
+        },
+        "device": "cuda",
+        "device_name": "NVIDIA GeForce RTX 4070 Laptop GPU",
+        "cuda_runtime": "12.6",
+        "cudnn": 91002,
+        "torch_threads": 4,
+        "torch_interop_threads": 1,
+        "cuda_visible_devices": "0",
+        "nvidia_smi": {
+          "exit_code": 0,
+          "stdout": "Wed Oct 14 22:28:01 2026       \n+-----------------------------------------------------------------------------------------+\n| NVIDIA-SMI 580.178.04             Driver Version: 580.178.04     CUDA Version: 13.0     |\n+-----------------------------------------+------------------------+----------------------+\n| GPU  Name                 Persistence-M | Bus-Id          Disp.A | Volatile Uncorr. ECC |\n| Fan  Temp   Perf          Pwr:Usage/Cap |           Memory-Usage | GPU-Util  Compute M. |\n|                                         |                        |               MIG M. |\n|=========================================+========================+======================|\n|   0  NVIDIA GeForce RTX 4070 ...    Off |   00000000:01:00.0 Off |                  N/A |\n| N/A   58C    P0             16W /  115W |     187MiB /   8188MiB |      0%      Default |\n|                                         |                        |                  N/A |\n+-----------------------------------------+------------------------+----------------------+\n\n+-----------------------------------------------------------------------------------------+\n| Processes:                                                                              |\n|  GPU   GI   CI              PID   Type   Process name                        GPU Memory |\n|        ID   ID                                                               Usage      |\n|=========================================================================================|\n|    0   N/A  N/A            2556      G   /usr/lib/xorg/Xorg                       20MiB |\n|    0   N/A  N/A            7785      C   ...ime-20261014/.venv/bin/python        148MiB |\n+-----------------------------------------------------------------------------------------+\n",
+          "stderr": ""
+        }
+      }
+    },
+    {
+      "id": "egfr_gin_random_seed2",
+      "passed": true,
+      "receipt_sha256": "aa8b92664abb796429321c0a6f2f450622ec64d24c54baf2d000f3e9233661e6",
+      "prediction_sha256": "e08117cb60b16a80eb4260d6e842437e7a64f268c1f85e86ae8f438ac6eddd29",
+      "training_environment": {
+        "utc": "2026-10-14T14:29:07.385818+00:00",
+        "python": "3.12.15 (main, Oct  6 2026, 23:50:18) [GCC 15.3.0]",
+        "executable": "/home/lessray/qsar-campaigns/cuda-runtime-20261014/.venv/bin/python",
+        "platform": "Linux-7.0.0-38-generic-x86_64-with-glibc2.39",
+        "packages": {
+          "torch": "2.14.0+cu126",
+          "torch-geometric": "2.8.0.post1",
+          "numpy": "2.5.3",
+          "scikit-learn": "1.9.1",
+          "rdkit": "2026.3.6"
+        },
+        "device": "cuda",
+        "device_name": "NVIDIA GeForce RTX 4070 Laptop GPU",
+        "cuda_runtime": "12.6",
+        "cudnn": 91002,
+        "torch_threads": 4,
+        "torch_interop_threads": 1,
+        "cuda_visible_devices": "0",
+        "nvidia_smi": {
+          "exit_code": 0,
+          "stdout": "Wed Oct 14 22:29:07 2026       \n+-----------------------------------------------------------------------------------------+\n| NVIDIA-SMI 580.178.04             Driver Version: 580.178.04     CUDA Version: 13.0     |\n+-----------------------------------------+------------------------+----------------------+\n| GPU  Name                 Persistence-M | Bus-Id          Disp.A | Volatile Uncorr. ECC |\n| Fan  Temp   Perf          Pwr:Usage/Cap |           Memory-Usage | GPU-Util  Compute M. |\n|                                         |                        |               MIG M. |\n|=========================================+========================+======================|\n|   0  NVIDIA GeForce RTX 4070 ...    Off |   00000000:01:00.0 Off |                  N/A |\n| N/A   58C    P0             16W /  115W |     187MiB /   8188MiB |      0%      Default |\n|                                         |                        |                  N/A |\n+-----------------------------------------+------------------------+----------------------+\n\n+-----------------------------------------------------------------------------------------+\n| Processes:                                                                              |\n|  GPU   GI   CI              PID   Type   Process name                        GPU Memory |\n|        ID   ID                                                               Usage      |\n|=========================================================================================|\n|    0   N/A  N/A            2556      G   /usr/lib/xorg/Xorg                       20MiB |\n|    0   N/A  N/A            7858      C   ...ime-20261014/.venv/bin/python        148MiB |\n+-----------------------------------------------------------------------------------------+\n",
+          "stderr": ""
+        }
+      }
+    },
+    {
+      "id": "egfr_gin_scaffold_seed2",
+      "passed": true,
+      "receipt_sha256": "196be4e7e0f617956dd92bcb82595aabb77440db5dc5d118b13368854a79a409",
+      "prediction_sha256": "72e8b13254ee87fdc0c226482c087ea117ea60884ac3df499290301ad085d4f1",
+      "training_environment": {
+        "utc": "2026-10-14T14:29:28.106087+00:00",
+        "python": "3.12.15 (main, Oct  6 2026, 23:50:18) [GCC 15.3.0]",
+        "executable": "/home/lessray/qsar-campaigns/cuda-runtime-20261014/.venv/bin/python",
+        "platform": "Linux-7.0.0-38-generic-x86_64-with-glibc2.39",
+        "packages": {
+          "torch": "2.14.0+cu126",
+          "torch-geometric": "2.8.0.post1",
+          "numpy": "2.5.3",
+          "scikit-learn": "1.9.1",
+          "rdkit": "2026.3.6"
+        },
+        "device": "cuda",
+        "device_name": "NVIDIA GeForce RTX 4070 Laptop GPU",
+        "cuda_runtime": "12.6",
+        "cudnn": 91002,
+        "torch_threads": 4,
+        "torch_interop_threads": 1,
+        "cuda_visible_devices": "0",
+        "nvidia_smi": {
+          "exit_code": 0,
+          "stdout": "Wed Oct 14 22:29:28 2026       \n+-----------------------------------------------------------------------------------------+\n| NVIDIA-SMI 580.178.04             Driver Version: 580.178.04     CUDA Version: 13.0     |\n+-----------------------------------------+------------------------+----------------------+\n| GPU  Name                 Persistence-M | Bus-Id          Disp.A | Volatile Uncorr. ECC |\n| Fan  Temp   Perf          Pwr:Usage/Cap |           Memory-Usage | GPU-Util  Compute M. |\n|                                         |                        |               MIG M. |\n|=========================================+========================+======================|\n|   0  NVIDIA GeForce RTX 4070 ...    Off |   00000000:01:00.0 Off |                  N/A |\n| N/A   58C    P0             16W /  115W |     187MiB /   8188MiB |      0%      Default |\n|                                         |                        |                  N/A |\n+-----------------------------------------+------------------------+----------------------+\n\n+-----------------------------------------------------------------------------------------+\n| Processes:                                                                              |\n|  GPU   GI   CI              PID   Type   Process name                        GPU Memory |\n|        ID   ID                                                               Usage      |\n|=========================================================================================|\n|    0   N/A  N/A            2556      G   /usr/lib/xorg/Xorg                       20MiB |\n|    0   N/A  N/A            7876      C   ...ime-20261014/.venv/bin/python        148MiB |\n+-----------------------------------------------------------------------------------------+\n",
+          "stderr": ""
+        }
+      }
+    },
+    {
+      "id": "mt_random_seed2",
+      "passed": true,
+      "receipt_sha256": "db52d07b454efec38834637645922eb405036085088d8b40d3f60bbda826d56d",
+      "prediction_sha256": "981180b7c614cef67bb21fb567358a626b60fcbf3c94f2b6ca027337bb1fe5e9",
+      "training_environment": {
+        "utc": "2026-10-14T14:29:48.759719+00:00",
+        "python": "3.12.15 (main, Oct  6 2026, 23:50:18) [GCC 15.3.0]",
+        "executable": "/home/lessray/qsar-campaigns/cuda-runtime-20261014/.venv/bin/python",
+        "platform": "Linux-7.0.0-38-generic-x86_64-with-glibc2.39",
+        "packages": {
+          "torch": "2.14.0+cu126",
+          "torch-geometric": "2.8.0.post1",
+          "numpy": "2.5.3",
+          "scikit-learn": "1.9.1",
+          "rdkit": "2026.3.6"
+        },
+        "device": "cuda",
+        "device_name": "NVIDIA GeForce RTX 4070 Laptop GPU",
+        "cuda_runtime": "12.6",
+        "cudnn": 91002,
+        "torch_threads": 4,
+        "torch_interop_threads": 1,
+        "cuda_visible_devices": "0",
+        "nvidia_smi": {
+          "exit_code": 0,
+          "stdout": "Wed Oct 14 22:29:48 2026       \n+-----------------------------------------------------------------------------------------+\n| NVIDIA-SMI 580.178.04             Driver Version: 580.178.04     CUDA Version: 13.0     |\n+-----------------------------------------+------------------------+----------------------+\n| GPU  Name                 Persistence-M | Bus-Id          Disp.A | Volatile Uncorr. ECC |\n| Fan  Temp   Perf          Pwr:Usage/Cap |           Memory-Usage | GPU-Util  Compute M. |\n|                                         |                        |               MIG M. |\n|=========================================+========================+======================|\n|   0  NVIDIA GeForce RTX 4070 ...    Off |   00000000:01:00.0 Off |                  N/A |\n| N/A   58C    P0             16W /  115W |     187MiB /   8188MiB |      0%      Default |\n|                                         |                        |                  N/A |\n+-----------------------------------------+------------------------+----------------------+\n\n+-----------------------------------------------------------------------------------------+\n| Processes:                                                                              |\n|  GPU   GI   CI              PID   Type   Process name                        GPU Memory |\n|        ID   ID                                                               Usage      |\n|=========================================================================================|\n|    0   N/A  N/A            2556      G   /usr/lib/xorg/Xorg                       20MiB |\n|    0   N/A  N/A            7894      C   ...ime-20261014/.venv/bin/python        148MiB |\n+-----------------------------------------------------------------------------------------+\n",
+          "stderr": ""
+        }
+      }
+    },
+    {
+      "id": "mt_scaffold_seed2",
+      "passed": true,
+      "receipt_sha256": "de6c30ecd936388f8af462ee7bcf0880d96414b6cd46fe4043fd4ae80e72ed2d",
+      "prediction_sha256": "13dd59198426bed0012e7884cb4b08be3d03082d5d812d9e0a54260545ebeaa9",
+      "training_environment": {
+        "utc": "2026-10-14T14:30:42.989303+00:00",
+        "python": "3.12.15 (main, Oct  6 2026, 23:50:18) [GCC 15.3.0]",
+        "executable": "/home/lessray/qsar-campaigns/cuda-runtime-20261014/.venv/bin/python",
+        "platform": "Linux-7.0.0-38-generic-x86_64-with-glibc2.39",
+        "packages": {
+          "torch": "2.14.0+cu126",
+          "torch-geometric": "2.8.0.post1",
+          "numpy": "2.5.3",
+          "scikit-learn": "1.9.1",
+          "rdkit": "2026.3.6"
+        },
+        "device": "cuda",
+        "device_name": "NVIDIA GeForce RTX 4070 Laptop GPU",
+        "cuda_runtime": "12.6",
+        "cudnn": 91002,
+        "torch_threads": 4,
+        "torch_interop_threads": 1,
+        "cuda_visible_devices": "0",
+        "nvidia_smi": {
+          "exit_code": 0,
+          "stdout": "Wed Oct 14 22:30:42 2026       \n+-----------------------------------------------------------------------------------------+\n| NVIDIA-SMI 580.178.04             Driver Version: 580.178.04     CUDA Version: 13.0     |\n+-----------------------------------------+------------------------+----------------------+\n| GPU  Name                 Persistence-M | Bus-Id          Disp.A | Volatile Uncorr. ECC |\n| Fan  Temp   Perf          Pwr:Usage/Cap |           Memory-Usage | GPU-Util  Compute M. |\n|                                         |                        |               MIG M. |\n|=========================================+========================+======================|\n|   0  NVIDIA GeForce RTX 4070 ...    Off |   00000000:01:00.0 Off |                  N/A |\n| N/A   58C    P0             16W /  115W |     187MiB /   8188MiB |      0%      Default |\n|                                         |                        |                  N/A |\n+-----------------------------------------+------------------------+----------------------+\n\n+-----------------------------------------------------------------------------------------+\n| Processes:                                                                              |\n|  GPU   GI   CI              PID   Type   Process name                        GPU Memory |\n|        ID   ID                                                               Usage      |\n|=========================================================================================|\n|    0   N/A  N/A            2556      G   /usr/lib/xorg/Xorg                       20MiB |\n|    0   N/A  N/A            7971      C   ...ime-20261014/.venv/bin/python        148MiB |\n+-----------------------------------------------------------------------------------------+\n",
+          "stderr": ""
+        }
+      }
+    },
+    {
+      "id": "pooled_random_seed2",
+      "passed": true,
+      "receipt_sha256": "e06ba19b5c194f9066b8ea2da449dc69377d35aad9c028e5fd0029e00419482e",
+      "prediction_sha256": "9f03ea235d35d00638def6deb6135863555e994f60d5a233ebf879db051538e1",
+      "training_environment": {
+        "utc": "2026-10-14T14:31:35.371954+00:00",
+        "python": "3.12.15 (main, Oct  6 2026, 23:50:18) [GCC 15.3.0]",
+        "executable": "/home/lessray/qsar-campaigns/cuda-runtime-20261014/.venv/bin/python",
+        "platform": "Linux-7.0.0-38-generic-x86_64-with-glibc2.39",
+        "packages": {
+          "torch": "2.14.0+cu126",
+          "torch-geometric": "2.8.0.post1",
+          "numpy": "2.5.3",
+          "scikit-learn": "1.9.1",
+          "rdkit": "2026.3.6"
+        },
+        "device": "cuda",
+        "device_name": "NVIDIA GeForce RTX 4070 Laptop GPU",
+        "cuda_runtime": "12.6",
+        "cudnn": 91002,
+        "torch_threads": 4,
+        "torch_interop_threads": 1,
+        "cuda_visible_devices": "0",
+        "nvidia_smi": {
+          "exit_code": 0,
+          "stdout": "Wed Oct 14 22:31:35 2026       \n+-----------------------------------------------------------------------------------------+\n| NVIDIA-SMI 580.178.04             Driver Version: 580.178.04     CUDA Version: 13.0     |\n+-----------------------------------------+------------------------+----------------------+\n| GPU  Name                 Persistence-M | Bus-Id          Disp.A | Volatile Uncorr. ECC |\n| Fan  Temp   Perf          Pwr:Usage/Cap |           Memory-Usage | GPU-Util  Compute M. |\n|                                         |                        |               MIG M. |\n|=========================================+========================+======================|\n|   0  NVIDIA GeForce RTX 4070 ...    Off |   00000000:01:00.0 Off |                  N/A |\n| N/A   58C    P0             16W /  115W |     187MiB /   8188MiB |      0%      Default |\n|                                         |                        |                  N/A |\n+-----------------------------------------+------------------------+----------------------+\n\n+-----------------------------------------------------------------------------------------+\n| Processes:                                                                              |\n|  GPU   GI   CI              PID   Type   Process name                        GPU Memory |\n|        ID   ID                                                               Usage      |\n|=========================================================================================|\n|    0   N/A  N/A            2556      G   /usr/lib/xorg/Xorg                       20MiB |\n|    0   N/A  N/A            7989      C   ...ime-20261014/.venv/bin/python        148MiB |\n+-----------------------------------------------------------------------------------------+\n",
+          "stderr": ""
+        }
+      }
+    },
+    {
+      "id": "pooled_scaffold_seed2",
+      "passed": true,
+      "receipt_sha256": "211d779794fda806fb7e2b7092038702de760f5f8a18964b5b670642c72bc402",
+      "prediction_sha256": "17639ed7fadc273ecd3bbfc54e2d04d62cbd41f112d7953152c4f7e1e3e34dbb",
+      "training_environment": {
+        "utc": "2026-10-14T14:32:41.304689+00:00",
+        "python": "3.12.15 (main, Oct  6 2026, 23:50:18) [GCC 15.3.0]",
+        "executable": "/home/lessray/qsar-campaigns/cuda-runtime-20261014/.venv/bin/python",
+        "platform": "Linux-7.0.0-38-generic-x86_64-with-glibc2.39",
+        "packages": {
+          "torch": "2.14.0+cu126",
+          "torch-geometric": "2.8.0.post1",
+          "numpy": "2.5.3",
+          "scikit-learn": "1.9.1",
+          "rdkit": "2026.3.6"
+        },
+        "device": "cuda",
+        "device_name": "NVIDIA GeForce RTX 4070 Laptop GPU",
+        "cuda_runtime": "12.6",
+        "cudnn": 91002,
+        "torch_threads": 4,
+        "torch_interop_threads": 1,
+        "cuda_visible_devices": "0",
+        "nvidia_smi": {
+          "exit_code": 0,
+          "stdout": "Wed Oct 14 22:32:41 2026       \n+-----------------------------------------------------------------------------------------+\n| NVIDIA-SMI 580.178.04             Driver Version: 580.178.04     CUDA Version: 13.0     |\n+-----------------------------------------+------------------------+----------------------+\n| GPU  Name                 Persistence-M | Bus-Id          Disp.A | Volatile Uncorr. ECC |\n| Fan  Temp   Perf          Pwr:Usage/Cap |           Memory-Usage | GPU-Util  Compute M. |\n|                                         |                        |               MIG M. |\n|=========================================+========================+======================|\n|   0  NVIDIA GeForce RTX 4070 ...    Off |   00000000:01:00.0 Off |                  N/A |\n| N/A   58C    P0             16W /  115W |     187MiB /   8188MiB |      0%      Default |\n|                                         |                        |                  N/A |\n+-----------------------------------------+------------------------+----------------------+\n\n+-----------------------------------------------------------------------------------------+\n| Processes:                                                                              |\n|  GPU   GI   CI              PID   Type   Process name                        GPU Memory |\n|        ID   ID                                                               Usage      |\n|=========================================================================================|\n|    0   N/A  N/A            2556      G   /usr/lib/xorg/Xorg                       20MiB |\n|    0   N/A  N/A            8068      C   ...ime-20261014/.venv/bin/python        148MiB |\n+-----------------------------------------------------------------------------------------+\n",
+          "stderr": ""
+        }
+      }
+    }
+  ],
+  "errors": [],
+  "rows_checked": 42,
+  "rows_passed": 42,
+  "end_utc": "2026-10-14T14:39:21.194473+00:00",
+  "output_sha256": {
+    "predictions/egfr_gin_random_seed1.npz": "c801199ad363534b71bcc4d4cf8ae74180773584c0ab81efb1cd9971627e13e1",
+    "predictions/egfr_gin_random_seed2.npz": "e08117cb60b16a80eb4260d6e842437e7a64f268c1f85e86ae8f438ac6eddd29",
+    "predictions/egfr_gin_random_seed42.npz": "8a5cef22b96f2aa6e8477a8b12691607168dc4265d4745dc147e37ae13a5d87c",
+    "predictions/egfr_gin_scaffold_seed1.npz": "e53b499d5a93de20b4b200d186acaced2057d747e4d583c3cc5d5c557f5a8f45",
+    "predictions/egfr_gin_scaffold_seed2.npz": "72e8b13254ee87fdc0c226482c087ea117ea60884ac3df499290301ad085d4f1",
+    "predictions/egfr_gin_scaffold_seed42.npz": "0f51846997341bf3e0cd98fbdf24f647f3f08262167edba2e1fb3b8aa1a397cb",
+    "predictions/mt_random_seed1.npz": "308d5ba129375627ad7ea179af5258626f8277f52f4cc5ddbc98cc74006799f5",
+    "predictions/mt_random_seed2.npz": "981180b7c614cef67bb21fb567358a626b60fcbf3c94f2b6ca027337bb1fe5e9",
+    "predictions/mt_random_seed42.npz": "7ea8221ff164bc115e5347103ad0d28667cd84242381530690867516d266236b",
+    "predictions/mt_scaffold_seed1.npz": "02c2c098df482ff7a25e2c2a81147666799e6b40b9b4a908daae099e13df04db",
+    "predictions/mt_scaffold_seed2.npz": "13dd59198426bed0012e7884cb4b08be3d03082d5d812d9e0a54260545ebeaa9",
+    "predictions/mt_scaffold_seed42.npz": "73a6ca7032d58a4f9f7e0f644135a1c41c0a15d14734932b34898b444a63cfd0",
+    "predictions/pooled_random_seed1.npz": "da13e5472508561f56e001833a5658eec5fac3bee74226e4dffa7367b039765e",
+    "predictions/pooled_random_seed2.npz": "9f03ea235d35d00638def6deb6135863555e994f60d5a233ebf879db051538e1",
+    "predictions/pooled_random_seed42.npz": "0ffb1dbf4e7e359271f4685e68687664414883993f9183e5c718dbe122d068ca",
+    "predictions/pooled_scaffold_seed1.npz": "7332358f38563d8f1bf2442fda428a89404e292c811cf50573c835a4b4709eff",
+    "predictions/pooled_scaffold_seed2.npz": "17639ed7fadc273ecd3bbfc54e2d04d62cbd41f112d7953152c4f7e1e3e34dbb",
+    "predictions/pooled_scaffold_seed42.npz": "9b15fe870b1d5c26dae871f923f5cda7cedacd119a3387d5196c9f217ea417b9",
+    "summary.csv": "b86b2154c113ca619784e535eb48fbfe43b2ecda6f1e38a83449689406bb5ba9"
+  }
+}

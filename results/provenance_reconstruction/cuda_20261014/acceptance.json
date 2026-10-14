@@ -1,0 +1,28 @@
+{
+  "status": "accepted_independent_cpu_replay",
+  "jobs": 18,
+  "task_result_cells": 42,
+  "report": "analysis/report.json",
+  "report_sha256": "733be6d167dfd76c8fabe904404d21d13b792e2d364f1f42b92e9f8947b22e4b",
+  "report_source_sha256": "8accdd8f96781b6f846132943ba385a1ba6530aa6ae864564b28157f48cecdcb",
+  "identity": {
+    "plan_sha256": "017361607030902d20f7ef6faa605bbbe8bcb61bfcaddb7828f040d628256f6e",
+    "runner_sha256": "cebcb554103afb64babb5d0fe5319869c1f1eaaff4e0006651e7869f93943139",
+    "threads": 4,
+    "backend": "cuda"
+  },
+  "archive": "artifacts/provenance-20261014T143337822825.tar.gz",
+  "archive_sha256": "ef6788b1ac778e5e09cf56ac2a41a0b3767c95f98c27d2bf44f4f02dd434ca23",
+  "archive_bytes": 42777090,
+  "archive_manifest_sha256": "cc92f9c42bd693a7dcb6674c2f27803d3b69f5e7877583f6d26a62a293470c8a",
+  "archive_files": 931,
+  "max_prediction_abs_error": 2.384185791015625e-06,
+  "max_label_abs_error": 4.76837158203125e-07,
+  "saved_r2_minus_historical_range": [
+    -0.08223484096476863,
+    0.1295180909707555
+  ],
+  "interpretation": "Independent reconstruction and CPU inference verification; historical executable, environment and logs remain unknown. Matching scores do not establish historical run identity.",
+  "main_results_changed": false,
+  "historical_identity_recovered": false
+}

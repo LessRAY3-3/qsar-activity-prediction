@@ -1,0 +1,8 @@
+{
+  "baseline_commit": "d7864b0636848a5fd0130b5830aab5d9e25c8ce6",
+  "status": "unchanged",
+  "tracked_paths_checked": 904,
+  "scope": "All previously tracked results and processed data, GIN and multitask training scripts. New supplementary directories excluded because they did not exist at baseline.",
+  "changed_paths": [],
+  "path_inventory_sha256": "1ab787fe4edd98c6af6a3184eb65e63bd79693684a65a14a9c9a2f6492f1351b"
+}

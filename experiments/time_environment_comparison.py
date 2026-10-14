@@ -93,7 +93,7 @@ def load_report(root, device):
         seen.update(seeds)
     require(seen == set(SEEDS), f"{device} provenance has incomplete seed coverage")
     frame = pd.read_csv(root / "diagnostics.csv", dtype={"label_id": str, "tag": str, "arm": str})
-    columns = {"arm", "tag", "seed", "label_id", "device", *METRICS}
+    columns = {"arm", "tag", "seed", "label_id", "device", "best_epoch", "common_flag", *METRICS}
     require(columns <= set(frame.columns), f"{device} diagnostics missing required outcomes")
     require(len(frame) == 128 and not frame.duplicated(["arm", "tag", "seed"]).any(),
             f"{device} diagnostics contain missing/duplicate jobs")
@@ -111,6 +111,13 @@ def load_report(root, device):
             f"{device} diagnostics contain negative squared/absolute errors")
     require((frame["test_r2"].to_numpy(dtype=float) <= 1 + 1e-12).all(),
             f"{device} diagnostics contain impossible R2 > 1")
+    epochs = frame["best_epoch"].to_numpy(dtype=float)
+    require(np.isfinite(epochs).all() and (epochs >= 1).all()
+            and np.equal(epochs, np.floor(epochs)).all(), f"{device} diagnostics contain invalid best epochs")
+    require(frame["common_flag"].map(lambda value: isinstance(value, (bool, np.bool_))).all(),
+            f"{device} diagnostics common_flag must be boolean")
+    expected_flags = frame.best_epoch.lt(30) & frame.train_mse.gt(0.5)
+    require(frame.common_flag.eq(expected_flags).all(), f"{device} diagnostics common flags differ")
     return report, frame
 
 
@@ -138,6 +145,25 @@ def paired_contrasts(cpu, cuda):
         result[f"env_extended_{metric}"] = ge - ce
         result[f"interaction_{metric}"] = (ge - gc) - (ce - cc)
     return result.sort_values(keys).reset_index(drop=True)
+
+
+def summarize_cells(cpu, cuda):
+    """Four descriptive means over 8 targets x 8 seeds, with equal job weights.
+
+    Completeness and label compatibility are checked before calling this helper.
+    No cross-target dispersion, confidence interval or hypothesis test is added.
+    """
+    rows = []
+    for device, frame in (("cpu", cpu), ("cuda", cuda)):
+        for arm in ARMS:
+            cell = frame.loc[frame.arm.eq(arm)]
+            require(len(cell) == 64, f"{device}/{arm}: expected 64 jobs")
+            rows.append({"device": device, "arm": arm, "jobs": len(cell),
+                         "mean_train_mse": float(cell.train_mse.mean()),
+                         "mean_valid_rmse_std": float(cell.valid_rmse_std.mean()),
+                         "mean_test_r2": float(cell.test_r2.mean()),
+                         "common_flags": int(cell.common_flag.sum())})
+    return pd.DataFrame(rows)
 
 
 def summarize(pairs):
@@ -176,21 +202,38 @@ def run(cpu_report, cuda_report, output):
                 f"CPU/CUDA {field} differs")
     pairs = paired_contrasts(cpu, cuda)
     targets, across = summarize(pairs)
+    cells = summarize_cells(cpu, cuda)
     metadata = {
         "schema": "time-environment-comparison-v1", "status": "accepted",
         "created_at": datetime.now(timezone.utc).isoformat(), "factorial_cells_complete": 4,
         "jobs_accepted": 256, "paired_target_seed_rows": 64, "targets": 8, "seeds": list(SEEDS),
         "arms": ARMS, "primary_metrics": ["train_mse", "valid_rmse_std"],
         "secondary_metrics": ["test_r2", "test_rmse", "test_mae"],
+        "cells_summary": {
+            "file": "cells.csv",
+            "aggregation": "Each cell is the arithmetic mean of all 64 accepted target/seed jobs (8 targets x 8 seeds), with equal target and seed weights; jobs are not weighted by molecule count.",
+            "interpretation": "Descriptive four-cell outcomes only; no pooled cross-target SD, confidence intervals or p-values. Overlapping targets are not independent replications.",
+            "columns": {"device": "Audited training device: cpu or cuda",
+                        "arm": "Declared training budget: control or extended",
+                        "jobs": "Number of accepted target/seed jobs, exactly 64 per cell",
+                        "mean_train_mse": "Mean best-checkpoint train MSE in standardized label units",
+                        "mean_valid_rmse_std": "Mean best-checkpoint validation RMSE in standardized label units; std denotes label standardization, not a standard deviation across jobs",
+                        "mean_test_r2": "Mean held-out test R2, a secondary descriptive outcome",
+                        "common_flags": "Count of jobs with best_epoch < 30 and best-checkpoint standardized train MSE > 0.5"}},
         "contrasts": {"cpu_budget": "CPU extended - CPU control",
                       "cuda_budget": "CUDA extended - CUDA control",
                       "env_control": "CUDA control - CPU control",
                       "env_extended": "CUDA extended - CPU extended",
                       "interaction": "(CUDA extended - CUDA control) - (CPU extended - CPU control)"},
-        "direction": "Lower MSE/RMSE/MAE is better; higher test R2 is better. Interaction is a difference of budget effects, not a winner score.",
+        "direction": "Lower MSE/RMSE/MAE is better; higher test R2 is better. Interaction is a difference of descriptive budget contrasts, not a winner score.",
+        "training_prefix_comparison": {
+            "cpu": cpu_meta["training_prefix_comparison"],
+            "cuda": cuda_meta["training_prefix_comparison"]},
         "selection_policy": "All declared tags/seeds retained; no flag-based groups or budget/seed selection; main results are unchanged.",
         "limitations": ["Environment contrasts combine OS, CPU/GPU architecture, kernels, libraries and RNG implementations; they are not pure hardware causal effects.",
                         "Equal seed integers across devices do not guarantee identical random-number streams or training trajectories.",
+                        "Within-device control/extended trajectories can also differ at the same seed. When CUDA budget-arm logged prefixes do not match, the descriptive CUDA budget contrast includes run-to-run variation and cannot be attributed solely to extending training; the interaction inherits this limitation. Prefix mismatches do not exclude any declared runs.",
+                        "Training-prefix summaries compare printed, rounded log values only. Matching rounded prefixes do not establish bitwise-identical trajectories or remove other limitations of causal attribution.",
                         "Eight seeds repeat optimization on the same frozen split; this is not data k-fold cross-validation.",
                         "EGFR and EGFR_FULL overlap; target averages are descriptive and not independent-target inference.",
                         "Across-seed SDs are descriptive; no p-values or confidence intervals are constructed.",
@@ -207,11 +250,12 @@ def run(cpu_report, cuda_report, output):
     # All validation and calculations precede publication. Missing CUDA evidence
     # therefore cannot produce an apparent complete factorial report.
     output.mkdir(parents=True, exist_ok=False)
+    cells.to_csv(output / "cells.csv", index=False)
     pairs.to_csv(output / "paired.csv", index=False)
     targets.to_csv(output / "targets.csv", index=False)
     across.to_csv(output / "cross_target_means.csv", index=False)
     metadata["output_sha256"] = {name: digest(output / name) for name in
-                                 ("paired.csv", "targets.csv", "cross_target_means.csv")}
+                                 ("cells.csv", "paired.csv", "targets.csv", "cross_target_means.csv")}
     (output / "report.json").write_text(json.dumps(metadata, indent=2) + "\n")
     return metadata
 

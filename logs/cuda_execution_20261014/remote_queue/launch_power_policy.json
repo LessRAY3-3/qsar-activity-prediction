@@ -1,0 +1,31 @@
+{
+  "state": "dispatched_not_yet_validated",
+  "utc": "2026-10-14T13:52:07.180422+00:00",
+  "pid": 5286,
+  "command": [
+    "systemd-inhibit",
+    "--what=idle",
+    "--mode=block",
+    "--who=qsar-146",
+    "--why=QSAR CUDA queues; existing AC automatic suspend disabled",
+    "/home/lessray/qsar-campaigns/cuda-runtime-20261014/.venv/bin/python",
+    "-u",
+    "/home/lessray/qsar-campaigns/cuda-ready-20261014/handoff.py",
+    "--root",
+    "/home/lessray/qsar-campaigns/cuda-ready-20261014",
+    "--execute"
+  ],
+  "existing_power_policy": {
+    "sleep-inactive-ac-type": "'suspend'",
+    "sleep-inactive-ac-timeout": "0",
+    "sleep-inactive-battery-type": "'suspend'",
+    "sleep-inactive-battery-timeout": "900"
+  },
+  "power_online": {
+    "/sys/class/power_supply/AC0/online": "1"
+  },
+  "global_settings_changed": false,
+  "inhibitor": "idle only; idle:sleep request denied by host policy",
+  "limitation": "Requires remaining on AC; does not block explicit suspend",
+  "handoff_sha256": "38c80199fb5e41a77bebbfa5ee7aafd807484c7bdef1c488412e44fc1a32f1bb"
+}

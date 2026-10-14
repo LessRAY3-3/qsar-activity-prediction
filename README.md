@@ -330,8 +330,9 @@ neural network beat Morgan fingerprints + RandomForest?**
 have no committed training logs and an unrecorded original device. The review
 originally counted nine, including three historical time runs; those time
 runs have since been replaced by the accepted as-of campaign with separate
-provenance. A new CUDA replay of the six remaining runs is planned separately;
-its logs will describe that new run, not establish the historical device.
+provenance. New CUDA fits of the six remaining runs belong to the separate
+18-fit missing-log supplement, currently awaiting independent acceptance;
+their logs describe the new fits and cannot establish the historical device.
 
 **On this dataset the GIN does not beat the fingerprint RF.** The random
 ensemble CI favours RF (Δ −0.044 [−0.079, −0.010]). The scaffold
@@ -839,7 +840,7 @@ three training MSEs are 0.749–0.976. See
 convergence nor establishes that more training would help. Models and test
 predictions are unchanged; no test score selected a new training budget.
 
-**Eight-seed M3 study accepted; matched CUDA cohort pending.** A separate
+**All four eight-seed environment/budget cells accepted (256 jobs).** A separate
 [cross-computing-environment reproducibility and robustness study](docs/methodology.md#follow-up-a-matched-environment--training-budget-study)
 keeps the data and GIN architecture fixed; it is not data k-fold
 cross-validation or a comparison of different model structures. The initial
@@ -884,18 +885,53 @@ nor proof of convergence. See the
 [eight-seed summary](results/time_budget_sensitivity/m3_eight_seed/summary.json)
 and [acceptance](results/time_budget_sensitivity/m3_eight_seed/acceptance.json).
 
-The three-seed pilot and its offline replay remain separate historical records.
-CUDA's fresh **128 jobs remain pending** host availability;
-no cross-environment result is available. The documented
+**Matched CUDA results and the complete four-cell comparison.** The fresh
+128-job RTX 4070 Laptop GPU cohort passed independent CPU checkpoint replay;
+maximum test-prediction replay error was **1.90735e−6** (absolute tolerance
+1e−5). All four cells contain the same eight targets and eight declared seeds.
+The following arithmetic means give each target/seed job equal weight; they
+are descriptive, not independent-target inference or confidence intervals.
+Train MSE and validation RMSE use standardized labels; test R² is secondary.
+Flags count `best_epoch < 30` and best-checkpoint standardized train MSE > 0.5.
+
+| Environment | Budget | Jobs | Train MSE | Validation RMSE | Test R² | Flags |
+| --- | --- | ---: | ---: | ---: | ---: | ---: |
+| CPU | original | 64 | 0.518934 | 0.813357 | 0.007337 | 27 |
+| CPU | extended | 64 | 0.512036 | 0.811900 | 0.006742 | 26 |
+| CUDA | original | 64 | 0.506191 | 0.814175 | 0.011845 | 23 |
+| CUDA | extended | 64 | 0.499029 | 0.809495 | 0.027442 | 22 |
+
+CUDA's mean extended-minus-original changes are **−0.007162** train MSE,
+**−0.004679** validation RMSE, and **+0.015598** secondary test R²; common
+flags change **23/64 → 22/64**. However, **0/64 CUDA training-log prefixes
+match**, compared with **64/64 on CPU**, at their printed precision. Thus the
+CUDA budget/early-stopping-policy contrast includes run-to-run variation:
+its mean improvements cannot be attributed solely to allowing the same
+training trajectory to continue longer. Validation RMSE improves in 36/64
+pairs but worsens in 28/64; secondary test R² rises in 30/64 and falls in 34/64.
+No same-budget, same-seed CUDA repeat was run to estimate this variability
+separately; successful inference replay does not establish training determinism.
+Matching integer seeds does not guarantee matching trajectories, within or
+across devices. CPU/CUDA differences combine architecture, OS, kernels and
+libraries; this is not a pure hardware causal comparison or data k-fold
+cross-validation. No budget, seed or replacement model was selected from test
+performance, and main campaign results below remain unchanged.
+
+The CUDA phase ran on 2026-10-14, **21:52:07–22:18:57 (UTC+8)**, including
+preflight; the first-to-last training-status interval was **26 min 42.62 s**.
+This excludes transfer and independent acceptance and is not a controlled
+CPU/GPU speed benchmark. See the [CUDA acceptance](results/time_budget_sensitivity/cuda_eight_seed/analysis/report.json),
+[all four cells](results/time_budget_sensitivity/environment_comparison/cells.csv),
+[64 matched target/seed contrasts](results/time_budget_sensitivity/environment_comparison/paired.csv)
+and [comparison metadata](results/time_budget_sensitivity/environment_comparison/report.json).
+The README verifier independently recomputes the table from accepted job
+diagnostics. The three-seed pilot remains a separate historical record, and the
 [post-pilot amendment](results/time_budget_sensitivity/replication_extension.json)
-retains its actual decision chronology.
-The [portable CUDA queue](docs/methodology.md#portable-cuda-execution-and-return-checks)
-stages these 128 frozen jobs followed by 18 separate missing-log replacement
-fits. It checks source/input hashes, rejects CPU fallback and preserves
-per-job logs. Returned models require independent CPU replay before results
-can be accepted; a successful queue exit alone does not complete the study.
-The pilot's historical CUDA references do not fill a new study cell. Main
-campaign results below are unchanged.
+retains its actual decision chronology. The [portable CUDA queue](docs/methodology.md#portable-cuda-execution-and-return-checks)
+also completed 18 separate missing-log replacement fits. All 18 models / 42
+result cells passed [independent CPU replay](results/provenance_reconstruction/cuda_20261014/acceptance.json),
+with maximum prediction error 2.38419e−6. These new experiments do not enter
+the four cells, replace main results or recover missing historical run identities.
 
 **Test R2 and paired molecule-bootstrap CI** (B = 10,000). GIN time is the
 per-seed mean ± population standard deviation; GIN ens is R2 of the averaged

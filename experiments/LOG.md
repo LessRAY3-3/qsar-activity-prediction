@@ -16,6 +16,35 @@ results. The initial 2026-10-13 entry records the preceding campaign; its hERG
 scores and aggregate means are superseded. Earlier all-year-label time scores
 are historical only.**
 
+## 2026-10-14 — Both CUDA queues completed and independently accepted
+
+- All 128 frozen CUDA budget/early-stopping-policy jobs completed, followed by
+  18 separate provenance replacement fits. M3 independently replayed all 128
+  budget checkpoints and all 18 supplementary models / 42 task/result cells.
+  Maximum prediction errors were 1.90735e−6 and 2.38419e−6 respectively; all
+  fixed tolerances passed. Both return archives and per-member hashes were
+  verified on M4 and M3.
+- The accepted M3/CUDA × original/extended design now contains all 256 jobs,
+  64 per cell. Mean test R² (secondary) is 0.007337 / 0.006742 on CPU and
+  0.011845 / 0.027442 on CUDA. CUDA extended-minus-original mean standardized
+  validation RMSE is −0.004679; common diagnostic flags change 23/64 → 22/64.
+- CUDA common log prefixes match in 0/64 pairs (CPU 64/64). Independent review
+  found only the intended budget parameter differences, but 60 pairs already
+  differ at epoch one. The contrast includes independent-run variability;
+  neither a general improvement nor a pure budget/hardware effect is established.
+  All seeds and unfavorable results remain included; original main outputs stay fixed.
+- Supplementary R² minus historical recorded R² ranges −0.082235 to +0.129518.
+  These are new runs with complete provenance, not recovered historical identities.
+- Added verified unpacking, descriptive four-cell summaries and 20 independent
+  README cell checks. Full tests: 724 passed, 3 existing warnings; Ruff passed;
+  README: 467 cells, zero mismatches. Operational preparation failures and
+  resolutions are preserved, including the denied sleep inhibitor and missing
+  dependency preflight, both before training.
+- Evidence: `results/time_budget_sensitivity/cuda_eight_seed/`,
+  `results/time_budget_sensitivity/environment_comparison/`,
+  `results/provenance_reconstruction/cuda_20261014/`, and
+  `logs/cuda_execution_20261014/`. Prior pending statements below are historical.
+
 ## 2026-10-14 — CUDA delivery prepared; connection still blocked
 
 - Prepared separate queues for the 128 frozen environment/budget jobs and

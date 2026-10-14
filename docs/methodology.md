@@ -1308,7 +1308,7 @@ It removes ten named acceptance protections in isolated temporary copies.
 All ten were caught by the real-artifact tests; import/setup/training failures
 are explicitly inconclusive. PR #8 did not publish the source of its sixteen
 original mutants, so this result does not claim to reproduce that exact set.
-The pending matched CUDA experiment still uses the immutable `8521063` bundle
+The accepted matched CUDA experiment used the immutable `8521063` bundle
 and `90a4700` training core described below, not these changed worker sources.
 
 ### Follow-up: a matched environment × training-budget study
@@ -1327,12 +1327,13 @@ eight seeds:
 `results/time_budget_sensitivity/replication_extension.json`; the eight-seed
 plan was not preregistered before the pilot. The original design and pilot
 JSON/CSV, parameters, archives and results remain unchanged as historical
-evidence. The accepted eight-seed CPU cohort is reported separately below.
+evidence. Both eight-seed environments and their four-cell comparison are now
+independently accepted and reported below.
 
 | Execution environment | Original budget | Extended budget |
 | --- | --- | --- |
 | M3 Max CPU | 64 completed and independently accepted | 64 completed and independently accepted |
-| Ubuntu / RTX 4070 Laptop CUDA | 64 fresh jobs, awaiting connection | 64 fresh jobs, awaiting connection |
+| Ubuntu / RTX 4070 Laptop CUDA | 64 completed and independently accepted | 64 completed and independently accepted |
 
 Each current cell covers all eight targets and all eight declared seeds.
 The original budget is `epochs=100, min_epochs=0, patience=20`; the extended
@@ -1340,10 +1341,10 @@ budget is `epochs=200, min_epochs=60, patience=40`. The expanded design has
 **256 jobs: 64 per cell and 128 per environment**. M3 completed its 80
 additional jobs for seeds 3/4/5/6/7 in 1,113.540 seconds
 (18 min 33.54 s). The combined **128-job CPU cohort passed independent
-artifact checks and CPU checkpoint replay**. The new 4070 CUDA campaign will
-run all 128 jobs when the CUDA host becomes available; no CUDA execution
-is scheduled in this revision. Only the two CPU cells are complete; the full
-four-cell study and environment contrasts remain pending.
+artifact checks and CPU checkpoint replay**. The fresh 4070 CUDA campaign
+also completed and independently passed all 128 jobs. All four cells and
+64 paired target/seed environment contrasts are now accepted; the separate
+18-fit missing-log supplement is still awaiting its own acceptance.
 
 Both budgets retain the same learning-rate scheduler. Trainer, original
 worker, label loader, graph dataset, common helpers, training mathematics
@@ -1355,12 +1356,12 @@ entry points `scripts/run_time_budget_extension.py` and
 editing those frozen training files; their own source and bundle hashes are
 recorded separately, with the supplement bundle frozen at `8521063`.
 Both arms remain isolated from the input bundle and
-published outputs. The pending CUDA deployment must verify the same frozen
-training/input versions. Historical accepted CUDA runs are reference data,
-not substitutes for the newly matched 128-job CUDA cohort.
+published outputs. The CUDA deployment verified the same frozen training/input
+versions. Historical accepted CUDA runs remain reference data and were not
+substituted for any of the newly matched 128 CUDA jobs.
 
 **Frozen-comparison boundary after the Low fixes.** The accepted eight-seed
-M3 cohort and pending matched CUDA training must continue to use
+M3 cohort and matched CUDA training both used
 `results/time_budget_sensitivity/extension_inputs.tar.gz`: bundle revision
 `8521063` contains the unchanged training core from `90a4700`. This revision's
 repairs to the current worker/label utilities change source hashes even though
@@ -1419,9 +1420,9 @@ but do not make all target/seed rows independent. Retain every declared seed
 in every cell and report all paired contrasts, including unfavorable results.
 The seed expansion follows the documented post-pilot sponsor request above; it is
 not conditioned on achieving a desired test ranking. Do not choose further
-seeds, budgets or replacement models from test performance. No outcome for
-the pending CUDA cells is assumed. The original accepted
-weights, predictions and metric history remain unchanged.
+seeds, budgets or replacement models from test performance. All CUDA outcomes
+are included, including trajectories that differ between budget arms. The original
+accepted weights, predictions and metric history remain unchanged.
 
 **Accepted eight-seed M3 results (2026-10-14).** All 128 jobs were independently
 checked using auditor `df97088`: 48 retained pilot fits plus 80 supplemental
@@ -1457,10 +1458,58 @@ Records: `results/time_budget_sensitivity/m3_eight_seed/summary.json`,
 64 log-prefix comparisons). The supplement archive contains 698 verified file hashes, and all 70
 extension-input manifest files passed extraction/hash verification. The full
 CPU report also passed the environment comparator's accepted-report loader;
-no partial CPU-only four-cell report was generated. All 503 tests passed, Ruff passed for `scripts experiments tests`, and
-CI passed at `df97088`. Main accepted temporal/RF results and the original
-three-seed pilot artifacts remain unchanged. CUDA still requires its full
-128-job matched cohort before any environment contrast is available.
+no partial CPU-only four-cell report was generated at that stage. The M3
+acceptance revision passed 503 tests, Ruff for `scripts experiments tests`,
+and CI at `df97088`. Main accepted temporal/RF results and the original
+three-seed pilot artifacts remain unchanged. The subsequently accepted CUDA
+cohort completes the design as described next.
+
+**Accepted eight-seed CUDA results and four-cell comparison (2026-10-14).**
+The returned 128 fresh CUDA jobs passed manifest, status, frozen-source/input,
+parameter and device checks plus independent CPU replay of every checkpoint.
+The maximum prediction discrepancy was **1.9073486328125e−6**, below the
+fixed absolute tolerance **1e−5**; training-MSE and validation-RMSE replay
+discrepancies were at most **1.78814e−7** and **1.19209e−7**, respectively.
+Acceptance is `results/time_budget_sensitivity/cuda_eight_seed/analysis/report.json`.
+
+| Environment | Budget | Jobs | Train MSE | Validation RMSE | Test R² | Flags |
+| --- | --- | ---: | ---: | ---: | ---: | ---: |
+| CPU | original | 64 | 0.518934 | 0.813357 | 0.007337 | 27 |
+| CPU | extended | 64 | 0.512036 | 0.811900 | 0.006742 | 26 |
+| CUDA | original | 64 | 0.506191 | 0.814175 | 0.011845 | 23 |
+| CUDA | extended | 64 | 0.499029 | 0.809495 | 0.027442 | 22 |
+
+Each cell is an arithmetic mean over eight targets × eight seeds with equal
+job weights, not molecule-count weights. Train MSE and validation RMSE are
+best-checkpoint metrics in standardized label units; `valid_rmse_std` denotes
+label standardization, not dispersion across seeds. Test R² is secondary;
+flags use the common `<30 epochs` / `>0.5 MSE` rule. No pooled cross-target SD,
+p-value or confidence interval is inferred from these four means.
+`environment_comparison/paired.csv` preserves all 64 matched target/seed rows;
+`targets.csv` gives descriptive per-target seed summaries, and
+`cross_target_means.csv` gives equally weighted target-average contrasts.
+
+CUDA's mean extended-minus-original changes are **−0.007162** train MSE,
+**−0.004679** standardized validation RMSE and **+0.015598** test R². Its common
+flags change **23/64 → 22/64**. Crucially, **0/64 CUDA rounded training-log
+prefixes match between arms**, versus **64/64 CPU prefixes**. The CUDA budget
+contrast therefore includes run-to-run variation; it is not the isolated
+effect of continuing the same trajectory for more epochs. This observation
+neither identifies a single numerical cause nor establishes the benefit of
+longer training. Identical integer seeds do not guarantee identical random
+streams or trajectories, even within the CUDA environment. Across environments,
+the contrast also combines OS, architecture, kernels and library builds; it is
+not a pure hardware causal effect. Eight seeds on fixed splits are training
+replicates, not data k-fold cross-validation. All declared outcomes are retained.
+
+The CUDA phase envelope was **2026-10-14 21:52:07.451877–22:18:57.034290
+(UTC+8)**, including preflight (1,609.582413 seconds). The earliest job start to
+latest job completion was **21:52:13.904796–22:18:56.521163 (UTC+8)**,
+**1,602.616367 seconds (26 min 42.62 s)**. These intervals exclude transfer and
+independent acceptance; different concurrency and execution environments prevent
+interpreting them as a controlled CPU/GPU speed benchmark. The 18 missing-log
+replacement fits are a separate accepted supplement (18 models / 42 result cells).
+The three-seed pilot below remains historical and is not rewritten by these results.
 
 **Observed initial three-seed M3 pilot (2026-10-14; unchanged).** Frozen training source
 `90a470050367cebc4cd83dfe8d3f7fb37d53e6de` completed both arms in 683.063 seconds
@@ -1490,8 +1539,9 @@ training did not broadly improve the selected models. This does not prove all
 models converged, nor predict the result of other optimization changes.
 
 The M3 9/24 diagnostic count is not a reduction from the earlier CUDA 13/24:
-those are different cohorts and environments. The newly matched CUDA arms are
-still required before estimating the environment contrasts or interaction.
+those are different cohorts and environments. At the pilot stage, matched
+CUDA arms were still required; the completed eight-seed comparison is reported
+above and does not alter this historical pilot.
 Full rows, paired differences, target summaries and rounded-log comparisons are
 in `results/time_budget_sensitivity/m3/analysis/{diagnostics,paired,targets,prefix_logs}.csv`;
 `report.json` records the pilot verification and marks two of its original
@@ -1611,12 +1661,18 @@ uses the pilot input root above for CPU replay, while the extension input
 archive separately preserves the wrapper and bundle provenance. The accepted
 report is available in `m3_eight_seed/analysis/`; replays write to a new directory.
 
-**Future CUDA acceptance and environment comparison (not yet run):**
+**Offline replay of the accepted CUDA cohort and four-cell comparison:**
 
 ```bash
-# Only after the fresh 128-job CUDA cohort has completed and been returned.
+# Verify archive bytes, complete member inventory, sizes and hashes in a new directory.
+python scripts/unpack_verified_return.py \
+  --archive results/time_budget_sensitivity/cuda_eight_seed/artifacts/study.tar.gz \
+  --manifest results/time_budget_sensitivity/cuda_eight_seed/artifacts/study.tar.gz.manifest.json \
+  --out-dir .scratch/cuda-eight-seed-replay
+
+# Requires the frozen input extraction from the M3 replay above.
 python experiments/time_budget_report.py \
-  --study-root .scratch/cuda-eight-seed-replay/returned/study \
+  --study-root .scratch/cuda-eight-seed-replay/study \
   --seeds 42 1 2 3 4 5 6 7 --training-device cuda \
   --input-root .scratch/m3-budget-replay/input \
   --out-dir .scratch/cuda-eight-seed-report --threads 2
@@ -1635,8 +1691,12 @@ CUDA reports instead of publishing a partial four-cell result. For accepted
 inputs it produces 64 target/seed pairs and five contrasts: CPU budget,
 CUDA budget, CUDA-minus-CPU under the original budget, CUDA-minus-CPU under
 the extended budget, and the difference between the two budget contrasts.
-The CUDA acceptance and cross-environment comparison remain future operations;
-no CUDA comparison outcome is available yet.
+The accepted CUDA analysis is committed under
+`results/time_budget_sensitivity/cuda_eight_seed/analysis/`, and the comparison
+under `results/time_budget_sensitivity/environment_comparison/`. It also emits
+`cells.csv`, the complete four-cell descriptive summary, and records hashes of
+all output tables. Replays write to new directories and do not overwrite these
+accepted records. Archive verification alone is not numerical model acceptance.
 
 ### Frozen inputs and local preparation
 
@@ -1896,8 +1956,9 @@ python scripts/plan_provenance_reconstruction.py \
 ```
 
 The new backend is explicitly chosen as CUDA, while the historical backend
-remains unknown. Execution waits for the 4070 connection and must record a
-CUDA availability check, package/thread/device metadata, full stdout/stderr,
+remains unknown. The 18-fit supplement completed after the 128-job budget queue
+and passed independent M3 CPU replay for all 42 result cells. Its records
+include a CUDA availability check, package/thread/device metadata, full stdout/stderr,
 exit status and output hashes. The multitask trainer's automatic device choice
 requires supervision to prohibit fallback. These 18 supplementary jobs are
 separate from the 128 frozen CUDA budget-comparison jobs; their training code
@@ -1960,3 +2021,60 @@ prediction tolerance is absolute 1e-4 / relative 1e-5; metric tolerances are
 1e-5. A failed comparison is rejected and investigated, not silently accepted
 by widening a tolerance. Initial offline validation passed 649 tests and a
 143-file archive round trip; evidence is in `logs/win4070_ready_20261014/`.
+
+
+### Executed CUDA queues and independent acceptance (2026-10-14)
+
+The two queues finished without a failed training job: 128 frozen budget fits,
+then 18 separate provenance replacement fits. The latter ran between the
+budget-package completion at 14:19:14.547107 UTC and trainer exit at
+14:33:36.994273 UTC; packaging finished at 14:34:39.370610 UTC. Final queue state
+is `completed_pending_independent_replay`; subsequent independent M3 reports
+establish acceptance, rather than rewriting that historical execution state.
+Both archives passed full byte/member verification on the M4 coordinator and M3.
+
+The supplement's 18 saved models and 42 task/result cells all passed CPU replay,
+with maximum prediction discrepancy **2.384185791015625e−6** and maximum
+label discrepancy **4.76837158203125e−7** (floating-point reconstruction). The fixed absolute/relative tolerances were not widened. Its saved
+R² minus the historical recorded R² spans **−0.082235 to +0.129518**. These are
+new replacement experiments: neither similar scores nor complete new logs
+recover historical executable, backend, environment or run identity. Main
+models, predictions and historical numbers remain unchanged. Evidence and the
+complete per-cell differences are in
+`results/provenance_reconstruction/cuda_20261014/acceptance.json` and
+`analysis/summary.csv`.
+
+To unpack the supplement before using the replay command above:
+
+```bash
+python scripts/unpack_verified_return.py \
+  --archive results/provenance_reconstruction/cuda_20261014/artifacts/provenance-20261014T143337822825.tar.gz \
+  --manifest results/provenance_reconstruction/cuda_20261014/artifacts/provenance-20261014T143337822825.tar.gz.manifest.json \
+  --out-dir .scratch/provenance-replay-new
+```
+
+Execution records are in `logs/cuda_execution_20261014/`. The first standard
+idle/sleep inhibitor request was denied by the host policy, before any training.
+Read-only inspection confirmed AC power and an existing AC idle-suspend timeout
+of zero. A scoped idle-only inhibitor was then used; global power settings were
+unchanged. This was not protection against manual suspend or battery operation.
+An initial preflight also rejected the old minimal environment's missing
+matplotlib dependency before training. A separate environment copied the old
+runtime, added missing requirements under constraints preserving every existing
+package version, and passed `pip check` plus 24 actual CUDA smoke checks. The
+llvmlite wheel fetched from a mirror was checked against official PyPI's SHA256.
+Failed preparation logs, before/after package versions and the final preflight
+are retained; no model fitting took place in those failed attempts.
+
+Independent review verified all 64 CUDA control/extended commands differ only
+in epochs, minimum epochs and patience. Every pair has unequal values at common
+logged epochs: 60 differ in epoch one and the remaining four first differ in
+epochs 2, 3, 10 and 10, all before the earliest original-budget stopping point.
+This is therefore a budget/early-stopping-policy comparison with independent
+run variation, not the effect of appending epochs to identical trajectories.
+Validation RMSE improves in 36 pairs and worsens in 28; test R² improves in 30
+and worsens in 34. No within-budget repeated CUDA run estimates nondeterministic
+variance separately. Frozen code does not enable deterministic algorithms;
+its additive graph reductions are consistent with such variability, but these
+records cannot identify its unique cause. Inference replay verifies artifacts,
+not deterministic retraining. See `independent_prefix_review.json` in the logs.
