@@ -1,0 +1,435 @@
+{
+  "schema": "m3-time-budget-report-v1",
+  "status": "accepted",
+  "audited_at": "2026-10-14T02:08:18.285421+00:00",
+  "jobs_accepted": 128,
+  "seeds": [
+    42,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7
+  ],
+  "n_seeds": 8,
+  "cohorts": 2,
+  "paired_rows": 64,
+  "targets": 8,
+  "environment": "M3 CPU",
+  "training_device": "cpu",
+  "training_host": "leisiruideMacBook-Pro.local",
+  "training_platform": "macOS-27.0-arm64-arm-64bit",
+  "factorial_cells_complete": 2,
+  "planned_factorial_cells": 4,
+  "cpu_cells_status": "accepted for declared seeds",
+  "cuda_cells_status": "not audited by this report",
+  "primary_metrics": [
+    "best-checkpoint standardized train MSE",
+    "validation RMSE"
+  ],
+  "secondary_metrics": [
+    "test R2",
+    "test RMSE",
+    "test MAE",
+    "runtime"
+  ],
+  "delta_convention": "extended minus control, paired by target and seed",
+  "selection_policy": "All 128 jobs retained; no test-based seed/budget selection or replacement of main results",
+  "common_flag": "best_epoch < 30 and best-checkpoint standardized train MSE > 0.5",
+  "native_flag": "best_epoch < 0.3 * each arm max_epochs and best-checkpoint train MSE > 0.5",
+  "interpretation": [
+    "Flags are diagnostics, not proof of non-convergence or benefit from longer training",
+    "Current report measures within one training environment budget contrasts only",
+    "Future CPU/CUDA comparison combines OS, architecture, kernels and libraries; not a pure hardware causal effect",
+    "8 seeds and overlapping target sets do not provide independent target-level replications",
+    "Completed cells refer only to this training environment and the declared audited seeds; other environment/seed cohorts are not implied",
+    "Target seed SDs are descriptive, not confidence intervals; ensemble R2 differs from mean single-seed R2"
+  ],
+  "replay": {
+    "device": "cpu",
+    "torch_threads": 2,
+    "torch_interop_threads": 1,
+    "torch_version": "2.14.0",
+    "python": "3.12.14",
+    "platform": "macOS-27.0.1-arm64-arm-64bit",
+    "absolute_tolerance": 1e-05,
+    "max_test_prediction_abs_error": 9.5367431640625e-07,
+    "max_train_mse_abs_error": 7.52530618930436e-08,
+    "max_valid_rmse_abs_error": 1.1920928955078125e-07
+  },
+  "provenance": {
+    "protocol": {
+      "arms": {
+        "control": {
+          "epochs": 100,
+          "min_epochs": 0,
+          "patience": 20
+        },
+        "extended": {
+          "epochs": 200,
+          "min_epochs": 60,
+          "patience": 40
+        }
+      },
+      "common_flag": "best_epoch < 30 and best_checkpoint_train_mse > 0.5 in both arms",
+      "coordinator_sha256": "279374a06486d3260497a728c92798c878252e56ce5d5feea08353e8a5866c46",
+      "device": "cpu",
+      "environment_caveat": "CPU/CUDA contrasts include OS, architecture and numerical libraries; not an isolated hardware causal effect",
+      "interpretation": "Extra budget with unchanged scheduler; not a learning-rate or architecture search",
+      "jobs": 48,
+      "lanes": [
+        [
+          "a2a",
+          "egfr"
+        ],
+        [
+          "egfr_full",
+          "hivpr"
+        ],
+        [
+          "herg",
+          "mpro"
+        ],
+        [
+          "abl1",
+          "vegfr2"
+        ]
+      ],
+      "manifest_sha256": "daf7f1f9ee34f33c8ff478d04ff8239bdba4301032eedd3041a475f23f74ecf2",
+      "parallel_workers": 4,
+      "planned_extension": "2x2 environment x budget design: repeat both arms on RTX 4070 CUDA after user restores connection",
+      "primary_comparison": "Paired same-host best-checkpoint train MSE and validation RMSE",
+      "publication_policy": "Sensitivity study; preserve prior CUDA results and all RF results",
+      "schema": 1,
+      "seeds": [
+        42,
+        1,
+        2
+      ],
+      "selection": "Lowest validation RMSE; unchanged scheduler and 1e-5 improvement tolerance",
+      "source_commit": "90a470050367cebc4cd83dfe8d3f7fb37d53e6de",
+      "test_policy": "Secondary complete-cohort report; never select budget, seed or stopping from test scores",
+      "thread_environment": {
+        "MKL_NUM_THREADS": "4",
+        "OMP_NUM_THREADS": "4",
+        "OPENBLAS_NUM_THREADS": "1",
+        "PYTHONHASHSEED": "0",
+        "PYTHONUNBUFFERED": "1",
+        "QSAR_TORCH_INTEROP_THREADS": "1",
+        "QSAR_TORCH_THREADS": "4",
+        "VECLIB_MAXIMUM_THREADS": "4"
+      }
+    },
+    "training_environment": {
+      "packages": {
+        "joblib": "1.6.0",
+        "numpy": "2.5.3",
+        "rdkit": "2026.3.6",
+        "scikit-learn": "1.9.1",
+        "torch": "2.14.0",
+        "torch-geometric": "2.8.0.post1"
+      },
+      "platform": "macOS-27.0-arm64-arm-64bit",
+      "python": "3.12.14",
+      "variables": {
+        "CUBLAS_WORKSPACE_CONFIG": null,
+        "CUDA_VISIBLE_DEVICES": null,
+        "MKL_NUM_THREADS": "4",
+        "OMP_NUM_THREADS": "4",
+        "OPENBLAS_NUM_THREADS": "1",
+        "PYTHONHASHSEED": "0",
+        "QSAR_CV_BACKEND": null,
+        "QSAR_RF_JOBS": null,
+        "QSAR_TORCH_INTEROP_THREADS": "1",
+        "QSAR_TORCH_THREADS": "4",
+        "VECLIB_MAXIMUM_THREADS": "4"
+      }
+    },
+    "host": "leisiruideMacBook-Pro.local",
+    "input_sha256": {
+      "data/processed/a2a_graphs.npz": "16f91508a395a6150b9f1369c7347fee56e53d857fd863ee4b25650ad6451e73",
+      "data/processed/splits/a2a_time.npz": "5a28451cf757e4f547197bf7ae45701c496917e11cf07a699287fa7f7932eecd",
+      "data/processed/egfr_graphs.npz": "8490a7da9249e6bec71f3389580513e1356bc85240f86565f46c478594f33a2d",
+      "data/processed/splits/egfr_time.npz": "47d2d02eac0f9faac7024f34f722602ce40c19db36726353aa81a6b13b4aa966",
+      "data/processed/egfr_full_graphs.npz": "6789bf07e2066ec38b3e517ee02fd683212f88f10dd1ff124d820f925f9664a8",
+      "data/processed/splits/egfr_full_time.npz": "fdcd58f8ea2a2e83a2529160581202a6295f073dfa0bb6560a10dd4eb4a4f993",
+      "data/processed/hivpr_graphs.npz": "c765ebe2a90e70f70a6a16649ee42209ec2fc3746f8bb74861f4d0ffb574ea36",
+      "data/processed/splits/hivpr_time.npz": "57f292a4333ae6a94922236d0ec5e183dd46fb438ba0db0c942eaf503f928455",
+      "data/processed/herg_graphs.npz": "0d060f03d6852fab51c27444f9655c9c50111bb43899ea3fff7a8a932ef7458f",
+      "data/processed/splits/herg_time.npz": "90933252420671d709bdf0de5e4782e6f8351dfe0fb96977c9ee143fcb370647",
+      "data/processed/mpro_graphs.npz": "b842e69be1f22ea3e5f3970f66c40b76f300a4a662585fafc27e912744092d8f",
+      "data/processed/splits/mpro_time.npz": "a04f76855f5e0114854af278c7c86d26abe6b4d96acf691fbb49b9869267419f",
+      "data/processed/abl1_graphs.npz": "b1cf65db6aa62b1ae3c43de1eece05bf4003140f8718b1e26f25c1c9e1c750b4",
+      "data/processed/splits/abl1_time.npz": "7d5bc03ae5ac43bf776df73f11223069b6d574cde84f0633e5cf18d9e9c9ed62",
+      "data/processed/splits/vegfr2_time.npz": "7cd41dc7b53d23150416536830f6cdeb7b8160233620727162ef0b9e20751653",
+      "data/processed/vegfr2_graphs.npz": "50213134224178d8b2da350f5748b0da90aa52d1ea694c1d9fe7f9f9cdd9ffe9"
+    },
+    "source_sha256": {
+      "scripts/gnn_03_train_gin.py": "da5d897e71efab75cc30c8f805198ece1e43bb435fffc1652fbef951f5f95c3c",
+      "scripts/gnn_graph_dataset.py": "e004eefea627c97f379dcded339843bdd3318c790ff390a58ba6da7c883a1fea",
+      "scripts/qsar_common.py": "86be4f6672aab3a9564a8e0c7e2213f0cab870154f2ea9b68b13b32c41bb250c",
+      "scripts/run_time_campaign.py": "7189b12aae439122c2bdf7c62ff13e5ad85c255ced267812f0326038a3cdfaef",
+      "scripts/time_labels.py": "6c88a8a3cede0bf10d69edcbb8d51bc5f004d85293bd34e0a6ccfc659361d9ca"
+    },
+    "cohorts": [
+      {
+        "study_root": "/Users/lessray/Desktop/kimi code/qsar-time-retrain-20261013/.scratch/time-budget/returned/study",
+        "protocol": {
+          "arms": {
+            "control": {
+              "epochs": 100,
+              "min_epochs": 0,
+              "patience": 20
+            },
+            "extended": {
+              "epochs": 200,
+              "min_epochs": 60,
+              "patience": 40
+            }
+          },
+          "common_flag": "best_epoch < 30 and best_checkpoint_train_mse > 0.5 in both arms",
+          "coordinator_sha256": "279374a06486d3260497a728c92798c878252e56ce5d5feea08353e8a5866c46",
+          "device": "cpu",
+          "environment_caveat": "CPU/CUDA contrasts include OS, architecture and numerical libraries; not an isolated hardware causal effect",
+          "interpretation": "Extra budget with unchanged scheduler; not a learning-rate or architecture search",
+          "jobs": 48,
+          "lanes": [
+            [
+              "a2a",
+              "egfr"
+            ],
+            [
+              "egfr_full",
+              "hivpr"
+            ],
+            [
+              "herg",
+              "mpro"
+            ],
+            [
+              "abl1",
+              "vegfr2"
+            ]
+          ],
+          "manifest_sha256": "daf7f1f9ee34f33c8ff478d04ff8239bdba4301032eedd3041a475f23f74ecf2",
+          "parallel_workers": 4,
+          "planned_extension": "2x2 environment x budget design: repeat both arms on RTX 4070 CUDA after user restores connection",
+          "primary_comparison": "Paired same-host best-checkpoint train MSE and validation RMSE",
+          "publication_policy": "Sensitivity study; preserve prior CUDA results and all RF results",
+          "schema": 1,
+          "seeds": [
+            42,
+            1,
+            2
+          ],
+          "selection": "Lowest validation RMSE; unchanged scheduler and 1e-5 improvement tolerance",
+          "source_commit": "90a470050367cebc4cd83dfe8d3f7fb37d53e6de",
+          "test_policy": "Secondary complete-cohort report; never select budget, seed or stopping from test scores",
+          "thread_environment": {
+            "MKL_NUM_THREADS": "4",
+            "OMP_NUM_THREADS": "4",
+            "OPENBLAS_NUM_THREADS": "1",
+            "PYTHONHASHSEED": "0",
+            "PYTHONUNBUFFERED": "1",
+            "QSAR_TORCH_INTEROP_THREADS": "1",
+            "QSAR_TORCH_THREADS": "4",
+            "VECLIB_MAXIMUM_THREADS": "4"
+          }
+        },
+        "training_environment": {
+          "packages": {
+            "joblib": "1.6.0",
+            "numpy": "2.5.3",
+            "rdkit": "2026.3.6",
+            "scikit-learn": "1.9.1",
+            "torch": "2.14.0",
+            "torch-geometric": "2.8.0.post1"
+          },
+          "platform": "macOS-27.0-arm64-arm-64bit",
+          "python": "3.12.14",
+          "variables": {
+            "CUBLAS_WORKSPACE_CONFIG": null,
+            "CUDA_VISIBLE_DEVICES": null,
+            "MKL_NUM_THREADS": "4",
+            "OMP_NUM_THREADS": "4",
+            "OPENBLAS_NUM_THREADS": "1",
+            "PYTHONHASHSEED": "0",
+            "QSAR_CV_BACKEND": null,
+            "QSAR_RF_JOBS": null,
+            "QSAR_TORCH_INTEROP_THREADS": "1",
+            "QSAR_TORCH_THREADS": "4",
+            "VECLIB_MAXIMUM_THREADS": "4"
+          }
+        },
+        "host": "leisiruideMacBook-Pro.local",
+        "input_sha256": {
+          "data/processed/a2a_graphs.npz": "16f91508a395a6150b9f1369c7347fee56e53d857fd863ee4b25650ad6451e73",
+          "data/processed/splits/a2a_time.npz": "5a28451cf757e4f547197bf7ae45701c496917e11cf07a699287fa7f7932eecd",
+          "data/processed/egfr_graphs.npz": "8490a7da9249e6bec71f3389580513e1356bc85240f86565f46c478594f33a2d",
+          "data/processed/splits/egfr_time.npz": "47d2d02eac0f9faac7024f34f722602ce40c19db36726353aa81a6b13b4aa966",
+          "data/processed/egfr_full_graphs.npz": "6789bf07e2066ec38b3e517ee02fd683212f88f10dd1ff124d820f925f9664a8",
+          "data/processed/splits/egfr_full_time.npz": "fdcd58f8ea2a2e83a2529160581202a6295f073dfa0bb6560a10dd4eb4a4f993",
+          "data/processed/hivpr_graphs.npz": "c765ebe2a90e70f70a6a16649ee42209ec2fc3746f8bb74861f4d0ffb574ea36",
+          "data/processed/splits/hivpr_time.npz": "57f292a4333ae6a94922236d0ec5e183dd46fb438ba0db0c942eaf503f928455",
+          "data/processed/herg_graphs.npz": "0d060f03d6852fab51c27444f9655c9c50111bb43899ea3fff7a8a932ef7458f",
+          "data/processed/splits/herg_time.npz": "90933252420671d709bdf0de5e4782e6f8351dfe0fb96977c9ee143fcb370647",
+          "data/processed/mpro_graphs.npz": "b842e69be1f22ea3e5f3970f66c40b76f300a4a662585fafc27e912744092d8f",
+          "data/processed/splits/mpro_time.npz": "a04f76855f5e0114854af278c7c86d26abe6b4d96acf691fbb49b9869267419f",
+          "data/processed/abl1_graphs.npz": "b1cf65db6aa62b1ae3c43de1eece05bf4003140f8718b1e26f25c1c9e1c750b4",
+          "data/processed/splits/abl1_time.npz": "7d5bc03ae5ac43bf776df73f11223069b6d574cde84f0633e5cf18d9e9c9ed62",
+          "data/processed/splits/vegfr2_time.npz": "7cd41dc7b53d23150416536830f6cdeb7b8160233620727162ef0b9e20751653",
+          "data/processed/vegfr2_graphs.npz": "50213134224178d8b2da350f5748b0da90aa52d1ea694c1d9fe7f9f9cdd9ffe9"
+        },
+        "source_sha256": {
+          "scripts/gnn_03_train_gin.py": "da5d897e71efab75cc30c8f805198ece1e43bb435fffc1652fbef951f5f95c3c",
+          "scripts/gnn_graph_dataset.py": "e004eefea627c97f379dcded339843bdd3318c790ff390a58ba6da7c883a1fea",
+          "scripts/qsar_common.py": "86be4f6672aab3a9564a8e0c7e2213f0cab870154f2ea9b68b13b32c41bb250c",
+          "scripts/run_time_campaign.py": "7189b12aae439122c2bdf7c62ff13e5ad85c255ced267812f0326038a3cdfaef",
+          "scripts/time_labels.py": "6c88a8a3cede0bf10d69edcbb8d51bc5f004d85293bd34e0a6ccfc659361d9ca"
+        }
+      },
+      {
+        "study_root": "/Users/lessray/Desktop/kimi code/qsar-time-retrain-20261013/.scratch/time-budget/eight-seed-return/returned/study",
+        "protocol": {
+          "arms": {
+            "control": {
+              "epochs": 100,
+              "min_epochs": 0,
+              "patience": 20
+            },
+            "extended": {
+              "epochs": 200,
+              "min_epochs": 60,
+              "patience": 40
+            }
+          },
+          "common_flag": "best_epoch < 30 and best_checkpoint_train_mse > 0.5 in both arms",
+          "coordinator_sha256": "758d289570d7409c8335b343c8050531c58d59703a801dd311f0c7637a981703",
+          "device": "cpu",
+          "environment_caveat": "CPU/CUDA contrasts also include OS, architecture and numerical libraries",
+          "jobs": 80,
+          "lanes": [
+            [
+              "a2a",
+              "egfr"
+            ],
+            [
+              "egfr_full",
+              "hivpr"
+            ],
+            [
+              "herg",
+              "mpro"
+            ],
+            [
+              "abl1",
+              "vegfr2"
+            ]
+          ],
+          "manifest_sha256": "ab9c71cb1ff48505f14e8759c37d5e00c0c138cc50cf0d6e6baf752f96d9d802",
+          "parallel_workers": 4,
+          "primary_comparison": "Paired same-host best-checkpoint train MSE and validation RMSE",
+          "publication_policy": "Preserve the original three-seed study and all main CUDA/RF results",
+          "schema": 1,
+          "seeds": [
+            3,
+            4,
+            5,
+            6,
+            7
+          ],
+          "selection": "Lowest validation RMSE; unchanged scheduler and 1e-5 improvement tolerance",
+          "source_commit": "85210630c475e8733089a476b8d5bf4852dbf773",
+          "study_kind": "time-budget-seed-extension",
+          "test_policy": "Complete-cohort secondary report; never select budget or seed from test scores",
+          "thread_environment": {
+            "MKL_NUM_THREADS": "4",
+            "OMP_NUM_THREADS": "4",
+            "OPENBLAS_NUM_THREADS": "1",
+            "PYTHONHASHSEED": "0",
+            "PYTHONUNBUFFERED": "1",
+            "QSAR_TORCH_INTEROP_THREADS": "1",
+            "QSAR_TORCH_THREADS": "4",
+            "VECLIB_MAXIMUM_THREADS": "4"
+          },
+          "wrapper_sha256": "0d9a0f69c5a70addb2337e56785d0f2e0df894109f43c31f9c2aa8796ba783a6"
+        },
+        "training_environment": {
+          "packages": {
+            "joblib": "1.6.0",
+            "numpy": "2.5.3",
+            "rdkit": "2026.3.6",
+            "scikit-learn": "1.9.1",
+            "torch": "2.14.0",
+            "torch-geometric": "2.8.0.post1"
+          },
+          "platform": "macOS-27.0-arm64-arm-64bit",
+          "python": "3.12.14",
+          "variables": {
+            "CUBLAS_WORKSPACE_CONFIG": null,
+            "CUDA_VISIBLE_DEVICES": null,
+            "MKL_NUM_THREADS": "4",
+            "OMP_NUM_THREADS": "4",
+            "OPENBLAS_NUM_THREADS": "1",
+            "PYTHONHASHSEED": "0",
+            "QSAR_CV_BACKEND": null,
+            "QSAR_RF_JOBS": null,
+            "QSAR_TORCH_INTEROP_THREADS": "1",
+            "QSAR_TORCH_THREADS": "4",
+            "VECLIB_MAXIMUM_THREADS": "4"
+          }
+        },
+        "host": "leisiruideMacBook-Pro.local",
+        "input_sha256": {
+          "data/processed/a2a_graphs.npz": "16f91508a395a6150b9f1369c7347fee56e53d857fd863ee4b25650ad6451e73",
+          "data/processed/splits/a2a_time.npz": "5a28451cf757e4f547197bf7ae45701c496917e11cf07a699287fa7f7932eecd",
+          "data/processed/egfr_graphs.npz": "8490a7da9249e6bec71f3389580513e1356bc85240f86565f46c478594f33a2d",
+          "data/processed/splits/egfr_time.npz": "47d2d02eac0f9faac7024f34f722602ce40c19db36726353aa81a6b13b4aa966",
+          "data/processed/egfr_full_graphs.npz": "6789bf07e2066ec38b3e517ee02fd683212f88f10dd1ff124d820f925f9664a8",
+          "data/processed/splits/egfr_full_time.npz": "fdcd58f8ea2a2e83a2529160581202a6295f073dfa0bb6560a10dd4eb4a4f993",
+          "data/processed/hivpr_graphs.npz": "c765ebe2a90e70f70a6a16649ee42209ec2fc3746f8bb74861f4d0ffb574ea36",
+          "data/processed/splits/hivpr_time.npz": "57f292a4333ae6a94922236d0ec5e183dd46fb438ba0db0c942eaf503f928455",
+          "data/processed/herg_graphs.npz": "0d060f03d6852fab51c27444f9655c9c50111bb43899ea3fff7a8a932ef7458f",
+          "data/processed/splits/herg_time.npz": "90933252420671d709bdf0de5e4782e6f8351dfe0fb96977c9ee143fcb370647",
+          "data/processed/mpro_graphs.npz": "b842e69be1f22ea3e5f3970f66c40b76f300a4a662585fafc27e912744092d8f",
+          "data/processed/splits/mpro_time.npz": "a04f76855f5e0114854af278c7c86d26abe6b4d96acf691fbb49b9869267419f",
+          "data/processed/abl1_graphs.npz": "b1cf65db6aa62b1ae3c43de1eece05bf4003140f8718b1e26f25c1c9e1c750b4",
+          "data/processed/splits/abl1_time.npz": "7d5bc03ae5ac43bf776df73f11223069b6d574cde84f0633e5cf18d9e9c9ed62",
+          "data/processed/splits/vegfr2_time.npz": "7cd41dc7b53d23150416536830f6cdeb7b8160233620727162ef0b9e20751653",
+          "data/processed/vegfr2_graphs.npz": "50213134224178d8b2da350f5748b0da90aa52d1ea694c1d9fe7f9f9cdd9ffe9"
+        },
+        "source_sha256": {
+          "scripts/gnn_03_train_gin.py": "da5d897e71efab75cc30c8f805198ece1e43bb435fffc1652fbef951f5f95c3c",
+          "scripts/gnn_graph_dataset.py": "e004eefea627c97f379dcded339843bdd3318c790ff390a58ba6da7c883a1fea",
+          "scripts/qsar_common.py": "86be4f6672aab3a9564a8e0c7e2213f0cab870154f2ea9b68b13b32c41bb250c",
+          "scripts/run_time_campaign.py": "7189b12aae439122c2bdf7c62ff13e5ad85c255ced267812f0326038a3cdfaef",
+          "scripts/time_labels.py": "6c88a8a3cede0bf10d69edcbb8d51bc5f004d85293bd34e0a6ccfc659361d9ca"
+        }
+      }
+    ]
+  },
+  "auditor_sha256": "5573f3844f220eb439e89536aa8996b9ec287692a50e07e93e845734c1f00ba8",
+  "flags_by_arm": {
+    "control": {
+      "native": 27,
+      "common": 27
+    },
+    "extended": {
+      "native": 26,
+      "common": 26
+    }
+  },
+  "training_prefix_comparison": {
+    "pairs": 64,
+    "matching_rounded_prefixes": 64,
+    "interpretation": "Only printed epochs and rounded train/validation/lr values are compared; no bitwise-equivalence requirement. Differences are reported, not suppressed or used to select runs."
+  },
+  "output_sha256": {
+    "diagnostics.csv": "7818f3b68f81472726ac2d4b101a40f79d473813f7a72192fc92e8249620f90b",
+    "paired.csv": "c9ada6b17fc306450f2dad667e51cea9499d939bdc8fda547bbe6d370c965d74",
+    "targets.csv": "4cf53f9cd23a9dbfe8bd342d1b357219cc66cda9243db6a50b372966eec943e8",
+    "prefix_logs.csv": "930564bc2c626c3c52936d2eddc3406756cf6c34544608626013a846d191e753"
+  }
+}

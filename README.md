@@ -804,7 +804,7 @@ three training MSEs are 0.749–0.976. See
 convergence nor establishes that more training would help. Models and test
 predictions are unchanged; no test score selected a new training budget.
 
-**Three-seed M3 pilot completed; eight-seed M3 expansion running.** A separate
+**Eight-seed M3 study accepted; matched CUDA cohort pending.** A separate
 [cross-computing-environment reproducibility and robustness study](docs/methodology.md#follow-up-a-matched-environment--training-budget-study)
 keeps the data and GIN architecture fixed; it is not data k-fold
 cross-validation or a comparison of different model structures. The initial
@@ -829,17 +829,31 @@ but does not prove that all models converged. See the complete
 `54f4c7d`) and before the new CUDA experiment started, the user explicitly
 requested **eight seeds per cell: 42/1/2/3/4/5/6/7**. This is a documented
 post-pilot amendment, not an eight-seed preregistration. CPU/CUDA ×
-original/extended budget now gives **64 jobs per cell, 256 total**. M3 is
-running 80 additional jobs (five new seeds × eight targets × two budgets),
-to join its accepted 48 for a 128-job CPU cohort. CUDA will run all 128 jobs
-only after the user's connection-ready message; it has not started.
-Trainer, original worker, training mathematics and input hashes stay frozen
-at `90a4700`; the new coordinator/seed-wrapper bundle is frozen at
-`8521063` with separate provenance. The added jobs await completion and
-independent artifact/model-replay acceptance.
-The three-seed pilot and its offline replay remain intact, and the complete
-eight-seed cohort will be reported separately. See the
-[amendment record](results/time_budget_sensitivity/replication_extension.json).
+original/extended budget now gives **64 jobs per cell, 256 total**. M3 has
+completed all **128 CPU jobs**: the accepted 48-job pilot plus 80 added jobs
+(18 min 33.54 s for the supplement). All 128 checkpoints passed independent
+CPU replay; maximum test-prediction replay error was 9.54e−7. Trainer, original
+worker, training mathematics and inputs remain frozen at `90a4700`; the
+supplement coordinator/seed-wrapper bundle is `8521063`.
+
+Across all **64 target/seed pairs**, **61/64** saved test predictions are
+identical between budgets, and all 64 rounded training-log prefixes match.
+Only `hivpr` seeds **4, 5 and 42** select different best checkpoints. Mean
+extended-minus-original standardized validation RMSE is **−0.001458**, mean
+training MSE **−0.006898**, and common diagnostic flags change **27/64 → 26/64**.
+Secondary mean single-seed test R² changes **0.007337 → 0.006742**
+(Δ **−0.000595**). For `hivpr` seed 5, validation improves but test R² falls
+**0.102889**; retaining all declared seeds prevents a favorable subset from
+standing in for the full result. This is neither a general performance gain
+nor proof of convergence. See the
+[eight-seed summary](results/time_budget_sensitivity/m3_eight_seed/summary.json)
+and [acceptance](results/time_budget_sensitivity/m3_eight_seed/acceptance.json).
+
+The three-seed pilot and its offline replay remain separate historical records.
+CUDA's fresh **128 jobs remain pending** the user's connection-ready message;
+no cross-environment result is available. The documented
+[post-pilot amendment](results/time_budget_sensitivity/replication_extension.json)
+retains its actual decision chronology.
 The pilot's historical CUDA references do not fill a new study cell. Main
 campaign results below are unchanged.
 

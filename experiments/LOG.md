@@ -26,12 +26,27 @@ are historical only.**
   eight targets × seeds **42/1/2/3/4/5/6/7** gives **64 jobs per cell,
   128 per environment, 256 total**. This is not data k-fold cross-validation
   or an architecture comparison.
-- **Execution status:** M3's accepted 48 pilot jobs are retained. The additional
-  80 M3 jobs (seeds 3/4/5/6/7 in both budgets) are running; completion and
-  independent artifact/model-replay acceptance are pending;
-  the accepted combined CPU cohort will contain 128 jobs. The complete new
-  CUDA cohort contains 128 jobs and will start only after the user's
-  connection-ready message. No eight-seed result is complete or claimed here.
+- **Execution/acceptance:** all 80 additional M3 jobs completed in 1,113.540
+  seconds (18 min 33.54 s). Combined with the retained 48 pilot jobs, all 128
+  CPU jobs passed independent artifact checks and checkpoint replay; maximum
+  test-prediction replay error was 9.54e−7. The full 128-job CUDA cohort still
+  awaits the user's connection-ready message. The CPU half is complete;
+  the four-cell environment comparison is not.
+- **Eight-seed result:** 64 paired target/seed outcomes; 61/64 saved test
+  prediction pairs are identical and 64/64 rounded log prefixes match. Only
+  HIVPR seeds 4/5/42 select different best checkpoints. Common flags change
+  27/64 → 26/64. Mean paired Δtrain MSE is −0.006898, Δstandardized validation
+  RMSE −0.001458, and secondary Δtest R² −0.000595 (mean single-seed test R²
+  0.007337 → 0.006742). HIVPR seed 5 improves validation but loses 0.102889
+  test R²; all seeds are retained, without a general-improvement or convergence
+  claim. Full evidence is under `results/time_budget_sensitivity/m3_eight_seed/`.
+- **Verification:** 128 models independently replayed; 698 supplemental
+  archive files and all 70 extension-input manifest files passed safe extraction
+  and SHA256 checks. The complete CPU report passed the environment comparator's
+  accepted-report loader without generating an incomplete four-cell report.
+  All 503 tests and
+  scoped Ruff (`scripts experiments tests`) passed; CI passed at auditor
+  commit `df97088`.
 - **Frozen computation:** retain trainer, original worker, label loader,
   graph dataset, common helpers and all data hashes from
   `90a470050367cebc4cd83dfe8d3f7fb37d53e6de`. Training mathematics are unchanged.
@@ -48,13 +63,15 @@ are historical only.**
   implementations, not only floating-point differences. It is not a causally
   isolated hardware test. Main temporal/RF results remain untouched.
 - **Prepared analysis path:** `time_budget_report.py` accepts a separate pilot
-  and supplement tree with eight declared seeds; the future combined CPU
-  report requires all 128 jobs. A fresh CUDA report uses `--training-device cuda`
+  and supplement tree with eight declared seeds; the accepted combined CPU
+  report contains all 128 jobs. A fresh CUDA report uses `--training-device cuda`
   and likewise requires 128 jobs. `experiments/time_environment_comparison.py`
   requires both independently accepted reports, then emits 64 paired rows and
   five environment/budget contrasts. Missing CUDA evidence is an error, not
-  a partial comparison. The additional public M3 archive is planned at
-  `m3_extension/study.tar.gz` under the study results; it is not yet published.
+  a partial comparison. The published additional M3 archive is
+  `m3_extension/study.tar.gz` (49,725,424 bytes, 698 file hashes); the extension
+  input archive and manifests are also published. Methodology provides complete
+  hash verification, data-filtered extraction and merged replay commands.
 - **Amendment record:**
   `results/time_budget_sensitivity/replication_extension.json`. It supersedes
   the earlier plan to finish all four three-seed cells before deciding on

@@ -1155,22 +1155,23 @@ CUDA experiment began, the user explicitly requested expansion to eight seeds:
 `results/time_budget_sensitivity/replication_extension.json`; the eight-seed
 plan was not preregistered before the pilot. The original design and pilot
 JSON/CSV, parameters, archives and results remain unchanged as historical
-evidence. The expanded cohort will be reported separately.
+evidence. The accepted eight-seed CPU cohort is reported separately below.
 
 | Execution environment | Original budget | Extended budget |
 | --- | --- | --- |
-| M3 Max CPU | 64 planned: 24 pilot accepted + 40 in the running supplement | 64 planned: 24 pilot accepted + 40 in the running supplement |
+| M3 Max CPU | 64 completed and independently accepted | 64 completed and independently accepted |
 | Ubuntu / RTX 4070 Laptop CUDA | 64 fresh jobs, awaiting connection | 64 fresh jobs, awaiting connection |
 
 Each current cell covers all eight targets and all eight declared seeds.
 The original budget is `epochs=100, min_epochs=0, patience=20`; the extended
 budget is `epochs=200, min_epochs=60, patience=40`. The expanded design has
-**256 jobs: 64 per cell and 128 per environment**. M3 is running the 80 additional jobs for seeds 3/4/5/6/7. Completion and
-independent artifact/model-replay acceptance are still pending; only then will
-they be combined with the existing 48.
-The new 4070 CUDA campaign will run all 128 jobs after the user connects the
-machine and sends a connection-ready message. Neither the added M3 cohort nor
-the full eight-seed study is complete at this running stage.
+**256 jobs: 64 per cell and 128 per environment**. M3 completed its 80
+additional jobs for seeds 3/4/5/6/7 in 1,113.540 seconds
+(18 min 33.54 s). The combined **128-job CPU cohort passed independent
+artifact checks and CPU checkpoint replay**. The new 4070 CUDA campaign will
+run all 128 jobs after the user connects the machine and sends a
+connection-ready message. Only the two CPU cells are complete; the full
+four-cell study and environment contrasts remain pending.
 
 Both budgets retain the same learning-rate scheduler. Trainer, original
 worker, label loader, graph dataset, common helpers, training mathematics
@@ -1234,8 +1235,47 @@ in every cell and report all paired contrasts, including unfavorable results.
 The seed expansion follows the explicit post-pilot user request above; it is
 not conditioned on achieving a desired test ranking. Do not choose further
 seeds, budgets or replacement models from test performance. No outcome for
-the pending CUDA cells or added M3 seeds is assumed. The original accepted
+the pending CUDA cells is assumed. The original accepted
 weights, predictions and metric history remain unchanged.
+
+**Accepted eight-seed M3 results (2026-10-14).** All 128 jobs were independently
+checked using auditor `df97088`: 48 retained pilot fits plus 80 supplemental
+fits, with the frozen training core `90a4700` and supplement bundle `8521063`.
+All 128 checkpoints replayed on CPU; maximum test-prediction error was
+9.54e−7. All 64 common training-log prefixes match at their printed precision,
+which does not establish bitwise identity of unprinted optimizer states.
+
+| Descriptive outcome over all 64 target/seed pairs | Original | Extended |
+| --- | ---: | ---: |
+| Common fitting-diagnostic flags | 27/64 | 26/64 |
+| Mean single-seed test R² (secondary) | 0.007337 | 0.006742 |
+
+Mean paired extended-minus-original changes are **−0.006898** for standardized
+training MSE, **−0.001458** for standardized validation RMSE (primary), and
+**−0.000595** for test R² (secondary). Saved test predictions are identical in
+**61/64 pairs**. Only the following HIVPR pairs select different checkpoints:
+
+| Seed | Best epoch, original → extended | Δ validation RMSE | Δ test R² (secondary) |
+| --- | --- | ---: | ---: |
+| 4 | 51 → 90 | −0.010035 | +0.018141 |
+| 5 | 5 → 42 | −0.076737 | −0.102889 |
+| 42 | 44 → 84 | −0.006528 | +0.046639 |
+
+Seed 5 improves validation while losing test R². Every declared seed remains
+in the report; neither that seed nor the favorable ones can be selectively
+removed to choose a budget. Most selected models are unchanged, and these
+results establish neither a general gain nor convergence. The 27 → 26 count
+uses the common diagnostic, not the legacy max-epochs-dependent flag.
+
+Records: `results/time_budget_sensitivity/m3_eight_seed/summary.json`,
+`acceptance.json` and `analysis/` (128 diagnostic rows, 64 paired rows and
+64 log-prefix comparisons). The supplement archive contains 698 verified file hashes, and all 70
+extension-input manifest files passed extraction/hash verification. The full
+CPU report also passed the environment comparator's accepted-report loader;
+no partial CPU-only four-cell report was generated. All 503 tests passed, Ruff passed for `scripts experiments tests`, and
+CI passed at `df97088`. Main accepted temporal/RF results and the original
+three-seed pilot artifacts remain unchanged. CUDA still requires its full
+128-job matched cohort before any environment contrast is available.
 
 **Observed initial three-seed M3 pilot (2026-10-14; unchanged).** Frozen training source
 `90a470050367cebc4cd83dfe8d3f7fb37d53e6de` completed both arms in 683.063 seconds
@@ -1318,24 +1358,77 @@ remote machine, and does not train any model. Use the frozen `90a4700` scripts i
 future edited training scripts must not silently replace them. An existing
 replay directory is refused; choose a new directory for another run.
 
-**Acceptance and comparison commands for the expanded study (pending).** The
-planned additional M3 archive is
-`results/time_budget_sensitivity/m3_extension/study.tar.gz`; it has not yet
-been published. After all 80 added jobs finish, verify its archive/member
-hashes and extract it into a separate new directory. The paths below are
-examples of those future unpacked directories; do not create a combined
-study by overwriting the original 48-job tree.
+**Offline replay of the accepted eight-seed CPU cohort.** First run the
+unchanged pilot extraction above. The supplemental archive
+`results/time_budget_sensitivity/m3_extension/study.tar.gz` is now published:
+**49,725,424 bytes**, with **698 member hashes** (hardlinks deduplicate repeated
+snapshot bytes). Its frozen input bundle is `extension_inputs.tar.gz`, with
+`extension_inputs_archive.json` and `extension_input_manifest.json` (70 input
+manifest files).
+The following verifies archive hashes before data-filtered extraction into
+new directories, then checks every declared result/input member hash. Python
+3.12 or newer supports the `filter="data"` extraction used here.
 
 ```bash
-# Retain the original pilot input/study trees produced by the replay above.
-# Replace the supplement path with the separately verified 80-job study tree.
+python - <<'PYREPLAY'
+from pathlib import Path
+import hashlib
+import json
+import tarfile
+
+base = Path("results/time_budget_sensitivity")
+dest = Path(".scratch/m3-extension-replay")
+archives = [
+    (base / "m3_extension/study.tar.gz",
+     base / "m3_extension/study.tar.gz.manifest.json", dest / "returned"),
+    (base / "extension_inputs.tar.gz",
+     base / "extension_inputs_archive.json", dest / "input"),
+]
+for archive, metadata, _ in archives:
+    spec = json.loads(metadata.read_text())
+    if archive.stat().st_size != spec["bytes"] or hashlib.sha256(archive.read_bytes()).hexdigest() != spec["sha256"]:
+        raise SystemExit(f"Archive mismatch: {archive}")
+dest.mkdir(parents=True, exist_ok=False)
+for archive, _, target in archives:
+    target.mkdir()
+    with tarfile.open(archive, "r:gz") as stream:
+        stream.extractall(target, filter="data")
+result_spec = json.loads(archives[0][1].read_text())
+expected = result_spec["member_sha256"]
+actual = {p.relative_to(dest / "returned").as_posix()
+          for p in (dest / "returned").rglob("*") if p.is_file()}
+if actual != set(expected) or len(actual) != result_spec["files"]:
+    raise SystemExit("Supplement file inventory mismatch")
+for name, checksum in expected.items():
+    if hashlib.sha256((dest / "returned" / name).read_bytes()).hexdigest() != checksum:
+        raise SystemExit(f"Supplement member mismatch: {name}")
+input_spec = json.loads(archives[1][1].read_text())
+manifest = dest / "input/manifest.json"
+if hashlib.sha256(manifest.read_bytes()).hexdigest() != input_spec["manifest_sha256"]:
+    raise SystemExit("Extension input manifest mismatch")
+for item in json.loads(manifest.read_text())["files"]:
+    member = dest / "input" / item["path"]
+    if member.stat().st_size != item["size"] or hashlib.sha256(member.read_bytes()).hexdigest() != item["sha256"]:
+        raise SystemExit(f"Extension input member mismatch: {item['path']}")
+print(f"Verified {len(actual)} supplement files and frozen extension inputs")
+PYREPLAY
 python experiments/time_budget_report.py \
   --study-root .scratch/m3-budget-replay/returned/study \
   --supplement-root .scratch/m3-extension-replay/returned/study \
   --seeds 42 1 2 3 4 5 6 7 --training-device cpu \
   --input-root .scratch/m3-budget-replay/input \
   --out-dir .scratch/m3-eight-seed-report --threads 2
+```
 
+The original and supplemental study trees stay separate; the auditor checks
+matching frozen training/data versions before combining their outcomes. It
+uses the pilot input root above for CPU replay, while the extension input
+archive separately preserves the wrapper and bundle provenance. The accepted
+report is available in `m3_eight_seed/analysis/`; replays write to a new directory.
+
+**Future CUDA acceptance and environment comparison (not yet run):**
+
+```bash
 # Only after the fresh 128-job CUDA cohort has completed and been returned.
 python experiments/time_budget_report.py \
   --study-root .scratch/cuda-eight-seed-replay/returned/study \
@@ -1357,7 +1450,8 @@ CUDA reports instead of publishing a partial four-cell result. For accepted
 inputs it produces 64 target/seed pairs and five contrasts: CPU budget,
 CUDA budget, CUDA-minus-CPU under the original budget, CUDA-minus-CPU under
 the extended budget, and the difference between the two budget contrasts.
-These are future operations; no CUDA comparison outcome is available yet.
+The CUDA acceptance and cross-environment comparison remain future operations;
+no CUDA comparison outcome is available yet.
 
 ### Frozen inputs and local preparation
 
