@@ -1,0 +1,288 @@
+{
+  "environment": {
+    "packages": {
+      "joblib": "1.6.0",
+      "numpy": "2.5.3",
+      "rdkit": "2026.3.6",
+      "scikit-learn": "1.9.1",
+      "torch": "2.14.0",
+      "torch-geometric": "2.8.0.post1"
+    },
+    "platform": "macOS-27.0-arm64-arm-64bit",
+    "python": "3.12.14",
+    "variables": {
+      "CUBLAS_WORKSPACE_CONFIG": null,
+      "CUDA_VISIBLE_DEVICES": null,
+      "MKL_NUM_THREADS": null,
+      "OMP_NUM_THREADS": null,
+      "OPENBLAS_NUM_THREADS": null,
+      "PYTHONHASHSEED": null,
+      "QSAR_CV_BACKEND": null,
+      "QSAR_RF_JOBS": null,
+      "QSAR_TORCH_INTEROP_THREADS": null,
+      "QSAR_TORCH_THREADS": null,
+      "VECLIB_MAXIMUM_THREADS": null
+    }
+  },
+  "finished_at": "2026-10-14T01:21:54.424614+00:00",
+  "lanes": [
+    {
+      "arm": "control",
+      "command": [
+        "/Users/leisirui/qsar-campaigns/time-budget-20261014/.venv/bin/python",
+        "/Users/leisirui/qsar-campaigns/time-budget-20261014/study/control/lane0/scripts/run_time_campaign.py",
+        "--role",
+        "gin",
+        "--device",
+        "cpu",
+        "--tags",
+        "a2a",
+        "egfr",
+        "--seeds",
+        "42",
+        "1",
+        "2",
+        "--execute",
+        "--epochs",
+        "100",
+        "--min-epochs",
+        "0",
+        "--patience",
+        "20"
+      ],
+      "lane": 0,
+      "log": "/Users/leisirui/qsar-campaigns/time-budget-20261014/study/control/lane0/worker.log",
+      "returncode": 0,
+      "tags": [
+        "a2a",
+        "egfr"
+      ]
+    },
+    {
+      "arm": "control",
+      "command": [
+        "/Users/leisirui/qsar-campaigns/time-budget-20261014/.venv/bin/python",
+        "/Users/leisirui/qsar-campaigns/time-budget-20261014/study/control/lane2/scripts/run_time_campaign.py",
+        "--role",
+        "gin",
+        "--device",
+        "cpu",
+        "--tags",
+        "herg",
+        "mpro",
+        "--seeds",
+        "42",
+        "1",
+        "2",
+        "--execute",
+        "--epochs",
+        "100",
+        "--min-epochs",
+        "0",
+        "--patience",
+        "20"
+      ],
+      "lane": 2,
+      "log": "/Users/leisirui/qsar-campaigns/time-budget-20261014/study/control/lane2/worker.log",
+      "returncode": 0,
+      "tags": [
+        "herg",
+        "mpro"
+      ]
+    },
+    {
+      "arm": "control",
+      "command": [
+        "/Users/leisirui/qsar-campaigns/time-budget-20261014/.venv/bin/python",
+        "/Users/leisirui/qsar-campaigns/time-budget-20261014/study/control/lane3/scripts/run_time_campaign.py",
+        "--role",
+        "gin",
+        "--device",
+        "cpu",
+        "--tags",
+        "abl1",
+        "vegfr2",
+        "--seeds",
+        "42",
+        "1",
+        "2",
+        "--execute",
+        "--epochs",
+        "100",
+        "--min-epochs",
+        "0",
+        "--patience",
+        "20"
+      ],
+      "lane": 3,
+      "log": "/Users/leisirui/qsar-campaigns/time-budget-20261014/study/control/lane3/worker.log",
+      "returncode": 0,
+      "tags": [
+        "abl1",
+        "vegfr2"
+      ]
+    },
+    {
+      "arm": "control",
+      "command": [
+        "/Users/leisirui/qsar-campaigns/time-budget-20261014/.venv/bin/python",
+        "/Users/leisirui/qsar-campaigns/time-budget-20261014/study/control/lane1/scripts/run_time_campaign.py",
+        "--role",
+        "gin",
+        "--device",
+        "cpu",
+        "--tags",
+        "egfr_full",
+        "hivpr",
+        "--seeds",
+        "42",
+        "1",
+        "2",
+        "--execute",
+        "--epochs",
+        "100",
+        "--min-epochs",
+        "0",
+        "--patience",
+        "20"
+      ],
+      "lane": 1,
+      "log": "/Users/leisirui/qsar-campaigns/time-budget-20261014/study/control/lane1/worker.log",
+      "returncode": 0,
+      "tags": [
+        "egfr_full",
+        "hivpr"
+      ]
+    },
+    {
+      "arm": "extended",
+      "command": [
+        "/Users/leisirui/qsar-campaigns/time-budget-20261014/.venv/bin/python",
+        "/Users/leisirui/qsar-campaigns/time-budget-20261014/study/extended/lane0/scripts/run_time_campaign.py",
+        "--role",
+        "gin",
+        "--device",
+        "cpu",
+        "--tags",
+        "a2a",
+        "egfr",
+        "--seeds",
+        "42",
+        "1",
+        "2",
+        "--execute",
+        "--epochs",
+        "200",
+        "--min-epochs",
+        "60",
+        "--patience",
+        "40"
+      ],
+      "lane": 0,
+      "log": "/Users/leisirui/qsar-campaigns/time-budget-20261014/study/extended/lane0/worker.log",
+      "returncode": 0,
+      "tags": [
+        "a2a",
+        "egfr"
+      ]
+    },
+    {
+      "arm": "extended",
+      "command": [
+        "/Users/leisirui/qsar-campaigns/time-budget-20261014/.venv/bin/python",
+        "/Users/leisirui/qsar-campaigns/time-budget-20261014/study/extended/lane2/scripts/run_time_campaign.py",
+        "--role",
+        "gin",
+        "--device",
+        "cpu",
+        "--tags",
+        "herg",
+        "mpro",
+        "--seeds",
+        "42",
+        "1",
+        "2",
+        "--execute",
+        "--epochs",
+        "200",
+        "--min-epochs",
+        "60",
+        "--patience",
+        "40"
+      ],
+      "lane": 2,
+      "log": "/Users/leisirui/qsar-campaigns/time-budget-20261014/study/extended/lane2/worker.log",
+      "returncode": 0,
+      "tags": [
+        "herg",
+        "mpro"
+      ]
+    },
+    {
+      "arm": "extended",
+      "command": [
+        "/Users/leisirui/qsar-campaigns/time-budget-20261014/.venv/bin/python",
+        "/Users/leisirui/qsar-campaigns/time-budget-20261014/study/extended/lane3/scripts/run_time_campaign.py",
+        "--role",
+        "gin",
+        "--device",
+        "cpu",
+        "--tags",
+        "abl1",
+        "vegfr2",
+        "--seeds",
+        "42",
+        "1",
+        "2",
+        "--execute",
+        "--epochs",
+        "200",
+        "--min-epochs",
+        "60",
+        "--patience",
+        "40"
+      ],
+      "lane": 3,
+      "log": "/Users/leisirui/qsar-campaigns/time-budget-20261014/study/extended/lane3/worker.log",
+      "returncode": 0,
+      "tags": [
+        "abl1",
+        "vegfr2"
+      ]
+    },
+    {
+      "arm": "extended",
+      "command": [
+        "/Users/leisirui/qsar-campaigns/time-budget-20261014/.venv/bin/python",
+        "/Users/leisirui/qsar-campaigns/time-budget-20261014/study/extended/lane1/scripts/run_time_campaign.py",
+        "--role",
+        "gin",
+        "--device",
+        "cpu",
+        "--tags",
+        "egfr_full",
+        "hivpr",
+        "--seeds",
+        "42",
+        "1",
+        "2",
+        "--execute",
+        "--epochs",
+        "200",
+        "--min-epochs",
+        "60",
+        "--patience",
+        "40"
+      ],
+      "lane": 1,
+      "log": "/Users/leisirui/qsar-campaigns/time-budget-20261014/study/extended/lane1/worker.log",
+      "returncode": 0,
+      "tags": [
+        "egfr_full",
+        "hivpr"
+      ]
+    }
+  ],
+  "started_at": "2026-10-14T01:10:31.361380+00:00",
+  "state": "training_complete_pending_independent_audit"
+}

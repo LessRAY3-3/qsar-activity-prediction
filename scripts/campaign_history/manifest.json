@@ -1,0 +1,236 @@
+{
+  "schema": "historical-coordinator-source-archive-v1",
+  "archived_at": "2026-10-14T00:49:40.673309+00:00",
+  "purpose": "Byte-for-byte historical coordinator source snapshots, not supported runnable commands. Original machine paths and one-off mutation logic deliberately preserved. Do not execute these .txt files.",
+  "provenance_limit": "Captured from existing coordinator scratch files after the campaign. Snapshot bytes are verifiable; this archive is not a complete shell transcript and does not prove every command or invocation. The new audit_time_campaign.py is a later parameterized auditor, not claimed to be the original script.",
+  "campaigns": {
+    "initial": {
+      "source_directory": ".scratch/time-campaign",
+      "training_source_commit": "7ce15c1f0849ae69e0ca208f781a9824517eb328",
+      "acceptance": "results/time_split/initial_campaign_acceptance.json"
+    },
+    "herg_repair": {
+      "source_directory": ".scratch/review-repair",
+      "training_source_commit": "d13f9125af56028f60e099ec2e914dd2509c239e",
+      "acceptance": "results/time_split/campaign_acceptance.json"
+    }
+  },
+  "files": [
+    {
+      "campaign": "initial",
+      "source_path": ".scratch/time-campaign/accept_m3_rf.py",
+      "archived_path": "scripts/campaign_history/initial/accept_m3_rf.py.txt",
+      "sha256": "02108964a0730ade8fef36ab27b9b31612a6dc571aafe60e98b8d0cd4b3fc308",
+      "bytes": 5749,
+      "format": "historical Python source stored as non-executable text"
+    },
+    {
+      "campaign": "initial",
+      "source_path": ".scratch/time-campaign/accept_win4070_gin.py",
+      "archived_path": "scripts/campaign_history/initial/accept_win4070_gin.py.txt",
+      "sha256": "ed02fb0f342d882675db55d6cb46b00d20169a70a1ed6a6b74a9f3ae6b3c4b52",
+      "bytes": 6120,
+      "format": "historical Python source stored as non-executable text"
+    },
+    {
+      "campaign": "initial",
+      "source_path": ".scratch/time-campaign/collect_gin_remote.py",
+      "archived_path": "scripts/campaign_history/initial/collect_gin_remote.py.txt",
+      "sha256": "3d8b9e2c3399a470d0b19be562cbe119b12b771330272c93411d5a96440ac50a",
+      "bytes": 5136,
+      "format": "historical Python source stored as non-executable text"
+    },
+    {
+      "campaign": "initial",
+      "source_path": ".scratch/time-campaign/fetch_linux_wheels.py",
+      "archived_path": "scripts/campaign_history/initial/fetch_linux_wheels.py.txt",
+      "sha256": "e21f4e1342e803fad65b7f167c762c02a2fc1dbbd545485b1d9d1c5f111f5260",
+      "bytes": 1977,
+      "format": "historical Python source stored as non-executable text"
+    },
+    {
+      "campaign": "initial",
+      "source_path": ".scratch/time-campaign/gin_cuda_preflight.py",
+      "archived_path": "scripts/campaign_history/initial/gin_cuda_preflight.py.txt",
+      "sha256": "885bb6f2429e3ba51aa4bba9c6a525cd84cf7f03f4932cf9344cf3a1f6e27765",
+      "bytes": 4044,
+      "format": "historical Python source stored as non-executable text"
+    },
+    {
+      "campaign": "initial",
+      "source_path": ".scratch/time-campaign/integrate_campaign.py",
+      "archived_path": "scripts/campaign_history/initial/integrate_campaign.py.txt",
+      "sha256": "4c54899dab07327aa7fc67cae7b20418fb37dda9261a1b35b7b5d7767c299214",
+      "bytes": 4417,
+      "format": "historical Python source stored as non-executable text"
+    },
+    {
+      "campaign": "initial",
+      "source_path": ".scratch/time-campaign/m3_scale_rf.py",
+      "archived_path": "scripts/campaign_history/initial/m3_scale_rf.py.txt",
+      "sha256": "9ca59edb078829f7a083fec1ecab93b5788946cef3c015c394fd68005d66c77b",
+      "bytes": 5446,
+      "format": "historical Python source stored as non-executable text"
+    },
+    {
+      "campaign": "initial",
+      "source_path": ".scratch/time-campaign/run_gin_remote.py",
+      "archived_path": "scripts/campaign_history/initial/run_gin_remote.py.txt",
+      "sha256": "f3c4d3f623d76cac32a32765c5c50cbc6bcb6a7a113f9d96a7d3fa5f0d43fe80",
+      "bytes": 2106,
+      "format": "historical Python source stored as non-executable text"
+    },
+    {
+      "campaign": "herg_repair",
+      "source_path": ".scratch/review-repair/accept_repair.py",
+      "archived_path": "scripts/campaign_history/herg_repair/accept_repair.py.txt",
+      "sha256": "5c9816061538e76719ae54a6831753264bd85029a01205b87893122e2bc8e4dd",
+      "bytes": 3281,
+      "format": "historical Python source stored as non-executable text"
+    },
+    {
+      "campaign": "herg_repair",
+      "source_path": ".scratch/review-repair/collect_repair.py",
+      "archived_path": "scripts/campaign_history/herg_repair/collect_repair.py.txt",
+      "sha256": "aa3e11fd80fa28001cb8caaf1ed20339ae712b47a203318aebb06647756f1597",
+      "bytes": 3941,
+      "format": "historical Python source stored as non-executable text"
+    },
+    {
+      "campaign": "herg_repair",
+      "source_path": ".scratch/review-repair/finalize_analysis.py",
+      "archived_path": "scripts/campaign_history/herg_repair/finalize_analysis.py.txt",
+      "sha256": "5c2bab43773a04025bb99901f4dfbcbf72f5d07141c7c2cedcad854f1a7a2328",
+      "bytes": 574,
+      "format": "historical Python source stored as non-executable text"
+    },
+    {
+      "campaign": "herg_repair",
+      "source_path": ".scratch/review-repair/independent_data_audit.py",
+      "archived_path": "scripts/campaign_history/herg_repair/independent_data_audit.py.txt",
+      "sha256": "9e50cf948444ce3019734ed8eb799972b5428e0fe1a5cc2254157661800531c3",
+      "bytes": 6583,
+      "format": "historical Python source stored as non-executable text"
+    },
+    {
+      "campaign": "herg_repair",
+      "source_path": ".scratch/review-repair/integrate_repair.py",
+      "archived_path": "scripts/campaign_history/herg_repair/integrate_repair.py.txt",
+      "sha256": "c2ed835e9e5b0a745b28d314c51ea91c7b43d9ff70895261f65a7043c73fd0c4",
+      "bytes": 3874,
+      "format": "historical Python source stored as non-executable text"
+    },
+    {
+      "campaign": "herg_repair",
+      "source_path": ".scratch/review-repair/run_repair.py",
+      "archived_path": "scripts/campaign_history/herg_repair/run_repair.py.txt",
+      "sha256": "2bfc71348a82eebf3ef6f58b4139af4ffd3200d0538ff6fdbf143bd319dcc788",
+      "bytes": 1436,
+      "format": "historical Python source stored as non-executable text"
+    },
+    {
+      "campaign": "herg_repair",
+      "source_path": ".scratch/review-repair/update_results_docs.py",
+      "archived_path": "scripts/campaign_history/herg_repair/update_results_docs.py.txt",
+      "sha256": "3fc6866a55a1aadbcac79b1650bd55f711e6f88194b53ea49cdbb69c0466a6ac",
+      "bytes": 5282,
+      "format": "historical Python source stored as non-executable text"
+    },
+    {
+      "campaign": "herg_repair",
+      "source_path": ".scratch/review-repair/update_static_docs.py",
+      "archived_path": "scripts/campaign_history/herg_repair/update_static_docs.py.txt",
+      "sha256": "27e49cabb1fbb3d9c9565213864add5d18a10a56dc416dd39a6372c21cd3dd10",
+      "bytes": 4028,
+      "format": "historical Python source stored as non-executable text"
+    }
+  ],
+  "command_evidence": {
+    "interpretation": "The following worker argv templates are transcribed from archived supervisor code, not a reconstruction of all historical SSH/shell invocations. <python> denotes the recorded sys.executable. Do not replay the historical coordinator snapshots.",
+    "initial_gin": {
+      "source": "scripts/campaign_history/initial/run_gin_remote.py.txt",
+      "working_directory": "remote frozen bundle work directory",
+      "argv_templates": [
+        [
+          "<python>",
+          "scripts/run_time_campaign.py",
+          "--role",
+          "gin",
+          "--device",
+          "cuda",
+          "--execute",
+          "--tags",
+          "a2a",
+          "egfr_full",
+          "--seeds",
+          "42"
+        ],
+        [
+          "<python>",
+          "scripts/run_time_campaign.py",
+          "--role",
+          "gin",
+          "--device",
+          "cuda",
+          "--execute"
+        ]
+      ]
+    },
+    "herg_repair": {
+      "source": "scripts/campaign_history/herg_repair/run_repair.py.txt",
+      "working_directory": "remote frozen bundle work directory",
+      "argv_templates": [
+        [
+          "<python>",
+          "scripts/run_time_campaign.py",
+          "--role",
+          "rf",
+          "--tags",
+          "herg",
+          "--execute"
+        ],
+        [
+          "<python>",
+          "scripts/run_time_campaign.py",
+          "--role",
+          "gin",
+          "--tags",
+          "herg",
+          "--execute",
+          "--device",
+          "cuda"
+        ]
+      ]
+    }
+  },
+  "current_reaudit": {
+    "script": "scripts/audit_time_campaign.py",
+    "relationship_to_history": "New parameterized audit, created later; not the historical execution source.",
+    "commands": [
+      "python scripts/audit_time_campaign.py --root . --scope data --report audit-data.json",
+      "python scripts/audit_time_campaign.py --root . --scope full --report audit-full.json"
+    ],
+    "data_scope_non_git_inputs": [
+      "data/raw/document_years.csv",
+      "data/raw/{tag}_activities.csv for all 8 tags",
+      "data/processed/splits/{tag}_time.npz for all 8 tags"
+    ],
+    "full_scope_additional_non_git_inputs": [
+      "data/processed/{tag}_fingerprints.npz for all 8 tags",
+      "data/processed/{tag}_graphs.npz for all 8 tags",
+      "models/rf_time_split_{tag}.joblib for all 8 tags (current accepted versions, not old artifacts-v2 time models)"
+    ],
+    "tags": [
+      "a2a",
+      "abl1",
+      "egfr",
+      "egfr_full",
+      "herg",
+      "hivpr",
+      "mpro",
+      "vegfr2"
+    ],
+    "git_inputs": "Current tracked predictions, metrics, summaries, figures, acceptance/input manifests and GIN checkpoints; historical Git source commits identified by acceptance records must be locally available.",
+    "scope_limits": "Neither mode downloads data, trains models, loads checkpoint weights, or chooses new year cutoffs; data mode reports explicitly skipped model/cache hashes."
+  }
+}

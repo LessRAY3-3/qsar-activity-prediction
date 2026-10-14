@@ -1,0 +1,64 @@
+{
+  "status": "accepted",
+  "jobs": 128,
+  "paired_rows": 64,
+  "seeds": [
+    42,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7
+  ],
+  "identical_saved_test_prediction_pairs": 61,
+  "matching_rounded_log_prefixes": 64,
+  "common_flags": {
+    "control": 27,
+    "extended": 26
+  },
+  "mean_paired_deltas": {
+    "delta_train_mse": -0.006897738436236978,
+    "delta_valid_rmse_std": -0.0014578001573681814,
+    "delta_test_r2": -0.0005954392254352578
+  },
+  "mean_single_seed_test_r2": {
+    "control": 0.00733728520572184,
+    "extended": 0.006741845980286586
+  },
+  "changed_checkpoint_pairs": [
+    {
+      "tag": "hivpr",
+      "seed": 4,
+      "control_best_epoch": 51,
+      "extended_best_epoch": 90,
+      "delta_train_mse": -0.0564635097980499,
+      "delta_valid_rmse_std": -0.0100346803665161,
+      "delta_test_r2": 0.0181413292884826,
+      "delta_common_flag": 0
+    },
+    {
+      "tag": "hivpr",
+      "seed": 5,
+      "control_best_epoch": 5,
+      "extended_best_epoch": 42,
+      "delta_train_mse": -0.2774810642004013,
+      "delta_valid_rmse_std": -0.0767365097999572,
+      "delta_test_r2": -0.1028888225555419,
+      "delta_common_flag": -1
+    },
+    {
+      "tag": "hivpr",
+      "seed": 42,
+      "control_best_epoch": 44,
+      "extended_best_epoch": 84,
+      "delta_train_mse": -0.1075106859207153,
+      "delta_valid_rmse_std": -0.0065280199050903,
+      "delta_test_r2": 0.0466393828392028,
+      "delta_common_flag": 0
+    }
+  ],
+  "supplement_elapsed_seconds": 1113.540374,
+  "note": "All64 paired outcomes retained; test metrics secondary. This is only the CPU half. No universal improvement or convergence claim."
+}

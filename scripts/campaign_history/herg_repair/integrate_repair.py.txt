@@ -1,0 +1,47 @@
+from pathlib import Path
+from datetime import datetime,timezone
+import json,shutil,sys
+R=Path.cwd();B=R/'.scratch/review-repair';sys.path.insert(0,str(R/'scripts'))
+import run_time_campaign as w
+out=R/'results/time_split';a=json.loads((out/'campaign_acceptance.json').read_text())
+assert 'repair' not in a
+reports={role:json.loads((B/f'{role}_acceptance.json').read_text()) for role in ('rf','gin')}
+assert reports['rf']['jobs_accepted']==1 and reports['gin']['jobs_accepted']==3
+previous=out/'initial_campaign_acceptance.json';assert not previous.exists()
+shutil.copy2(out/'campaign_acceptance.json',previous)
+a['schema']='qsar-temporal-campaign-acceptance-v2'
+a['initial_source_commit']=a.pop('source_commit');a['source_commits']=[a['initial_source_commit'],'d13f9125af56028f60e099ec2e914dd2509c239e']
+a['initial_campaign_acceptance']='results/time_split/initial_campaign_acceptance.json'
+a['initial_independent_review']=a.pop('independent_review');a['initial_verification']=a.pop('verification')
+for key in ('rf_wall_seconds','gin_wall_seconds','remote_return_archive_sha256'):a['initial_'+key]=a.pop(key)
+oldjobs=[j for j in a['jobs'] if j['tag']=='herg'];a['jobs']=[j for j in a['jobs'] if j['tag']!='herg']
+for j in a['jobs']:j['input_manifest']=f"results/time_split/input_manifest_{j['role']}.json";j['source_commit']=a['initial_source_commit']
+for role,report in reports.items():
+    stage=Path(report['staged_work_directory'])
+    for row in report['jobs']:
+        for name,d in row['returned_artifact_sha256'].items():
+            src=stage/name;assert w.digest(src)==d
+            dst=R/name;dst.parent.mkdir(parents=True,exist_ok=True)
+            if 'metrics_' in name:
+                old=json.loads(dst.read_text());new=json.loads(src.read_text());keys={'time','best_params_time'} if role=='rf' else {'time'}
+                assert set(new)<=keys
+                merged={**old,**new};assert {k:v for k,v in old.items() if k not in keys}=={k:v for k,v in merged.items() if k not in keys}
+                w.atomic_json(dst,merged)
+            else:shutil.copy2(src,dst)
+        row['input_manifest']=f'results/time_split/input_manifest_{role}_repair.json';row['source_commit']=report['source_commit'];a['jobs'].append(row)
+    shutil.copy2(B/f'bundles/{role}/manifest.json',out/f'input_manifest_{role}_repair.json')
+    logs=R/'logs/time_asof_repair_20261014'/role;logs.mkdir(parents=True,exist_ok=True)
+    for name in ('launch.json','campaign_status.json','worker.log','return_manifest.json'):shutil.copy2(stage.parent/name,logs/name)
+    for d in (stage/'results/time_campaign').glob(f'{role}_*'):
+        dest=logs/d.name;shutil.copytree(d,dest)
+shutil.copy2(B/'frozen/data/processed/splits/herg_time.npz',R/'data/processed/splits/herg_time.npz')
+shutil.copy2(B/'figures/herg_timeline.png',R/'figures/time_split/herg_timeline.png')
+shutil.copy2(B/'split_comparison.json',out/'repair_split_comparison.json')
+a['repair']=dict(accepted_at=datetime.now(timezone.utc).isoformat(),reason='Preserve once-normalized cached parent key; recover CHEMBL2035183 (2012, 7200 nM) into hERG train',source_commit=a['source_commits'][1],jobs_replaced=4,jobs_retained=28,superseded_jobs=oldjobs,remote_return_archive_sha256={k:r['archive_sha256'] for k,r in reports.items()},wall_seconds={k:r['campaign_wall_seconds'] for k,r in reports.items()},split_comparison='results/time_split/repair_split_comparison.json')
+for f in a['integrated_files']:f['sha256']=w.digest(R/f['path'])
+a['accepted_at']=a['repair']['accepted_at']
+shutil.copy2(B/'independent_review.json',out/'repair_independent_review.json')
+a['repair']['independent_data_and_gin_review']='results/time_split/repair_independent_review.json'
+a['analysis']['source_commit']='0b4fb29'
+w.atomic_json(out/'campaign_acceptance.json',a)
+print('Integrated 4 repair jobs; preserved 28 jobs and all non-time metric entries')

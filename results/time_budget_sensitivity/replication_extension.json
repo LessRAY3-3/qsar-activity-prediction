@@ -1,0 +1,85 @@
+{
+  "schema": 1,
+  "decided_at": "2026-10-14T01:36:34.048420+00:00",
+  "reason": "User explicitly requested eight seeds per cell after the three-seed M3 pilot and before new matched CUDA runs",
+  "initial_design": "design.json",
+  "initial_seeds": [
+    42,
+    1,
+    2
+  ],
+  "added_seeds": [
+    3,
+    4,
+    5,
+    6,
+    7
+  ],
+  "final_seeds": [
+    42,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7
+  ],
+  "targets": 8,
+  "budgets": [
+    "control",
+    "extended"
+  ],
+  "environments": [
+    "M3 CPU",
+    "RTX 4070 CUDA"
+  ],
+  "jobs_per_cell": 64,
+  "planned_total_jobs": 256,
+  "m3_completed_pilot_jobs": 48,
+  "m3_additional_jobs": 80,
+  "cuda_pending_jobs": 128,
+  "status": "M3 full eight-seed cohort accepted; CUDA awaits user connection",
+  "fixed_training_source_commit": "90a470050367cebc4cd83dfe8d3f7fb37d53e6de",
+  "source_policy": "Frozen trainer, original worker, label loader, graph dataset, common helpers and data hashes must match pilot; new coordinator/wrapper source has separate provenance",
+  "selection_policy": "Retain all planned seeds; expansion is not conditional on test scores or desired rankings; do not replace published main results",
+  "reporting_policy": "Preserve original three-seed pilot and report the eight-seed complete cohort separately; this is a documented post-pilot design amendment, not an eight-seed preregistration",
+  "training_core_sha256": {
+    "scripts/gnn_03_train_gin.py": "da5d897e71efab75cc30c8f805198ece1e43bb435fffc1652fbef951f5f95c3c",
+    "scripts/gnn_graph_dataset.py": "e004eefea627c97f379dcded339843bdd3318c790ff390a58ba6da7c883a1fea",
+    "scripts/qsar_common.py": "86be4f6672aab3a9564a8e0c7e2213f0cab870154f2ea9b68b13b32c41bb250c",
+    "scripts/run_time_campaign.py": "7189b12aae439122c2bdf7c62ff13e5ad85c255ced267812f0326038a3cdfaef",
+    "scripts/time_labels.py": "6c88a8a3cede0bf10d69edcbb8d51bc5f004d85293bd34e0a6ccfc659361d9ca"
+  },
+  "input_sha256": {
+    "data/processed/a2a_graphs.npz": "16f91508a395a6150b9f1369c7347fee56e53d857fd863ee4b25650ad6451e73",
+    "data/processed/splits/a2a_time.npz": "5a28451cf757e4f547197bf7ae45701c496917e11cf07a699287fa7f7932eecd",
+    "data/processed/egfr_graphs.npz": "8490a7da9249e6bec71f3389580513e1356bc85240f86565f46c478594f33a2d",
+    "data/processed/splits/egfr_time.npz": "47d2d02eac0f9faac7024f34f722602ce40c19db36726353aa81a6b13b4aa966",
+    "data/processed/egfr_full_graphs.npz": "6789bf07e2066ec38b3e517ee02fd683212f88f10dd1ff124d820f925f9664a8",
+    "data/processed/splits/egfr_full_time.npz": "fdcd58f8ea2a2e83a2529160581202a6295f073dfa0bb6560a10dd4eb4a4f993",
+    "data/processed/hivpr_graphs.npz": "c765ebe2a90e70f70a6a16649ee42209ec2fc3746f8bb74861f4d0ffb574ea36",
+    "data/processed/splits/hivpr_time.npz": "57f292a4333ae6a94922236d0ec5e183dd46fb438ba0db0c942eaf503f928455",
+    "data/processed/herg_graphs.npz": "0d060f03d6852fab51c27444f9655c9c50111bb43899ea3fff7a8a932ef7458f",
+    "data/processed/splits/herg_time.npz": "90933252420671d709bdf0de5e4782e6f8351dfe0fb96977c9ee143fcb370647",
+    "data/processed/mpro_graphs.npz": "b842e69be1f22ea3e5f3970f66c40b76f300a4a662585fafc27e912744092d8f",
+    "data/processed/splits/mpro_time.npz": "a04f76855f5e0114854af278c7c86d26abe6b4d96acf691fbb49b9869267419f",
+    "data/processed/abl1_graphs.npz": "b1cf65db6aa62b1ae3c43de1eece05bf4003140f8718b1e26f25c1c9e1c750b4",
+    "data/processed/splits/abl1_time.npz": "7d5bc03ae5ac43bf776df73f11223069b6d574cde84f0633e5cf18d9e9c9ed62",
+    "data/processed/splits/vegfr2_time.npz": "7cd41dc7b53d23150416536830f6cdeb7b8160233620727162ef0b9e20751653",
+    "data/processed/vegfr2_graphs.npz": "50213134224178d8b2da350f5748b0da90aa52d1ea694c1d9fe7f9f9cdd9ffe9"
+  },
+  "preflight": {
+    "pytest_passed": 468,
+    "pytest_warnings": 3,
+    "ruff": "passed",
+    "diff_check": "passed",
+    "m3_pip_freeze_matches_pilot": true,
+    "training_core_and_all_inputs_match_pilot": true
+  },
+  "supplement_source_commit": "85210630c475e8733089a476b8d5bf4852dbf773",
+  "supplement_launch": "m3_extension/launch.json",
+  "m3_total_jobs_accepted": 128,
+  "m3_supplement_jobs_accepted": 80,
+  "m3_acceptance": "m3_eight_seed/acceptance.json"
+}

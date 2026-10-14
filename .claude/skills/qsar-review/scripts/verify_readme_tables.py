@@ -5,6 +5,7 @@ compare cell-by-cell; exit non-zero when any cell mismatches.
 Tables covered:
   T1 : eight-target panel   -- metrics_{tag}.json + gnn_metrics_{tag}[_seed1|_seed2].json
                                    + significance/summary.csv (mean3 rows)
+                                   + recomputed seed-deletion conditional column
   T2 : time split           -- time_split/summary.csv; delta/CI from
                                    significance/summary_time.csv (mean3 rows);
                                    GIN ens recomputed from gnn_preds_{tag}_time*.npz
@@ -18,6 +19,7 @@ Tables covered:
   T8 : fairness campaign    -- fairness/summary_{vegfr2,herg,abl1}.json
                                    (RF row cross-checked against metrics_{tag}.json;
                                     GINE rows verified from the same file)
+  T10: CPU/CUDA four cells -- accepted budget reports + independent diagnostics aggregation
   T9 : dataset sizes        -- row counts of data/processed/{tag}_pic50_clean.csv
 
 Known limitations (not machine-checked here):
@@ -40,6 +42,7 @@ Usage:
 """
 import argparse
 import csv
+import importlib.util
 import json
 import os
 import re
@@ -193,7 +196,7 @@ def check_t2():
         if r["pair"] == "mean3":
             st_rows[r["tag"]] = r
 
-    t2 = find_table("| Tag | RF rand | GIN rand | RF time | GIN time | GIN ens |")
+    t2 = find_table("| Tag | RF rand | GIN rand | Constant | RF time | GIN time | GIN ens |")
     assert len(t2) == 8, len(t2)
     for row in t2:
         tag = row[0].strip("`")
@@ -202,20 +205,21 @@ def check_t2():
         add("T2", f"{tag}/RF_rand", num(row[1]), float(s["rf_random_r2"]))
         add("T2", f"{tag}/GIN_rand_mean", num(row[2]),
             float(s["gin_random_r2_mean"]))
-        add("T2", f"{tag}/RF_time", num(row[3]), float(s["rf_time_r2"]))
-        d_mean, d_std = split_pm(row[4])
+        add("T2", f"{tag}/constant", num(row[3]), float(s["constant_r2"]))
+        add("T2", f"{tag}/RF_time", num(row[4]), float(s["rf_time_r2"]))
+        d_mean, d_std = split_pm(row[5])
         add("T2", f"{tag}/GIN_time_mean", d_mean, float(s["gin_time_r2_mean"]))
         add("T2", f"{tag}/GIN_time_std", d_std, float(s["gin_time_r2_std"]))
-        add("T2", f"{tag}/GIN_ens", num(row[5]), gin_ens_time(tag))
-        delta_disp = row[6].replace("**", "")
+        add("T2", f"{tag}/GIN_ens", num(row[6]), gin_ens_time(tag))
+        delta_disp = row[7].replace("**", "")
         add("T2", f"{tag}/delta", num(delta_disp), float(st["d_r2"]))
         # delta consistency: ens - rf_time
         add("T2", f"{tag}/delta_vs_ens-rf", float(st["d_r2"]),
             gin_ens_time(tag) - float(s["rf_time_r2"]))
-        bold = "**" in row[6]
+        bold = "**" in row[7]
         ci_sig = st["significant"] == "True"
         add("T2", f"{tag}/bold==sig", bold, ci_sig, ok=bold == ci_sig)
-        m = re.match(r"\[(.+?), (.+?)\]", row[7].replace("**", ""))
+        m = re.match(r"\[(.+?), (.+?)\]", row[8].replace("**", ""))
         add("T2", f"{tag}/ci_lo", num(m.group(1)), float(st["ci_lo"]))
         add("T2", f"{tag}/ci_hi", num(m.group(2)), float(st["ci_hi"]))
 
@@ -365,6 +369,80 @@ def check_t9():
         add("T9", f"{tag}/n", num(row[3].replace(",", "")), n)
 
 
+
+def check_conditional_column():
+    """Recompute the GIN table's seed-sensitivity labels, not a prose-log lookup."""
+    path = os.path.join(os.path.dirname(__file__), "single_seed_verdicts.py")
+    spec = importlib.util.spec_from_file_location("review_seed_verdicts", path)
+    seed_check = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(seed_check)
+    bootstrap = seed_check.bootstrap_module(BASE)
+    rows = find_table("| Tag | Target (ChEMBL id) | Family | n | RF rand | GIN rand |")
+    for row in rows:
+        tag = row[0].strip("`")
+        conditional = [short for split, short in (("random", "rand"), ("scaffold", "scaf"))
+                       if seed_check.cell_sensitivity(BASE, tag, split,
+                                                      bootstrap=bootstrap)["conditional"]]
+        expected = "+".join(conditional) or "—"
+        displayed = row[12].strip()
+        add("T1_conditional", tag, displayed, expected, ok=displayed == expected)
+
+
+def check_environment_table():
+    """Verify the optional four-cell table directly from audited job diagnostics.
+
+    Reuse the report loader's identity/integrity/coverage contract, but calculate
+    the five numeric columns independently; cells.csv is never an input. An
+    absent table contributes no checks, while a present table without accepted
+    CPU and CUDA reports fails rather than claiming that twenty cells passed.
+    """
+    header = "| Environment | Budget | Jobs | Train MSE | Validation RMSE | Test R² | Flags |"
+    if not any(line.startswith("|") and header in line for line in lines):
+        print("T10: four-cell environment table not present; no checks performed")
+        return
+    rows = find_table(header)
+    expected_cells = {(device, budget) for device in ("CPU", "CUDA")
+                      for budget in ("original", "extended")}
+    if (len(rows) != 4 or any(len(row) != 7 for row in rows)
+            or {(row[0], row[1]) for row in rows} != expected_cells):
+        raise ValueError("T10: expected exactly CPU/CUDA x original/extended rows")
+    # Resolve the implementation beside this published skill, not from an
+    # alternate BASE used to inspect a candidate repository's input files.
+    repository = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..", ".."))
+    path = os.path.join(repository, "experiments", "time_environment_comparison.py")
+    spec = importlib.util.spec_from_file_location("readme_environment_loader", path)
+    comparator = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(comparator)
+    loaded = {}
+    metadata = {}
+    for device, directory in (("CPU", "m3_eight_seed"), ("CUDA", "cuda_eight_seed")):
+        root = os.path.join(BASE, "results", "time_budget_sensitivity", directory, "analysis")
+        metadata[device], loaded[device] = comparator.load_report(root, device.lower())
+    for field in ("source_sha256", "input_sha256"):
+        if metadata["CPU"]["provenance"][field] != metadata["CUDA"]["provenance"][field]:
+            raise ValueError(f"T10: CPU/CUDA {field} differs")
+    for tag in TAGS:
+        labels = [frame.loc[frame.tag.eq(tag), "label_id"].iloc[0]
+                  for frame in loaded.values()]
+        if labels[0] != labels[1]:
+            raise ValueError(f"T10: CPU/CUDA {tag} label versions differ")
+    computed = []
+    for row in rows:
+        device, budget = row[:2]
+        arm = "control" if budget == "original" else "extended"
+        frame = loaded[device]
+        selected = frame.loc[frame.arm.eq(arm)]
+        values = (len(selected), float(np.mean(selected.train_mse.to_numpy(dtype=float))),
+                  float(np.mean(selected.valid_rmse_std.to_numpy(dtype=float))),
+                  float(np.mean(selected.test_r2.to_numpy(dtype=float))),
+                  int(np.count_nonzero(selected.common_flag.to_numpy(dtype=bool))))
+        for field, displayed, value in zip(("jobs", "train_mse", "valid_rmse_std", "test_r2", "flags"),
+                                           row[2:], values):
+            computed.append((f"{device}/{budget}/{field}", num(displayed), value))
+    for cell, displayed, value in computed:
+        add("T10_environment", cell, displayed, value)
+
+
 def run_checks():
     check_t1()
     check_t2()
@@ -375,6 +453,8 @@ def run_checks():
     check_t7()
     check_t8()
     check_t9()
+    check_conditional_column()
+    check_environment_table()
 
 
 def parse_args(argv=None):

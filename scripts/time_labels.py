@@ -1,4 +1,10 @@
-"""Versioned as-of labels shared by the temporal RF and GNN consumers."""
+"""Versioned labels and unkeyed integrity checks shared by temporal consumers.
+
+Neither the historical label ID nor the additional full-payload SHA256 provides
+source authentication. Historical IDs deliberately keep their original algorithm
+(they omit scaffold_smiles); frozen-package file hashes protect those old files.
+Newly generated splits add a versioned full-payload digest without changing IDs.
+"""
 import hashlib
 import json
 from pathlib import Path
@@ -6,6 +12,7 @@ from pathlib import Path
 import numpy as np
 
 LABEL_POLICY = "exact-dated-asof-v1"
+INTEGRITY_SCHEMA = "qsar-time-split-integrity-v1"
 
 
 def dataset_signature(smiles, y):
@@ -15,6 +22,7 @@ def dataset_signature(smiles, y):
 
 
 def label_signature(split):
+    """Historical label ID; deliberately unchanged for accepted archived runs."""
     h = hashlib.sha256()
     for key in ("label_policy", "dataset_signature", "source_sha256",
                 "cutoff_valid", "cutoff_test"):
@@ -27,6 +35,41 @@ def label_signature(split):
     h.update(json.dumps(np.asarray(split["smiles"], str).tolist()).encode())
     h.update(np.asarray(split["year"], dtype="<f4").tobytes())
     return h.hexdigest()
+
+
+
+def split_integrity_digest(split):
+    """Hash every payload field, including scaffold metadata, except this digest.
+
+    This is an additional unkeyed corruption check, not an authenticity claim.
+    Array dtype and shape are framed with JSON; strings and numeric bytes are
+    represented deterministically. The legacy label_signature stays unchanged.
+    """
+    digest = hashlib.sha256()
+    for key in sorted(set(split) - {"integrity_sha256"}):
+        array = np.asarray(split[key])
+        if array.dtype.hasobject:
+            raise ValueError(f"object array cannot be integrity-hashed: {key}")
+        header = json.dumps([key, array.dtype.str, list(array.shape)], separators=(",", ":"))
+        digest.update(header.encode() + b"\0")
+        digest.update(array.tobytes(order="C"))
+        digest.update(b"\0")
+    return digest.hexdigest()
+
+
+def validate_split_integrity(split):
+    fields = {"integrity_schema", "integrity_sha256"}
+    present = fields.intersection(split)
+    if not present:
+        # Historical files retain their original label IDs and byte content;
+        # package SHA256s cover their complete payload, including scaffolds.
+        return
+    if present != fields or str(split["integrity_schema"]) != INTEGRITY_SCHEMA:
+        raise ValueError("unsupported or incomplete time split integrity schema")
+    if "scaffold_smiles" not in split or np.asarray(split["scaffold_smiles"]).shape != np.asarray(split["smiles"]).shape:
+        raise ValueError("time split integrity requires one scaffold per molecule")
+    if str(split["integrity_sha256"]) != split_integrity_digest(split):
+        raise ValueError("time split full-payload integrity mismatch")
 
 
 def load_time_split(split_dir, tag, smiles=None, original_y=None):
@@ -58,6 +101,7 @@ def load_time_split(split_dir, tag, smiles=None, original_y=None):
         raise ValueError("time split source dataset signature mismatch")
     if str(sp.get("label_id", "")) != label_signature(sp):
         raise ValueError("time label signature mismatch; regenerate the split")
+    validate_split_integrity(sp)
     y = sp["y"]
     parts = [sp[k] for k in ("train_idx", "valid_idx", "test_idx", "excluded_idx")]
     if any(idx.ndim != 1 for idx in parts):

@@ -1,0 +1,48 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+_________ test_real_fitted_rf_is_checked_and_wrong_generation_rejected _________
+
+trained_campaign = (<module 'qsar_under_test_run_time_campaign' from '/private/var/folders/60/f144lgn97zg1y9wcvg2v5thh0000gn/T/qsar-tooli...role': 'gin', 'tag': 'a2a', 'label_id': '4a2bdd25e994bd195caf37180ef17a144d75646ff471534ce058398baf6adc27', ...}, ...})
+tmp_path = PosixPath('/private/var/folders/60/f144lgn97zg1y9wcvg2v5thh0000gn/T/pytest-of-lessray/pytest-49/test_real_fitted_rf_is_checked0')
+
+    def test_real_fitted_rf_is_checked_and_wrong_generation_rejected(trained_campaign, tmp_path):
+        worker, _, _, gin_job = trained_campaign
+        split = gin_job["split"]
+        label = str(split["label_id"])
+        x = np.arange(12, dtype=float).reshape(6, 2)
+        pool = np.r_[split["train_idx"], split["valid_idx"]]
+        model = RandomForestRegressor(n_estimators=3, random_state=42).fit(x[pool], split["y"][pool])
+        model.time_label_id_ = label
+        y = split["y"][split["test_idx"]]
+        pred = model.predict(x[split["test_idx"]])
+        (tmp_path / "results").mkdir()
+        (tmp_path / "models").mkdir()
+        files = ["models/rf_time_split_a2a.joblib", "results/rf_preds_a2a_time.npz", "results/metrics_a2a.json"]
+        job = {"files": files, "split": split,
+               "provenance": {"role": "rf", "tag": "a2a", "label_id": label,
+                              "hyperparameters": {"seed": 42, "device": "cpu"}}}
+        np.savez(tmp_path / files[1], y_true=y, y_pred=pred, test_idx=split["test_idx"], label_id=label)
+        (tmp_path / files[2]).write_text(json.dumps({"best_params_time": model.get_params(), "time": {
+            "label_id": label, "runtime": {"seed": 42}, "r2": r2_score(y, pred),
+            "rmse": float(np.sqrt(mean_squared_error(y, pred))), "mae": mean_absolute_error(y, pred)}}))
+        joblib.dump(model, tmp_path / files[0])
+        worker.validate_outputs(job, tmp_path)
+        model.time_label_id_ = "wrong-generation"
+        joblib.dump(model, tmp_path / files[0])
+>       with pytest.raises(ValueError, match="label_id"):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+tests/test_time_campaign_real.py:143: Failed
+---------------------------- Captured stdout setup -----------------------------
+DONE gin_a2a_seed42 (2.7s)
+SKIP verified gin_a2a_seed42
+=============================== warnings summary ===============================
+../../../../../../../Users/lessray/Desktop/kimi code/qsar-activity-prediction/.venv/lib/python3.12/site-packages/torch/jit/_script.py:1491
+  /Users/lessray/Desktop/kimi code/qsar-activity-prediction/.venv/lib/python3.12/site-packages/torch/jit/_script.py:1491: FutureWarning: `torch.jit.script` is deprecated. Please switch to `torch.compile` or `torch.export`.
+    warnings.warn(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/test_time_campaign_real.py::test_real_fitted_rf_is_checked_and_wrong_generation_rejected
+1 failed, 1 warning in 5.43s

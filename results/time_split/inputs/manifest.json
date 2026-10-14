@@ -1,0 +1,59 @@
+{
+  "schema": "qsar-time-analysis-inputs-v1",
+  "label_policy": "exact-dated-asof-v1",
+  "archive": {
+    "name": "splits.tar.gz",
+    "size": 1415829,
+    "sha256": "301d8e634ffd15feab6e92adaa5dc622900604faf1ebe78919568685670f686e"
+  },
+  "files": [
+    {
+      "name": "a2a_time.npz",
+      "size": 1108384,
+      "sha256": "5a28451cf757e4f547197bf7ae45701c496917e11cf07a699287fa7f7932eecd",
+      "label_id": "b35580bb601adf4fb9e604dee3dd0f8989d11ebd4f14eaafc3e25a4e40f44b5b"
+    },
+    {
+      "name": "abl1_time.npz",
+      "size": 3684976,
+      "sha256": "7d5bc03ae5ac43bf776df73f11223069b6d574cde84f0633e5cf18d9e9c9ed62",
+      "label_id": "999bd88ee0bf093ad765dd8c7769f26756c3f4a47935e0de22391af8feb6e7c3"
+    },
+    {
+      "name": "egfr_time.npz",
+      "size": 6698736,
+      "sha256": "47d2d02eac0f9faac7024f34f722602ce40c19db36726353aa81a6b13b4aa966",
+      "label_id": "b181f531e8ac9454c8ce55a1669a28259e7d3aa65852a74ce38eac44be846761"
+    },
+    {
+      "name": "egfr_full_time.npz",
+      "size": 17085224,
+      "sha256": "fdcd58f8ea2a2e83a2529160581202a6295f073dfa0bb6560a10dd4eb4a4f993",
+      "label_id": "09e7659309a88d077bdad0001daf441245aa9b9f88573d2cf755cd8697b3680b"
+    },
+    {
+      "name": "herg_time.npz",
+      "size": 29381544,
+      "sha256": "90933252420671d709bdf0de5e4782e6f8351dfe0fb96977c9ee143fcb370647",
+      "label_id": "369e86d94fe32622d959806abc5379f5487ab2f63282a4642af6c5003c628e93"
+    },
+    {
+      "name": "hivpr_time.npz",
+      "size": 4430216,
+      "sha256": "57f292a4333ae6a94922236d0ec5e183dd46fb438ba0db0c942eaf503f928455",
+      "label_id": "66a8a839e6cff2f4d7b9664c286fd8d2b716b784faab4aa60d7bf5e74d94eec6"
+    },
+    {
+      "name": "mpro_time.npz",
+      "size": 7274776,
+      "sha256": "a04f76855f5e0114854af278c7c86d26abe6b4d96acf691fbb49b9869267419f",
+      "label_id": "75bb580c77d0dbe64c7aed1178c0dbc2505f44f3c3c91cc0344a95e8c305c17c"
+    },
+    {
+      "name": "vegfr2_time.npz",
+      "size": 16744904,
+      "sha256": "7cd41dc7b53d23150416536830f6cdeb7b8160233620727162ef0b9e20751653",
+      "label_id": "0257d96ee9bd87e1664b7ac0bfb946a556acdd78ef5389fbb62256c0462beb78"
+    }
+  ]
+}

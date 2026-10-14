@@ -1,0 +1,119 @@
+"""One-time handoff: preserve hERG, then continue pending RF jobs at 16 CV workers."""
+import argparse
+from datetime import datetime, timezone
+import json
+import os
+from pathlib import Path
+import signal
+import subprocess
+import sys
+import time
+
+ROOT = Path('/Users/leisirui/qsar-campaigns/time-asof-20261013-7ce15c1-rf')
+WORK = ROOT / 'work'
+GROUP = 99851
+WORKER = 99853
+TAGS = ('a2a', 'egfr_full', 'abl1', 'egfr', 'herg', 'hivpr', 'mpro', 'vegfr2')
+STATUS = ROOT / 'scale16_status.json'
+
+
+def save(state, **details):
+    value = dict(state=state, updated_at=datetime.now(timezone.utc).isoformat(), **details)
+    temporary = STATUS.with_suffix('.tmp')
+    temporary.write_text(json.dumps(value, indent=2) + '\n')
+    temporary.replace(STATUS)
+
+
+def states():
+    result = {}
+    for tag in TAGS:
+        path = WORK / f'results/time_campaign/rf_{tag}_seed42/status.json'
+        result[tag] = json.loads(path.read_text()) if path.exists() else {}
+    return result
+
+
+def group_processes():
+    rows = subprocess.check_output(['ps', '-axo', 'pid,pgid,state,command'], text=True).splitlines()[1:]
+    return [row for row in rows if len(row.split()) >= 4 and row.split()[1] == str(GROUP) and not row.split()[2].startswith('Z')]
+
+
+def execute():
+    save('waiting_for_herg', old_rf_jobs=4, new_rf_jobs=16)
+    while True:
+        current = states()
+        if current['herg'].get('state') == 'success':
+            break
+        if current['herg'].get('state') == 'failed':
+            raise RuntimeError('hERG failed; no automatic handoff')
+        if not group_processes():
+            raise RuntimeError('Original worker stopped before hERG succeeded')
+        time.sleep(0.2)
+    pending = [tag for tag in TAGS if current[tag].get('state') != 'success']
+    if not pending:
+        save('already_complete', completed=list(TAGS))
+        return
+    # Verify identity and working directory before signaling this campaign only.
+    members = group_processes()
+    if members:
+        worker = [row for row in members if row.split()[0] == str(WORKER)]
+        if not worker or 'scripts/run_time_campaign.py --role rf --execute' not in worker[0]:
+            raise RuntimeError('Original worker identity changed; refusing to signal')
+        cwd = subprocess.check_output(['/usr/sbin/lsof', '-a', '-p', str(WORKER), '-d', 'cwd', '-Fn'], text=True)
+        if 'n' + str(WORK) not in cwd.splitlines():
+            raise RuntimeError('Original worker cwd differs; refusing to signal')
+        save('stopping_old_queue', pending=pending)
+        os.killpg(GROUP, signal.SIGINT)
+        deadline = time.monotonic() + 45
+        while group_processes():
+            if time.monotonic() > deadline:
+                raise RuntimeError('Original process group did not stop; no duplicate launch')
+            time.sleep(0.25)
+    current = states()
+    if current['herg'].get('state') != 'success':
+        raise RuntimeError('hERG completion record changed')
+    lock = WORK / '.time_campaign_rf.lock'
+    if lock.exists():
+        owner = json.loads(lock.read_text())
+        if owner.get('pid') != WORKER:
+            raise RuntimeError('Unexpected lock owner; refusing removal')
+        if subprocess.run(['ps', '-p', str(WORKER)], stdout=subprocess.DEVNULL).returncode == 0:
+            raise RuntimeError('Lock owner still alive')
+        lock.unlink()
+    pending = [tag for tag in TAGS if current[tag].get('state') != 'success']
+    if not pending:
+        save('already_complete', completed=list(TAGS))
+        return
+    env = os.environ.copy()
+    env.update(QSAR_RF_JOBS='16', QSAR_CV_BACKEND='loky', OMP_NUM_THREADS='1',
+               MKL_NUM_THREADS='1', OPENBLAS_NUM_THREADS='1', VECLIB_MAXIMUM_THREADS='1',
+               NUMEXPR_NUM_THREADS='1', PYTHONDONTWRITEBYTECODE='1', PYTHONUNBUFFERED='1',
+               MPLCONFIGDIR=str(ROOT / 'mplcache'))
+    command = ['/usr/bin/caffeinate', '-ims', '/usr/bin/time', '-l', str(ROOT / '.venv/bin/python'),
+               'scripts/run_time_campaign.py', '--role', 'rf', '--tags', *pending, '--execute', '--rerun']
+    receipt = ROOT / 'launch16.json'
+    if receipt.exists():
+        raise RuntimeError('16-worker launch already recorded; refusing duplicate')
+    with (ROOT / 'logs/worker16.log').open('x') as log:
+        process = subprocess.Popen(command, cwd=WORK, env=env, stdin=subprocess.DEVNULL,
+                                   stdout=log, stderr=subprocess.STDOUT, start_new_session=True)
+    info = dict(started_at=datetime.now(timezone.utc).isoformat(), pid=process.pid, command=command,
+                rf_jobs=16, tags=pending, preserved=[tag for tag in TAGS if tag not in pending],
+                reason='User requested full CPU use; outer CV concurrency only, same source/data/model settings')
+    receipt.write_text(json.dumps(info, indent=2) + '\n')
+    save('launched_16', **info)
+
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--execute', action='store_true')
+    args = parser.parse_args()
+    if not args.execute:
+        print(json.dumps({'mode': 'dry-run', 'states': {tag: state.get('state', 'queued') for tag, state in states().items()}, 'new_rf_jobs': 16}))
+        sys.exit(0)
+    if STATUS.exists():
+        raise RuntimeError('Handoff status already exists; inspect before retrying')
+    try:
+        execute()
+    except BaseException as exc:
+        save('failed', error=f'{type(exc).__name__}: {exc}')
+        raise

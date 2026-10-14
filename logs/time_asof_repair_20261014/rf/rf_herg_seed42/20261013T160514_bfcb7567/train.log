@@ -1,0 +1,9 @@
+Matplotlib is building the font cache; this may take a moment.
+Target: Voltage-gated inwardly rectifying potassium channel KCNH2 | Feature matrix: X=(8403, 2048), y range [0.02, 9.85]
+
+=== time split: train=4944, test=2325 ===
+Fitting 5 folds for each of 12 candidates, totalling 60 fits
+Best params: {'max_depth': None, 'min_samples_split': 2, 'n_estimators': 500}  (CV R2 = 0.543)
+[time]  R2 = -0.056   RMSE = 0.976   MAE = 0.698
+
+Metrics merged -> /Users/leisirui/qsar-campaigns/time-asof-repair-d13f912-rf/work/results/time_campaign/rf_herg_seed42/20261013T160514_bfcb7567/work/results/metrics_herg.json

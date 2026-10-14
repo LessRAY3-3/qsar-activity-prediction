@@ -1,4 +1,4 @@
-"""P8 time-split final summary: 3-split table + collapse panel (analysis only).
+"""P8 time-split final summary: 3-split table + comparison panel (analysis only).
 
 Question: with all 8 targets now trained on the publication-year split, how
 does time-split performance compare with the random/scaffold campaign
@@ -8,8 +8,8 @@ artifact that already exists on disk.
 
 Inputs (per tag):
   data/processed/splits/{tag}_time.npz               sizes + test years
-  data/processed/{tag}_fingerprints.npz              y for the constant
-                                                     (no-skill) baseline
+  data/processed/{tag}_fingerprints.npz              legacy baseline only;
+                                                     as-of baseline uses split y
   results/metrics_{tag}.json                         RF "time" r2/rmse
   results/gnn_metrics_{tag}{,_seed1,_seed2}.json     GIN "time" r2 +
                                                      best_epoch (3 seeds)
@@ -18,13 +18,13 @@ Inputs (per tag):
 
 Outputs:
   results/time_split/summary.csv           one row per tag; test_frac is
-                                           reported as-is (a2a 0.62 and
+                                           reported as-is (a2a 0.59 and
                                            mpro 0.51 exceed 0.5 because the
                                            test set cumulates the newest
                                            years to reach ~20%);
                                            constant_r2 is the test R2 of
-                                           predicting the mean pIC50 of all
-                                           non-test rows, gin_best_epochs
+                                           predicting mean training pIC50
+                                           (legacy: all non-test rows), gin_best_epochs
                                            the comma-joined time-split
                                            early-stop epochs of the 3 GIN
                                            seeds (N4)
@@ -110,20 +110,26 @@ def gin_time_r2(tag):
 
 
 def constant_r2(tag):
-    """Test R2 of the no-skill baseline (N4): predict the mean pIC50 of
-    every non-test row (train+valid) for all test rows."""
-    y = np.asarray(np.load(os.path.join(BASE, "data", "processed",
-                                        f"{tag}_fingerprints.npz"))["y"],
-                   dtype=np.float64)
+    """Test R2 of a constant fitted on training labels only for as-of runs.
+
+    Legacy all-year results retain their original non-test (train+valid)
+    pool solely for historical reproduction.
+    """
     sp = np.load(os.path.join(BASE, "data", "processed", "splits",
                               f"{tag}_time.npz"))
     test = np.asarray(sp["test_idx"])
-    if len(y) != len(sp["year"]):
-        raise ValueError(f"{tag}: y and split index spaces differ")
     if "label_policy" in sp:
+        sp = load_time_split(os.path.join(BASE, "data", "processed", "splits"), tag)
+        if sp is None:
+            raise ValueError(f"{tag}: time split is NA")
         y = np.asarray(sp["y"], dtype=np.float64)
-        pool = np.concatenate([sp["train_idx"], sp["valid_idx"]])
+        pool = sp["train_idx"]
     else:
+        y = np.asarray(np.load(os.path.join(BASE, "data", "processed",
+                                            f"{tag}_fingerprints.npz"))["y"],
+                       dtype=np.float64)
+        if len(y) != len(sp["year"]):
+            raise ValueError(f"{tag}: y and split index spaces differ")
         pool = np.ones(len(y), dtype=bool)
         pool[test] = False
     yt = y[test]
@@ -267,8 +273,10 @@ def make_panel(df, fig_path):
     fig.legend(handles=handles, loc="lower center", ncol=3, fontsize=9,
                frameon=False, title="bar shade / position (hue = panel model)",
                title_fontsize=8)
-    fig.suptitle("Time-split collapse: test R² under random, scaffold and "
-                 "time splits (8 targets)", fontsize=12)
+    fig.suptitle("Test R² across label/split protocols: random, scaffold and "
+                 "time splits (8 targets)\n"
+                 "Random/scaffold: all-year labels; time: as-of labels — not a split-only contrast",
+                 fontsize=10)
     fig.tight_layout(rect=(0, 0.08, 1, 0.95))
     fig.savefig(fig_path, dpi=150)
     plt.close(fig)
@@ -277,7 +285,7 @@ def make_panel(df, fig_path):
 # ---------------------------------------------------------------- report
 
 def print_conclusion(df):
-    """Console verdict: collapse magnitude, sign flips, CI tally, caveats."""
+    """Console verdict: protocol differences, sign flips, CI tally, caveats."""
     print("\n=== P8 time-split final summary (8 targets) ===")
     print("  RF  time R² range : "
           f"[{df['rf_time_r2'].min():+.3f}, {df['rf_time_r2'].max():+.3f}]")
@@ -288,8 +296,10 @@ def print_conclusion(df):
     df = df.copy()
     df["rf_drop"] = df["rf_time_r2"] - df["rf_random_r2"]
     df["gin_drop"] = df["gin_time_r2_mean"] - df["gin_random_r2_mean"]
-    print(f"  mean ΔR² (time − random): RF {df['rf_drop'].mean():+.3f}, "
+    print(f"  descriptive protocol ΔR² (time − random): RF {df['rf_drop'].mean():+.3f}, "
           f"GIN {df['gin_drop'].mean():+.3f}")
+    print("  caveat: random/scaffold use all-year labels; time uses as-of labels. "
+          "This contrast does not isolate splitting or temporal drift.")
     rf_neg = df.loc[df["rf_time_r2"] < 0, "tag"].tolist()
     gin_neg = df.loc[df["gin_time_r2_mean"] < 0, "tag"].tolist()
     print(f"  negative time R²: RF {rf_neg or 'none'}; GIN {gin_neg or 'none'}")

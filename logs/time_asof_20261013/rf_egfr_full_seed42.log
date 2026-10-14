@@ -1,0 +1,8 @@
+Target: Epidermal growth factor receptor | Feature matrix: X=(10729, 2048), y range [1.60, 17.30]
+
+=== time split: train=6848, test=3043 ===
+Fitting 5 folds for each of 12 candidates, totalling 60 fits
+Best params: {'max_depth': None, 'min_samples_split': 2, 'n_estimators': 500}  (CV R2 = 0.734)
+[time]  R2 = -0.753   RMSE = 1.585   MAE = 1.345
+
+Metrics merged -> <RF_CAMPAIGN>/work/results/metrics_egfr_full.json

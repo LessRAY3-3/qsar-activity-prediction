@@ -1,0 +1,75 @@
+{
+  "mode": "execute",
+  "jobs": [
+    {
+      "id": "rf_herg_seed42",
+      "command": [
+        "/Users/leisirui/qsar-campaigns/time-asof-20261013-7ce15c1-rf/.venv/bin/python",
+        "scripts/04_train_and_evaluate.py",
+        "--split",
+        "time"
+      ],
+      "files": [
+        "models/rf_time_split_herg.joblib",
+        "results/rf_preds_herg_time.npz",
+        "results/metrics_herg.json",
+        "figures/pred_vs_actual_time_herg.png"
+      ],
+      "provenance": {
+        "schema": 1,
+        "role": "rf",
+        "tag": "herg",
+        "label_id": "369e86d94fe32622d959806abc5379f5487ab2f63282a4642af6c5003c628e93",
+        "inputs": {
+          "data/processed/splits/herg_time.npz": "90933252420671d709bdf0de5e4782e6f8351dfe0fb96977c9ee143fcb370647",
+          "data/processed/herg_fingerprints.npz": "78bed5f5f0816091ade54f658d1eaf5479cecd71905ded194e57527a8da71baa"
+        },
+        "code": {
+          "scripts/run_time_campaign.py": "e48aa8f606f1852ab5990e5069d23fb2b3a62cd7bb32de600b5ed6b7223c8773",
+          "scripts/time_labels.py": "6c88a8a3cede0bf10d69edcbb8d51bc5f004d85293bd34e0a6ccfc659361d9ca",
+          "scripts/qsar_common.py": "86be4f6672aab3a9564a8e0c7e2213f0cab870154f2ea9b68b13b32c41bb250c",
+          "scripts/04_train_and_evaluate.py": "a8cb621f18279ab7ea0a0ca515ef45bf52d71bf1fb91a50993d66b13709ae329"
+        },
+        "hyperparameters": {
+          "seed": 42,
+          "cv_folds": 5,
+          "grid": "PARAM_GRID in hashed RF source",
+          "device": "cpu"
+        },
+        "environment": {
+          "python": "3.12.14",
+          "platform": "macOS-27.0-arm64-arm-64bit",
+          "packages": {
+            "numpy": "2.5.3",
+            "scikit-learn": "1.9.1",
+            "torch": "unavailable",
+            "torch-geometric": "unavailable",
+            "rdkit": "2026.3.6",
+            "joblib": "1.6.0"
+          },
+          "variables": {
+            "QSAR_RF_JOBS": "16",
+            "QSAR_CV_BACKEND": "loky",
+            "OMP_NUM_THREADS": "1",
+            "MKL_NUM_THREADS": "1",
+            "OPENBLAS_NUM_THREADS": "1",
+            "CUDA_VISIBLE_DEVICES": null,
+            "CUBLAS_WORKSPACE_CONFIG": null,
+            "PYTHONHASHSEED": null
+          }
+        },
+        "bundle_manifest": {
+          "sha256": "f1605d440ccb31bbdc75c773e8fb217d31607ad7c36def45b6f63325ae3406ad",
+          "source_git_head": "d13f9125af56028f60e099ec2e914dd2509c239e"
+        },
+        "command": [
+          "scripts/04_train_and_evaluate.py",
+          "--split",
+          "time"
+        ]
+      },
+      "signature": "7fa67708fb42efe1dcb3cf96cf0538a18857813531a3c1374b5dfa3dc8d55959"
+    }
+  ]
+}
+DONE rf_herg_seed42 (1625.1s)

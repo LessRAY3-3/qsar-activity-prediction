@@ -1,62 +1,77 @@
 {
-  "scaffold": {
-    "r2": 0.630845308303833,
-    "rmse": 1.041540360740501,
-    "mae": 0.8073932528495789,
-    "best_epoch": 65,
-    "best_valid_rmse_std": 0.5860572457313538,
-    "params": {
-      "tag": "egfr",
-      "model": "gin",
-      "hidden": 128,
-      "num_layers": 4,
-      "dropout": 0.2,
-      "lr": 0.001,
-      "batch_size": 128,
-      "epochs": 100,
-      "patience": 20,
-      "seed": 42,
-      "suffix": ""
-    }
-  },
   "random": {
-    "r2": 0.6694390177726746,
-    "rmse": 0.7986177200007067,
-    "mae": 0.5918937921524048,
     "best_epoch": 84,
     "best_valid_rmse_std": 0.5308358073234558,
+    "mae": 0.5918937921524048,
     "params": {
-      "tag": "egfr",
-      "model": "gin",
-      "hidden": 128,
-      "num_layers": 4,
-      "dropout": 0.2,
-      "lr": 0.001,
       "batch_size": 128,
+      "dropout": 0.2,
       "epochs": 100,
+      "hidden": 128,
+      "lr": 0.001,
+      "model": "gin",
+      "num_layers": 4,
       "patience": 20,
       "seed": 42,
-      "suffix": ""
-    }
+      "suffix": "",
+      "tag": "egfr"
+    },
+    "r2": 0.6694390177726746,
+    "rmse": 0.7986177200007067
+  },
+  "scaffold": {
+    "best_epoch": 65,
+    "best_valid_rmse_std": 0.5860572457313538,
+    "mae": 0.8073932528495789,
+    "params": {
+      "batch_size": 128,
+      "dropout": 0.2,
+      "epochs": 100,
+      "hidden": 128,
+      "lr": 0.001,
+      "model": "gin",
+      "num_layers": 4,
+      "patience": 20,
+      "seed": 42,
+      "suffix": "",
+      "tag": "egfr"
+    },
+    "r2": 0.630845308303833,
+    "rmse": 1.041540360740501
   },
   "time": {
-    "r2": 0.04038125276565552,
-    "rmse": 1.2539885306769256,
-    "mae": 0.9886125326156616,
-    "best_epoch": 9,
-    "best_valid_rmse_std": 0.8164685368537903,
+    "best_epoch": 18,
+    "best_valid_rmse_std": 0.8229971528053284,
+    "convergence_flag": false,
+    "device": "cuda",
+    "label_id": "b181f531e8ac9454c8ce55a1669a28259e7d3aa65852a74ce38eac44be846761",
+    "mae": 0.9531881809234619,
+    "max_epochs": 100,
     "params": {
-      "tag": "egfr",
-      "model": "gin",
-      "hidden": 128,
-      "num_layers": 4,
-      "dropout": 0.2,
-      "lr": 0.001,
       "batch_size": 128,
+      "device": "cuda",
+      "dropout": 0.2,
       "epochs": 100,
+      "hidden": 128,
+      "lr": 0.001,
+      "min_epochs": 0,
+      "model": "gin",
+      "num_layers": 4,
       "patience": 20,
       "seed": 42,
-      "suffix": ""
-    }
+      "suffix": "",
+      "tag": "egfr"
+    },
+    "r2": 0.13862526416778564,
+    "rmse": 1.1880651935934368,
+    "runtime": {
+      "device": "cuda",
+      "requested_device": "cuda",
+      "seed": 42,
+      "torch_interop_threads": 16,
+      "torch_threads": 2,
+      "torch_version": "2.14.0+cu126"
+    },
+    "train_mse": 0.3141092429571915
   }
 }

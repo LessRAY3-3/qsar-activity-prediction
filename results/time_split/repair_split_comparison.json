@@ -1,0 +1,104 @@
+[
+  {
+    "tag": "a2a",
+    "changed_fields": [],
+    "old_label_id": "b35580bb601adf4fb9e604dee3dd0f8989d11ebd4f14eaafc3e25a4e40f44b5b",
+    "new_label_id": "b35580bb601adf4fb9e604dee3dd0f8989d11ebd4f14eaafc3e25a4e40f44b5b",
+    "rows": {
+      "train": 399,
+      "valid": 143,
+      "test": 802,
+      "excluded": 22
+    }
+  },
+  {
+    "tag": "abl1",
+    "changed_fields": [],
+    "old_label_id": "999bd88ee0bf093ad765dd8c7769f26756c3f4a47935e0de22391af8feb6e7c3",
+    "new_label_id": "999bd88ee0bf093ad765dd8c7769f26756c3f4a47935e0de22391af8feb6e7c3",
+    "rows": {
+      "train": 1387,
+      "valid": 202,
+      "test": 531,
+      "excluded": 0
+    }
+  },
+  {
+    "tag": "egfr",
+    "changed_fields": [],
+    "old_label_id": "b181f531e8ac9454c8ce55a1669a28259e7d3aa65852a74ce38eac44be846761",
+    "new_label_id": "b181f531e8ac9454c8ce55a1669a28259e7d3aa65852a74ce38eac44be846761",
+    "rows": {
+      "train": 2948,
+      "valid": 340,
+      "test": 1233,
+      "excluded": 39
+    }
+  },
+  {
+    "tag": "egfr_full",
+    "changed_fields": [],
+    "old_label_id": "09e7659309a88d077bdad0001daf441245aa9b9f88573d2cf755cd8697b3680b",
+    "new_label_id": "09e7659309a88d077bdad0001daf441245aa9b9f88573d2cf755cd8697b3680b",
+    "rows": {
+      "train": 6848,
+      "valid": 781,
+      "test": 3043,
+      "excluded": 57
+    }
+  },
+  {
+    "tag": "herg",
+    "changed_fields": [
+      "train_idx",
+      "excluded_idx",
+      "y",
+      "year",
+      "label_id"
+    ],
+    "old_label_id": "cfa8bc4a32d0b179943f36a1234f46c2ea95e6518ae1d368609fd3520fb1f8d4",
+    "new_label_id": "369e86d94fe32622d959806abc5379f5487ab2f63282a4642af6c5003c628e93",
+    "rows": {
+      "train": 4944,
+      "valid": 1115,
+      "test": 2325,
+      "excluded": 19
+    }
+  },
+  {
+    "tag": "hivpr",
+    "changed_fields": [],
+    "old_label_id": "66a8a839e6cff2f4d7b9664c286fd8d2b716b784faab4aa60d7bf5e74d94eec6",
+    "new_label_id": "66a8a839e6cff2f4d7b9664c286fd8d2b716b784faab4aa60d7bf5e74d94eec6",
+    "rows": {
+      "train": 1812,
+      "valid": 232,
+      "test": 529,
+      "excluded": 0
+    }
+  },
+  {
+    "tag": "mpro",
+    "changed_fields": [],
+    "old_label_id": "75bb580c77d0dbe64c7aed1178c0dbc2505f44f3c3c91cc0344a95e8c305c17c",
+    "new_label_id": "75bb580c77d0dbe64c7aed1178c0dbc2505f44f3c3c91cc0344a95e8c305c17c",
+    "rows": {
+      "train": 1017,
+      "valid": 643,
+      "test": 1750,
+      "excluded": 0
+    }
+  },
+  {
+    "tag": "vegfr2",
+    "changed_fields": [],
+    "old_label_id": "0257d96ee9bd87e1664b7ac0bfb946a556acdd78ef5389fbb62256c0462beb78",
+    "new_label_id": "0257d96ee9bd87e1664b7ac0bfb946a556acdd78ef5389fbb62256c0462beb78",
+    "rows": {
+      "train": 6294,
+      "valid": 1280,
+      "test": 2038,
+      "excluded": 31
+    }
+  }
+]

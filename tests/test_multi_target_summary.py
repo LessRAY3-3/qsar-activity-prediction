@@ -39,7 +39,7 @@ def test_verdict_line_carries_point_estimate_no_ci_qualifier(load_experiment,
 
     assert "point estimates, no CI" in out
     # the lead itself is still reported, under the no-CI label
-    assert "clear lead on 2 cell(s): t1/random, t1/scaffold" in out
+    assert "positive point estimate on 2 cell(s): t1/random, t1/scaffold" in out
     # the seed-42 column would add a scaffold win for t2 -- reference only
     assert "not used for any verdict" in out
     assert "t2" in out

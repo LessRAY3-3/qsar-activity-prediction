@@ -1,0 +1,31 @@
+models: random/scaffold only; skipping legacy rf_time_split_* assets (existing local time models are preserved)
+downloading sha256sums.txt
+  sha256sums.txt: 100% (251/251 bytes)
+downloading models.tar.xz
+  models.tar.xz: 10% (48234496/478850360 bytes)
+  models.tar.xz: 20% (96468992/478850360 bytes)
+  models.tar.xz: 30% (144703488/478850360 bytes)
+Traceback (most recent call last):
+  File "/Users/lessray/Desktop/kimi code/qsar-time-retrain-20261013/.scratch/pr8-verification/real_release_check.py", line 11, in <module>
+    mod.run(["models","raw","cache"],repo_root=dest,fetch_assets=lambda api:urls)
+  File "/Users/lessray/Desktop/kimi code/qsar-time-retrain-20261013/scripts/fetch_artifacts.py", line 616, in run
+    print(f"  {problem}")
+      ^^^^^^^^^^^^^^^^^^^^
+  File "/Users/lessray/Desktop/kimi code/qsar-time-retrain-20261013/scripts/fetch_artifacts.py", line 264, in ensure_archive
+    downloader(urls[archive_name], dest, label=archive_name)
+  File "/Users/lessray/Desktop/kimi code/qsar-time-retrain-20261013/scripts/fetch_artifacts.py", line 147, in download
+    chunk = response.read(1 << 20)
+            ^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/homebrew/Cellar/python@3.12/3.12.14/Frameworks/Python.framework/Versions/3.12/lib/python3.12/http/client.py", line 494, in read
+    s = self.fp.read(amt)
+        ^^^^^^^^^^^^^^^^^
+  File "/opt/homebrew/Cellar/python@3.12/3.12.14/Frameworks/Python.framework/Versions/3.12/lib/python3.12/socket.py", line 720, in readinto
+    return self._sock.recv_into(b)
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/homebrew/Cellar/python@3.12/3.12.14/Frameworks/Python.framework/Versions/3.12/lib/python3.12/ssl.py", line 1251, in recv_into
+    return self.read(nbytes, buffer)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/homebrew/Cellar/python@3.12/3.12.14/Frameworks/Python.framework/Versions/3.12/lib/python3.12/ssl.py", line 1103, in read
+    return self._sslobj.read(len, buffer)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+KeyboardInterrupt

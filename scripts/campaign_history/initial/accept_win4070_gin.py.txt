@@ -1,0 +1,94 @@
+"""Accept all returned CUDA jobs against the coordinator's frozen inputs."""
+from datetime import datetime, timezone
+from pathlib import Path, PurePosixPath
+import csv
+import json
+import shutil
+import sys
+import tarfile
+
+import numpy as np
+
+ROOT = Path.cwd()
+sys.path.insert(0, str(ROOT / 'scripts'))
+import run_time_campaign as worker
+
+incoming = ROOT / '.scratch/time-campaign/incoming/win4070-gin'
+archive = incoming / 'gin-results.tar.gz'
+expected_archive = '928d7245b7fe4735a2ab4dd7109ca1e2edf732c5afa946a5aa699b24f7e3f304'
+assert worker.digest(archive) == expected_archive
+assert (incoming / 'gin-results.sha256').read_text().split()[0] == expected_archive
+stage = incoming / 'extracted'
+if not stage.exists():
+    stage.mkdir()
+    with tarfile.open(archive) as bundle:
+        bundle.extractall(stage, filter='data')
+manifest = json.loads((stage / 'return_manifest.json').read_text())
+assert manifest['schema'] == 'qsar-gin-return-v1'
+assert manifest['source_commit'] == '7ce15c1f0849ae69e0ca208f781a9824517eb328'
+assert manifest['checkpoint_cuda_predictions_verified']
+assert manifest['remote_canonical_and_snapshot_hashes_verified']
+seen = set()
+for entry in manifest['files']:
+    relative = PurePosixPath(entry['path'])
+    assert not relative.is_absolute() and '..' not in relative.parts
+    assert entry['path'] not in seen
+    seen.add(entry['path'])
+    path = stage / relative
+    assert path.resolve().is_relative_to(stage.resolve()) and not path.is_symlink()
+    assert path.stat().st_size == entry['bytes']
+    assert worker.digest(path) == entry['sha256'], entry['path']
+input_manifest = ROOT / '.scratch/time-campaign/bundles/gin/manifest.json'
+assert (stage / 'work/manifest.json').read_bytes() == input_manifest.read_bytes()
+assert {(row['tag'], row['seed']) for row in manifest['jobs']} == {(tag, seed) for tag in worker.TAGS for seed in worker.SEEDS}
+assert len(manifest['jobs']) == 24
+summaries = []
+for tag in worker.TAGS:
+    reference = None
+    for seed in worker.SEEDS:
+        directory = stage / f'work/results/time_campaign/gin_{tag}_seed{seed}'
+        state = json.loads((directory / 'status.json').read_text())
+        assert state['state'] == 'success'
+        assert state['signature'] == worker.json_digest(state['provenance'])
+        job = worker.build_jobs(worker.parse_args(['--role','gin','--tags',tag,'--seeds',str(seed),'--device','cuda']), ROOT)[0]
+        for key in ('schema','role','tag','label_id','inputs','code','hyperparameters','command'):
+            assert state['provenance'][key] == job['provenance'][key], (tag, seed, key)
+        assert state['provenance']['bundle_manifest']['sha256'] == worker.digest(input_manifest)
+        assert set(state['artifacts']) == set(job['files'])
+        for name, digest in state['artifacts'].items():
+            assert worker.digest(stage / 'work' / name) == digest, (tag, seed, name)
+        job['provenance'] = state['provenance']
+        # Return archives contain outputs, not duplicate source. Supply the
+        # already hash-matched coordinator source for strict CPU model loading.
+        if not (stage / 'work/scripts').exists():
+            shutil.copytree(ROOT / 'scripts', stage / 'work/scripts', ignore=shutil.ignore_patterns('__pycache__'))
+        worker.validate_outputs(job, stage / 'work')
+        metrics_path = next(stage / 'work' / name for name in job['files'] if 'metrics_' in name)
+        metrics = json.loads(metrics_path.read_text())['time']
+        summary = next(row.copy() for row in manifest['jobs'] if row['tag'] == tag and row['seed'] == seed)
+        for key in ('r2','rmse','mae','best_epoch','convergence_flag','device','label_id'):
+            assert summary[key] == metrics[key], (tag, seed, key)
+        assert metrics['device'] == 'cuda'
+        pred_path = next(stage / 'work' / name for name in job['files'] if '_preds_' in name)
+        with np.load(pred_path, allow_pickle=False) as pred:
+            current = {key: pred[key].copy() for key in ('test_idx','y_true')}
+        if reference is not None:
+            for key in reference:
+                np.testing.assert_array_equal(current[key], reference[key])
+        reference = current
+        summaries.append(summary)
+        print(f'Accepted {tag} seed {seed}: R2={metrics["r2"]:.6f}', flush=True)
+start = datetime.fromisoformat(json.loads((stage / 'launch.json').read_text())['started_at'])
+finish = datetime.fromisoformat(json.loads((stage / 'campaign_status.json').read_text())['updated_at'])
+report = dict(state='gin_complete_and_accepted',validated_at=datetime.now(timezone.utc).isoformat(),source_commit=manifest['source_commit'],archive_sha256=expected_archive,source_input_label_hashes_verified=True,remote_cuda_predictions_reproduced=True,local_checkpoints_loaded=True,metrics_recomputed=True,seed_test_rows_identical=True,jobs_accepted=24,campaign_wall_seconds=(finish-start).total_seconds(),convergence_flags=sum(row['convergence_flag'] for row in summaries),max_cuda_replay_abs_error=max(row['prediction_replay_max_abs_error'] for row in summaries),jobs=summaries,staged_work_directory=str(stage/'work'),canonical_results_updated=False)
+report_path = ROOT / '.scratch/time-campaign/win4070_gin_acceptance.json'
+report_path.write_text(json.dumps(report,indent=2)+'\n')
+with (ROOT / '.scratch/time-campaign/win4070_gin_metrics.csv').open('w') as stream:
+    writer = csv.DictWriter(stream,fieldnames=list(summaries[0]))
+    writer.writeheader()
+    writer.writerows(summaries)
+status_path = ROOT / '.scratch/time-campaign/win4070_deployment.json'
+status = json.loads(status_path.read_text())
+status.update(state='completed_and_accepted',updated_at=report['validated_at'],completed_jobs=[f'gin_{tag}_seed{seed}' for tag in worker.TAGS for seed in worker.SEEDS],current_job=None,queued_jobs=[],acceptance_report=str(report_path),campaign_status=json.loads((stage/'campaign_status.json').read_text()))
+status_path.write_text(json.dumps(status,indent=2)+'\n')
+print(json.dumps({key:report[key] for key in ('state','jobs_accepted','campaign_wall_seconds','convergence_flags','max_cuda_replay_abs_error')},indent=2))

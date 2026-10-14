@@ -1,0 +1,147 @@
+{
+  "schema": "qsar-repair-return-v1",
+  "role": "gin",
+  "source_commit": "d13f9125af56028f60e099ec2e914dd2509c239e",
+  "created_at": "2026-10-13T16:03:34.996976+00:00",
+  "jobs": [
+    {
+      "role": "gin",
+      "tag": "herg",
+      "seed": 42,
+      "state": "success",
+      "label_id": "369e86d94fe32622d959806abc5379f5487ab2f63282a4642af6c5003c628e93",
+      "r2": -0.038910508155822754,
+      "rmse": 0.9685518308190851,
+      "mae": 0.6659982204437256,
+      "elapsed_seconds": 17.524865263999345,
+      "started_at": "2026-10-13T15:59:39.049942+00:00",
+      "finished_at": "2026-10-13T15:59:56.575196+00:00",
+      "prediction_replay_max_abs_error": 4.76837158203125e-07
+    },
+    {
+      "role": "gin",
+      "tag": "herg",
+      "seed": 1,
+      "state": "success",
+      "label_id": "369e86d94fe32622d959806abc5379f5487ab2f63282a4642af6c5003c628e93",
+      "r2": -0.044777631759643555,
+      "rmse": 0.9712828779608585,
+      "mae": 0.6708722710609436,
+      "elapsed_seconds": 16.091038724999635,
+      "started_at": "2026-10-13T15:59:56.615206+00:00",
+      "finished_at": "2026-10-13T16:00:12.706542+00:00",
+      "prediction_replay_max_abs_error": 4.76837158203125e-07
+    },
+    {
+      "role": "gin",
+      "tag": "herg",
+      "seed": 2,
+      "state": "success",
+      "label_id": "369e86d94fe32622d959806abc5379f5487ab2f63282a4642af6c5003c628e93",
+      "r2": -0.11230778694152832,
+      "rmse": 1.002181296738261,
+      "mae": 0.6757155060768127,
+      "elapsed_seconds": 12.691621838000174,
+      "started_at": "2026-10-13T16:00:12.746741+00:00",
+      "finished_at": "2026-10-13T16:00:25.438669+00:00",
+      "prediction_replay_max_abs_error": 9.5367431640625e-07
+    }
+  ],
+  "files": [
+    {
+      "path": "campaign_status.json",
+      "bytes": 164,
+      "sha256": "7d9b8b35ca02875e0f54ebaa0654769bc962ba3d1c4441553f147ab2010d39b6"
+    },
+    {
+      "path": "launch.json",
+      "bytes": 611,
+      "sha256": "c34bafecee541f8d98d757ffb9e3b4fe45c2a5c265b27433986da59abc5d473c"
+    },
+    {
+      "path": "work/manifest.json",
+      "bytes": 19297,
+      "sha256": "c4ac95061ed9dcc7820e8c44358616be61e6369acda382df5dce87cbd4089925"
+    },
+    {
+      "path": "work/results/gnn_metrics_herg.json",
+      "bytes": 883,
+      "sha256": "a6e75ab1c89cfc83d6efab09e28a1ac431de6a620112ec9dc4816ec1b6b4c716"
+    },
+    {
+      "path": "work/results/gnn_metrics_herg_seed1.json",
+      "bytes": 887,
+      "sha256": "e428ebcb80cb9ace45f982ea86a5ffda99de19ccd8ee4d78005a291a0e2fbe59"
+    },
+    {
+      "path": "work/results/gnn_metrics_herg_seed2.json",
+      "bytes": 885,
+      "sha256": "de56a4f4321a6bd6956014db683ef96cbe98c652177fc7a42ed5b6145ef5bfe3"
+    },
+    {
+      "path": "work/results/gnn_models/herg_gin_time.pt",
+      "bytes": 680806,
+      "sha256": "71a6b5e6705bde0ba75b2d27d6ccdefa9fb9e745d532fe27b5cc88115342222b"
+    },
+    {
+      "path": "work/results/gnn_models/herg_gin_time_seed1.pt",
+      "bytes": 681160,
+      "sha256": "76f3188bef46b49d9f4754a6053a6cb6687b901f639b88ee01a700c0f3cf492e"
+    },
+    {
+      "path": "work/results/gnn_models/herg_gin_time_seed2.pt",
+      "bytes": 681160,
+      "sha256": "b46ef10767d23d14ffea48476d7716fcec0f2da543907d694a35bfdbb61ba8e7"
+    },
+    {
+      "path": "work/results/gnn_preds_herg_time.npz",
+      "bytes": 38462,
+      "sha256": "20f29327532fbb1fc3435d2faa6bfb573378c217c53612ab03941c38de84095c"
+    },
+    {
+      "path": "work/results/gnn_preds_herg_time_seed1.npz",
+      "bytes": 38462,
+      "sha256": "ca40e88f985afd1f0f14073566c10fc717669e3474765cbde42207bdebf2785a"
+    },
+    {
+      "path": "work/results/gnn_preds_herg_time_seed2.npz",
+      "bytes": 38462,
+      "sha256": "43e002097d0a90f17a923d0e02f4a48f04d87cb4f2c468c5a852f720b2674ea3"
+    },
+    {
+      "path": "work/results/time_campaign/gin_herg_seed1/20261013T155956_ed450b2e/train.log",
+      "bytes": 1584,
+      "sha256": "19a1ebd0217b597dbe2bc917df2a2a41265998bb13fe58205cd5767623f04777"
+    },
+    {
+      "path": "work/results/time_campaign/gin_herg_seed1/status.json",
+      "bytes": 3976,
+      "sha256": "6d8353110f5070b08747bf49f3cc1efda676f263020d4ccc5dc8777d5f12ae35"
+    },
+    {
+      "path": "work/results/time_campaign/gin_herg_seed2/20261013T160012_26c16c03/train.log",
+      "bytes": 1460,
+      "sha256": "0379f094f3048e3859eadfad418e7f5c2c2490177c2fdd7046d76bf68e22db17"
+    },
+    {
+      "path": "work/results/time_campaign/gin_herg_seed2/status.json",
+      "bytes": 3976,
+      "sha256": "c6b73475eae50f92f9b76ad2bf1cfb357c869ea3c8f0d39f0874873264e58ada"
+    },
+    {
+      "path": "work/results/time_campaign/gin_herg_seed42/20261013T155939_14f98233/train.log",
+      "bytes": 1443,
+      "sha256": "d73d8e2b77b5cebd77f64bf2f27c3d5a363225ec68f6147b7f069b7ebcf2e55b"
+    },
+    {
+      "path": "work/results/time_campaign/gin_herg_seed42/status.json",
+      "bytes": 3897,
+      "sha256": "b6cff7dc41413a2cc34f9bf425e5262691acbfa75380622798fa79b27c3a511f"
+    },
+    {
+      "path": "worker.log",
+      "bytes": 11698,
+      "sha256": "547e78b72e5b92cb906f33aeffacaff5d62196cd6820023b53c3cce01339d00d"
+    }
+  ]
+}

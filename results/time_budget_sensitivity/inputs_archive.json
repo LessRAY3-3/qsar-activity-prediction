@@ -1,0 +1,7 @@
+{
+  "file": "inputs.tar.gz",
+  "sha256": "160a07db9801160dfd89ce21f40fb0471545be3787b7368a1018b2efc3f77051",
+  "manifest": "input_manifest.json",
+  "manifest_sha256": "daf7f1f9ee34f33c8ff478d04ff8239bdba4301032eedd3041a475f23f74ecf2",
+  "source_commit": "90a470050367cebc4cd83dfe8d3f7fb37d53e6de"
+}

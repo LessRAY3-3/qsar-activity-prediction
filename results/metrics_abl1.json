@@ -1,18 +1,4 @@
 {
-  "target": "Tyrosine-protein kinase ABL1",
-  "tag": "abl1",
-  "random": {
-    "split": "random",
-    "r2": 0.8221851002242336,
-    "rmse": 0.6143437164322182,
-    "mae": 0.46989448377395443
-  },
-  "scaffold": {
-    "split": "scaffold",
-    "r2": 0.714350780366555,
-    "rmse": 0.6710749767425623,
-    "mae": 0.500406770176892
-  },
   "best_params_random": {
     "bootstrap": true,
     "ccp_alpha": 0.0,
@@ -53,12 +39,6 @@
     "verbose": 0,
     "warm_start": false
   },
-  "time": {
-    "split": "time",
-    "r2": 0.5597981137181406,
-    "rmse": 1.0288486976104485,
-    "mae": 0.8877444507040438
-  },
   "best_params_time": {
     "bootstrap": true,
     "ccp_alpha": 0.0,
@@ -69,14 +49,40 @@
     "max_samples": null,
     "min_impurity_decrease": 0.0,
     "min_samples_leaf": 1,
-    "min_samples_split": 2,
+    "min_samples_split": 5,
     "min_weight_fraction_leaf": 0.0,
     "monotonic_cst": null,
-    "n_estimators": 500,
+    "n_estimators": 300,
     "n_jobs": 1,
     "oob_score": false,
     "random_state": 42,
     "verbose": 0,
     "warm_start": false
+  },
+  "random": {
+    "mae": 0.46989448377395443,
+    "r2": 0.8221851002242336,
+    "rmse": 0.6143437164322182,
+    "split": "random"
+  },
+  "scaffold": {
+    "mae": 0.500406770176892,
+    "r2": 0.714350780366555,
+    "rmse": 0.6710749767425623,
+    "split": "scaffold"
+  },
+  "tag": "abl1",
+  "target": "Tyrosine-protein kinase ABL1",
+  "time": {
+    "label_id": "999bd88ee0bf093ad765dd8c7769f26756c3f4a47935e0de22391af8feb6e7c3",
+    "mae": 0.8868448061318323,
+    "r2": 0.559081982968605,
+    "rmse": 1.0296852351157821,
+    "runtime": {
+      "cv_backend": "loky",
+      "rf_jobs": 4,
+      "seed": 42
+    },
+    "split": "time"
   }
 }

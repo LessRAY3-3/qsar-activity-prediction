@@ -1,0 +1,63 @@
+"""Replay repaired models and produce a checksummed return archive."""
+from pathlib import Path
+from datetime import datetime, timezone
+import json
+import os
+import sys
+import tarfile
+import numpy as np
+
+root=Path(__file__).resolve().parent
+work=root/'work'
+role=sys.argv[1]
+sys.path.insert(0,str(work/'scripts'))
+import run_time_campaign as worker
+assert json.loads((root/'campaign_status.json').read_text())['state']=='complete'
+export=root/'export'; export.mkdir(exist_ok=False)
+paths={work/'manifest.json',root/'launch.json',root/'campaign_status.json',root/'worker.log'}
+rows=[]
+for seed in ((42,) if role=='rf' else (42,1,2)):
+    directory=work/f'results/time_campaign/{role}_herg_seed{seed}'
+    state=json.loads((directory/'status.json').read_text())
+    for key,value in state['provenance']['environment']['variables'].items():
+        if value is None: os.environ.pop(key,None)
+        else: os.environ[key]=value
+    args=worker.parse_args(['--role',role,'--tags','herg','--seeds',str(seed),'--device','cuda'])
+    job=worker.build_jobs(args,work)[0]
+    assert worker.can_resume(state,job,work,directory)
+    worker.validate_job_inputs(job,work)
+    worker.validate_outputs(job,work)
+    prediction=next(work/name for name in job['files'] if '_preds_' in name)
+    with np.load(prediction) as npz: saved=npz['y_pred']
+    if role=='rf':
+        import joblib
+        model=joblib.load(work/'models/rf_time_split_herg.joblib')
+        with np.load(work/'data/processed/herg_fingerprints.npz') as cache:
+            replay=model.predict(cache['X'][job['split']['test_idx']])
+        np.testing.assert_array_equal(replay,saved)
+    else:
+        import torch
+        from torch_geometric.loader import DataLoader
+        from gnn_graph_dataset import MoleculeGraphDataset
+        torch.set_num_threads(2)
+        checkpoint=torch.load(next(work/name for name in job['files'] if name.endswith('.pt')),map_location='cpu',weights_only=True)
+        model=worker.build_checkpoint_model(work,checkpoint['args']).to('cuda')
+        model.load_state_dict(checkpoint['state_dict'],strict=True); model.eval()
+        dataset=MoleculeGraphDataset(work/'data/processed/herg_graphs.npz',indices=job['split']['test_idx'])
+        with torch.no_grad():
+            replay=torch.cat([model(batch.to('cuda')).cpu() for batch in DataLoader(dataset,batch_size=512)]).numpy()*checkpoint['y_std']+checkpoint['y_mean']
+        np.testing.assert_allclose(replay,saved,atol=1e-5,rtol=1e-5)
+    metrics=json.loads(next(work/name for name in job['files'] if 'metrics_' in name).read_text())['time']
+    rows.append(dict(role=role,tag='herg',seed=seed,state='success',label_id=job['provenance']['label_id'],r2=metrics['r2'],rmse=metrics['rmse'],mae=metrics['mae'],elapsed_seconds=state['elapsed_seconds'],started_at=state['started_at'],finished_at=state['finished_at'],prediction_replay_max_abs_error=float(np.max(np.abs(replay-saved)))))
+    paths.update(work/name for name in job['files'])
+    paths.add(directory/'status.json');paths.add(directory/state['log'])
+    print('Verified',role,seed,rows[-1],flush=True)
+manifest=dict(schema='qsar-repair-return-v1',role=role,source_commit=json.loads((work/'manifest.json').read_text())['source']['git_head'],created_at=datetime.now(timezone.utc).isoformat(),jobs=rows,files=[dict(path=str(p.relative_to(root)),bytes=p.stat().st_size,sha256=worker.digest(p)) for p in sorted(paths)])
+manifest_path=export/'return_manifest.json';manifest_path.write_text(json.dumps(manifest,indent=2)+'\n')
+archive=export/f'{role}-results.tar.gz'
+with tarfile.open(archive,'w:gz',compresslevel=3) as tar:
+    tar.add(manifest_path,arcname='return_manifest.json')
+    for p in sorted(paths):tar.add(p,arcname=str(p.relative_to(root)))
+digest=worker.digest(archive)
+(export/f'{role}-results.sha256').write_text(digest+'  '+archive.name+'\n')
+print(json.dumps(dict(archive=str(archive),sha256=digest,bytes=archive.stat().st_size)))

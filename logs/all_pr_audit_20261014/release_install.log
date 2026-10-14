@@ -1,0 +1,30 @@
+models: random/scaffold only; skipping legacy rf_time_split_* assets (existing local time models are preserved)
+downloading sha256sums.txt
+  sha256sums.txt: 100% (251/251 bytes)
+cache hit: models.tar.xz (sha256 ok), skipping download
+extracted models.tar.xz
+verified and installed models.tar.xz
+  replaced: models/rf_random_split_a2a.joblib, models/rf_random_split_abl1.joblib, models/rf_random_split_bace.joblib, models/rf_random_split_egfr.joblib, models/rf_random_split_egfr_full.joblib, models/rf_random_split_herg.joblib, models/rf_random_split_hivpr.joblib, models/rf_random_split_mpro.joblib, models/rf_random_split_vegfr2.joblib, models/rf_scaffold_split_a2a.joblib, models/rf_scaffold_split_abl1.joblib, models/rf_scaffold_split_bace.joblib, models/rf_scaffold_split_egfr.joblib, models/rf_scaffold_split_egfr_full.joblib, models/rf_scaffold_split_herg.joblib, models/rf_scaffold_split_hivpr.joblib, models/rf_scaffold_split_mpro.joblib, models/rf_scaffold_split_vegfr2.joblib
+  kept up to date: (none)
+downloading raw_data.tar.gz
+  raw_data.tar.gz: 46% (1048576/2252327 bytes)
+  raw_data.tar.gz: 93% (2097152/2252327 bytes)
+  raw_data.tar.gz: 100% (2252327/2252327 bytes)
+sha256 ok: raw_data.tar.gz
+extracted raw_data.tar.gz
+repo checksums ok: 11 files match data/raw/sha256sums.txt
+verified and installed raw_data.tar.gz
+  replaced: data/raw/a2a_activities.csv, data/raw/abl1_activities.csv, data/raw/bace_activities.csv, data/raw/document_years.csv, data/raw/egfr_activities.csv, data/raw/egfr_full_activities.csv, data/raw/esol_delaney.csv, data/raw/herg_activities.csv, data/raw/hivpr_activities.csv, data/raw/mpro_activities.csv, data/raw/vegfr2_activities.csv
+  kept up to date: (none)
+downloading processed_cache.tar.gz
+  processed_cache.tar.gz: 27% (1048576/3748710 bytes)
+  processed_cache.tar.gz: 55% (2097152/3748710 bytes)
+  processed_cache.tar.gz: 83% (3145728/3748710 bytes)
+  processed_cache.tar.gz: 100% (3748710/3748710 bytes)
+sha256 ok: processed_cache.tar.gz
+extracted processed_cache.tar.gz
+verified and installed processed_cache.tar.gz
+  replaced: data/processed/a2a_fingerprints.npz, data/processed/abl1_fingerprints.npz, data/processed/bace_fingerprints.npz, data/processed/egfr_fingerprints.npz, data/processed/egfr_full_fingerprints.npz, data/processed/herg_fingerprints.npz, data/processed/hivpr_fingerprints.npz, data/processed/mpro_fingerprints.npz, data/processed/vegfr2_fingerprints.npz
+  kept up to date: (none)
+done.
+{"status": "passed", "scope": "actual release archive and isolated install audit; no training", "discovery": "saved GitHub API metadata", "installed_models": 18, "installed_time_models": 0, "installed_caches": 9, "raw_pins": 11, "fetch_script_sha256": "f7e2b635ee299ad76935e4af45c017d770d2afc516bfcf7f5101399e08ffea12"}

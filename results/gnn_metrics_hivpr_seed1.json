@@ -1,62 +1,77 @@
 {
   "random": {
-    "r2": 0.6281977891921997,
-    "rmse": 0.9729161968407052,
-    "mae": 0.7082008719444275,
     "best_epoch": 76,
     "best_valid_rmse_std": 0.547921895980835,
+    "mae": 0.7082008719444275,
     "params": {
-      "tag": "hivpr",
-      "model": "gin",
-      "hidden": 128,
-      "num_layers": 4,
-      "dropout": 0.2,
-      "lr": 0.001,
       "batch_size": 128,
+      "dropout": 0.2,
       "epochs": 100,
+      "hidden": 128,
+      "lr": 0.001,
+      "model": "gin",
+      "num_layers": 4,
       "patience": 20,
       "seed": 1,
-      "suffix": "_seed1"
-    }
+      "suffix": "_seed1",
+      "tag": "hivpr"
+    },
+    "r2": 0.6281977891921997,
+    "rmse": 0.9729161968407052
   },
   "scaffold": {
-    "r2": 0.44727909564971924,
-    "rmse": 1.0066201897390996,
-    "mae": 0.7886907458305359,
     "best_epoch": 92,
     "best_valid_rmse_std": 0.5181370973587036,
+    "mae": 0.7886907458305359,
     "params": {
-      "tag": "hivpr",
-      "model": "gin",
-      "hidden": 128,
-      "num_layers": 4,
-      "dropout": 0.2,
-      "lr": 0.001,
       "batch_size": 128,
+      "dropout": 0.2,
       "epochs": 100,
+      "hidden": 128,
+      "lr": 0.001,
+      "model": "gin",
+      "num_layers": 4,
       "patience": 20,
       "seed": 1,
-      "suffix": "_seed1"
-    }
+      "suffix": "_seed1",
+      "tag": "hivpr"
+    },
+    "r2": 0.44727909564971924,
+    "rmse": 1.0066201897390996
   },
   "time": {
-    "r2": -0.04094719886779785,
-    "rmse": 1.7548445674611401,
-    "mae": 1.4259637594223022,
-    "best_epoch": 6,
-    "best_valid_rmse_std": 0.7977402210235596,
+    "best_epoch": 5,
+    "best_valid_rmse_std": 0.7606596350669861,
+    "convergence_flag": false,
+    "device": "cuda",
+    "label_id": "66a8a839e6cff2f4d7b9664c286fd8d2b716b784faab4aa60d7bf5e74d94eec6",
+    "mae": 1.2951709032058716,
+    "max_epochs": 100,
     "params": {
-      "tag": "hivpr",
-      "model": "gin",
-      "hidden": 128,
-      "num_layers": 4,
-      "dropout": 0.2,
-      "lr": 0.001,
       "batch_size": 128,
+      "device": "cuda",
+      "dropout": 0.2,
       "epochs": 100,
+      "hidden": 128,
+      "lr": 0.001,
+      "min_epochs": 0,
+      "model": "gin",
+      "num_layers": 4,
       "patience": 20,
       "seed": 1,
-      "suffix": "_seed1"
-    }
+      "suffix": "_seed1",
+      "tag": "hivpr"
+    },
+    "r2": 0.1366705298423767,
+    "rmse": 1.5981317759143818,
+    "runtime": {
+      "device": "cuda",
+      "requested_device": "cuda",
+      "seed": 1,
+      "torch_interop_threads": 16,
+      "torch_threads": 2,
+      "torch_version": "2.14.0+cu126"
+    },
+    "train_mse": 0.34478405884428004
   }
 }

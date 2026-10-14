@@ -1,0 +1,12 @@
+{
+  "baseline_revision": "cdc816370003029f2cd29446b027844aae3e82a3",
+  "unchanged_tracked_paths": {
+    "results/gnn_models": true,
+    "results/time_budget_sensitivity": true,
+    "results/time_split/summary.csv": true,
+    "results/significance/summary_time.csv": true,
+    "data/processed": true
+  },
+  "original_checkout_clean": true,
+  "no_remote_hosts_contacted": true
+}

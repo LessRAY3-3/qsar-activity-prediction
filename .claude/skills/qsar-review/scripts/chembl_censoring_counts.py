@@ -166,8 +166,8 @@ def overlap(tag, repo):
 
     parent_map = {smi: parent_fn(smi)[0] for smi in raw["canonical_smiles"].unique()}
     raw["_parent"] = raw["canonical_smiles"].map(parent_map)
-    rel = raw["standard_relation"]
-    raw["_exact"] = rel == "="        # 02's inclusion rule, verbatim (no stripping)
+    rel = raw["standard_relation"].fillna("").astype(str).str.strip()
+    raw["_exact"] = rel == "="        # 02 keeps stripped equals; missing values are non-exact
     raw["_nonexact"] = ~raw["_exact"]
 
     grp = raw.groupby("_parent")

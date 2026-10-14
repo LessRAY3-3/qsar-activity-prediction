@@ -1,0 +1,38 @@
+[
+  {
+    "mutation": "train_inclusive_valid_cutoff",
+    "killed": true,
+    "pytest_exit": 1,
+    "summary": "1 failed in 12.21s"
+  },
+  {
+    "mutation": "train_uses_test_cutoff",
+    "killed": true,
+    "pytest_exit": 1,
+    "summary": "1 failed in 1.82s"
+  },
+  {
+    "mutation": "valid_inclusive_test_cutoff",
+    "killed": true,
+    "pytest_exit": 1,
+    "summary": "1 failed in 1.89s"
+  },
+  {
+    "mutation": "median_to_mean",
+    "killed": true,
+    "pytest_exit": 1,
+    "summary": "1 failed in 1.82s"
+  },
+  {
+    "mutation": "nm_filter_removed",
+    "killed": true,
+    "pytest_exit": 1,
+    "summary": "1 failed in 1.82s"
+  },
+  {
+    "mutation": "label_id_guard_removed",
+    "killed": true,
+    "pytest_exit": 1,
+    "summary": "1 failed in 1.96s"
+  }
+]

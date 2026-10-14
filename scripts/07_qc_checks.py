@@ -11,9 +11,9 @@ Three checks:
      counted: 02's nM-unit and non-empty-SMILES filters apply first, then
      only rows the label policy keeps (standard_relation == "=") - rows the
      H1 filter drops are reported on a separate line, never mixed into the
-     headline. Inputs 02 refuses or runs without that policy (non-ChEMBL
-     TAGs bace/esol; ChEMBL-style files missing the relation column) are
-     skipped with an explanation instead of being audited.
+     headline. BACE is audited on its uncensored input pool, matching 02;
+     ESOL (a different endpoint) and inputs 02 refuses are skipped with an
+     explanation instead of being audited.
   3. Permutation importance vs MDI. RandomForest's built-in (MDI) importance
      is inflated for correlated features - and 2048 fingerprint bits contain
      many chemically equivalent ones. Permutation importance on the held-out
@@ -71,15 +71,10 @@ def check_testset_distributions(X, y, smiles):
 
 def check_ultra_potent():
     print("\n== 2. ultra-potent records (pIC50 > 9, IC50 < 1 nM) ==")
-    # Skip the audit for non-ChEMBL campaigns: 02_clean_data runs bace
-    # without the standard_relation censoring policy (and esol never goes
-    # through 02 at all), so a relation-based "labelled rows" headline
-    # would misstate what the model saw (Low, PR #6).
-    if TAG in ("bace", "esol"):
-        print(f"  skipped: QSAR_TAG={TAG!r} is not a ChEMBL campaign "
-              "dataset - 02_clean_data applies the standard_relation "
-              "censoring policy only to ChEMBL inputs, so the labelled-"
-              "rows audit below does not apply here")
+    # ESOL has a solubility endpoint and does not run the IC50 cleaner.
+    # BACE does: audit its uncensored input pool instead of omitting it.
+    if TAG == "esol":
+        print("  skipped: QSAR_TAG='esol' uses solubility, not IC50")
         return
     df = pd.read_csv(RAW)
     df["standard_value"] = pd.to_numeric(df["standard_value"], errors="coerce")
@@ -100,6 +95,9 @@ def check_ultra_potent():
               "with empty canonical_smiles")
     df = df[df["standard_value"] > 0]
     df["pic50"] = -np.log10(df["standard_value"] * 1e-9)
+    if df.empty:
+        print("  skipped: no rows pass 02's unit/value/SMILES filters")
+        return
     hot_all = df[df["pic50"] > 9]
     if "standard_relation" in df.columns:
         # The label policy (scripts/02_clean_data.py) keeps only
@@ -134,9 +132,10 @@ def check_ultra_potent():
             n_chembl_style = int(
                 (ids.str.startswith("CHEMBL") | ids.str.fullmatch(r"\d+")
                  | ids.str.fullmatch(r"\d+\.0+")).sum())
+            n_blank = int((ids == "").sum())
         else:
-            n_chembl_style = 0
-        if n_chembl_style:
+            n_chembl_style, n_blank = len(df), 0
+        if TAG != "bace" and (n_chembl_style or n_blank):
             print(f"  skipped: {n_chembl_style} ChEMBL-style molecule ID(s) "
                   "but no standard_relation column - 02_clean_data refuses "
                   "such inputs (the censoring filter cannot be verified), "

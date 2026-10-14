@@ -1,0 +1,60 @@
+from pathlib import Path
+import pandas as pd
+s=pd.read_csv('results/time_split/summary.csv').set_index('tag');r=s.loc['herg']
+fmt=lambda x:f'{x:+.3f}'.replace('-','−')
+row=f"| `herg` | {r.rf_random_r2:.3f} | {r.gin_random_r2_mean:.3f} | {fmt(r.rf_time_r2)} | {fmt(r.gin_time_r2_mean)}±{r.gin_time_r2_std:.3f} | {fmt(r.rf_time_r2+r.d_r2_mean3)} | {fmt(r.d_r2_mean3)} | [{fmt(r.ci_lo)}, {fmt(r.ci_hi)}] |"
+p=Path('README.md');t=p.read_text();old='| `herg` | 0.607 | 0.619 | −0.047 | −0.079±0.053 | −0.041 | +0.006 | [−0.036, +0.049] |';assert old in t;t=t.replace(old,row)
+t=t.replace('**−0.033 RF**, **+0.020 GIN per seed** and\n**+0.061 GIN ensemble**','**−0.034 RF**, **+0.022 GIN per seed** and\n**+0.062 GIN ensemble**');p.write_text(t)
+p=Path('docs/methodology.md');t=p.read_text().replace('RF **−0.033**,\nGIN per-seed **+0.020**, and GIN ensemble **+0.061**','RF **−0.034**,\nGIN per-seed **+0.022**, and GIN ensemble **+0.062**')
+t=t.replace('required by the corrected training input, not chosen from test performance.','required by the corrected training input, not chosen from test performance.\nThe repair took 1,625 seconds for RF and 47 seconds for the three GIN jobs,\nexcluding transfer and acceptance. RF checkpoint replay matched exactly;\nmaximum CUDA GIN prediction replay error was 9.54e-7. On hERG, RF R2 is\n−0.056, mean single-seed GIN R2 is −0.065±0.033, and ensemble GIN R2 is\n−0.034. The ensemble ΔR2 is +0.022 with 95% CI [−0.016, +0.061], still\nincluding zero. Logs are under `logs/time_asof_repair_20261014/`.')
+p.write_text(t)
+p=Path('docs/interview.md');t=p.read_text().replace('The time campaign was retrained on 2026-10-13: all 8 RF + 24 GIN jobs now','The time campaign was retrained on 2026-10-13, with four hERG fits replaced\non 2026-10-14 after recovering one eligible training molecule: all 8 RF + 24 GIN jobs now');p.write_text(t)
+p=Path('experiments/LOG.md');t=p.read_text();a=t.index('**Status pointer');b=t.index('## 2026-10-13',a)
+t=t[:a]+'''**Status pointer (2026-10-14): the repair below defines the current temporal
+results. The initial 2026-10-13 entry records the preceding campaign; its hERG
+scores and aggregate means are superseded. Earlier all-year-label time scores
+are historical only.**
+
+## 2026-10-14 — hERG parent-key repair and reproducible temporal inputs
+
+- **Data correction:** time splitting was normalizing already-normalized cache
+  SMILES again. For `CHEMBL2035183`, that changed the key and excluded a valid
+  2012 exact 7,200 nM measurement. The raw-record key is now normalized once
+  and joined to the unchanged cache key. hERG train increases 4,943 → 4,944;
+  exclusions decrease 20 → 19 (168 total). Validation/test rows and labels are
+  unchanged. All other seven split arrays and their retained file bytes match.
+- **Training:** source `d13f9125af56028f60e099ec2e914dd2509c239e`; replace only
+  hERG RF + GIN seeds 42/1/2. RF ran on M3 with 16 CV workers in 1,625 seconds;
+  GIN ran on the 4070 in 47 seconds. Original model recipes are unchanged.
+  The other 28 jobs retain source `7ce15c1` and their original provenance.
+- **Worker correction:** each attempt starts with isolated source/input files
+  and empty outputs. NA/input/source/manifest changes are rechecked before
+  execution, resume and publication. No-op or partial runs cannot reuse old
+  artifacts; publication failures roll back replaced files.
+- **Acceptance:** four replacement jobs passed frozen source/input/label hashes,
+  metric recomputation and checkpoint loading. RF replay is exact; maximum
+  CUDA GIN replay error is 9.54e-7. Independent CPU replay of all three GIN
+  validation scores matched exactly, with train-only normalization verified.
+  All 32 current prediction files align with the current labels; non-time
+  metric entries remain unchanged. Acceptance maps jobs to the initial or
+  repair manifests instead of assigning one source revision to every job.
+- **Updated results:** hERG RF R2 −0.056; GIN per-seed −0.065±0.033; GIN
+  ensemble −0.034. Ensemble ΔR2 +0.022, 95% CI [−0.016, +0.061]. B=10,000
+  bootstrap retains four GIN wins, two RF wins and two intervals containing
+  zero. Eight-row means are RF −0.034, GIN per-seed +0.022, ensemble +0.062.
+  The original uncertainty and overlapping-target caveats still apply.
+- **Reproduction:** publish the eight frozen splits as a 2.1 MiB package in
+  `results/time_split/inputs/`. `scripts/restore_time_inputs.py` verifies hashes,
+  split signatures and all prediction/metric label versions before restoration.
+  Conflicting local inputs are refused. The as-of constant baseline now reads
+  split labels directly, so raw tables and feature caches are unnecessary for
+  bootstrap/summary reproduction. CI restores and validates the package before
+  running tests. Analysis code is recorded at `0b4fb29`.
+- **Records:** `results/time_split/campaign_acceptance.json`,
+  `repair_split_comparison.json`, `repair_independent_review.json`, repair input
+  manifests and `logs/time_asof_repair_20261014/`. The original acceptance is
+  preserved as `initial_campaign_acceptance.json`. RF release assets remain
+  historical; accepted new joblib files are retained on M3 and the coordinator.
+
+'''+t[b:];p.write_text(t)
+print(row)

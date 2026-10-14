@@ -1,0 +1,47 @@
+from datetime import datetime,timezone
+from pathlib import Path,PurePosixPath
+import json,shutil,sys,tarfile
+import numpy as np
+R=Path.cwd();B=R/'.scratch/review-repair';sys.path.insert(0,str(R/'scripts'))
+import run_time_campaign as w
+role=sys.argv[1];expected=sys.argv[2];incoming=B/'incoming'/role;a=incoming/f'{role}-results.tar.gz'
+assert w.digest(a)==expected
+stage=incoming/'extracted'
+if not stage.exists():
+    stage.mkdir()
+    with tarfile.open(a) as tar:tar.extractall(stage,filter='data')
+m=json.loads((stage/'return_manifest.json').read_text());assert m['schema']=='qsar-repair-return-v1' and m['role']==role
+assert m['source_commit']=='d13f9125af56028f60e099ec2e914dd2509c239e'
+seen=set()
+for e in m['files']:
+    p=PurePosixPath(e['path']);assert not p.is_absolute() and '..' not in p.parts and str(p) not in seen;seen.add(str(p))
+    f=stage/p;assert f.resolve().is_relative_to(stage.resolve()) and not f.is_symlink()
+    assert f.stat().st_size==e['bytes'] and w.digest(f)==e['sha256']
+manifest=B/f'bundles/{role}/manifest.json';assert (stage/'work/manifest.json').read_bytes()==manifest.read_bytes()
+seeds=(42,) if role=='rf' else (42,1,2)
+assert len(m['jobs'])==len(seeds) and {r['seed'] for r in m['jobs']}==set(seeds)
+if not (stage/'work/scripts').exists():shutil.copytree(B/'frozen/scripts',stage/'work/scripts')
+rows=[];ref=None
+for seed in seeds:
+    s=json.loads((stage/f'work/results/time_campaign/{role}_herg_seed{seed}/status.json').read_text())
+    assert s['state']=='success' and s['signature']==w.json_digest(s['provenance'])
+    job=w.build_jobs(w.parse_args(['--role',role,'--tags','herg','--seeds',str(seed),'--device','cuda']),B/'frozen')[0]
+    for k in ('schema','role','tag','label_id','inputs','code','hyperparameters','command'):
+        assert job['provenance'][k]==s['provenance'][k],(seed,k)
+    assert s['provenance']['bundle_manifest']['sha256']==w.digest(manifest)
+    assert set(s['artifacts'])==set(job['files'])
+    for name,d in s['artifacts'].items():assert w.digest(stage/'work'/name)==d
+    job['provenance']=s['provenance'];w.validate_outputs(job,stage/'work')
+    metrics=json.loads(next(stage/'work'/f for f in job['files'] if 'metrics_' in f).read_text())['time']
+    row=next(r.copy() for r in m['jobs'] if r['seed']==seed)
+    for k in ('r2','rmse','mae','label_id'):assert row[k]==metrics[k]
+    with np.load(next(stage/'work'/f for f in job['files'] if '_preds_' in f)) as p:
+        cur={k:p[k].copy() for k in ('test_idx','y_true')}
+    if ref is not None:
+        for k in ref:np.testing.assert_array_equal(ref[k],cur[k])
+    ref=cur
+    row.update({k:metrics[k] for k in ('best_epoch','convergence_flag','device') if k in metrics})
+    row.update(provenance=s['provenance'],signature=s['signature'],returned_artifact_sha256=s['artifacts']);rows.append(row)
+report=dict(source_commit=m['source_commit'],validated_at=datetime.now(timezone.utc).isoformat(),archive_sha256=expected,jobs_accepted=len(rows),jobs=rows,staged_work_directory=str(stage/'work'),campaign_wall_seconds=json.loads((stage/'campaign_status.json').read_text())['elapsed_seconds'])
+(B/f'{role}_acceptance.json').write_text(json.dumps(report,indent=2)+'\n')
+print(json.dumps(dict(role=role,jobs=len(rows),scores=[r['r2'] for r in rows]),indent=2))

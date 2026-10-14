@@ -1,0 +1,12 @@
+{
+  "n_rows": 1513,
+  "column_order_matches": true,
+  "smiles_order_and_ids_identical": true,
+  "fingerprint_inputs_identical": true,
+  "pic50_max_abs_diff": 0.0,
+  "ic50_max_abs_diff": 0.0,
+  "artifact_modified": false,
+  "raw_sha256": "db1cbba25344133b30625a5a17f747bb10fe4ee0afcdfec030b4fc38a6b553d2",
+  "frozen_clean_sha256": "89bf461d500fa757e058e0718656ae24eee67c46fe35117a4637d232b294ebb2",
+  "cleaner_sha256": "c0b1df723a73e10c78653f72020799e1d809f30748fcef5e01a79d795477d51f"
+}

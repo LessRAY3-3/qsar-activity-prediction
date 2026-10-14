@@ -1,0 +1,145 @@
+/Users/leisirui/qsar-activity-prediction/.venv/lib/python3.12/site-packages/torch/jit/_script.py:1491: FutureWarning: `torch.jit.script` is deprecated. Please switch to `torch.compile` or `torch.export`.
+  warnings.warn(
+PASS control/a2a/seed42: checkpoint replay
+PASS control/a2a/seed1: checkpoint replay
+PASS control/a2a/seed2: checkpoint replay
+PASS control/a2a/seed3: checkpoint replay
+PASS control/a2a/seed4: checkpoint replay
+PASS control/a2a/seed5: checkpoint replay
+PASS control/a2a/seed6: checkpoint replay
+PASS control/a2a/seed7: checkpoint replay
+PASS control/egfr/seed42: checkpoint replay
+PASS control/egfr/seed1: checkpoint replay
+PASS control/egfr/seed2: checkpoint replay
+PASS control/egfr/seed3: checkpoint replay
+PASS control/egfr/seed4: checkpoint replay
+PASS control/egfr/seed5: checkpoint replay
+PASS control/egfr/seed6: checkpoint replay
+PASS control/egfr/seed7: checkpoint replay
+PASS control/egfr_full/seed42: checkpoint replay
+PASS control/egfr_full/seed1: checkpoint replay
+PASS control/egfr_full/seed2: checkpoint replay
+PASS control/egfr_full/seed3: checkpoint replay
+PASS control/egfr_full/seed4: checkpoint replay
+PASS control/egfr_full/seed5: checkpoint replay
+PASS control/egfr_full/seed6: checkpoint replay
+PASS control/egfr_full/seed7: checkpoint replay
+PASS control/hivpr/seed42: checkpoint replay
+PASS control/hivpr/seed1: checkpoint replay
+PASS control/hivpr/seed2: checkpoint replay
+PASS control/hivpr/seed3: checkpoint replay
+PASS control/hivpr/seed4: checkpoint replay
+PASS control/hivpr/seed5: checkpoint replay
+PASS control/hivpr/seed6: checkpoint replay
+PASS control/hivpr/seed7: checkpoint replay
+PASS control/herg/seed42: checkpoint replay
+PASS control/herg/seed1: checkpoint replay
+PASS control/herg/seed2: checkpoint replay
+PASS control/herg/seed3: checkpoint replay
+PASS control/herg/seed4: checkpoint replay
+PASS control/herg/seed5: checkpoint replay
+PASS control/herg/seed6: checkpoint replay
+PASS control/herg/seed7: checkpoint replay
+PASS control/mpro/seed42: checkpoint replay
+PASS control/mpro/seed1: checkpoint replay
+PASS control/mpro/seed2: checkpoint replay
+PASS control/mpro/seed3: checkpoint replay
+PASS control/mpro/seed4: checkpoint replay
+PASS control/mpro/seed5: checkpoint replay
+PASS control/mpro/seed6: checkpoint replay
+PASS control/mpro/seed7: checkpoint replay
+PASS control/abl1/seed42: checkpoint replay
+PASS control/abl1/seed1: checkpoint replay
+PASS control/abl1/seed2: checkpoint replay
+PASS control/abl1/seed3: checkpoint replay
+PASS control/abl1/seed4: checkpoint replay
+PASS control/abl1/seed5: checkpoint replay
+PASS control/abl1/seed6: checkpoint replay
+PASS control/abl1/seed7: checkpoint replay
+PASS control/vegfr2/seed42: checkpoint replay
+PASS control/vegfr2/seed1: checkpoint replay
+PASS control/vegfr2/seed2: checkpoint replay
+PASS control/vegfr2/seed3: checkpoint replay
+PASS control/vegfr2/seed4: checkpoint replay
+PASS control/vegfr2/seed5: checkpoint replay
+PASS control/vegfr2/seed6: checkpoint replay
+PASS control/vegfr2/seed7: checkpoint replay
+PASS extended/a2a/seed42: checkpoint replay
+PASS extended/a2a/seed1: checkpoint replay
+PASS extended/a2a/seed2: checkpoint replay
+PASS extended/a2a/seed3: checkpoint replay
+PASS extended/a2a/seed4: checkpoint replay
+PASS extended/a2a/seed5: checkpoint replay
+PASS extended/a2a/seed6: checkpoint replay
+PASS extended/a2a/seed7: checkpoint replay
+PASS extended/egfr/seed42: checkpoint replay
+PASS extended/egfr/seed1: checkpoint replay
+PASS extended/egfr/seed2: checkpoint replay
+PASS extended/egfr/seed3: checkpoint replay
+PASS extended/egfr/seed4: checkpoint replay
+PASS extended/egfr/seed5: checkpoint replay
+PASS extended/egfr/seed6: checkpoint replay
+PASS extended/egfr/seed7: checkpoint replay
+PASS extended/egfr_full/seed42: checkpoint replay
+PASS extended/egfr_full/seed1: checkpoint replay
+PASS extended/egfr_full/seed2: checkpoint replay
+PASS extended/egfr_full/seed3: checkpoint replay
+PASS extended/egfr_full/seed4: checkpoint replay
+PASS extended/egfr_full/seed5: checkpoint replay
+PASS extended/egfr_full/seed6: checkpoint replay
+PASS extended/egfr_full/seed7: checkpoint replay
+PASS extended/hivpr/seed42: checkpoint replay
+PASS extended/hivpr/seed1: checkpoint replay
+PASS extended/hivpr/seed2: checkpoint replay
+PASS extended/hivpr/seed3: checkpoint replay
+PASS extended/hivpr/seed4: checkpoint replay
+PASS extended/hivpr/seed5: checkpoint replay
+PASS extended/hivpr/seed6: checkpoint replay
+PASS extended/hivpr/seed7: checkpoint replay
+PASS extended/herg/seed42: checkpoint replay
+PASS extended/herg/seed1: checkpoint replay
+PASS extended/herg/seed2: checkpoint replay
+PASS extended/herg/seed3: checkpoint replay
+PASS extended/herg/seed4: checkpoint replay
+PASS extended/herg/seed5: checkpoint replay
+PASS extended/herg/seed6: checkpoint replay
+PASS extended/herg/seed7: checkpoint replay
+PASS extended/mpro/seed42: checkpoint replay
+PASS extended/mpro/seed1: checkpoint replay
+PASS extended/mpro/seed2: checkpoint replay
+PASS extended/mpro/seed3: checkpoint replay
+PASS extended/mpro/seed4: checkpoint replay
+PASS extended/mpro/seed5: checkpoint replay
+PASS extended/mpro/seed6: checkpoint replay
+PASS extended/mpro/seed7: checkpoint replay
+PASS extended/abl1/seed42: checkpoint replay
+PASS extended/abl1/seed1: checkpoint replay
+PASS extended/abl1/seed2: checkpoint replay
+PASS extended/abl1/seed3: checkpoint replay
+PASS extended/abl1/seed4: checkpoint replay
+PASS extended/abl1/seed5: checkpoint replay
+PASS extended/abl1/seed6: checkpoint replay
+PASS extended/abl1/seed7: checkpoint replay
+PASS extended/vegfr2/seed42: checkpoint replay
+PASS extended/vegfr2/seed1: checkpoint replay
+PASS extended/vegfr2/seed2: checkpoint replay
+PASS extended/vegfr2/seed3: checkpoint replay
+PASS extended/vegfr2/seed4: checkpoint replay
+PASS extended/vegfr2/seed5: checkpoint replay
+PASS extended/vegfr2/seed6: checkpoint replay
+PASS extended/vegfr2/seed7: checkpoint replay
+{
+  "status": "accepted",
+  "jobs_accepted": 128,
+  "paired_rows": 64,
+  "flags_by_arm": {
+    "control": {
+      "native": 23,
+      "common": 23
+    },
+    "extended": {
+      "native": 22,
+      "common": 22
+    }
+  }
+}

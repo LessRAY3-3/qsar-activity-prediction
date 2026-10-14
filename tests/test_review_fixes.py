@@ -13,11 +13,11 @@ def test_asof_labels_ignore_future_censored_and_undated_records(load_script):
     mod = load_script("gnn_08_time_splits")
     # First molecule reproduces the reported 1999 / 2024 median contamination.
     acts = pd.DataFrame({
-        "canonical_smiles": ["CCO", "CCO.Cl", "CCO", "CCO", "CCO", "CCN", "CCC"],
-        "document_chembl_id": ["old", "old", "future", "old", "unknown", "valid", "future"],
-        "standard_value": [8, 2000, 8, 0.01, 0.01, 100, 1000],
-        "standard_units": ["nM"] * 7,
-        "standard_relation": [" = ", "=", "=", "<", "=", "=", "="],
+        "canonical_smiles": ["CCO", "CCO.Cl", "CCO", "CCO", "CCO", "CCN", "CCC", "CCCC"],
+        "document_chembl_id": ["old", "old", "future", "old", "unknown", "valid", "future", "unknown"],
+        "standard_value": [8, 2000, 8, 0.01, 0.01, 100, 1000, 100],
+        "standard_units": ["nM"] * 8,
+        "standard_relation": [" = ", "=", "=", "<", "=", "=", "=", "="],
     })
     years = pd.DataFrame({"document_chembl_id": ["old", "valid", "future"],
                           "document_year": [1999, 2019, 2024]})

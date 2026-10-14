@@ -11,8 +11,8 @@ index-dependent carbon tail), one document per molecule with a synthetic
     one-line summary;
   * guards: 3-year span -> {TAG}_time_NA.json marker, no npz, exit 0;
     busiest year < 100 molecules -> same marker; 2 of 200 SMILES
-    unjoinable (99.0% coverage) -> pinned for cutoff selection, then
-    excluded from training for lack of dated labels; 12 of 200 unjoinable (94%, below
+    undated (99.0% coverage) -> pinned for cutoff selection, then
+    excluded from training for lack of dated labels; 12 of 200 undated (94%, below
     FILL_YEAR_COVERAGE) -> SystemExit; missing
     document_years.csv -> SystemExit naming fetch_document_years.py;
   * M1/03 regime: activities rows written as salt forms while the npz
@@ -20,6 +20,11 @@ index-dependent carbon tail), one document per molecule with a synthetic
     (200/200 coverage, exact per-molecule years), no coverage collapse.
 """
 import json
+import os
+from pathlib import Path
+import subprocess
+import sys
+import time
 
 import numpy as np
 import pandas as pd
@@ -69,7 +74,12 @@ def _write_inputs(tmp_path, years, broken=(), salt=()):
     Indices in ``salt`` are written to activities.csv as a multi-fragment
     (salt) form while the npz keeps the plain SMILES - the M1/03 regime.
     """
-    smiles = np.array(_smiles())
+    # Match the real cache contract: raw strings are standardized by 02
+    # once before 03 exports their parent keys.
+    import importlib
+    parent = importlib.import_module("02_clean_data")._parent_smiles
+    raw_smiles = np.array(_smiles())
+    smiles = np.array([parent(s)[0] for s in raw_smiles])
     years = np.asarray(years)
     assert len(years) == len(smiles)
 
@@ -88,7 +98,7 @@ def _write_inputs(tmp_path, years, broken=(), salt=()):
     broken = set(broken)
     salt = set(salt)
     act_rows, year_rows = [], []
-    for i, smi in enumerate(smiles):
+    for i, smi in enumerate(raw_smiles):
         act_smi = f"{smi}.Cl" if i in salt else smi
         act_rows.append((act_smi, f"DOC{i:03d}"))
         if i % 7 == 0:
@@ -153,7 +163,8 @@ def test_happy_path_disjoint_exhaustive_and_artifacts(tmp_path, monkeypatch, mod
     assert not (set(tr) & set(va) or set(tr) & set(te) or set(va) & set(te))
     assert set(tr) | set(va) | set(te) == set(range(N))
 
-    smiles = np.array(_smiles())
+    with np.load(paths["npz"]) as cache:
+        smiles = cache["smiles"]
     np.testing.assert_array_equal(out["smiles"], smiles)
     np.testing.assert_array_equal(out["scaffold_smiles"], murcko_scaffold_list(smiles))
 
@@ -208,13 +219,39 @@ def test_salt_activities_join_years_on_parent_keys(tmp_path, monkeypatch, mod, c
 
     d = np.load(paths["splits"] / f"{mod.TAG}_time.npz")
     np.testing.assert_array_equal(d["year"].astype(int), _years())  # per-molecule years exact
-    np.testing.assert_array_equal(d["smiles"], np.array(_smiles()))  # npz smiles untouched
+    with np.load(paths["npz"]) as cache:
+        np.testing.assert_array_equal(d["smiles"], cache["smiles"])
+
+
+def test_cached_parent_is_not_standardized_twice(mod):
+    """CHEMBL2035183 has a non-idempotent parent round trip in pinned RDKit.
+
+    Its exact 2012 record belongs in the pre-2016 training pool, even when
+    reparsing the parent cache would produce a different SMILES string.
+    """
+    raw = "C1=C/COCc2cc(ccc2OCCN2CCCC2)Nc2nccc(n2)-c2ccc(s2)COC/1"
+    cached_parent = mod._parent_smiles(raw)[0]
+    assert mod._parent_smiles(cached_parent)[0] != cached_parent, (
+        "Pinned RDKit no longer reproduces CHEMBL2035183's non-idempotent round trip; "
+        "refresh this real regression case explicitly (do not silently pass).")
+    smiles = np.array([cached_parent])
+    acts = pd.DataFrame({"canonical_smiles": [raw],
+                         "document_chembl_id": ["CHEMBL2034857"],
+                         "standard_value": [7200.], "standard_units": ["nM"],
+                         "standard_relation": ["="]})
+    years = pd.DataFrame({"document_chembl_id": ["CHEMBL2034857"],
+                          "document_year": [2012]})
+    np.testing.assert_array_equal(mod.assign_years(smiles, acts, years), [2012.])
+    pools = [np.array([0]), np.array([], dtype=int), np.array([], dtype=int)]
+    y, retained, excluded = mod.asof_labels(smiles, acts, years, pools, 2016, 2018)
+    assert float(y[0]) == pytest.approx(9 - np.log10(7200), abs=1e-6)
+    assert retained[0].tolist() == [0]
+    assert len(excluded) == 0
 
 
 def test_short_year_span_writes_na_marker(tmp_path, monkeypatch, mod, capsys):
     paths = _setup(tmp_path, monkeypatch, mod, years=_years_short())
-    np.savez(paths["splits"] / f"{mod.TAG}_time.npz", train_idx=[0], test_idx=[1])
-    assert mod.main([]) is None  # NA is a normal, successful exit
+    assert mod.main([]) is None  # A legitimately unavailable first split may be marked NA
 
     payload = json.loads((paths["splits"] / f"{mod.TAG}_time_NA.json").read_text())
     for key in ("tag", "reason", "year_min", "year_max", "n_in_latest_year"):
@@ -237,7 +274,7 @@ def test_sparse_busiest_year_writes_na_marker(tmp_path, monkeypatch, mod):
     assert not (paths["splits"] / f"{mod.TAG}_time.npz").exists()
 
 
-def test_two_unjoinable_smiles_excluded_after_cutoff_selection(tmp_path, monkeypatch, mod, capsys):
+def test_two_raw_structures_without_document_years_are_excluded(tmp_path, monkeypatch, mod, capsys):
     paths = _setup(tmp_path, monkeypatch, mod, broken=(30, 77))
     mod.main([])
     printed = capsys.readouterr().out
@@ -245,7 +282,7 @@ def test_two_unjoinable_smiles_excluded_after_cutoff_selection(tmp_path, monkeyp
     assert "pinning them to year_min" in printed
     d = np.load(paths["splits"] / f"{mod.TAG}_time.npz")
     assert not np.isnan(d["year"]).any()
-    filled = {_smiles()[30], _smiles()[77]}
+    filled = set(d["smiles"][[30, 77]].tolist())
     train_smiles = set(np.asarray(d["smiles"], dtype=str)[d["train_idx"]].tolist())
     assert not (filled & train_smiles)
     assert set(d["excluded_idx"]) == {30, 77}
@@ -304,18 +341,373 @@ def test_prediction_version_checks_rows_and_actual_labels(tmp_path, monkeypatch,
     good = dict(label_id=sp["label_id"], test_idx=sp["test_idx"],
                 y_true=sp["y"][sp["test_idx"]])
     require_prediction_version(good, sp)
+    # Keep the actual labels and row order identical so only the version gate
+    # can reject an older campaign (the test must kill removal of that gate).
+    for stale_id in ("0" * 64, ""):
+        with pytest.raises(ValueError, match="label version differs"):
+            require_prediction_version({**good, "label_id": stale_id}, sp)
+    with pytest.raises(ValueError, match="label version differs"):
+        require_prediction_version({k: v for k, v in good.items() if k != "label_id"}, sp)
     with pytest.raises(ValueError, match="test indices"):
         require_prediction_version({**good, "test_idx": good["test_idx"][::-1]}, sp)
     with pytest.raises(ValueError, match="labels differ"):
         require_prediction_version({**good, "y_true": good["y_true"] + 0.1}, sp)
 
 
-def test_failed_regeneration_invalidates_old_split(tmp_path, monkeypatch, mod):
+def test_failed_regeneration_preserves_readable_old_split(tmp_path, monkeypatch, mod):
+    from time_labels import load_time_split
     paths = _setup(tmp_path, monkeypatch, mod)
-    stale = paths["splits"] / f"{mod.TAG}_time.npz"
-    np.savez(stale, train_idx=[0], test_idx=[1])
+    mod.main([])
+    existing = paths["splits"] / f"{mod.TAG}_time.npz"
+    original = existing.read_bytes()
     paths["years"].unlink()
     with pytest.raises(SystemExit):
         mod.main([])
-    assert not stale.exists()
-    assert (paths["splits"] / f"{mod.TAG}_time_NA.json").exists()
+    assert existing.read_bytes() == original
+    assert not (paths["splits"] / f"{mod.TAG}_time_NA.json").exists()
+    assert load_time_split(paths["splits"], mod.TAG) is not None
+
+
+@pytest.mark.parametrize("cached", ["C1=CC=CC=C1", "c1ccccc1.Cl"])
+def test_cached_key_missing_from_raw_fails_with_row_and_key(mod, cached):
+    acts = pd.DataFrame({"canonical_smiles": ["CC", "c1ccccc1"],
+                         "document_chembl_id": ["D0", "D1"],
+                         "standard_value": [100., 100.], "standard_units": ["nM", "nM"],
+                         "standard_relation": ["=", "="]})
+    years = pd.DataFrame({"document_chembl_id": ["D0", "D1"], "document_year": [2000, 2001]})
+    keys = np.array(["CC", cached])
+    pools = [np.array([0, 1]), np.array([], dtype=int), np.array([], dtype=int)]
+    for call in (lambda: mod.assign_years(keys, acts, years),
+                 lambda: mod.asof_labels(keys, acts, years, pools, 2010, 2020)):
+        with pytest.raises(ValueError, match="cached parent key") as error:
+            call()
+        assert "row=1" in str(error.value) and repr(cached) in str(error.value)
+
+
+@pytest.mark.parametrize("missing", ["document", "year", "exact_measurement"])
+def test_raw_structure_exists_but_metadata_or_eligible_label_missing_is_allowed(mod, missing):
+    acts = pd.DataFrame({"canonical_smiles": ["CC"], "document_chembl_id": ["D"],
+                         "standard_value": [100.], "standard_units": ["nM"],
+                         "standard_relation": ["="]})
+    years = pd.DataFrame({"document_chembl_id": ["D"], "document_year": [2000.]})
+    if missing == "document":
+        acts.loc[0, "document_chembl_id"] = None
+    elif missing == "year":
+        years.loc[0, "document_year"] = np.nan
+    else:
+        acts.loc[0, "standard_relation"] = ">"
+    keys = np.array(["CC"])
+    pools = [np.array([0]), np.array([], dtype=int), np.array([], dtype=int)]
+    assigned = mod.assign_years(keys, acts, years)
+    assert np.isnan(assigned[0]) if missing != "exact_measurement" else assigned[0] == 2000
+    y, retained, excluded = mod.asof_labels(keys, acts, years, pools, 2010, 2020)
+    assert np.isnan(y[0]) and excluded.tolist() == [0]
+    assert all(len(idx) == 0 for idx in retained)
+
+
+def test_asof_exact_record_boundaries_median_and_units(mod):
+    # Explicit pIC50 answers: train median(6,7,4)=6; validation median(6,7)=6.5;
+    # test median(5,7)=6. Boundary/future records carry very different values.
+    records = [
+        ("CC", 2009, 1000., "nM", "="),
+        ("CC", 2009, 100., "nM", "="),
+        ("CC", 2009, 100000., "nM", "="),
+        ("CC", 2010, 1., "nM", "="),
+        ("CC", 2019, .1, "nM", "="),
+        ("CC", 2020, .01, "nM", "="),
+        ("CCC", 2010, 1000., "nM", "="),
+        ("CCC", 2019, 100., "nM", "="),
+        ("CCC", 2020, 1., "nM", "="),
+        ("CCCC", 2019, 1., "nM", "="),
+        ("CCCC", 2020, 10000., "nM", "="),
+        ("CCCC", 2021, 100., "nM", "="),
+        ("CCO", 2009, 1., "uM", "="),
+        ("CCO", 2009, 1., "nM", ">"),
+    ]
+    acts = pd.DataFrame(records, columns=["canonical_smiles", "year", "standard_value",
+                                         "standard_units", "standard_relation"])
+    acts["document_chembl_id"] = [f"D{i}" for i in range(len(acts))]
+    years = acts[["document_chembl_id", "year"]].rename(columns={"year": "document_year"})
+    keys = np.array(["CC", "CCC", "CCCC", "CCO"])
+    pools = [np.array([0, 3]), np.array([1]), np.array([2])]
+    y, retained, excluded = mod.asof_labels(keys, acts, years, pools, 2010, 2020)
+    np.testing.assert_allclose(y[:3], [6., 6.5, 6.], atol=1e-6, rtol=0)
+    assert np.isnan(y[3])
+    assert [idx.tolist() for idx in retained] == [[0], [1], [2]]
+    assert excluded.tolist() == [3]
+
+
+def test_single_structural_mismatch_aborts_instead_of_becoming_an_exclusion(tmp_path, monkeypatch, mod):
+    paths = _setup(tmp_path, monkeypatch, mod)
+    with np.load(paths["npz"]) as cache:
+        data = dict(cache)
+    # Only 0.5% affected: year-coverage thresholds must not hide this mismatch.
+    keys = data["smiles"].astype(object)
+    keys[30] = str(keys[30]) + ".Cl"
+    data["smiles"] = keys.astype(str)
+    np.savez(paths["npz"], **data)
+    with pytest.raises(ValueError, match="row=30"):
+        mod.main([])
+    assert not (paths["splits"] / f"{mod.TAG}_time.npz").exists()
+    assert not (paths["splits"] / f"{mod.TAG}_time_NA.json").exists()
+
+
+
+def test_cached_parent_is_not_renormalized_independently_of_rdkit_version(monkeypatch, mod):
+    raw, parent = "raw structure key", "cached parent key"
+    seen = []
+    def non_idempotent(value):
+        seen.append(value)
+        if value == raw:
+            return parent, None
+        raise AssertionError("Cached parent was normalized a second time")
+    monkeypatch.setattr(mod, "_parent_smiles", non_idempotent)
+    acts = pd.DataFrame({"canonical_smiles": [raw], "document_chembl_id": ["D"],
+                         "standard_value": [7200.], "standard_units": ["nM"], "standard_relation": ["="]})
+    years = pd.DataFrame({"document_chembl_id": ["D"], "document_year": [2012]})
+    keys = np.array([parent])
+    np.testing.assert_array_equal(mod.assign_years(keys, acts, years), [2012.])
+    y, _, excluded = mod.asof_labels(keys, acts, years,
+                                     [np.array([0]), np.array([], dtype=int), np.array([], dtype=int)],
+                                     2016, 2018)
+    assert y[0] == pytest.approx(9 - np.log10(7200), abs=1e-6)
+    assert not len(excluded) and seen == [raw, raw]
+
+
+def test_unavailable_regeneration_preserves_old_split_and_returns_error(tmp_path, monkeypatch, mod):
+    paths = _setup(tmp_path, monkeypatch, mod)
+    mod.main([])
+    existing = paths["splits"] / f"{mod.TAG}_time.npz"
+    original = existing.read_bytes()
+    years = pd.read_csv(paths["years"])
+    years["document_year"] = 2020
+    years.to_csv(paths["years"], index=False)
+    with pytest.raises(ValueError, match="existing split retained"):
+        mod.main([])
+    assert existing.read_bytes() == original
+    assert not (paths["splits"] / f"{mod.TAG}_time_NA.json").exists()
+
+
+def test_plot_failure_does_not_publish_new_split_or_invalidate_old_one(tmp_path, monkeypatch, mod):
+    paths = _setup(tmp_path, monkeypatch, mod)
+    mod.main([])
+    existing = paths["splits"] / f"{mod.TAG}_time.npz"
+    figure = paths["figs"] / f"{mod.TAG}_timeline.png"
+    original, original_figure = existing.read_bytes(), figure.read_bytes()
+    def fail_plot(*args, **kwargs):
+        raise OSError("injected plot failure")
+    monkeypatch.setattr(mod, "plot_timeline", fail_plot)
+    with pytest.raises(OSError, match="plot failure"):
+        mod.main([])
+    assert existing.read_bytes() == original and figure.read_bytes() == original_figure
+    assert not (paths["splits"] / f"{mod.TAG}_time_NA.json").exists()
+
+
+def test_full_integrity_digest_covers_scaffolds_without_changing_legacy_label_id(tmp_path, monkeypatch, mod):
+    from time_labels import label_signature, load_time_split
+    paths = _setup(tmp_path, monkeypatch, mod)
+    mod.main([])
+    file = paths["splits"] / f"{mod.TAG}_time.npz"
+    good = load_time_split(paths["splits"], mod.TAG)
+    original_id = str(good["label_id"])
+    bad = dict(good, scaffold_smiles=good["scaffold_smiles"].copy())
+    bad["scaffold_smiles"][0] = "different"
+    assert label_signature(bad) == original_id  # legacy ID algorithm remains compatible
+    np.savez(file, **bad)
+    with pytest.raises(ValueError, match="full-payload integrity mismatch"):
+        load_time_split(paths["splits"], mod.TAG)
+    for missing in ("integrity_schema", "integrity_sha256"):
+        incomplete = {key: value for key, value in good.items() if key != missing}
+        np.savez(file, **incomplete)
+        with pytest.raises(ValueError, match="integrity schema"):
+            load_time_split(paths["splits"], mod.TAG)
+    historical = {key: value for key, value in good.items() if not key.startswith("integrity_")}
+    np.savez(file, **historical)
+    restored = load_time_split(paths["splits"], mod.TAG)
+    assert str(restored["label_id"]) == original_id
+    np.testing.assert_array_equal(restored["scaffold_smiles"], good["scaffold_smiles"])
+
+
+@pytest.mark.skipif(os.name != "posix", reason="POSIX signal interruption test")
+def test_sigkill_during_regeneration_keeps_existing_split(tmp_path, monkeypatch, mod):
+    paths = _setup(tmp_path, monkeypatch, mod)
+    mod.main([])
+    existing = paths["splits"] / f"{mod.TAG}_time.npz"
+    original = existing.read_bytes()
+    ready = tmp_path / "ready"
+    code = """
+import importlib, pathlib, signal, sys
+sys.path.insert(0, sys.argv[1])
+module = importlib.import_module('gnn_08_time_splits')
+def interrupted_plot(*args, **kwargs):
+    pathlib.Path(sys.argv[-1]).touch()
+    signal.pause()
+module.plot_timeline = interrupted_plot
+module.run('egfr', *sys.argv[2:-1])
+"""
+    args = [str(paths[key]) for key in ("npz", "acts", "years", "splits", "figs")]
+    process = subprocess.Popen([sys.executable, "-B", "-c", code,
+                                str(Path(mod.__file__).parent), *args, str(ready)],
+                               stdout=subprocess.DEVNULL, stderr=subprocess.PIPE)
+    try:
+        deadline = time.monotonic() + 30
+        while not ready.exists() and time.monotonic() < deadline:
+            assert process.poll() is None, "regeneration exited before interruption point"
+            time.sleep(0.02)
+        assert ready.exists(), "regeneration did not reach interruption point"
+        process.kill()
+        process.wait(timeout=10)
+        assert existing.read_bytes() == original
+        assert not (paths["splits"] / "egfr_time_NA.json").exists()
+    finally:
+        if process.poll() is None:
+            process.kill()
+            process.wait(timeout=10)
+        process.stderr.close()
+
+
+@pytest.mark.parametrize("same_split_bytes", [False, True])
+def test_npz_publication_failure_rolls_back_already_replaced_timeline(
+        tmp_path, monkeypatch, mod, same_split_bytes):
+    paths = _setup(tmp_path, monkeypatch, mod)
+    mod.main([])
+    split = paths["splits"] / "egfr_time.npz"
+    figure = paths["figs"] / "egfr_timeline.png"
+    old_split, old_figure = split.read_bytes(), figure.read_bytes()
+    staged_split, staged_figure = tmp_path / "next.npz", tmp_path / "next.png"
+    staged_split.write_bytes(old_split if same_split_bytes else b"next split payload")
+    staged_figure.write_bytes(b"distinct next figure payload")
+    original_replace = mod._atomic_replace
+    def fail_npz(source, destination):
+        if Path(destination) == split:
+            assert figure.read_bytes() == staged_figure.read_bytes()
+            raise OSError("injected second canonical replacement failure")
+        return original_replace(source, destination)
+    monkeypatch.setattr(mod, "_atomic_replace", fail_npz)
+    with pytest.raises(OSError, match="second canonical"):
+        mod._publish_pair(staged_split, staged_figure, paths["splits"], paths["figs"], "egfr")
+    assert split.read_bytes() == old_split
+    assert figure.read_bytes() == old_figure
+    assert not (paths["splits"] / ".egfr_time_publication").exists()
+    record = json.loads((paths["splits"] / ".egfr_time_last_publication.json").read_text())
+    assert record["outcome"] == "rolled_back"
+
+
+def test_first_publication_failure_removes_new_figure_and_leaves_no_split(tmp_path, monkeypatch, mod):
+    split_dir, fig_dir = tmp_path / "splits", tmp_path / "figures"
+    split_dir.mkdir()
+    candidate, figure = tmp_path / "candidate.npz", tmp_path / "candidate.png"
+    candidate.write_bytes(b"complete candidate")
+    figure.write_bytes(b"complete figure")
+    original_replace = mod._atomic_replace
+    def fail_npz(source, destination):
+        if Path(destination) == split_dir / "egfr_time.npz":
+            raise OSError("injected first publication failure")
+        return original_replace(source, destination)
+    monkeypatch.setattr(mod, "_atomic_replace", fail_npz)
+    with pytest.raises(OSError, match="first publication"):
+        mod._publish_pair(candidate, figure, split_dir, fig_dir, "egfr")
+    assert not (split_dir / "egfr_time.npz").exists()
+    assert not (fig_dir / "egfr_timeline.png").exists()
+
+
+@pytest.mark.skipif(os.name != "posix", reason="POSIX signal interruption test")
+@pytest.mark.parametrize("after_commit", [False, True])
+def test_sigkill_between_publication_steps_is_recovered_before_next_input_read(
+        tmp_path, monkeypatch, mod, after_commit):
+    paths = _setup(tmp_path, monkeypatch, mod)
+    mod.main([])
+    split, figure = paths["splits"] / "egfr_time.npz", paths["figs"] / "egfr_timeline.png"
+    old_split, old_figure = split.read_bytes(), figure.read_bytes()
+    # Real changed year input produces a genuinely different NPZ and timeline.
+    years = pd.read_csv(paths["years"])
+    years["document_year"] += 1
+    years.to_csv(paths["years"], index=False)
+    ready = tmp_path / "publication_ready"
+    code = """
+import importlib, pathlib, signal, sys
+sys.path.insert(0, sys.argv[1])
+module = importlib.import_module('gnn_08_time_splits')
+original = module._atomic_replace
+split = pathlib.Path(sys.argv[5]) / 'egfr_time.npz'
+after_commit = sys.argv[-1] == 'True'
+def interrupted_replace(source, destination):
+    if pathlib.Path(destination) == split:
+        if after_commit:
+            original(source, destination)
+        pathlib.Path(sys.argv[-2]).touch()
+        signal.pause()
+    return original(source, destination)
+module._atomic_replace = interrupted_replace
+module.run('egfr', *sys.argv[2:7])
+"""
+    args = [str(paths[key]) for key in ("npz", "acts", "years", "splits", "figs")]
+    process = subprocess.Popen([sys.executable, "-B", "-c", code,
+                                str(Path(mod.__file__).parent), *args, str(ready), str(after_commit)],
+                               stdout=subprocess.DEVNULL, stderr=subprocess.PIPE)
+    try:
+        deadline = time.monotonic() + 30
+        while not ready.exists() and time.monotonic() < deadline:
+            assert process.poll() is None, "publication exited before interruption point"
+            time.sleep(0.02)
+        assert ready.exists(), "publication did not reach interruption point"
+        assert figure.read_bytes() != old_figure
+        assert (split.read_bytes() != old_split) == after_commit
+        journal = paths["splits"] / ".egfr_time_publication"
+        assert (journal / "pending.json").exists()
+        # A live process must not be mistaken for an interrupted transaction.
+        with pytest.raises(RuntimeError, match="another time split regeneration"):
+            mod.main([])
+        assert (journal / "pending.json").exists()
+        process.kill()
+        process.wait(timeout=10)
+        published_split, published_figure = split.read_bytes(), figure.read_bytes()
+        paths["years"].unlink()
+        with pytest.raises(SystemExit, match="document years"):
+            mod.main([])
+        assert not journal.exists()
+        record = json.loads((paths["splits"] / ".egfr_time_last_publication.json").read_text())
+        if after_commit:
+            assert record["outcome"] == "committed"
+            assert split.read_bytes() == published_split and figure.read_bytes() == published_figure
+        else:
+            assert record["outcome"] == "rolled_back"
+            assert split.read_bytes() == old_split and figure.read_bytes() == old_figure
+    finally:
+        if process.poll() is None:
+            process.kill()
+            process.wait(timeout=10)
+        process.stderr.close()
+
+
+def test_pending_publication_refuses_external_figure_edits(tmp_path, monkeypatch, mod):
+    split_dir, fig_dir = tmp_path / "splits", tmp_path / "figures"
+    split_dir.mkdir()
+    fig_dir.mkdir()
+    target, figure = split_dir / "egfr_time.npz", fig_dir / "egfr_timeline.png"
+    target.write_bytes(b"old split")
+    figure.write_bytes(b"old figure")
+    candidate, candidate_figure = tmp_path / "next.npz", tmp_path / "next.png"
+    candidate.write_bytes(b"new split")
+    candidate_figure.write_bytes(b"new figure")
+    original_replace, original_recover = mod._atomic_replace, mod._recover_publication
+    def fail_npz(source, destination):
+        if Path(destination) == target:
+            raise OSError("injected split publish failure")
+        return original_replace(source, destination)
+    monkeypatch.setattr(mod, "_atomic_replace", fail_npz)
+    monkeypatch.setattr(mod, "_recover_publication", lambda *args: None)
+    with pytest.raises(OSError):
+        mod._publish_pair(candidate, candidate_figure, split_dir, fig_dir, "egfr")
+    figure.write_bytes(b"external user edit")
+    with pytest.raises(ValueError, match="figure changed externally"):
+        original_recover(split_dir, fig_dir, "egfr")
+    assert figure.read_bytes() == b"external user edit" and target.read_bytes() == b"old split"
+    assert (split_dir / ".egfr_time_publication/pending.json").exists()
+    # A previously completed rollback may have been killed during journal
+    # cleanup, after deleting the backup. Recovery must remain idempotent.
+    figure.write_bytes(b"old figure")
+    (split_dir / ".egfr_time_publication/previous_timeline.png").unlink()
+    original_recover(split_dir, fig_dir, "egfr")
+    assert not (split_dir / ".egfr_time_publication").exists()
+    assert figure.read_bytes() == b"old figure"

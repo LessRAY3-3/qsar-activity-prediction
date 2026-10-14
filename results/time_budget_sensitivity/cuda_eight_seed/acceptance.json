@@ -1,0 +1,33 @@
+{
+  "status": "accepted",
+  "audited_at": "2026-10-14T14:27:16.275993+00:00",
+  "training_core_commit": "90a470050367cebc4cd83dfe8d3f7fb37d53e6de",
+  "supplement_bundle_commit": "85210630c475e8733089a476b8d5bf4852dbf773",
+  "deployment_commit": "d7864b0636848a5fd0130b5830aab5d9e25c8ce6",
+  "jobs": 128,
+  "report": "analysis/report.json",
+  "report_sha256": "e86c75e3d56864a1f1562c5108019e4cce47cc2a3163648a0230a0d4fbf21f8b",
+  "summary_sha256": "ee142c8de75ca185d0a50caa43dd05c6437aaffdc0cf52635ac317c6b29b6cbb",
+  "auditor_sha256": "5573f3844f220eb439e89536aa8996b9ec287692a50e07e93e845734c1f00ba8",
+  "archive": "artifacts/study.tar.gz",
+  "archive_sha256": "ad770666def4edbcbb51778e538480d3f6f8b949b9d1d12940c952307fb374b2",
+  "archive_bytes": 88569135,
+  "archive_files": 3426,
+  "archive_manifest_sha256": "23185c21fbfa26c42d3efa20bae7e22d7b44ce67f44b1607a8f4713310ef6685",
+  "archive_verification": "full archive/member verification independently passed on M4 Air and M3 Max",
+  "replay": {
+    "device": "cpu",
+    "torch_threads": 4,
+    "torch_interop_threads": 1,
+    "torch_version": "2.14.0",
+    "python": "3.12.14",
+    "platform": "macOS-27.0-arm64-arm-64bit",
+    "absolute_tolerance": 1e-05,
+    "max_test_prediction_abs_error": 1.9073486328125e-06,
+    "max_train_mse_abs_error": 1.7881393432617188e-07,
+    "max_valid_rmse_abs_error": 1.1920928955078125e-07
+  },
+  "main_results_changed": false,
+  "m3_results_changed": false,
+  "historical_result_identity_claimed": false
+}

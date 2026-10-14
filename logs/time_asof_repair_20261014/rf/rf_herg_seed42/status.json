@@ -1,0 +1,81 @@
+{
+  "artifacts": {
+    "figures/pred_vs_actual_time_herg.png": "8fdbbe79ead6fc8e72a17b1b2fe0b6010a63122d16429ee746c6c2fbd00eed92",
+    "models/rf_time_split_herg.joblib": "514a3f9a4aa01e82801e241d46113fb171d18f3446d6473eff78821902ac7908",
+    "results/metrics_herg.json": "55f5ebebddc8b42acc4ff04fa7ef64642b8287484046e42862a4c7ebd6b34754",
+    "results/rf_preds_herg_time.npz": "f4818b247dd6ba553de567f532f832b19cb5d0d42a876035f7934e1d4055c47d"
+  },
+  "command": [
+    "/Users/leisirui/qsar-campaigns/time-asof-20261013-7ce15c1-rf/.venv/bin/python",
+    "scripts/04_train_and_evaluate.py",
+    "--split",
+    "time"
+  ],
+  "elapsed_seconds": 1625.0758199999982,
+  "finished_at": "2026-10-13T16:32:19.415231+00:00",
+  "git": {
+    "diff_sha256": "ba691ba042bcedd9a61a36f5969026bc95859dccdc7e47f24e6bce35673baf2f",
+    "dirty_status": "unavailable",
+    "revision": "unavailable"
+  },
+  "host": "leisiruideMacBook-Pro.local",
+  "log": "20261013T160514_bfcb7567/train.log",
+  "pid": 15230,
+  "provenance": {
+    "bundle_manifest": {
+      "sha256": "f1605d440ccb31bbdc75c773e8fb217d31607ad7c36def45b6f63325ae3406ad",
+      "source_git_head": "d13f9125af56028f60e099ec2e914dd2509c239e"
+    },
+    "code": {
+      "scripts/04_train_and_evaluate.py": "a8cb621f18279ab7ea0a0ca515ef45bf52d71bf1fb91a50993d66b13709ae329",
+      "scripts/qsar_common.py": "86be4f6672aab3a9564a8e0c7e2213f0cab870154f2ea9b68b13b32c41bb250c",
+      "scripts/run_time_campaign.py": "e48aa8f606f1852ab5990e5069d23fb2b3a62cd7bb32de600b5ed6b7223c8773",
+      "scripts/time_labels.py": "6c88a8a3cede0bf10d69edcbb8d51bc5f004d85293bd34e0a6ccfc659361d9ca"
+    },
+    "command": [
+      "scripts/04_train_and_evaluate.py",
+      "--split",
+      "time"
+    ],
+    "environment": {
+      "packages": {
+        "joblib": "1.6.0",
+        "numpy": "2.5.3",
+        "rdkit": "2026.3.6",
+        "scikit-learn": "1.9.1",
+        "torch": "unavailable",
+        "torch-geometric": "unavailable"
+      },
+      "platform": "macOS-27.0-arm64-arm-64bit",
+      "python": "3.12.14",
+      "variables": {
+        "CUBLAS_WORKSPACE_CONFIG": null,
+        "CUDA_VISIBLE_DEVICES": null,
+        "MKL_NUM_THREADS": "1",
+        "OMP_NUM_THREADS": "1",
+        "OPENBLAS_NUM_THREADS": "1",
+        "PYTHONHASHSEED": null,
+        "QSAR_CV_BACKEND": "loky",
+        "QSAR_RF_JOBS": "16"
+      }
+    },
+    "hyperparameters": {
+      "cv_folds": 5,
+      "device": "cpu",
+      "grid": "PARAM_GRID in hashed RF source",
+      "seed": 42
+    },
+    "inputs": {
+      "data/processed/herg_fingerprints.npz": "78bed5f5f0816091ade54f658d1eaf5479cecd71905ded194e57527a8da71baa",
+      "data/processed/splits/herg_time.npz": "90933252420671d709bdf0de5e4782e6f8351dfe0fb96977c9ee143fcb370647"
+    },
+    "label_id": "369e86d94fe32622d959806abc5379f5487ab2f63282a4642af6c5003c628e93",
+    "role": "rf",
+    "schema": 1,
+    "tag": "herg"
+  },
+  "signature": "7fa67708fb42efe1dcb3cf96cf0538a18857813531a3c1374b5dfa3dc8d55959",
+  "snapshot": "20261013T160514_bfcb7567/outputs",
+  "started_at": "2026-10-13T16:05:14.331156+00:00",
+  "state": "success"
+}

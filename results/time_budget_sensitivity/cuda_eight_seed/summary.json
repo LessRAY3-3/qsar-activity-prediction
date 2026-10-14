@@ -1,0 +1,30 @@
+{
+  "status": "accepted",
+  "jobs": 128,
+  "paired_rows": 64,
+  "seeds": [
+    42,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7
+  ],
+  "training_elapsed_seconds": 1603.772391,
+  "training_started_at": "2026-10-14T13:52:13.216049+00:00",
+  "training_finished_at": "2026-10-14T14:18:56.988440+00:00",
+  "matching_rounded_log_prefixes": 0,
+  "common_flags": {
+    "control": 23,
+    "extended": 22
+  },
+  "mean_paired_deltas": {
+    "delta_train_mse": -0.007161677116528153,
+    "delta_valid_rmse_std": -0.004679489880800247,
+    "delta_test_r2": 0.015597755089402199
+  },
+  "max_prediction_replay_abs_error": 1.9073486328125e-06,
+  "interpretation": "All declared jobs retained. CUDA training prefixes differ for all 64 pairs; budget contrasts include between-run trajectory variation and cannot isolate the effect of extending a common trajectory. Test metrics are secondary. Main campaign models are unchanged."
+}

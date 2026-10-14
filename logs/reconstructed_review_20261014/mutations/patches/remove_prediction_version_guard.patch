@@ -1,0 +1,12 @@
+--- a/scripts/time_labels.py
++++ b/scripts/time_labels.py
+@@ -128,8 +128,7 @@
+ def require_prediction_version(predictions, split):
+     """Prevent a partly rerun campaign from mixing legacy and as-of results."""
+     expected = str(split.get("label_id", ""))
+-    if str(predictions.get("label_id", "")) != expected:
+-        raise ValueError("time prediction label version differs from split; retrain all time models")
++    # MUTATION: accept stale or absent prediction label_id
+     if not expected:
+         raise ValueError("time prediction validation requires a versioned split")
+     if not np.array_equal(predictions.get("test_idx"), split["test_idx"]):

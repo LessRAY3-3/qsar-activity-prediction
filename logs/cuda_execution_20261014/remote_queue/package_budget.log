@@ -1,0 +1,2 @@
+{"state": "collected_pending_independent_audit", "files": 3426, "jobs": 128}
+{"archive": "study.tar.gz", "sha256": "ad770666def4edbcbb51778e538480d3f6f8b949b9d1d12940c952307fb374b2", "bytes": 88569135, "files": 3426, "hardlinks": 2161, "note": "Tar hardlinks reuse identical canonical/snapshot bytes. Extract with a data-only tar filter. Input graphs/splits are supplied separately."}

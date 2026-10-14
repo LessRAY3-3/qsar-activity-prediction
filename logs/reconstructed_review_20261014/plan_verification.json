@@ -1,0 +1,9 @@
+{
+  "status": "passed",
+  "jobs": 18,
+  "source_files": 36,
+  "input_files": 12,
+  "historical_metric_files": 9,
+  "all_sha256_verified": true,
+  "training_started": false
+}

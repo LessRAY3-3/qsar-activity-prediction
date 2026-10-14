@@ -125,7 +125,7 @@ def _record_forest(monkeypatch):
         if len(args) >= 2:
             try:
                 plots.append((float(np.ravel(args[0])[0]),
-                              float(np.ravel(args[1])[0])))
+                              float(np.ravel(args[1])[0]), dict(kwargs)))
             except (TypeError, ValueError):
                 pass
         return orig_p(self, *args, **kwargs)
@@ -223,3 +223,4 @@ def test_combined_forest_fallback_row_uses_panel_summary_for_both(
     markers = [p for p in plots if abs(p[1] - y) < 1e-9]
     assert len(markers) == 1
     assert markers[0][0] == pytest.approx(0.35)
+    assert markers[0][2]["markerfacecolor"] == "white"

@@ -1,0 +1,9 @@
+Matplotlib is building the font cache; this may take a moment.
+Target: Adenosine receptor A2a | Feature matrix: X=(1366, 2048), y range [4.13, 11.72]
+
+=== time split: train=399, test=802 ===
+Fitting 5 folds for each of 12 candidates, totalling 60 fits
+Best params: {'max_depth': None, 'min_samples_split': 2, 'n_estimators': 500}  (CV R2 = 0.591)
+[time]  R2 = -0.273   RMSE = 1.176   MAE = 0.965
+
+Metrics merged -> <RF_CAMPAIGN>/work/results/metrics_a2a.json

@@ -2,7 +2,6 @@
   "tag": "egfr",
   "split": "scaffold",
   "families": {
-    "chromone": "O=c1ccoc2ccccc12",
     "thienopyrimidine": "c1ncc2ccsc2n1"
   },
   "selection": "top-5 per family by |err_gin - err_rf|",
@@ -22,7 +21,7 @@
       "y_true": 8.522878646850586,
       "err_rf": 1.5815208725134546,
       "err_gin": 0.5802497863769531,
-      "gnn_seconds": 1.2,
+      "gnn_seconds": 1.6,
       "gnn_atom_scores": [
         0.0,
         0.2112,
@@ -121,7 +120,7 @@
       "y_true": 8.698969841003418,
       "err_rf": 1.8382066449324297,
       "err_gin": 1.0050230026245115,
-      "gnn_seconds": 0.5,
+      "gnn_seconds": 1.1,
       "gnn_atom_scores": [
         0.206,
         0.8598,
@@ -227,7 +226,7 @@
       "y_true": 8.823908805847168,
       "err_rf": 1.9665161746342985,
       "err_gin": 1.2787775993347168,
-      "gnn_seconds": 0.5,
+      "gnn_seconds": 0.8,
       "gnn_atom_scores": [
         0.0773,
         0.3996,
@@ -330,7 +329,7 @@
       "y_true": 8.301030158996582,
       "err_rf": 1.434138596455259,
       "err_gin": 0.7605996131896973,
-      "gnn_seconds": 0.5,
+      "gnn_seconds": 1.2,
       "gnn_atom_scores": [
         0.0,
         0.7266,
@@ -429,7 +428,7 @@
       "y_true": 9.301030158996582,
       "err_rf": 2.389162616044002,
       "err_gin": 1.7529425621032717,
-      "gnn_seconds": 0.5,
+      "gnn_seconds": 1.7,
       "gnn_atom_scores": [
         0.1832,
         0.3704,

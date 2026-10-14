@@ -53,6 +53,8 @@ def test_control_never_reads_learning_curve(tmp_path, monkeypatch, load_experime
         rf_pools=pools,
         test_sizes={"random": 912, "scaffold": 912},
         n_total=4560,
+        xgb_tests={s: np.arange(3648, 4560) for s in ("random", "scaffold")},
+        rf_tests={s: np.arange(3648, 4560) for s in ("random", "scaffold")},
     )
     for split, r2 in (("random", 0.71), ("scaffold", 0.65)):
         assert control[split]["r2_mean"] == pytest.approx(r2)
@@ -77,6 +79,8 @@ def test_same_pool_false_when_fit_pool_is_train_only(tmp_path, monkeypatch, load
         rf_pools={"random": np.arange(3648), "scaffold": np.arange(3648)},
         test_sizes={"random": 912, "scaffold": 912},
         n_total=4560,
+        xgb_tests={s: np.arange(3648, 4560) for s in ("random", "scaffold")},
+        rf_tests={s: np.arange(3648, 4560) for s in ("random", "scaffold")},
     )
     for split in ("random", "scaffold"):
         assert control[split]["same_pool"] is False
@@ -122,10 +126,12 @@ def test_same_pool_fallback_when_fingerprint_unavailable(tmp_path, monkeypatch, 
         rf_pools={"random": None, "scaffold": None},
         test_sizes={"random": 912, "scaffold": 912},
         n_total=4560,
+        xgb_tests={s: np.arange(3648, 4560) for s in ("random", "scaffold")},
+        rf_tests={s: np.arange(3648, 4560) for s in ("random", "scaffold")},
     )
     out = capsys.readouterr().out
     assert "fingerprint unavailable" in out
-    assert control["random"]["same_pool"] is True       # 3648 == 4560-912
+    assert control["random"]["same_pool"] is False      # sizes alone cannot verify
     assert control["scaffold"]["same_pool"] is False    # 3283 != 3648
     assert control["random"]["rf_pool_sha256"] is None
     assert control["random"]["xgb_pool_sha256"] is not None
@@ -163,6 +169,8 @@ def test_control_missing_split_raises(tmp_path, monkeypatch, load_experiment):
             rf_pools={"time": np.arange(3440)},
             test_sizes={"time": 560},
             n_total=4560,
+        xgb_tests={s: np.arange(3648, 4560) for s in ("random", "scaffold")},
+        rf_tests={s: np.arange(3648, 4560) for s in ("random", "scaffold")},
         )
 
 

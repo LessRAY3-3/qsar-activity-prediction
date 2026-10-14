@@ -1,0 +1,8 @@
+Target: Tyrosine-protein kinase ABL1 | Feature matrix: X=(2120, 2048), y range [3.41, 10.82]
+
+=== time split: train=1387, test=531 ===
+Fitting 5 folds for each of 12 candidates, totalling 60 fits
+Best params: {'max_depth': None, 'min_samples_split': 5, 'n_estimators': 300}  (CV R2 = 0.767)
+[time]  R2 = 0.559   RMSE = 1.030   MAE = 0.887
+
+Metrics merged -> <RF_CAMPAIGN>/work/results/metrics_abl1.json

@@ -1,0 +1,24 @@
+{
+  "started_at": "2026-10-13T16:05:14.139962+00:00",
+  "pid": 15226,
+  "command": [
+    "/usr/bin/caffeinate",
+    "-ims",
+    "/Users/leisirui/qsar-campaigns/time-asof-20261013-7ce15c1-rf/.venv/bin/python",
+    "/Users/leisirui/qsar-campaigns/time-asof-repair-d13f912-rf/run_repair.py",
+    "rf"
+  ],
+  "environment": {
+    "QSAR_RF_JOBS": "16",
+    "QSAR_CV_BACKEND": "loky",
+    "OMP_NUM_THREADS": "1",
+    "MKL_NUM_THREADS": "1",
+    "OPENBLAS_NUM_THREADS": "1",
+    "VECLIB_MAXIMUM_THREADS": "1",
+    "NUMEXPR_NUM_THREADS": "1",
+    "PYTHONDONTWRITEBYTECODE": "1",
+    "PYTHONUNBUFFERED": "1",
+    "MPLCONFIGDIR": "/Users/leisirui/qsar-campaigns/time-asof-repair-d13f912-rf/mplcache"
+  },
+  "source_commit": "d13f9125af56028f60e099ec2e914dd2509c239e"
+}

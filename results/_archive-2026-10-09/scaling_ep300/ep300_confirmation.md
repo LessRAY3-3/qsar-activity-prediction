@@ -1,7 +1,7 @@
 # ep300 confirmation — egfr_full GIN（100 → 300 epoch 上限）
 
 日期：2026-10-04 ｜ 机器：m3 ｜ 脚本：`scripts/gnn_03_train_gin.py`（未改动）
-数据：`data/processed/egfr_full_graphs.npz` + `data/processed/splits/egfr_full_{random,scaffold}.npz`
+数据：刷新前的 `data/processed/egfr_full_graphs.npz` + `data/processed/splits/egfr_full_{random,scaffold}.npz`；当前同名文件已更新，不是这次历史实验的输入。
 配置：`QSAR_TAG=egfr_full`，hidden 128 / 4 layers / dropout 0.2 / lr 1e-3 / bs 128 / patience 20，`--epochs 300`
 判定阈值：|ΔR2| ≥ 0.01 视为 material
 日志：`logs/ep300_confirm.log`（第一轮）、`logs/ep300_repair.log`（补齐轮）
@@ -9,7 +9,10 @@
 ## 6-run 对比表
 
 R2_ep300 / best_epoch_ep300 取自 `results/_archive-2026-10-09/scaling_ep300/gnn_metrics_egfr_full{,_seed1,_seed2}_ep300.json`（2026-10-13 归档，与本文同目录）；
-R2_base / best_epoch_base 取自 `results/gnn_metrics_egfr_full{,_seed1,_seed2}.json`（仍在 results/）。
+R2_base / best_epoch_base 取自 Git 提交 `43a071638e668cb79dda0335b5cbf523dae45835`
+的 `results/gnn_metrics_egfr_full{,_seed1,_seed2}.json`；当前同名文件已刷新，不能用于核对本表。
+例如：`git show 43a071638e668cb79dda0335b5cbf523dae45835:results/gnn_metrics_egfr_full.json`。
+2026-10-14 复核该提交的三个文件，六个 R² 和 best_epoch 均与下表一致。
 
 | split | seed | R2_base | R2_ep300 | Δ | material? | best_epoch_base | best_epoch_ep300 |
 |---|---|---|---|---|---|---|---|
@@ -41,7 +44,9 @@ R2_base / best_epoch_base 取自 `results/gnn_metrics_egfr_full{,_seed1,_seed2}.
 
 同 seed 重跑漂移最大 0.0277，远超预设的 0.001 容差，且与 epoch 预算效应同量级。
 按第一轮数值，scaffold 3-seed mean Δ = −0.0015（不 material）；按文件数值为 −0.0173（material）。
-两者之差来自 run-to-run 非确定性（CUDA scatter/atomics + early-stop 选点放大），不是 epoch 上限本身。
+两者之差显示同 seed 重跑波动，因此这次单轮比较无法隔离 epoch 预算效应。
+日志明确记录 `device=mps`，原文归因于 CUDA scatter/atomics 不成立；
+仅凭这些结果也不能确认具体底层非确定性来源。
 
 ## 结论
 

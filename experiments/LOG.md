@@ -2,17 +2,504 @@
 
 Running log of the deep-dive experiments. Each entry: what ran, headline
 numbers (3-seed mean +/- std unless noted), and the commit holding the
-artifacts. Newest first. Maintained by M4 Air (this machine, Apple M4
-MacBook Air); the 2026-10-10/11 refresh-campaign panel trainings ran on
-the win4070 CUDA host (logs committed under `logs/win4070_/`) and the
-auxiliary batches (learning curve, y-randomization, multitask) on this
-M4 Air under MPS; older 2026-09/10 entries also record M3 Max runs.
+artifacts. Newer campaign summaries lead the file; older entries and appended
+review corrections retain their historical order. Device claims are scoped
+to actual records: `logs/win4070_/` records the non-EGFR GIN and GINE/AFP
+CUDA panel campaigns; the refreshed EGFR GIN runs lack training logs.
+`logs/aux_m4_*.log` does not print a device. The refreshed multitask rerun
+also lacks a committed log and has an unrecorded device; `logs/multitask.log`
+is the superseded 2026-10-04 M3 Max run. Older log line-number references
+are historical locations, not stable anchors; use entry headings and dates.
 
-**Status pointer (2026-10-13): entries are newest first, but the two
-latest entries sit at the *bottom* of this file — first the 2026-10-13
-PR #6 review-remediation entry, below it the 2026-10-12
-review-remediation campaign; superseded status lines are marked in
-place.**
+**Status pointer (2026-10-14): the repair below defines the current temporal
+results. The initial 2026-10-13 entry records the preceding campaign; its hERG
+scores and aggregate means are superseded. Earlier all-year-label time scores
+are historical only.**
+
+## 2026-10-14 — Both CUDA queues completed and independently accepted
+
+- All 128 frozen CUDA budget/early-stopping-policy jobs completed, followed by
+  18 separate provenance replacement fits. M3 independently replayed all 128
+  budget checkpoints and all 18 supplementary models / 42 task/result cells.
+  Maximum prediction errors were 1.90735e−6 and 2.38419e−6 respectively; all
+  fixed tolerances passed. Both return archives and per-member hashes were
+  verified on M4 and M3.
+- The accepted M3/CUDA × original/extended design now contains all 256 jobs,
+  64 per cell. Mean test R² (secondary) is 0.007337 / 0.006742 on CPU and
+  0.011845 / 0.027442 on CUDA. CUDA extended-minus-original mean standardized
+  validation RMSE is −0.004679; common diagnostic flags change 23/64 → 22/64.
+- CUDA common log prefixes match in 0/64 pairs (CPU 64/64). Independent review
+  found only the intended budget parameter differences, but 60 pairs already
+  differ at epoch one. The contrast includes independent-run variability;
+  neither a general improvement nor a pure budget/hardware effect is established.
+  All seeds and unfavorable results remain included; original main outputs stay fixed.
+- Supplementary R² minus historical recorded R² ranges −0.082235 to +0.129518.
+  These are new runs with complete provenance, not recovered historical identities.
+- Added verified unpacking, descriptive four-cell summaries and 20 independent
+  README cell checks. Full tests: 724 passed, 3 existing warnings; Ruff passed;
+  README: 467 cells, zero mismatches. Operational preparation failures and
+  resolutions are preserved, including the denied sleep inhibitor and missing
+  dependency preflight, both before training.
+- Evidence: `results/time_budget_sensitivity/cuda_eight_seed/`,
+  `results/time_budget_sensitivity/environment_comparison/`,
+  `results/provenance_reconstruction/cuda_20261014/`, and
+  `logs/cuda_execution_20261014/`. Prior pending statements below are historical.
+
+## 2026-10-14 — CUDA delivery prepared; connection still blocked
+
+- Prepared separate queues for the 128 frozen environment/budget jobs and
+  the 18 missing-log replacement fits. Full logs, exact source/input hashes,
+  checkpoint/output validation, serial GPU execution and return packaging
+  are implemented. Frozen training code and existing results are unchanged.
+- Added independent CPU replay for all 18 replacement fits / 42 result cells,
+  including normalization, test membership and pooled-task offsets. Seven
+  tests use real small untrained models, including the full receipt-to-report
+  flow; they are verification fixtures, not new project experiments.
+- Independent review reproduced a supervisor-termination bug that could leave
+  a training subprocess alive. The fix records process ownership, handles
+  SIGTERM cleanup and refuses live/uncertain prior phases before CUDA smoke.
+  Actual subprocess tests cover both SIGTERM and SIGKILL cases.
+- M3 SSH and its CPU environment were verified read-only. The configured
+  win4070 address, 10.0.2.2, returned “No route to host” on repeated probes;
+  no remote CUDA training started. User reconnection is required.
+- Final local validation: 667 tests passed, 3 existing warnings; Ruff and
+  diff checks passed. The reviewed delivery archive passed all 143 member
+  hashes and relocated offline checks. The archive is identified by
+  `logs/win4070_ready_20261014/readiness.json`; earlier preparation archives
+  are superseded. README still has 447 checked cells with zero mismatches.
+
+## 2026-10-14 — Explicit replacement of unavailable review evidence
+
+- Clarified that “447 cells, zero mismatches” means covered README entries
+  agree with stored/recomputed values at display precision; it does not
+  certify prose, figures or underlying scientific validity.
+- Created a new 16-case replacement mutation suite: ten acceptance mutations
+  plus six label/version mutations described by PR #8 T4. Both baselines pass
+  and all sixteen faults are caught. Every patch and source hash is published;
+  original unpublished mutant identities are not asserted.
+- Reuse the completed a2a/hERG five-seed RF supplement. Selecting these two
+  plausible targets and seeds 42/1/2/3/4 supplies independent evidence, not
+  an invented identity for the historical five-fit cohort.
+- Prepared eighteen missing-log replacement jobs: six current EGFR GIN fits,
+  twelve multitask/pooled fits. Three current EGFR time fits already have
+  accepted records and are excluded. All trainer arguments and input/source
+  hashes validate. Jobs wait for CUDA and use separate output directories;
+  no remote machine was contacted and no project model trained in this pass.
+- Final local validation: 621 tests passed, 3 warnings; Ruff and diff checks
+  pass; README remains 447 checked cells with zero mismatches. Evidence is in
+  `logs/reconstructed_review_20261014/` and
+  `results/provenance_reconstruction/replacement_summary.json`.
+
+## 2026-10-14 — All-PR narrative reconciliation
+
+- Re-read the original and follow-up reports from PR #1/#3/#5/#6/#8.
+  Corrected residual S2/S3/S4/S6 and C1/C2 framing: per-seed mean versus
+  ensemble estimands, exploratory unadjusted intervals, one-sided GNN seed
+  deletion, conditional cell wording, fairness comparisons and decomposition
+  allocation. No bootstrap sign fraction is promoted to a calibrated p-value.
+- The new reproducible seed-deletion script confirms 0/8 current time cells
+  are conditional (24 deletions), while reproducing 14/48 conditional
+  random/scaffold cells; evidence is `logs/all_pr_review_20261014/seed_sensitivity.json`.
+- The refreshed EGFR GIN and multitask provenance gaps remain explicit;
+  the old multitask MPS log is not evidence for the refreshed run. Historical
+  ep300 baselines now point at their exact pre-refresh Git revision, and its
+  incorrect CUDA explanation is replaced by the actual MPS device record.
+- Recomputed the 47-molecule EGFR thienopyrimidine case from saved predictions:
+  RF MAE 1.318; GIN seeds 42/1/2 MAE 1.021/1.325/0.996. Its direction changes
+  for seed 1. It is a case study, not a seed-stable chemotype conclusion.
+- The review-reported RF SD ≈ 0.006 has no published cohort; the report says
+  only a2a RF was retrained, so it is not attributed to hERG. A new
+  independent five-seed RF study now supplies the missing sensitivity evidence:
+  current as-of a2a / hERG R² population SD is 0.023457 / 0.005488
+  (sample SD 0.026225 / 0.006136). All ten predictions and their hashes were
+  verified; seed 42 matches published predictions within 2e−15. Results live
+  in `results/rf_seed_sensitivity/`. This does not establish the identity of
+  the original review cohort. Missing historical training logs and exact
+  historical mutant patches cannot be reconstructed from prose.
+- Separately, S5 now has 16 deterministic XGBoost refits and paired bootstrap
+  artifacts under `results/xgboost_paired/`: all historical R² values match
+  exactly, with nominal 95% intervals giving 6 RF / 1 XGB / 9 unresolved.
+  hERG/scaffold favours XGB by +0.032 [+0.014, +0.051]. The original
+  model results and frozen GIN study packages are retained; no remote
+  machine was used for this follow-up.
+
+- Full PR #1–#8 disposition and source snapshot: `results/review_all_prs/audit.json`
+  (21 technical groups and 79 documentation entries). The final suite passes
+  610 tests with 3 warnings; README verification checks 447 cells with zero
+  mismatches. The independent full temporal audit verifies 108 artifact hashes.
+- Actual Release archives were downloaded, checksum-verified and installed in
+  an isolated scratch tree: 18 random/scaffold models, 9 caches, 11 raw pins,
+  zero historical time models. Fetch receipts detect complete-but-stale local
+  installations; interrupted rollback retains recovery backups. See
+  `logs/all_pr_audit_20261014/release_install.json` for every archive member.
+- BACE raw-to-clean regeneration exactly reproduces all 1,513 rows. Seven
+  interpretability JSON copies now match their figure-source records, with
+  old copies archived. GINE-only figure labels were regenerated from saved
+  statistics; all 48 numeric uncertainty artifacts are byte-identical.
+- Accepted main time results, GIN checkpoints and the eight-seed M3 study are
+  unchanged. The 128 CUDA jobs remain deferred and must use the original
+  frozen source bundles. No new source bundle was substituted.
+
+## 2026-10-14 — PR #8 Low tooling hardening
+
+- Restore publishes only complete files with atomic no-clobber semantics and
+  verifies all 24 GIN checkpoint label/role/seed records. Failed split
+  regeneration preserves the prior valid split rather than creating a failed
+  NA marker. Newly generated splits add full-payload integrity checks including
+  scaffold metadata; historical label IDs and frozen archives are unchanged.
+- Current workers verify complete manifests and record the bundle verifier's
+  source. Nested bundles no longer borrow the enclosing Git HEAD; included
+  ignored Python files are explicitly dirty. Publication journals support
+  explicit recovery after SIGTERM/SIGKILL; recovery does not start training.
+- Cross-review also caught a two-file publication boundary: a new timeline
+  could survive a failed NPZ install. A per-target lock and durable journal now
+  roll back pre-commit failures or recover a completed pair on the next run,
+  including SIGKILL before and after the NPZ commit point.
+- Real short CPU GIN training and real RF fitting exercise acceptance without
+  mocked model builders. Ten disclosed acceptance mutants were all caught;
+  these are not claimed to be the review's unpublished original sixteen.
+  Commit-signing settings no longer interfere with fixture repositories, and
+  the real CHEMBL2035183 regression fails explicitly if its RDKit premise changes.
+- No project experiment was retrained and no remote host was contacted in this
+  Low pass. Test-only tiny fits use temporary directories. The main campaign,
+  three-seed pilot and full eight-seed CPU study remain frozen; CUDA is deferred.
+- Validation: **553 tests passed, three existing warnings**; Ruff and diff
+  checks passed. Logs, all ten disclosed mutation cases and compatibility
+  evidence for eight legacy splits / 24 checkpoints are committed under
+  `logs/pr8_low_20261014/`. The two intermediate test failures were stale
+  presentation assertions; the final test preserves the numerical and
+  data-dependent warning checks with the corrected protocol wording.
+
+## 2026-10-14 — PR #8 Low statistical and presentation corrections
+
+- **Independent diagnostics:** `experiments/low_review_diagnostics.py` writes
+  `results/review_low_diagnostics/` without fitting or changing models.
+  RF AD absolute errors are recomputed from per-molecule predictions. On the
+  same 13 scorable cells, out-AD RMSE is greater in 10/13; mean RMSE is
+  1.074599 outside vs 0.745936 inside, mean MAE 0.861382 vs 0.548032.
+  Subset label variances are retained because R² denominators differ.
+- **A2A source audit:** document CHEMBL5728996 (2022) supplies 371/802 test
+  parents, 46.26%, via 378 exact rows at 30/75/300 nM (80/77/221 rows).
+  Parent medians produce six frozen label levels. All 802 as-of test labels
+  reconstruct within 4.71e−7. One document/description is not proof of a
+  single experimental batch; source dependence and discretization are caveats.
+- **RF uncertainty:** each published temporal RF uses one seed-42 fit.
+  The hERG ensemble Δ moves +0.005748 → +0.021937 between the initial and
+  repaired campaigns; the initial summary hash matches its acceptance record.
+  That change includes input correction and GIN retraining, so it is not an
+  RF seed experiment. A review's five-state R² SD ≈0.006 is explicitly
+  attributed to the review and not claimed as independently reproduced.
+  A fixed-input, fixed-hyperparameter five-refit supplement is documented but
+  has not been run; model and prediction files remain unchanged.
+- **Presentation:** protocol comparisons explicitly distinguish random/scaffold
+  all-year labels from temporal as-of labels, rather than attributing the
+  contrast to splitting alone. The actual A2A test share is 802/1366 = 58.71%,
+  and historical .62 references remain historical. Corrected frozen package
+  size is 1,415,829 bytes (1.350 MiB), not 2.1 MiB. Historical entries point to
+  their own acceptance/revision and do not overwrite later current results.
+- **Scope:** existing eight-seed CPU/pilot outcomes, model parameters and main
+  numerical metrics are untouched. No additional training or CUDA connection.
+  The pending CUDA comparison retains the published extension-input bundle
+  `8521063` and training core `90a4700`; current worker/label Low fixes must
+  not be substituted into that experiment. External validation/restoration
+  may improve while the executed training package remains immutable. Replay
+  continues to use the archived original inputs.
+
+## 2026-10-14 — post-pilot expansion to eight seeds per environment/budget cell
+
+- **Decision chronology:** the M3 three-seed pilot was completed, accepted and
+  committed as `54f4c7d` before the user explicitly requested eight seeds in
+  every cell. The new matched CUDA experiment had not started. This is a
+  post-pilot design amendment, not an eight-seed preregistration; preserve the
+  earlier design, pilot reports, parameters and result archives unchanged.
+- **Current scope:** cross-computing-environment reproducibility and robustness
+  testing, with fixed data/splits and the same GIN architecture. CPU/CUDA ×
+  original (`100/0/20`) / extended (`200/60/40`) epochs/minimum/patience;
+  eight targets × seeds **42/1/2/3/4/5/6/7** gives **64 jobs per cell,
+  128 per environment, 256 total**. This is not data k-fold cross-validation
+  or an architecture comparison.
+- **Execution/acceptance:** all 80 additional M3 jobs completed in 1,113.540
+  seconds (18 min 33.54 s). Combined with the retained 48 pilot jobs, all 128
+  CPU jobs passed independent artifact checks and checkpoint replay; maximum
+  test-prediction replay error was 9.54e−7. The full 128-job CUDA cohort still
+  awaits the user's connection-ready message. The CPU half is complete;
+  the four-cell environment comparison is not.
+- **Eight-seed result:** 64 paired target/seed outcomes; 61/64 saved test
+  prediction pairs are identical and 64/64 rounded log prefixes match. Only
+  HIVPR seeds 4/5/42 select different best checkpoints. Common flags change
+  27/64 → 26/64. Mean paired Δtrain MSE is −0.006898, Δstandardized validation
+  RMSE −0.001458, and secondary Δtest R² −0.000595 (mean single-seed test R²
+  0.007337 → 0.006742). HIVPR seed 5 improves validation but loses 0.102889
+  test R²; all seeds are retained, without a general-improvement or convergence
+  claim. Full evidence is under `results/time_budget_sensitivity/m3_eight_seed/`.
+- **Verification:** 128 models independently replayed; 698 supplemental
+  archive files and all 70 extension-input manifest files passed safe extraction
+  and SHA256 checks. The complete CPU report passed the environment comparator's
+  accepted-report loader without generating an incomplete four-cell report.
+  All 503 tests and
+  scoped Ruff (`scripts experiments tests`) passed; CI passed at auditor
+  commit `df97088`.
+- **Frozen computation:** retain trainer, original worker, label loader,
+  graph dataset, common helpers and all data hashes from
+  `90a470050367cebc4cd83dfe8d3f7fb37d53e6de`. Training mathematics are unchanged.
+  New coordinator/seed-wrapper entry points have separate recorded provenance,
+  with their supplement bundle frozen at `8521063`; they do not replace the
+  frozen training code.
+- **Reporting:** preserve the pilot's actual result (23/24 identical saved
+  prediction pairs; only HIVPR seed 42 improves validation; diagnostic flags
+  9/24 → 9/24). Report the complete eight-seed cohort separately, retain every
+  declared seed and do not select from test performance. The original offline
+  replay commands and paths remain valid in the report's default three-seed
+  mode. Same-numbered CPU/CUDA seeds do not guarantee the same random sequence
+  or operator results; the contrast includes backend RNG and operator
+  implementations, not only floating-point differences. It is not a causally
+  isolated hardware test. Main temporal/RF results remain untouched.
+- **Prepared analysis path:** `time_budget_report.py` accepts a separate pilot
+  and supplement tree with eight declared seeds; the accepted combined CPU
+  report contains all 128 jobs. A fresh CUDA report uses `--training-device cuda`
+  and likewise requires 128 jobs. `experiments/time_environment_comparison.py`
+  requires both independently accepted reports, then emits 64 paired rows and
+  five environment/budget contrasts. Missing CUDA evidence is an error, not
+  a partial comparison. The published additional M3 archive is
+  `m3_extension/study.tar.gz` (49,725,424 bytes, 698 file hashes); the extension
+  input archive and manifests are also published. Methodology provides complete
+  hash verification, data-filtered extraction and merged replay commands.
+- **Amendment record:**
+  `results/time_budget_sensitivity/replication_extension.json`. It supersedes
+  the earlier plan to finish all four three-seed cells before deciding on
+  extra seeds; the historical entries below record what was planned and
+  observed at those earlier stages.
+
+## 2026-10-14 — M3 two-budget study accepted; new CUDA cohort pending
+
+**Historical three-seed pilot entry.** Its results and original 96-job plan
+are retained below; the current eight-seed amendment above supersedes its
+next-step plan and pending CUDA job count.
+
+- **Scope/status:** the M3 half of the cross-computing-environment
+  reproducibility and robustness study is complete: eight targets × three seeds
+  × two budgets = 48 GIN jobs. Fixed labels/splits make this distinct from data
+  k-fold cross-validation. The two fresh 4070 CUDA arms remain pending the user's
+  connection message; the full four-cell, 96-job design is not yet complete.
+- **Execution:** source `90a470050367cebc4cd83dfe8d3f7fb37d53e6de`, CPU with four
+  concurrent workers and 4 intra-op / 1 inter-op threads per worker. Original
+  `100/0/20` and extended `200/60/40` epochs/minimum/patience share the fixed
+  model, scheduler and input versions. Training wall time was 683.063 seconds
+  (11 min 23 s), excluding setup, transfer and verification. This is not an
+  isolated hardware-speed benchmark.
+- **Acceptance:** all 48 statuses succeeded and canonical/snapshot artifacts,
+  provenance, labels and parameters passed checks. Independent CPU replay
+  matched train MSE, validation RMSE and test predictions within the 1e-5
+  tolerance (maximum test-prediction error 9.54e-7). Logs verify the actual
+  stopping epochs, including the extended minimum. All 24 paired common log
+  prefixes match at their printed precision, without a claim of bitwise
+  optimizer-state identity.
+- **Paired result:** 23/24 saved test-prediction arrays are unchanged. Only
+  `hivpr` seed 42 selects a later best epoch (44 → 84; stopping 64 → 124), with
+  standardized train MSE 0.273681 → 0.166170 and validation RMSE
+  0.741784 → 0.735256. Its secondary test R² is 0.012266 → 0.058906.
+  Across all pairs mean Δvalidation RMSE is −0.000272; common flags remain
+  9/24 → 9/24. Mean single-seed test R² changes −0.009381 → −0.007437, driven
+  by that one pair and not strong evidence of a general gain. Under the current
+  scheduler and these budgets, extending training did not broadly improve
+  selected models; this does not prove that every model has converged.
+- **Cohorts and next step:** the earlier accepted CUDA 13/24 flags are a
+  separate historical reference, not the M3 original-budget count and not a
+  matched new CUDA cell. Complete the new CUDA original/extended arms with the
+  same frozen training source and inputs, retaining every target/seed. Only
+  after the initial three seeds in all four cells, plan added seeds from
+  validation variability and precision needs, never from test performance.
+  CPU/CUDA differences combine systems, architecture, libraries and kernels;
+  report environment-associated contrasts and interactions, not pure hardware
+  causality. No main campaign weights, predictions or metric history are replaced.
+- **Offline evidence:** `results/time_budget_sensitivity/m3/analysis/` contains
+  48 diagnostics rows, 24 paired rows, eight target summaries, 24 log-prefix
+  comparisons and the acceptance report. The frozen `inputs.tar.gz` is about
+  4.6 MiB; `m3/study.tar.gz` is 29,868,373 bytes (28.5 MiB), with canonical and
+  snapshot duplicates stored as tar hardlinks. All 442 restored result files
+  matched the archive manifest and frozen input verification passed. The
+  methodology provides hash-first extraction and full offline replay commands.
+
+## 2026-10-14 — PR #8 review corrections and an environment × budget study
+
+This entry records review corrections to the current repaired campaign. The
+published model weights, predictions and historical metric JSON entries are
+preserved. New diagnostics are separate artifacts. The authorized follow-up forms
+a 2 × 2 environment/budget study. Its M3 48-job queue was running when this
+review entry was first written and has since completed acceptance, as recorded
+in the entry above; the 4070 CUDA campaign's 48 jobs still await the user's
+connection message.
+
+- **T1 — resampling-unit sensitivity:** the existing 24-cell scaffold comparison
+  covers eight targets and GIN/GINE/AttentiveFP. Seven of ten molecule-bootstrap
+  significant cells have scaffold-group intervals containing zero. README and
+  methodology now expose the full sensitivity result and distinguish the two
+  resampling units; this is a reinterpretation of the existing sensitivity CSV,
+  not new training or 24 independent replications.
+- **T2 — constant baseline and error decomposition:**
+  `experiments/time_baseline_diagnostics.py` writes a separate
+  `results/time_split/baseline_diagnostics.csv`, comparing RF and GIN ensemble
+  with the train-label-mean constant using 10,000 paired molecule resamples.
+  It also records test fractions and the arithmetic level/scale/correlation
+  decomposition of the RF-to-GIN R² difference. The interpretation distinguishes
+  outperforming RF from outperforming a constant; the decomposition does not
+  identify a causal distribution-shift mechanism. Published predictions are
+  unchanged, and the figure/summary wording now reflects these distinctions.
+- **T3 — diagnose the saved best checkpoint:** the old convergence heuristic
+  used the final training epoch's stochastic loss, although the model saved and
+  evaluated on test was the best validation checkpoint. CPU eval-mode replay of
+  all 24 accepted checkpoints verifies their training normalization and best
+  validation RMSE, then measures the saved checkpoint's training MSE. Thirteen
+  of 24 exceed standardized training MSE 0.5 and meet the early-best-epoch rule;
+  see `results/time_split/checkpoint_diagnostics.csv`. This is a fitting
+  diagnostic, **not proof of non-convergence or evidence that longer training
+  will improve generalization**. Historical metric JSON is not rewritten. The
+  acceptance record now distinguishes original last-epoch flags from this new
+  diagnostic. Future trainer output records best-checkpoint eval MSE, its source,
+  and the separate last-epoch loss before applying the heuristic.
+- **T4 — direct temporal-label tests:** explicit expected medians cover train,
+  validation and test year boundaries, future-measurement exclusion, exact
+  relation and nM eligibility; prediction-version checks cover `label_id`, row
+  order and true labels. The coordinator's targeted mutation check caught all
+  six injected faults. These tests check the label rules directly rather than
+  accepting agreement between two consumers of the same wrong labels.
+- **T5 — fail on absent structural keys:** the splitter now checks cached parent
+  keys against all standardized raw structures before document/year or label
+  eligibility filtering. An absent key raises an error with cache row and key;
+  an existing raw structure with missing dating/eligible-label metadata can still
+  be excluded normally. Cached parent keys are never normalized a second time.
+- **T6 — traceable coordination and runnable independent audit:** 16 surviving
+  initial/repair coordinator scripts are archived unchanged as `.py.txt` under
+  `scripts/campaign_history/`, with SHA256, original scratch paths and
+  source-derived worker command templates in its manifest. These post-campaign
+  snapshots preserve one-off machine paths and mutation logic and must not be
+  executed; they are not a complete historical shell transcript. The separately
+  added `scripts/audit_time_campaign.py` is a new parameterized audit, not a
+  claim that this exact CLI was used originally. Its `data` and `full` scopes
+  both passed against all 42,636 retained labels, 168 exclusions, 32 predictions
+  and 16 × 10,000-replicate bootstrap rows. Eight dedicated tests and Ruff passed.
+  Commands, dependencies and explicit skipped-hash semantics are documented in
+  methodology under "Independently audit raw labels and current results".
+- **T7 — protect accepted RF models from the old release:**
+  `scripts/fetch_artifacts.py` installs only the 18 named random/scaffold RF
+  models from `artifacts-v2`. It validates archive members but does not install
+  its eight obsolete temporal models, including when other local models are
+  missing. Existing accepted time models are preserved; new time RF weights
+  remain available on M3/the coordinator rather than in that old release.
+- **Additional guard:** learning-curve, y-randomization and XGBoost auxiliary
+  commands now reject unsupported `time` splits explicitly, instead of silently
+  applying their random/scaffold label path to temporal data.
+- **Authorized 2 × 2 follow-up:** both M3 CPU and 4070 CUDA run the original
+  budget (`epochs=100, min_epochs=0, patience=20`) and the extended budget
+  (`epochs=200, min_epochs=60, patience=40`). Each cell contains eight targets ×
+  seeds 42/1/2: **24 jobs per cell, 48 per environment, 96 total**. M3 has now
+  completed acceptance; the fresh 4070 pair is waiting for the user's
+  connection message. All four cells must use the same frozen current labels,
+  split indices, graph inputs, training-source revision, model, optimizer,
+  scheduler and validation-selection rule. Only the declared budget and
+  environment factors differ; environment versions and execution settings are
+  recorded rather than assumed equivalent.
+- **Analysis and interpretation:** retain every target/seed result and its
+  paired contrasts, not only four aggregate averages. Compare extended minus
+  original within each environment, CUDA minus CPU at each budget, and the
+  difference between the two within-environment budget contrasts. Primary
+  diagnostics are best-checkpoint eval training MSE and validation RMSE; report
+  the full cohort's test scores secondarily without selecting budgets, seeds or
+  replacement models by those scores. The common early-fit diagnostic uses
+  `best_epoch < 30` and standardized train MSE > 0.5 in both budget arms, avoiding
+  a changed threshold merely because the maximum epoch count doubled. Operating
+  system, architecture, numerical kernels and underlying libraries remain
+  bundled with device, so the comparison estimates an **environment-associated
+  difference, not a pure causal hardware effect**. Longer training is not
+  presumed better. The old accepted CUDA fits remain historical references and
+  are not substituted for the newly matched original-budget CUDA cell; all
+  existing accepted results remain intact while the study is performed.
+
+## 2026-10-14 — hERG parent-key repair and reproducible temporal inputs
+
+- **Data correction:** time splitting was normalizing already-normalized cache
+  SMILES again. For `CHEMBL2035183`, that changed the key and excluded a valid
+  2012 exact 7,200 nM measurement. The raw-record key is now normalized once
+  and joined to the unchanged cache key. hERG train increases 4,943 → 4,944;
+  exclusions decrease 20 → 19 (168 total). Validation/test rows and labels are
+  unchanged. All other seven split arrays and their retained file bytes match.
+- **Training:** source `d13f9125af56028f60e099ec2e914dd2509c239e`; replace only
+  hERG RF + GIN seeds 42/1/2. RF ran on M3 with 16 CV workers in 1,625 seconds;
+  GIN ran on the 4070 in 47 seconds. Original model recipes are unchanged.
+  The other 28 jobs retain source `7ce15c1` and their original provenance.
+- **Worker correction:** each attempt starts with isolated source/input files
+  and empty outputs. NA/input/source/manifest changes are rechecked before
+  execution, resume and publication. No-op or partial runs cannot reuse old
+  artifacts; publication failures roll back replaced files.
+- **Acceptance:** four replacement jobs passed frozen source/input/label hashes,
+  metric recomputation and checkpoint loading. RF replay is exact; maximum
+  CUDA GIN replay error is 9.54e-7. Independent CPU replay of all three GIN
+  validation scores matched exactly, with train-only normalization verified.
+  All 32 current prediction files align with the current labels; non-time
+  metric entries remain unchanged. Acceptance maps jobs to the initial or
+  repair manifests instead of assigning one source revision to every job.
+- **Updated results:** hERG RF R2 −0.056; GIN per-seed −0.065±0.033; GIN
+  ensemble −0.034. Ensemble ΔR2 +0.022, 95% CI [−0.016, +0.061]. B=10,000
+  bootstrap retains four GIN wins, two RF wins and two intervals containing
+  zero. Eight-row means are RF −0.034, GIN per-seed +0.022, ensemble +0.062.
+  The original uncertainty and overlapping-target caveats still apply.
+- **Reproduction:** publish the eight frozen splits as a 1,415,829-byte (1.350 MiB) archive in
+  `results/time_split/inputs/`. `scripts/restore_time_inputs.py` verifies hashes,
+  split signatures and all prediction/metric label versions before restoration.
+  Conflicting local inputs are refused. The as-of constant baseline now reads
+  split labels directly, so raw tables and feature caches are unnecessary for
+  bootstrap/summary reproduction. CI restores and validates the package before
+  running tests. Analysis code is recorded at `0b4fb29`.
+- **Final verification:** 327 tests passed in both the coordinator worktree and
+  a clean exported checkout; Ruff and diff checks passed. Without raw tables or
+  feature caches, restore → B=10,000 bootstrap → summary reproduced all 12 CSV
+  and PNG outputs byte-for-byte. An independent raw-record audit recomputed
+  42,636 labels, checked all 168 exclusions and 32 predictions, and reproduced
+  all 16 bootstrap intervals. Logs and reproduction evidence are committed.
+- **Records:** `results/time_split/campaign_acceptance.json`,
+  `repair_split_comparison.json`, `repair_independent_review.json`, repair input
+  manifests and `logs/time_asof_repair_20261014/`. The original acceptance is
+  preserved as `initial_campaign_acceptance.json`. RF release assets remain
+  historical; accepted new joblib files are retained on M3 and the coordinator.
+
+## 2026-10-13 — completed as-of temporal retraining
+
+- **Frozen protocol:** source `7ce15c1f0849ae69e0ca208f781a9824517eb328`,
+  `exact-dated-asof-v1`, eight targets, 169 label-eligibility exclusions.
+  RF fits train only with its 12-setting, five-fold search; GIN fits the
+  same pool and selects checkpoints on validation, seeds 42/1/2. No test
+  scores were used to alter the recipe or discard seeds.
+- **Execution:** M3 Max completed eight RF jobs in 117.9 minutes (four
+  CV workers for the first five targets; sixteen for hivpr/mpro/vegfr2).
+  RTX 4070 Laptop GPU, 8 GiB, torch 2.14.0+cu126 / CUDA 12.6 completed
+  24 GIN fits in 225.3 seconds, excluding setup and transfer. All stopped
+  after 20 epochs without validation improvement; best epochs span 2–33.
+  No script convergence flags were triggered; this is not evidence of
+  optimal fitting. M4 Air prepared inputs, accepted results and ran analysis.
+- **Acceptance:** 32/32 jobs passed source/input/label hash checks, test-row
+  alignment, checkpoint loading and metric recomputation. RF checkpoint
+  replay matched exactly; maximum CUDA GIN prediction difference was
+  9.54e-7. Records: `results/time_split/initial_campaign_acceptance.json`, both
+  `input_manifest_*.json` files and `logs/time_asof_20261013/`.
+- **Results:** B=10,000 paired molecule bootstrap of the three-seed
+  ensemble favours GIN on a2a/egfr_full/hivpr/mpro and RF on abl1/vegfr2;
+  egfr/herg intervals contain zero. Unweighted mean time R² is RF −0.033,
+  GIN per-seed +0.020, GIN ensemble +0.061. The figures and README at that
+  initial revision reported these values; the hERG repair entry supersedes
+  those aggregate means. Train-only constant baselines and uncertainty remain
+  documented in the current report.
+  These intervals condition on fitted seeds; targets include overlapping
+  EGFR datasets and are not independent replications.
+- **Integration:** archived previous temporal artifacts before replacing
+  predictions, GIN checkpoints and figures; merged only `time` and RF
+  `best_params_time` into metric JSON files. All non-time metric entries
+  are unchanged. The old MSE decomposition remains a historical record.
+- **Distribution:** RF models are retained on M3 and the coordinator,
+  outside Git. The `artifacts-v2` release has not been updated for this
+  campaign and still contains historical RF time models.
+- **Validation:** 292 tests passed; Ruff and `git diff --check` passed.
+  The stored-constant regression test now independently selects train-only
+  as-of labels, while preserving its historical non-test-pool branch.
 
 ## 2026-10-11
 
@@ -1027,9 +1514,11 @@ baseline `6c1e3bb`: 165 tests passed, ruff clean, CI green, README 431
 cells / 0 mismatches at review time). The reviewer retracted two of
 their own earlier items — P5 (under the pinned xgboost 3.4.1 the
 `egfr_full`/random 0.6814376116 reproduces) and P2's per-tag "mechanism"
-labels (partly wrong). Main conclusion unchanged and strengthened:
-**tuned RF >= GIN**, now shown robust to dropping any single training
-seed in 20 of its 21 win cells. Items R1-R5 were split across the
+labels (partly wrong). **Later correction (PR #6 addendum C1):** this
+entry originally claimed that the asymmetric seed-deletion result
+strengthened RF robustness. That claim is withdrawn: only GNN seeds were
+varied and two-seed ensembles incur an ensemble-size penalty. RF seed
+robustness was not measured. Items R1-R5 were split across the
 fetch / README / methodology / docs-records / interpretability / code /
 tests / skill batches working concurrently; per-item state below is as
 observed at this entry's write time.
@@ -1056,7 +1545,12 @@ observed at this entry's write time.
   predictions: `a2a` +0.326 = **+0.580** +0.008 −0.263 (RF predicts
   0.83 log units low — a level effect, not shrinkage), `egfr_full`
   +0.592 = +0.392 +0.032 +0.168, `abl1` −0.236 = −0.002 −0.115 −0.119;
-  only `egfr` is spread-led (+0.079 of +0.039), and on `herg` the GIN
+  These are historical all-year-label results, superseded by the current
+  as-of-label campaign. **C2 correction:** only the level term and total
+  are allocation-independent; the spread/correlation split is a convention.
+  Reduced RF over-dispersion also occurs for `egfr_full` and `mpro`, not
+  only `egfr`. Under the stated allocation `egfr` is spread-led
+  (+0.079 of +0.039), and on `herg` the GIN
   spreads *more* than RF (0.44 vs 0.41), so "compression" never fitted.
   The P2-era labels are withdrawn — the N4 annotation at the 2026-10-12
   entry above marks the superseded text; README/methodology carry the

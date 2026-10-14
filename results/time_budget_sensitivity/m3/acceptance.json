@@ -1,0 +1,19 @@
+{
+  "status": "accepted",
+  "training_source_commit": "90a470050367cebc4cd83dfe8d3f7fb37d53e6de",
+  "jobs": 48,
+  "control_jobs": 24,
+  "extended_jobs": 24,
+  "pytest_passed": 431,
+  "pytest_warnings": 3,
+  "ruff": "passed",
+  "independent_report": "analysis/report.json",
+  "report_sha256": "2c01c020d9fddce9f7a9dc9c7f1f1dcea2925108037c8515c36a73f3b7a0de70",
+  "archive_roundtrip_files_verified": 442,
+  "input_manifest_verification": "passed",
+  "existing_campaign_models_and_predictions_changed": false,
+  "cuda_study_status": "pending user connection",
+  "return_transport_sha256": "8d449a4a7e9a87a780daa55a8bb54b062fc5e8d0fb73979b0ab6dbedb62f2097",
+  "packager_sha256": "50da6e71e9c978a7f46459146b212e5c1dca7c084894a9b567acb0839c4e85e4",
+  "study_archive_sha256": "17857229745c585b757fd057fdd56e6c8b54517979b507eb121206c9894d80e9"
+}

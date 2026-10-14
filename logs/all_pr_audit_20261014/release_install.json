@@ -1,0 +1,510 @@
+{
+  "status": "passed",
+  "scope": "actual release archive and isolated install audit; no training",
+  "discovery": "saved GitHub API metadata",
+  "archives": [
+    {
+      "name": "models.tar.xz",
+      "sha256": "25f1ed1696fbe02ca93d917c2027730d4fb03c9377ebc8d1b12705c13179d5da",
+      "members": [
+        {
+          "name": "._models",
+          "size": 163,
+          "type": "0"
+        },
+        {
+          "name": "models",
+          "size": 0,
+          "type": "5"
+        },
+        {
+          "name": "models/._rf_time_split_egfr_full.joblib",
+          "size": 163,
+          "type": "0"
+        },
+        {
+          "name": "models/rf_time_split_egfr_full.joblib",
+          "size": 292709921,
+          "type": "0"
+        },
+        {
+          "name": "models/._rf_scaffold_split_bace.joblib",
+          "size": 163,
+          "type": "0"
+        },
+        {
+          "name": "models/rf_scaffold_split_bace.joblib",
+          "size": 30750273,
+          "type": "0"
+        },
+        {
+          "name": "models/._rf_scaffold_split_hivpr.joblib",
+          "size": 163,
+          "type": "0"
+        },
+        {
+          "name": "models/rf_scaffold_split_hivpr.joblib",
+          "size": 43588337,
+          "type": "0"
+        },
+        {
+          "name": "models/._rf_random_split_egfr_full.joblib",
+          "size": 163,
+          "type": "0"
+        },
+        {
+          "name": "models/rf_random_split_egfr_full.joblib",
+          "size": 358956113,
+          "type": "0"
+        },
+        {
+          "name": "models/._rf_random_split_bace.joblib",
+          "size": 163,
+          "type": "0"
+        },
+        {
+          "name": "models/rf_random_split_bace.joblib",
+          "size": 52155905,
+          "type": "0"
+        },
+        {
+          "name": "models/._rf_time_split_herg.joblib",
+          "size": 163,
+          "type": "0"
+        },
+        {
+          "name": "models/rf_time_split_herg.joblib",
+          "size": 127473617,
+          "type": "0"
+        },
+        {
+          "name": "models/._rf_time_split_egfr.joblib",
+          "size": 163,
+          "type": "0"
+        },
+        {
+          "name": "models/rf_time_split_egfr.joblib",
+          "size": 77584817,
+          "type": "0"
+        },
+        {
+          "name": "models/._rf_scaffold_split_a2a.joblib",
+          "size": 163,
+          "type": "0"
+        },
+        {
+          "name": "models/rf_scaffold_split_a2a.joblib",
+          "size": 23328785,
+          "type": "0"
+        },
+        {
+          "name": "models/._rf_scaffold_split_herg.joblib",
+          "size": 163,
+          "type": "0"
+        },
+        {
+          "name": "models/rf_scaffold_split_herg.joblib",
+          "size": 287923217,
+          "type": "0"
+        },
+        {
+          "name": "models/._rf_scaffold_split_egfr.joblib",
+          "size": 163,
+          "type": "0"
+        },
+        {
+          "name": "models/rf_scaffold_split_egfr.joblib",
+          "size": 158203841,
+          "type": "0"
+        },
+        {
+          "name": "models/._rf_scaffold_split_egfr_full.joblib",
+          "size": 163,
+          "type": "0"
+        },
+        {
+          "name": "models/rf_scaffold_split_egfr_full.joblib",
+          "size": 357697697,
+          "type": "0"
+        },
+        {
+          "name": "models/._rf_time_split_a2a.joblib",
+          "size": 163,
+          "type": "0"
+        },
+        {
+          "name": "models/rf_time_split_a2a.joblib",
+          "size": 16982033,
+          "type": "0"
+        },
+        {
+          "name": "models/._rf_random_split_herg.joblib",
+          "size": 163,
+          "type": "0"
+        },
+        {
+          "name": "models/rf_random_split_herg.joblib",
+          "size": 288250241,
+          "type": "0"
+        },
+        {
+          "name": "models/._rf_random_split_egfr.joblib",
+          "size": 163,
+          "type": "0"
+        },
+        {
+          "name": "models/rf_random_split_egfr.joblib",
+          "size": 95491217,
+          "type": "0"
+        },
+        {
+          "name": "models/._rf_random_split_vegfr2.joblib",
+          "size": 163,
+          "type": "0"
+        },
+        {
+          "name": "models/rf_random_split_vegfr2.joblib",
+          "size": 331726433,
+          "type": "0"
+        },
+        {
+          "name": "models/._rf_random_split_hivpr.joblib",
+          "size": 163,
+          "type": "0"
+        },
+        {
+          "name": "models/rf_random_split_hivpr.joblib",
+          "size": 44251889,
+          "type": "0"
+        },
+        {
+          "name": "models/._rf_scaffold_split_abl1.joblib",
+          "size": 163,
+          "type": "0"
+        },
+        {
+          "name": "models/rf_scaffold_split_abl1.joblib",
+          "size": 44394113,
+          "type": "0"
+        },
+        {
+          "name": "models/._rf_time_split_mpro.joblib",
+          "size": 163,
+          "type": "0"
+        },
+        {
+          "name": "models/rf_time_split_mpro.joblib",
+          "size": 42977633,
+          "type": "0"
+        },
+        {
+          "name": "models/._rf_random_split_abl1.joblib",
+          "size": 163,
+          "type": "0"
+        },
+        {
+          "name": "models/rf_random_split_abl1.joblib",
+          "size": 22242881,
+          "type": "0"
+        },
+        {
+          "name": "models/._rf_random_split_a2a.joblib",
+          "size": 163,
+          "type": "0"
+        },
+        {
+          "name": "models/rf_random_split_a2a.joblib",
+          "size": 23286449,
+          "type": "0"
+        },
+        {
+          "name": "models/._rf_time_split_vegfr2.joblib",
+          "size": 163,
+          "type": "0"
+        },
+        {
+          "name": "models/rf_time_split_vegfr2.joblib",
+          "size": 162583553,
+          "type": "0"
+        },
+        {
+          "name": "models/._rf_random_split_mpro.joblib",
+          "size": 163,
+          "type": "0"
+        },
+        {
+          "name": "models/rf_random_split_mpro.joblib",
+          "size": 117703265,
+          "type": "0"
+        },
+        {
+          "name": "models/._rf_time_split_hivpr.joblib",
+          "size": 163,
+          "type": "0"
+        },
+        {
+          "name": "models/rf_time_split_hivpr.joblib",
+          "size": 23307185,
+          "type": "0"
+        },
+        {
+          "name": "models/._rf_scaffold_split_mpro.joblib",
+          "size": 163,
+          "type": "0"
+        },
+        {
+          "name": "models/rf_scaffold_split_mpro.joblib",
+          "size": 57753041,
+          "type": "0"
+        },
+        {
+          "name": "models/._rf_time_split_abl1.joblib",
+          "size": 163,
+          "type": "0"
+        },
+        {
+          "name": "models/rf_time_split_abl1.joblib",
+          "size": 61002545,
+          "type": "0"
+        },
+        {
+          "name": "models/._rf_scaffold_split_vegfr2.joblib",
+          "size": 163,
+          "type": "0"
+        },
+        {
+          "name": "models/rf_scaffold_split_vegfr2.joblib",
+          "size": 333231089,
+          "type": "0"
+        }
+      ]
+    },
+    {
+      "name": "raw_data.tar.gz",
+      "sha256": "8f388e4f8899bdd402e4fa88b005daaf9f1bca521ae0ea842fc56cfe646ce6c4",
+      "members": [
+        {
+          "name": "data/._raw",
+          "size": 163,
+          "type": "0"
+        },
+        {
+          "name": "data/raw",
+          "size": 0,
+          "type": "5"
+        },
+        {
+          "name": "data/raw/._egfr_activities.csv",
+          "size": 163,
+          "type": "0"
+        },
+        {
+          "name": "data/raw/egfr_activities.csv",
+          "size": 2203676,
+          "type": "0"
+        },
+        {
+          "name": "data/raw/._vegfr2_activities.csv",
+          "size": 163,
+          "type": "0"
+        },
+        {
+          "name": "data/raw/vegfr2_activities.csv",
+          "size": 9217230,
+          "type": "0"
+        },
+        {
+          "name": "data/raw/._mpro_activities.csv",
+          "size": 163,
+          "type": "0"
+        },
+        {
+          "name": "data/raw/mpro_activities.csv",
+          "size": 3003320,
+          "type": "0"
+        },
+        {
+          "name": "data/raw/._bace_activities.csv",
+          "size": 163,
+          "type": "0"
+        },
+        {
+          "name": "data/raw/bace_activities.csv",
+          "size": 269226,
+          "type": "0"
+        },
+        {
+          "name": "data/raw/._a2a_activities.csv",
+          "size": 163,
+          "type": "0"
+        },
+        {
+          "name": "data/raw/a2a_activities.csv",
+          "size": 1824505,
+          "type": "0"
+        },
+        {
+          "name": "data/raw/._document_years.csv",
+          "size": 163,
+          "type": "0"
+        },
+        {
+          "name": "data/raw/document_years.csv",
+          "size": 78817,
+          "type": "0"
+        },
+        {
+          "name": "data/raw/._esol_delaney.csv",
+          "size": 163,
+          "type": "0"
+        },
+        {
+          "name": "data/raw/esol_delaney.csv",
+          "size": 96699,
+          "type": "0"
+        },
+        {
+          "name": "data/raw/._egfr_full_activities.csv",
+          "size": 163,
+          "type": "0"
+        },
+        {
+          "name": "data/raw/egfr_full_activities.csv",
+          "size": 16572861,
+          "type": "0"
+        },
+        {
+          "name": "data/raw/._abl1_activities.csv",
+          "size": 163,
+          "type": "0"
+        },
+        {
+          "name": "data/raw/abl1_activities.csv",
+          "size": 4002502,
+          "type": "0"
+        },
+        {
+          "name": "data/raw/._hivpr_activities.csv",
+          "size": 163,
+          "type": "0"
+        },
+        {
+          "name": "data/raw/hivpr_activities.csv",
+          "size": 1006568,
+          "type": "0"
+        },
+        {
+          "name": "data/raw/._herg_activities.csv",
+          "size": 163,
+          "type": "0"
+        },
+        {
+          "name": "data/raw/herg_activities.csv",
+          "size": 6063267,
+          "type": "0"
+        }
+      ]
+    },
+    {
+      "name": "processed_cache.tar.gz",
+      "sha256": "3543e4ddd5a1a457f1fdd34170fab46846c4bef72806fcb225ca70299afaa277",
+      "members": [
+        {
+          "name": "data/processed/._a2a_fingerprints.npz",
+          "size": 163,
+          "type": "0"
+        },
+        {
+          "name": "data/processed/a2a_fingerprints.npz",
+          "size": 109600,
+          "type": "0"
+        },
+        {
+          "name": "data/processed/._abl1_fingerprints.npz",
+          "size": 163,
+          "type": "0"
+        },
+        {
+          "name": "data/processed/abl1_fingerprints.npz",
+          "size": 181980,
+          "type": "0"
+        },
+        {
+          "name": "data/processed/._bace_fingerprints.npz",
+          "size": 163,
+          "type": "0"
+        },
+        {
+          "name": "data/processed/bace_fingerprints.npz",
+          "size": 126079,
+          "type": "0"
+        },
+        {
+          "name": "data/processed/._egfr_fingerprints.npz",
+          "size": 163,
+          "type": "0"
+        },
+        {
+          "name": "data/processed/egfr_fingerprints.npz",
+          "size": 373046,
+          "type": "0"
+        },
+        {
+          "name": "data/processed/._egfr_full_fingerprints.npz",
+          "size": 163,
+          "type": "0"
+        },
+        {
+          "name": "data/processed/egfr_full_fingerprints.npz",
+          "size": 919485,
+          "type": "0"
+        },
+        {
+          "name": "data/processed/._herg_fingerprints.npz",
+          "size": 163,
+          "type": "0"
+        },
+        {
+          "name": "data/processed/herg_fingerprints.npz",
+          "size": 785896,
+          "type": "0"
+        },
+        {
+          "name": "data/processed/._hivpr_fingerprints.npz",
+          "size": 163,
+          "type": "0"
+        },
+        {
+          "name": "data/processed/hivpr_fingerprints.npz",
+          "size": 215293,
+          "type": "0"
+        },
+        {
+          "name": "data/processed/._mpro_fingerprints.npz",
+          "size": 163,
+          "type": "0"
+        },
+        {
+          "name": "data/processed/mpro_fingerprints.npz",
+          "size": 295898,
+          "type": "0"
+        },
+        {
+          "name": "data/processed/._vegfr2_fingerprints.npz",
+          "size": 163,
+          "type": "0"
+        },
+        {
+          "name": "data/processed/vegfr2_fingerprints.npz",
+          "size": 814557,
+          "type": "0"
+        }
+      ]
+    }
+  ],
+  "installed_models": 18,
+  "installed_time_models": 0,
+  "installed_caches": 9,
+  "raw_pins": 11,
+  "fetch_script_sha256": "f7e2b635ee299ad76935e4af45c017d770d2afc516bfcf7f5101399e08ffea12"
+}

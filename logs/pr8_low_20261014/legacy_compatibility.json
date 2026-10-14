@@ -1,0 +1,47 @@
+{
+  "historical_files_unchanged": 34,
+  "old_split_count": 8,
+  "old_checkpoints_validated": 24,
+  "splits": [
+    {
+      "tag": "a2a",
+      "legacy_label_id": "b35580bb601adf4fb9e604dee3dd0f8989d11ebd4f14eaafc3e25a4e40f44b5b",
+      "additional_integrity_present": false
+    },
+    {
+      "tag": "abl1",
+      "legacy_label_id": "999bd88ee0bf093ad765dd8c7769f26756c3f4a47935e0de22391af8feb6e7c3",
+      "additional_integrity_present": false
+    },
+    {
+      "tag": "egfr",
+      "legacy_label_id": "b181f531e8ac9454c8ce55a1669a28259e7d3aa65852a74ce38eac44be846761",
+      "additional_integrity_present": false
+    },
+    {
+      "tag": "egfr_full",
+      "legacy_label_id": "09e7659309a88d077bdad0001daf441245aa9b9f88573d2cf755cd8697b3680b",
+      "additional_integrity_present": false
+    },
+    {
+      "tag": "herg",
+      "legacy_label_id": "369e86d94fe32622d959806abc5379f5487ab2f63282a4642af6c5003c628e93",
+      "additional_integrity_present": false
+    },
+    {
+      "tag": "hivpr",
+      "legacy_label_id": "66a8a839e6cff2f4d7b9664c286fd8d2b716b784faab4aa60d7bf5e74d94eec6",
+      "additional_integrity_present": false
+    },
+    {
+      "tag": "mpro",
+      "legacy_label_id": "75bb580c77d0dbe64c7aed1178c0dbc2505f44f3c3c91cc0344a95e8c305c17c",
+      "additional_integrity_present": false
+    },
+    {
+      "tag": "vegfr2",
+      "legacy_label_id": "0257d96ee9bd87e1664b7ac0bfb946a556acdd78ef5389fbb62256c0462beb78",
+      "additional_integrity_present": false
+    }
+  ]
+}

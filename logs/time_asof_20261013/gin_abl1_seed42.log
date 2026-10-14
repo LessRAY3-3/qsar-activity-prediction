@@ -1,0 +1,14 @@
+<GIN_CAMPAIGN>/.venv/lib/python3.12/site-packages/torch/jit/_script.py:1491: FutureWarning: `torch.jit.script` is deprecated. Please switch to `torch.compile` or `torch.export`.
+  warnings.warn(
+[abl1/time] device=cuda  y_mean=7.117 y_std=1.481
+<GIN_CAMPAIGN>/work/scripts/gnn_03_train_gin.py:273: UserWarning: Converting a tensor with requires_grad=True to a scalar may lead to unexpected behavior.
+Consider using tensor.detach() first. (Triggered internally at /__w/pytorch/pytorch/torch/csrc/autograd/generated/python_variable_methods.cpp:820.)
+  total += float(loss) * len(batch.y)
+  epoch   1  train_mse=0.7854  valid_rmse=0.7583  lr=1.0e-03 *
+  epoch   7  train_mse=0.4278  valid_rmse=0.7342  lr=1.0e-03 *
+  epoch   8  train_mse=0.4046  valid_rmse=0.7003  lr=1.0e-03 *
+  epoch  10  train_mse=0.3544  valid_rmse=1.0900  lr=1.0e-03
+  epoch  20  train_mse=0.2862  valid_rmse=0.8230  lr=5.0e-04
+  early stop at epoch 28 (best epoch 8)
+  TEST  R2=0.0919  RMSE=1.4778  MAE=1.2707  (3s)
+  saved -> results/gnn_models/abl1_gin_time.pt, results/gnn_preds_abl1_time.npz, results/gnn_metrics_abl1.json

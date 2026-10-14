@@ -50,6 +50,9 @@ What / why:
      provenance), n_measurements (records per parent) and
      n_structural_variants (distinct canonical_smiles per parent).
      Unparseable SMILES fall back to the raw string and are counted.
+     Explicit legacy exception: TAG='bace' keeps the original canonical
+     SMILES, charges, grouping and CSV schema of the MoleculeNet benchmark.
+     Applying the ChEMBL parent transform would change its frozen features.
 """
 import os
 import numpy as np
@@ -171,6 +174,13 @@ def main():
             )
         print("No standard_relation column in input (bace-style download format); skipping censoring filter.")
 
+    if df.empty:
+        raise SystemExit(
+            f"ERROR: {IN_CSV} has no usable exact measurements after the "
+            "unit/value/SMILES/relation filters; refusing a header-only clean "
+            "CSV. Existing output has not been changed. Check the raw input."
+        )
+
     # 6. sanity cross-check against ChEMBL's own pchembl_value (should match),
     #    over all retained rows, not just the subset with a pChEMBL value
     pchembl = pd.to_numeric(df["pchembl_value"], errors="coerce")
@@ -185,11 +195,16 @@ def main():
           "(exact measurements ChEMBL could not convert, e.g. 'Outside typical range').")
 
     # 7. parent standardization, then deduplicate by parent_smiles -> median pIC50
-    print(f"Standardizing {df['canonical_smiles'].nunique()} unique SMILES to parent structures ...")
+    action = "Keeping legacy BACE structures for" if TAG == "bace" else "Standardizing"
+    print(f"{action} {df['canonical_smiles'].nunique()} unique SMILES ...")
     parent_map = {}
     n_multi = n_changed = n_fallback = 0
     for smi in df["canonical_smiles"].unique():
-        parent, n_frag, parsed = _parent_smiles(smi)
+        if TAG == "bace":
+            # BACE's published benchmark uses the input structures verbatim.
+            parent, n_frag, parsed = smi, 1, True
+        else:
+            parent, n_frag, parsed = _parent_smiles(smi)
         parent_map[smi] = parent
         if not parsed:
             n_fallback += 1
@@ -230,8 +245,13 @@ def main():
             "target",
         ]
     ]
+    if TAG == "bace":
+        clean = clean.drop(columns=["parent_smiles", "n_structural_variants"])
+        print("BACE legacy protocol: retained input canonical SMILES and charges; "
+              "no ChEMBL parent standardization.")
     print(f"Target: {target_name}")
-    print(f"Removed {n_rows - len(clean)} duplicate rows -> {len(clean)} unique parent compounds.")
+    unit = "canonical structures" if TAG == "bace" else "parent compounds"
+    print(f"Removed {n_rows - len(clean)} duplicate rows -> {len(clean)} unique {unit}.")
     n_merged = int((sizes > 1).sum())
     n_merged_struct = int((n_structural > 1).sum())
     print(f"Parent groups merged away: {n_merged} (of which {n_merged_struct} held >1 distinct "

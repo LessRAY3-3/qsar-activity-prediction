@@ -9,10 +9,16 @@ figures in the README and the run ledger in `experiments/LOG.md`.
 Numbers are the refreshed (2026-10-11 refresh / 2026-10-12 re-run)
 values; anything marked **pre-refresh** is from the 6,165-compound `egfr`
 pull that the refresh replaced and should be quoted only as history.
-The time-split results are also **legacy audit artifacts**: their all-year
-labels included future measurements. Versioned as-of labels are implemented,
-but the 8 RF + 24 GIN time campaign has not been rerun. Do not quote the old
-time table as prospective validation or evidence for deployment/model choice.
+The time campaign was retrained on 2026-10-13, with four hERG fits replaced
+on 2026-10-14 after recovering one eligible training molecule: all 8 RF + 24 GIN jobs now
+use versioned as-of labels and passed artifact acceptance. Use the current
+README time table; the old all-year-label results remain historical only.
+The new ensemble molecule-bootstrap intervals favour GIN on four targets,
+RF on two, and include zero on two. These retrospective holdouts do not
+establish a causal drift mechanism or deployment readiness. Best-checkpoint
+training diagnostics flag 13/24 time GIN fits under a heuristic threshold;
+this is not evidence of convergence. RF is below the train-mean constant
+on a2a, egfr_full and herg; relative GIN wins need that absolute context.
 
 1. **Why pIC50** - order-of-magnitude target standardisation.
 2. **Why scaffold split** - random splits leak analogues across
@@ -24,8 +30,8 @@ time table as prospective validation or evidence for deployment/model choice.
    substructure claims were validated with permutation importance on the
    held-out set before being made.
 4. **Industry use** - first stage of virtual screening: in silico triage of
-   large libraries before experimental validation, cutting wet-lab cost by
-   orders of magnitude.
+   large libraries before experimental validation. Reduced experimental
+   cost is a possible use case, not an outcome measured in this project.
 5. **Controlled GNN vs RF comparison** - same molecules, splits verified
    bit-identical (saved RF models reproduce the original metrics to 7
    decimals on the regenerated indices). Result: the GIN does *not* beat
@@ -43,23 +49,31 @@ time table as prospective validation or evidence for deployment/model choice.
    "Hyperparameters: an honest negative result") improved validation but
    degraded test (validation-set selection noise); the simplest recipe
    was kept. GIN scaffold-split R2 varies +-0.02
-   across seeds - single-seed GNN comparisons are meaningless.
+   across seeds in that historical run; report seed sensitivity rather
+   than treating a single fit as representative of the training procedure.
 7. **Failure-mode analysis** - the two models' 50 worst molecules overlap
    ~9x more than chance (refreshed: 25 random / 25 scaffold shared of 50,
    vs 2.7 expected; per-molecule |error| Spearman 0.50 random / 0.59
    scaffold; **pre-refresh**: 25 / 21, Spearman ~0.52). This identifies
    shared difficult examples, not the cause: assay noise, common model
    limitations and distribution shift remain possible. Specific chemotypes
-   still fail asymmetrically
-   (thienopyrimidines hurt RF more: 47 scaffold-test molecules at mean
+   show seed-specific asymmetries
+   (for GIN seed 42, thienopyrimidines hurt RF more: 47 scaffold-test molecules at mean
    |error| 1.32 vs the GIN's 1.02; the chromone series that hurt the GIN
    **pre-refresh** - n=37 at 1.12 vs 0.64 - is gone from the refreshed
-   test set, its query matches 0 of 912) - fingerprints and graphs
-   extrapolate differently.
+   test set, its query matches 0 of 912). The thienopyrimidine direction
+   can reverse for other GIN seeds, so this case study does not establish
+   a stable architecture-specific chemotype weakness.
 
-8. **Inference limits** - scaffold CIs depend on the resampling unit; ABL1
-   and Mpro GIN verdicts cross zero when whole scaffold groups are resampled.
-   Seed sensitivity and scaffold dependence are different checks. RF tree std
+8. **Inference limits** - scaffold CIs depend on the resampling unit: 7 of 10
+   molecule-significant verdicts across GIN/GINE/AttentiveFP include zero when
+   whole scaffold groups are resampled (2/3 GNN wins, 5/7 RF wins). Only
+   5–85 test groups are available, limiting this sensitivity analysis too.
+   Seed sensitivity and scaffold dependence are different checks. All
+   panel 95% intervals are unadjusted exploratory comparisons; they do not
+   imply simultaneous panel coverage. Bootstrap sign fractions are not
+   calibrated null p-values. Dropping only GNN seeds also changes ensemble
+   size and cannot establish RF seed robustness. RF tree std
    ranks error better than the tested GNN seed std, but ranking does not prove
    probabilistic calibration. The multi-task runs perform worse under their
    tested configurations; unmatched heads and cross-target molecule overlap

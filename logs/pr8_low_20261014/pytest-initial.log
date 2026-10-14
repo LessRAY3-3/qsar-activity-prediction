@@ -1,0 +1,65 @@
+........................................................................ [ 13%]
+........................................................................ [ 26%]
+...........................................F............................ [ 39%]
+........................................................................ [ 52%]
+........................................................................ [ 65%]
+........................................................................ [ 78%]
+........................................................................ [ 92%]
+...........................................                              [100%]
+=================================== FAILURES ===================================
+_________________ test_time_split_conclusion_follows_the_data __________________
+
+load_experiment = <function load_experiment.<locals>._load at 0x11cc45f80>
+capsys = <_pytest.capture.CaptureFixture object at 0x11defad50>
+
+    def test_time_split_conclusion_follows_the_data(load_experiment, capsys):
+        mod = load_experiment("time_split_summary")
+        healthy = pd.DataFrame([
+            {"tag": "t1", "rf_time_r2": 0.3, "rf_random_r2": 0.6,
+             "gin_time_r2_mean": 0.35, "gin_random_r2_mean": 0.6,
+             "constant_r2": 0.1, "significant": False, "winner": "rf",
+             "test_frac": 0.2},
+            {"tag": "t2", "rf_time_r2": 0.4, "rf_random_r2": 0.6,
+             "gin_time_r2_mean": 0.45, "gin_random_r2_mean": 0.6,
+             "constant_r2": 0.1, "significant": False, "winner": "rf",
+             "test_frac": 0.2},
+            {"tag": "t3", "rf_time_r2": 0.5, "rf_random_r2": 0.6,
+             "gin_time_r2_mean": 0.55, "gin_random_r2_mean": 0.6,
+             "constant_r2": 0.1, "significant": False, "winner": "rf",
+             "test_frac": 0.2},
+        ])
+        mod.print_conclusion(healthy)
+        out = capsys.readouterr().out
+        assert "negative time R²: RF none; GIN none" in out
+        assert "RF below constant baseline: none" in out
+        assert "note: negative time-split" not in out
+>       assert "caveat:" not in out
+E       AssertionError: assert 'caveat:' not in '\n=== P8 ti...head: none\n'
+E         
+E         'caveat:' is contained here:
+E            -0.150
+E             caveat: random/scaffold use all-year labels; time uses as-of labels. This contrast does not isolate splitting or temporal drift.
+E         ?   +++++++
+E             negative time R²: RF none; GIN none
+E             RF below constant baseline: none
+E             paired bootstrap (mean3): 0/8 CIs exclude 0 | GIN ahead: none; RF ahead: none
+
+tests/test_latent_robustness.py:199: AssertionError
+=============================== warnings summary ===============================
+../qsar-activity-prediction/.venv/lib/python3.12/site-packages/torch/jit/_script.py:1491
+  /Users/lessray/Desktop/kimi code/qsar-activity-prediction/.venv/lib/python3.12/site-packages/torch/jit/_script.py:1491: FutureWarning: `torch.jit.script` is deprecated. Please switch to `torch.compile` or `torch.export`.
+    warnings.warn(
+
+tests/test_gnn_models.py::test_time_training_uses_asof_labels_for_scaling_and_evaluation
+  /Users/lessray/Desktop/kimi code/qsar-time-retrain-20261013/scripts/gnn_03_train_gin.py:293: UserWarning: Converting a tensor with requires_grad=True to a scalar may lead to unexpected behavior.
+  Consider using tensor.detach() first. (Triggered internally at /Users/runner/work/pytorch/pytorch/torch/csrc/autograd/generated/python_variable_methods.cpp:821.)
+    total += float(loss) * len(batch.y)
+
+tests/test_p8_analysis.py::test_bootstrap_records_requested_n_boot_with_degenerate_resamples
+  /Users/lessray/Desktop/kimi code/qsar-time-retrain-20261013/experiments/paired_bootstrap.py:277: RuntimeWarning: divide by zero encountered in divide
+    r2s.append(1.0 - sse / sst)
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/test_latent_robustness.py::test_time_split_conclusion_follows_the_data
+1 failed, 546 passed, 3 warnings in 40.48s

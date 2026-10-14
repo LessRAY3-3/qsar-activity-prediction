@@ -1,0 +1,83 @@
+"""Verify the completed CUDA campaign and package canonical artifacts with audit logs."""
+from datetime import datetime, timezone
+from pathlib import Path
+import argparse
+import json
+import os
+import sys
+import tarfile
+
+ROOT = Path('/home/lessray/qsar-campaigns/time-asof-20261013-7ce15c1-gin')
+WORK = ROOT / 'work'
+sys.path.insert(0, str(WORK / 'scripts'))
+import numpy as np
+import torch
+from torch_geometric.loader import DataLoader
+from gnn_graph_dataset import MoleculeGraphDataset
+import run_time_campaign as worker
+
+assert json.loads((ROOT / 'campaign_status.json').read_text())['stage'] == 'complete'
+assert not (WORK / '.time_campaign_gin.lock').exists()
+export = ROOT / 'exports/gin-complete-7ce15c1-v1'
+export.mkdir(parents=True, exist_ok=False)
+paths = {WORK / 'manifest.json'}
+summary = []
+for tag in worker.TAGS:
+    for seed in worker.SEEDS:
+        directory = WORK / f'results/time_campaign/gin_{tag}_seed{seed}'
+        state = json.loads((directory / 'status.json').read_text())
+        assert state['state'] == 'success'
+        for key, value in state['provenance']['environment']['variables'].items():
+            if value is None: os.environ.pop(key, None)
+            else: os.environ[key] = value
+        torch.set_num_threads(2)
+        args = worker.parse_args(['--role','gin','--tags',tag,'--seeds',str(seed),'--device','cuda'])
+        job = worker.build_jobs(args, WORK)[0]
+        assert worker.can_resume(state, job, WORK, directory), (tag, seed, 'provenance mismatch')
+        worker.validate_outputs(job, WORK)
+        checkpoint_path = next(WORK / name for name in job['files'] if name.endswith('.pt'))
+        checkpoint = torch.load(checkpoint_path, map_location='cpu', weights_only=True)
+        model = worker.build_checkpoint_model(WORK, checkpoint['args']).to('cuda')
+        model.load_state_dict(checkpoint['state_dict'], strict=True)
+        model.eval()
+        dataset = MoleculeGraphDataset(WORK / f'data/processed/{tag}_graphs.npz', indices=job['split']['test_idx'])
+        predictions = []
+        with torch.no_grad():
+            for batch in DataLoader(dataset, batch_size=512):
+                predictions.append(model(batch.to('cuda')).cpu())
+        replay = torch.cat(predictions).numpy() * checkpoint['y_std'] + checkpoint['y_mean']
+        prediction_path = next(WORK / name for name in job['files'] if '_preds_' in name)
+        with np.load(prediction_path, allow_pickle=False) as stored:
+            np.testing.assert_allclose(replay, stored['y_pred'], atol=1e-5, rtol=1e-5)
+            max_error = float(np.max(np.abs(replay - stored['y_pred'])))
+        metrics_path = next(WORK / name for name in job['files'] if 'metrics_' in name)
+        metrics = json.loads(metrics_path.read_text())['time']
+        summary.append(dict(tag=tag,seed=seed,state='success',label_id=job['provenance']['label_id'],
+                            r2=metrics['r2'],rmse=metrics['rmse'],mae=metrics['mae'],best_epoch=metrics['best_epoch'],
+                            convergence_flag=metrics['convergence_flag'],device=metrics['device'],
+                            elapsed_seconds=state['elapsed_seconds'],started_at=state['started_at'],finished_at=state['finished_at'],
+                            prediction_replay_max_abs_error=max_error))
+        paths.update(WORK / name for name in job['files'])
+        paths.add(directory / 'status.json')
+        paths.update(directory.glob('*/train.log'))
+        paths.update(directory.glob('*/previous_status.json'))
+        del checkpoint, model, dataset, predictions, replay
+        torch.cuda.empty_cache()
+        print('Verified', tag, seed, 'prediction replay max error', max_error, flush=True)
+for name in ('launch.json','campaign_status.json','environment.freeze.txt','gin_requirements.txt','cuda_preflight.json','dry_run.json','run_campaign.py'):
+    paths.add(ROOT / name)
+paths.update((ROOT / 'logs').glob('*.log'))
+manifest = dict(schema='qsar-gin-return-v1',source_commit='7ce15c1f0849ae69e0ca208f781a9824517eb328',
+                created_at=datetime.now(timezone.utc).isoformat(),jobs=summary,
+                remote_canonical_and_snapshot_hashes_verified=True,checkpoint_cuda_predictions_verified=True,
+                replay_tolerance=dict(atol=1e-5,rtol=1e-5),
+                files=[dict(path=str(path.relative_to(ROOT)),bytes=path.stat().st_size,sha256=worker.digest(path)) for path in sorted(paths)])
+manifest_path = export / 'return_manifest.json'
+manifest_path.write_text(json.dumps(manifest,indent=2)+'\n')
+archive = export / 'gin-results.tar.gz'
+with tarfile.open(archive,'w:gz',compresslevel=3) as bundle:
+    bundle.add(manifest_path,arcname='return_manifest.json')
+    for path in sorted(paths): bundle.add(path,arcname=str(path.relative_to(ROOT)))
+digest = worker.digest(archive)
+(export / 'gin-results.sha256').write_text(digest+'  gin-results.tar.gz\n')
+print(json.dumps(dict(archive=str(archive),bytes=archive.stat().st_size,sha256=digest,jobs=len(summary),convergence_flags=sum(row['convergence_flag'] for row in summary),max_replay_error=max(row['prediction_replay_max_abs_error'] for row in summary)),indent=2))

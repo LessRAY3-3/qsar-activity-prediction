@@ -1,0 +1,9 @@
+{
+  "state": "prepared_not_connected_or_trained",
+  "directory": "/Users/lessray/Desktop/kimi code/qsar-time-retrain-20261013/.scratch/win4070-ready-20261014",
+  "jobs": 146,
+  "delivery_manifest_sha256": "a73b20b6ead2a9482b5783efa2c9b0e3b6f0f0c5547063516a36949af62334be",
+  "archive": "/Users/lessray/Desktop/kimi code/qsar-time-retrain-20261013/.scratch/win4070-ready-20261014.tar.gz",
+  "archive_sha256": "28768efcab6b5ac33328b1db7f8c22076d7a700fdd26f659d15e1469b0e5ed98",
+  "archive_bytes": 8353538
+}

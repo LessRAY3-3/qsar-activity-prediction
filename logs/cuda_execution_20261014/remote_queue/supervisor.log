@@ -1,0 +1,16 @@
+2026-10-14T13:26:39.429669+00:00 starting budget_comparison
+Traceback (most recent call last):
+  File "/home/lessray/qsar-campaigns/cuda-ready-20261014/handoff.py", line 392, in <module>
+    main()
+  File "/home/lessray/qsar-campaigns/cuda-ready-20261014/handoff.py", line 386, in main
+    detach(root) if args.detach else execute(root)
+                                     ^^^^^^^^^^^^^
+  File "/home/lessray/qsar-campaigns/cuda-ready-20261014/handoff.py", line 335, in execute
+    run_phase(root, state, name, command, env)
+  File "/home/lessray/qsar-campaigns/cuda-ready-20261014/handoff.py", line 292, in run_phase
+    raise RuntimeError(f'{name} failed ({returncode}); inspect logs before resume')
+RuntimeError: budget_comparison failed (1); inspect logs before resume
+/home/lessray/qsar-campaigns/time-asof-20261013-7ce15c1-gin/.venv/bin/python failed with exit status 1.
+2026-10-14T13:52:07.676062+00:00 starting budget_comparison
+2026-10-14T14:18:57.261109+00:00 starting package_budget
+2026-10-14T14:19:14.772871+00:00 starting provenance_reconstruction

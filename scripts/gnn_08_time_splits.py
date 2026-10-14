@@ -36,7 +36,8 @@ Split (n = molecule count)
           cutoff_t. Missing eligible labels are excluded. The three pools
           plus excluded_idx partition the original dataset.
 
-Guards (write {TAG}_time_NA.json instead of an npz, exit 0)
+First-generation guards (write {TAG}_time_NA.json instead of an npz, exit 0;
+  an unavailable regeneration retains an existing split and exits nonzero)
   * year span max(year)-min(year) < 8  -> too few time points to cut on
   * fewer than 100 molecules in the BUSIEST year (the year holding the
     most molecules) -> the yearly counts are too thin for stable cutoffs.
@@ -50,7 +51,8 @@ Outputs
       (int, row order of {TAG}_fingerprints.npz == {TAG}_pic50_clean.csv),
       excluded_idx, y (as-of; NaN for exclusions), original_y,
       scaffold_smiles, smiles, year (float32, per molecule), cutoffs,
-      label_policy, source/data signatures and label_id
+      label_policy, source/data signatures and label_id; new splits also carry
+      integrity_schema and integrity_sha256 covering every payload field
   data/processed/splits/{TAG}_time_NA.json   guard marker (tag, reason,
       year_min, year_max, n_in_latest_year, n_in_busiest_year)
   figures/time_split/{TAG}_timeline.png  year histogram with both cutoffs
@@ -61,10 +63,14 @@ trainers read the npz (or skip on the NA marker).
 CLI: --tag (default QSAR_TAG env, then "egfr"), style of 02_clean_data.py.
 """
 import argparse
+from contextlib import contextmanager
 import hashlib
 import importlib
 import json
 import os
+from pathlib import Path
+import shutil
+import tempfile
 
 import matplotlib
 import numpy as np
@@ -75,7 +81,8 @@ import matplotlib.pyplot as plt
 
 from gnn_01_make_splits import check_disjoint
 from qsar_common import exact_relation_mask, murcko_scaffold_list
-from time_labels import LABEL_POLICY, dataset_signature, label_signature
+from time_labels import (INTEGRITY_SCHEMA, LABEL_POLICY, dataset_signature,
+                         label_signature, split_integrity_digest)
 
 # 02's parent standardization (LargestFragmentChooser + Uncharger), reused
 # verbatim so the year join keys on exactly the same unit 02/03 export.
@@ -141,10 +148,11 @@ def read_inputs(in_npz, in_activities, in_years):
 
 
 def _parent_keys(values):
-    """02's parent standardization for every entry (memoized), for joining.
+    """Standardize raw activity SMILES once, exactly as the cache producer.
 
-    Both join sides go through this so the key space is identical whether
-    the npz already holds parent_smiles (03) or a raw canonical string.
+    Cached SMILES already contain 02's parent output and must not pass
+    through this function again: the RDKit round trip is not idempotent
+    for every molecule (e.g. CHEMBL2035183).
     """
     cache = {}
     keys = []
@@ -156,16 +164,38 @@ def _parent_keys(values):
     return keys
 
 
+
+def _activities_with_parent(smiles, activities):
+    """Validate cache keys against ALL raw structures before eligibility filtering.
+
+    A missing document/year is allowed; an absent structural key indicates a
+    cache/raw mismatch, not missing publication metadata. Never normalize the
+    cached keys again, because parent standardization need not be idempotent.
+    """
+    acts = activities.copy()
+    acts["parent"] = _parent_keys(acts["canonical_smiles"])
+    raw_keys = {key for key in acts["parent"] if key is not None}
+    missing = [(row, key) for row, key in enumerate(np.asarray(smiles, dtype=str))
+               if key not in raw_keys]
+    if missing:
+        details = "; ".join(f"row={row} key={key!r}" for row, key in missing)
+        raise ValueError(
+            f"{len(missing)} cached parent key(s) absent from standardized raw activities "
+            f"(zero-based cache rows): {details}")
+    return acts
+
+
 def assign_years(smiles, activities, years):
     """Per-SMILES earliest publication year (float array, NaN = no year).
 
     Joins activities -> document_years on document_chembl_id, then takes
     the minimum year over all rows of each standardized parent SMILES.
-    The reindex key is 02's parent form on BOTH sides: raw activities carry
-    salt/charge variants while the fingerprint npz exports parent_smiles,
-    so plain-string keys would leave those molecules undated.
+    Raw salt/charge forms are standardized once, as in 02. The fingerprint
+    cache already exports those parent keys; use them unchanged rather than
+    standardizing a second time and potentially changing the join key.
     """
-    acts = activities.dropna(subset=["canonical_smiles", "document_chembl_id"]).copy()
+    acts = _activities_with_parent(smiles, activities).dropna(
+        subset=["canonical_smiles", "document_chembl_id"]).copy()
     acts["canonical_smiles"] = acts["canonical_smiles"].astype(str)
     acts["document_chembl_id"] = acts["document_chembl_id"].astype(str)
 
@@ -175,9 +205,8 @@ def assign_years(smiles, activities, years):
     docs["document_chembl_id"] = docs["document_chembl_id"].astype(str)
 
     merged = acts.merge(docs, on="document_chembl_id", how="left")
-    merged["join_smiles"] = _parent_keys(merged["canonical_smiles"])
-    per_smiles = merged.groupby("join_smiles")["document_year"].min()
-    keys = _parent_keys(np.asarray(smiles, dtype=str))
+    per_smiles = merged.groupby("parent")["document_year"].min()
+    keys = np.asarray(smiles, dtype=str)
     out = per_smiles.reindex(keys).to_numpy(dtype=float)
     return np.array(out, dtype=float, copy=True)  # writable copy: ensure_coverage fills NaNs in place
 
@@ -194,7 +223,7 @@ def asof_labels(smiles, activities, years, pools, cutoff_v, cutoff_t):
                 "canonical_smiles", "document_chembl_id"}
     if not required.issubset(activities.columns):
         raise ValueError(f"as-of labels require columns: {sorted(required - set(activities.columns))}")
-    acts = activities.copy()
+    acts = _activities_with_parent(smiles, activities)
     acts["standard_value"] = pd.to_numeric(acts["standard_value"], errors="coerce")
     keep = (exact_relation_mask(acts["standard_relation"])
             & acts["standard_units"].eq("nM")
@@ -209,9 +238,8 @@ def asof_labels(smiles, activities, years, pools, cutoff_v, cutoff_t):
     acts["document_chembl_id"] = acts["document_chembl_id"].astype(str)
     docs["document_chembl_id"] = docs["document_chembl_id"].astype(str)
     acts = acts.merge(docs, on="document_chembl_id", how="inner", validate="many_to_one")
-    acts["parent"] = _parent_keys(acts["canonical_smiles"])
     acts["pic50"] = -np.log10(acts["standard_value"] * 1e-9)
-    keys = _parent_keys(smiles)
+    keys = np.asarray(smiles, dtype=str)
     y = np.full(len(smiles), np.nan, dtype=np.float32)
     retained = []
     conditions = (acts["document_year"] < cutoff_v,
@@ -354,8 +382,8 @@ def plot_timeline(year, cutoff_v, cutoff_t, n_train, n_valid, n_test, tag, out_p
     plt.close(fig)
 
 
-def run(tag, in_npz, in_activities, in_years, split_dir, fig_dir):
-    # Failed/partial regeneration must never leave a consumable old split.
+def _stage_run(tag, in_npz, in_activities, in_years, split_dir, fig_dir):
+    # All writes here are confined to the unpublished staging directory.
     write_na_marker(split_dir, tag, "time split regeneration incomplete", None, None, None, None)
     smiles, activities, years_df = read_inputs(in_npz, in_activities, in_years)
     n = len(smiles)
@@ -404,6 +432,8 @@ def run(tag, in_npz, in_activities, in_years, split_dir, fig_dir):
                    scaffold_smiles=murcko_scaffold_list(smiles), smiles=smiles,
                    year=year.astype(np.float32))
     payload["label_id"] = label_signature(payload)
+    payload["integrity_schema"] = INTEGRITY_SCHEMA
+    payload["integrity_sha256"] = split_integrity_digest(payload)
 
     os.makedirs(split_dir, exist_ok=True)
     out_npz = os.path.join(split_dir, f"{tag}_time.npz")
@@ -423,6 +453,206 @@ def run(tag, in_npz, in_activities, in_years, split_dir, fig_dir):
           f"train={len(train_idx)} ({len(train_idx) / n:.1%}) "
           f"valid={len(valid_idx)} ({len(valid_idx) / n:.1%}) "
           f"test={len(test_idx)} ({len(test_idx) / n:.1%})")
+    return None
+
+
+
+def _atomic_replace(source, destination):
+    """Copy into the destination filesystem before one atomic replacement."""
+    destination = Path(destination)
+    if destination.is_symlink():
+        raise ValueError(f"refusing to replace symlink: {destination}")
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    temporary = None
+    try:
+        with tempfile.NamedTemporaryFile(prefix=".time-regenerate-", suffix=".tmp",
+                                         dir=destination.parent, delete=False) as output:
+            temporary = Path(output.name)
+            with Path(source).open("rb") as input_file:
+                shutil.copyfileobj(input_file, output)
+            output.flush()
+            os.fsync(output.fileno())
+        os.replace(temporary, destination)
+    finally:
+        if temporary is not None:
+            temporary.unlink(missing_ok=True)
+
+
+
+def _file_hash(path):
+    path = Path(path)
+    if path.is_symlink():
+        raise ValueError(f"symlink publication path forbidden: {path}")
+    if not path.exists():
+        return None
+    digest = hashlib.sha256()
+    with path.open("rb") as stream:
+        for block in iter(lambda: stream.read(1024 * 1024), b""):
+            digest.update(block)
+    return digest.hexdigest()
+
+
+def _file_identity(path):
+    if not Path(path).exists():
+        return None
+    stat = Path(path).stat()
+    return [stat.st_dev, stat.st_ino]
+
+
+def _sync_directory(path):
+    descriptor = os.open(path, os.O_RDONLY)
+    try:
+        os.fsync(descriptor)
+    finally:
+        os.close(descriptor)
+
+
+def _write_publication_record(path, payload):
+    """Write journal metadata durably before changing a canonical artifact."""
+    path = Path(path)
+    temporary = None
+    try:
+        with tempfile.NamedTemporaryFile(mode="w", prefix=path.name + ".", suffix=".tmp",
+                                         dir=path.parent, delete=False) as stream:
+            temporary = Path(stream.name)
+            json.dump(payload, stream, indent=2)
+            stream.write("\n")
+            stream.flush()
+            os.fsync(stream.fileno())
+        os.replace(temporary, path)
+        _sync_directory(path.parent)
+    finally:
+        if temporary is not None:
+            temporary.unlink(missing_ok=True)
+
+
+@contextmanager
+def _regeneration_lock(split_dir, tag):
+    """A crash releases this OS lock; journal recovery never races a live run."""
+    import fcntl  # supported campaign hosts are Linux and macOS
+
+    split_dir.mkdir(parents=True, exist_ok=True)
+    path = split_dir / f".{tag}_time_regeneration.lock"
+    if path.is_symlink():
+        raise ValueError(f"symlink lock forbidden: {path}")
+    with path.open("a+b") as lock:
+        try:
+            fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        except BlockingIOError:
+            raise RuntimeError(f"{tag}: another time split regeneration is active") from None
+        try:
+            yield
+        finally:
+            fcntl.flock(lock, fcntl.LOCK_UN)
+
+
+def _recover_publication(split_dir, fig_dir, tag):
+    """Finish a committed pair or roll back its figure; never guess on conflicts.
+
+    NPZ replacement is the commit point. Its inode distinguishes a completed
+    replacement even when the new NPZ bytes equal the old bytes. There can be a
+    short mixed-version window before this point; recovery is not multi-file
+    instantaneous atomicity. Readers needing a pair should inspect the journal.
+    """
+    journal = split_dir / f".{tag}_time_publication"
+    if not journal.exists():
+        return
+    if journal.is_symlink():
+        raise ValueError(f"symlink journal forbidden: {journal}")
+    record = journal / "pending.json"
+    if not record.exists():
+        # Preparation did not reach its durable write-ahead record. Neither
+        # canonical artifact can have been changed by this transaction yet.
+        shutil.rmtree(journal)
+        return
+    state = json.loads(record.read_text())
+    target, figure = split_dir / f"{tag}_time.npz", fig_dir / f"{tag}_timeline.png"
+    if (state.get("schema") != "qsar-time-publication-v1" or
+            state.get("split_path") != str(target.resolve()) or
+            state.get("figure_path") != str(figure.resolve())):
+        raise ValueError(f"{tag}: pending publication paths/schema differ; inspect {record}")
+    actual, identity = _file_hash(target), _file_identity(target)
+    committed = actual == state["new_split_sha256"] and identity != state["old_split_identity"]
+    if committed:
+        if _file_hash(figure) != state["new_figure_sha256"]:
+            raise ValueError(f"{tag}: committed figure changed externally; inspect {record}")
+        (split_dir / f"{tag}_time_NA.json").unlink(missing_ok=True)
+        outcome = "committed"
+    else:
+        if actual != state["old_split_sha256"] or identity != state["old_split_identity"]:
+            raise ValueError(f"{tag}: split changed externally during publication; inspect {record}")
+        current_figure = _file_hash(figure)
+        if current_figure not in (state["old_figure_sha256"], state["new_figure_sha256"]):
+            raise ValueError(f"{tag}: figure changed externally during publication; inspect {record}")
+        if current_figure != state["old_figure_sha256"]:
+            if state["old_figure_sha256"] is None:
+                figure.unlink(missing_ok=True)
+            else:
+                backup = journal / "previous_timeline.png"
+                if _file_hash(backup) != state["old_figure_sha256"]:
+                    raise ValueError(f"{tag}: timeline backup is corrupt; inspect {record}")
+                _atomic_replace(backup, figure)
+        outcome = "rolled_back"
+    _sync_directory(split_dir)
+    if figure.parent.exists():
+        _sync_directory(figure.parent)
+    _write_publication_record(split_dir / f".{tag}_time_last_publication.json",
+                              {**state, "outcome": outcome})
+    shutil.rmtree(journal)
+    _sync_directory(split_dir)
+    print(f"  {tag}: publication {outcome}")
+
+
+def _publish_pair(staged_split, staged_figure, split_dir, fig_dir, tag):
+    target, figure = split_dir / f"{tag}_time.npz", fig_dir / f"{tag}_timeline.png"
+    journal = split_dir / f".{tag}_time_publication"
+    state = {"schema": "qsar-time-publication-v1", "split_path": str(target.resolve()),
+             "figure_path": str(figure.resolve()), "old_split_sha256": _file_hash(target),
+             "old_split_identity": _file_identity(target), "new_split_sha256": _file_hash(staged_split),
+             "old_figure_sha256": _file_hash(figure), "new_figure_sha256": _file_hash(staged_figure)}
+    journal.mkdir()
+    try:
+        if state["old_figure_sha256"] is not None:
+            _atomic_replace(figure, journal / "previous_timeline.png")
+        _write_publication_record(journal / "pending.json", state)
+        _sync_directory(split_dir)
+        _atomic_replace(staged_figure, figure)
+        _sync_directory(figure.parent)
+        _atomic_replace(staged_split, target)  # commit point
+        _sync_directory(split_dir)
+    except BaseException:
+        # SIGKILL cannot execute this block; the durable journal is recovered
+        # before the next run reads raw inputs. Failed rollback leaves evidence.
+        _recover_publication(split_dir, fig_dir, tag)
+        raise
+    _recover_publication(split_dir, fig_dir, tag)
+
+
+def run(tag, in_npz, in_activities, in_years, split_dir, fig_dir):
+    """Compute first; preserve old outputs on failure and recover interrupted publication.
+
+    A legitimately unavailable first split may publish an NA marker. An
+    unavailable replacement fails explicitly and retains the previous split.
+    Each file replacement is atomic; the NPZ/timeline pair uses a journal and
+    rollback, not a claim of instantaneous multi-file atomicity.
+    """
+    split_dir, fig_dir = Path(split_dir), Path(fig_dir)
+    with _regeneration_lock(split_dir, tag):
+        _recover_publication(split_dir, fig_dir, tag)
+        with tempfile.TemporaryDirectory(prefix=".time-regenerate-", dir=split_dir.parent) as temporary:
+            stage = Path(temporary)
+            staged_splits, staged_figures = stage / "splits", stage / "figures"
+            _stage_run(tag, in_npz, in_activities, in_years, staged_splits, staged_figures)
+            name, marker = f"{tag}_time.npz", f"{tag}_time_NA.json"
+            if (staged_splits / marker).exists():
+                if (split_dir / name).exists() or (split_dir / name).is_symlink():
+                    reason = json.loads((staged_splits / marker).read_text())["reason"]
+                    raise ValueError(f"{tag}: replacement time split unavailable ({reason}); existing split retained")
+                _atomic_replace(staged_splits / marker, split_dir / marker)
+                return None
+            _publish_pair(staged_splits / name, staged_figures / f"{tag}_timeline.png",
+                          split_dir, fig_dir, tag)
+            print(f"  published {split_dir / name}")
     return None
 
 

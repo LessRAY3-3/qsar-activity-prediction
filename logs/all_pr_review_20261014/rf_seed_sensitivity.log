@@ -1,0 +1,12 @@
+a2a: train=399, test=802, trees=500, threads=4
+a2a/seed42: R2=-0.273177562 delta=+0.388553768 1.0s
+a2a/seed1: R2=-0.301643670 delta=+0.417019876 1.0s
+a2a/seed2: R2=-0.295544776 delta=+0.410920983 1.0s
+a2a/seed3: R2=-0.311935171 delta=+0.427311377 1.0s
+a2a/seed4: R2=-0.344882388 delta=+0.460258594 1.0s
+herg: train=4944, test=2325, trees=500, threads=4
+herg/seed42: R2=-0.055579351 delta=+0.021936664 75.7s
+herg/seed1: R2=-0.052699186 delta=+0.019056499 94.1s
+herg/seed2: R2=-0.049534155 delta=+0.015891468 124.8s
+herg/seed3: R2=-0.042333382 delta=+0.008690695 119.2s
+herg/seed4: R2=-0.058191441 delta=+0.024548754 123.2s

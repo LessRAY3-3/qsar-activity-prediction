@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="1" time="5.845" timestamp="2026-10-14T10:31:25.877280+08:00" hostname="lessraydeMacBook-Air.local"><testcase classname="tests.test_time_campaign_real" name="test_real_gin_checkpoint_corruption_rejected[metric]" time="3.492"><failure message="Failed: DID NOT RAISE any of (ValueError, RuntimeError)">trained_campaign = (&lt;module 'qsar_under_test_run_time_campaign' from '/private/var/folders/60/f144lgn97zg1y9wcvg2v5thh0000gn/T/qsar-tooli...role': 'gin', 'tag': 'a2a', 'label_id': '4a2bdd25e994bd195caf37180ef17a144d75646ff471534ce058398baf6adc27', ...}, ...})
+tmp_path = PosixPath('/private/var/folders/60/f144lgn97zg1y9wcvg2v5thh0000gn/T/pytest-of-lessray/pytest-46/test_real_gin_checkpoint_corru0')
+corruption = 'metric'
+
+    @pytest.mark.parametrize("corruption", ["shape", "nan", "label", "scaling", "seed",
+                                            "bad_mean", "bad_positive_std", "metric",
+                                            "prediction_version", "runtime", "metric_label"])
+    def test_real_gin_checkpoint_corruption_rejected(trained_campaign, tmp_path, corruption):
+        worker, original, _, job = trained_campaign
+        shutil.copytree(original / "scripts", tmp_path / "scripts")
+        shutil.copytree(original / "results", tmp_path / "results")
+        path = tmp_path / job["files"][0]
+        checkpoint = torch.load(path, map_location="cpu", weights_only=True)
+        if corruption in ("shape", "nan"):
+            key = next(k for k, v in checkpoint["state_dict"].items() if v.ndim == 2)
+            value = checkpoint["state_dict"][key]
+            checkpoint["state_dict"][key] = value[:1] if corruption == "shape" else torch.full_like(value, float("nan"))
+        elif corruption == "label":
+            checkpoint["label_id"] = "wrong-generation"
+        elif corruption == "scaling":
+            checkpoint["y_std"] = 0.0
+        elif corruption == "bad_mean":
+            checkpoint["y_mean"] = 999.0
+        elif corruption == "bad_positive_std":
+            checkpoint["y_std"] = 999.0
+        elif corruption in ("metric", "metric_label"):
+            metric = tmp_path / job["files"][2]
+            payload = json.loads(metric.read_text())
+            if corruption == "metric":
+                payload["time"]["r2"] += 1.0
+            else:
+                payload["time"]["label_id"] = "wrong-generation"
+            metric.write_text(json.dumps(payload))
+        elif corruption == "prediction_version":
+            prediction = tmp_path / job["files"][1]
+            with np.load(prediction) as archive:
+                payload = dict(archive)
+            payload["label_id"] = "wrong-generation"
+            np.savez(prediction, **payload)
+        elif corruption == "runtime":
+            checkpoint["runtime"]["device"] = "mps"
+        else:
+            checkpoint["args"]["seed"] = 1
+        torch.save(checkpoint, path)
+&gt;       with pytest.raises((ValueError, RuntimeError)):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE any of (ValueError, RuntimeError)
+
+tests/test_time_campaign_real.py:115: Failed</failure></testcase></testsuite></testsuites>

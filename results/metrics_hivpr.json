@@ -1,18 +1,4 @@
 {
-  "target": "Human immunodeficiency virus type 1 protease",
-  "tag": "hivpr",
-  "random": {
-    "split": "random",
-    "r2": 0.692191224981888,
-    "rmse": 0.885237832097779,
-    "mae": 0.6083497545225193
-  },
-  "scaffold": {
-    "split": "scaffold",
-    "r2": 0.5380349887188622,
-    "rmse": 0.9202741992916071,
-    "mae": 0.7029623520812518
-  },
   "best_params_random": {
     "bootstrap": true,
     "ccp_alpha": 0.0,
@@ -53,17 +39,11 @@
     "verbose": 0,
     "warm_start": false
   },
-  "time": {
-    "split": "time",
-    "r2": -0.02711032536343172,
-    "rmse": 1.7431423109254773,
-    "mae": 1.3942573888668919
-  },
   "best_params_time": {
     "bootstrap": true,
     "ccp_alpha": 0.0,
     "criterion": "squared_error",
-    "max_depth": 40,
+    "max_depth": null,
     "max_features": 1.0,
     "max_leaf_nodes": null,
     "max_samples": null,
@@ -78,5 +58,31 @@
     "random_state": 42,
     "verbose": 0,
     "warm_start": false
+  },
+  "random": {
+    "mae": 0.6083497545225193,
+    "r2": 0.692191224981888,
+    "rmse": 0.885237832097779,
+    "split": "random"
+  },
+  "scaffold": {
+    "mae": 0.7029623520812518,
+    "r2": 0.5380349887188622,
+    "rmse": 0.9202741992916071,
+    "split": "scaffold"
+  },
+  "tag": "hivpr",
+  "target": "Human immunodeficiency virus type 1 protease",
+  "time": {
+    "label_id": "66a8a839e6cff2f4d7b9664c286fd8d2b716b784faab4aa60d7bf5e74d94eec6",
+    "mae": 1.4039708164781963,
+    "r2": -0.043910857959849725,
+    "rmse": 1.7573408496671954,
+    "runtime": {
+      "cv_backend": "loky",
+      "rf_jobs": 16,
+      "seed": 42
+    },
+    "split": "time"
   }
 }

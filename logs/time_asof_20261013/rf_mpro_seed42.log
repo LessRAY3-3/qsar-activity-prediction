@@ -1,0 +1,8 @@
+Target: Replicase polyprotein 1ab | Feature matrix: X=(3410, 2048), y range [2.97, 9.77]
+
+=== time split: train=1017, test=1750 ===
+Fitting 5 folds for each of 12 candidates, totalling 60 fits
+Best params: {'max_depth': None, 'min_samples_split': 2, 'n_estimators': 300}  (CV R2 = 0.698)
+[time]  R2 = 0.007   RMSE = 1.050   MAE = 0.821
+
+Metrics merged -> <RF_CAMPAIGN>/work/results/metrics_mpro.json

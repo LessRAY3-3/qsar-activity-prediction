@@ -1,0 +1,79 @@
+"""CUDA and resource smoke checks on frozen graphs; writes no trained artifacts."""
+from datetime import datetime, timezone
+from pathlib import Path
+import argparse
+import gc
+import importlib.util
+import json
+import sys
+
+ROOT = Path('/home/lessray/qsar-campaigns/time-asof-20261013-7ce15c1-gin')
+WORK = ROOT / 'work'
+sys.path.insert(0, str(WORK / 'scripts'))
+import numpy as np
+import torch
+from torch_geometric.loader import DataLoader
+from gnn_graph_dataset import MoleculeGraphDataset
+from time_labels import load_time_split, require_prediction_version
+
+assert str(torch.__version__) == '2.14.0+cu126', torch.__version__
+assert torch.cuda.is_available(), 'CUDA is unavailable'
+spec = importlib.util.spec_from_file_location('gin_trainer', WORK / 'scripts/gnn_03_train_gin.py')
+trainer = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(trainer)
+assert trainer.resolve_device('cuda') == 'cuda'
+args = argparse.Namespace(model='gin', hidden=128, num_layers=4, dropout=0.2)
+checks = []
+for tag in ('a2a', 'egfr_full', 'abl1', 'egfr', 'herg', 'hivpr', 'mpro', 'vegfr2'):
+    cache = WORK / f'data/processed/{tag}_graphs.npz'
+    with np.load(cache, allow_pickle=False) as data:
+        split = load_time_split(WORK / 'data/processed/splits', tag, data['smiles'], data['y'])
+        graph_size = data['n_nodes'] + data['n_edges']
+    y = split['y']
+    mean, std = float(y[split['train_idx']].mean()), float(y[split['train_idx']].std())
+    normalized = (y.copy() - mean) / std
+    reconstructed = normalized[split['test_idx']] * std + mean
+    require_prediction_version({'label_id':split['label_id'], 'test_idx':split['test_idx'], 'y_true':reconstructed}, split)
+    for pool, batch_size in (('train',128), ('valid',512), ('test',512)):
+        indices = split[pool + '_idx']
+        largest = indices[np.argsort(graph_size[indices])[-batch_size:]]
+        dataset = MoleculeGraphDataset(cache, indices=largest)
+        dataset.y = normalized
+        batch = next(iter(DataLoader(dataset, batch_size=batch_size))).to('cuda')
+        torch.manual_seed(42)
+        model = trainer.build_model(args).to('cuda')
+        torch.cuda.reset_peak_memory_stats()
+        if pool == 'train':
+            model.train()
+            optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
+            optimizer.zero_grad()
+            prediction = model(batch)
+            loss = torch.nn.functional.mse_loss(prediction, batch.y)
+            assert torch.isfinite(loss)
+            loss.backward()
+            assert all(p.grad is None or torch.isfinite(p.grad).all() for p in model.parameters())
+            optimizer.step()
+            del optimizer, loss
+        else:
+            model.eval()
+            with torch.no_grad(): prediction = model(batch)
+        assert torch.isfinite(prediction).all()
+        torch.cuda.synchronize()
+        record = dict(tag=tag, pool=pool, graphs=len(largest), nodes=batch.num_nodes,
+                      edges=batch.num_edges, peak_allocated_mib=torch.cuda.max_memory_allocated()/2**20,
+                      peak_reserved_mib=torch.cuda.max_memory_reserved()/2**20)
+        checks.append(record)
+        print(json.dumps(record), flush=True)
+        del model, prediction, batch, dataset
+        gc.collect()
+        torch.cuda.empty_cache()
+props = torch.cuda.get_device_properties(0)
+report = dict(state='passed', timestamp=datetime.now(timezone.utc).isoformat(),
+              torch_version=str(torch.__version__), cuda_runtime=torch.version.cuda,
+              gpu=props.name, total_vram_bytes=props.total_memory,
+              cuda_capability=list(torch.cuda.get_device_capability()),
+              torch_threads=torch.get_num_threads(), checks=checks,
+              max_peak_allocated_mib=max(c['peak_allocated_mib'] for c in checks),
+              max_peak_reserved_mib=max(c['peak_reserved_mib'] for c in checks))
+(ROOT / 'cuda_preflight.json').write_text(json.dumps(report, indent=2)+'\n')
+print('CUDA preflight passed:', report['gpu'], 'peak reserved MiB', report['max_peak_reserved_mib'])

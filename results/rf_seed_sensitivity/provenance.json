@@ -1,0 +1,178 @@
+{
+  "schema": "qsar-rf-seed-sensitivity-v1",
+  "seeds": [
+    42,
+    1,
+    2,
+    3,
+    4
+  ],
+  "python_version": "3.12.14",
+  "sklearn_version": "1.9.1",
+  "numpy_version": "2.5.3",
+  "platform": "macOS-27.0.1-arm64-arm-64bit",
+  "seed42_prediction_tolerance_atol": 1e-10,
+  "seed42_prediction_tolerance_rtol": 0,
+  "evidence": {
+    "a2a": {
+      "input_sha256": {
+        "data/processed/a2a_fingerprints.npz": "7c50c66bacc7dc2361b4e6e827a77e987c69e27a984ccc2c895108a98566a412",
+        "data/processed/splits/a2a_time.npz": "5a28451cf757e4f547197bf7ae45701c496917e11cf07a699287fa7f7932eecd",
+        "results/metrics_a2a.json": "9b6ef30cd7f2e58a4ba93c511b1d22453f4e1e16415a12ee168a6a408489592c",
+        "results/rf_preds_a2a_time.npz": "6d56584ae7d3a70c90a51c8b8d973a0022e0fd51f8c2c16cf6ddfe3a01deebe2",
+        "results/gnn_preds_a2a_time.npz": "f53e9ffd433f3a435fa41a1d8a106a2a24a0230d0cc9f5d68edfb6b8a8b93bfd",
+        "results/gnn_preds_a2a_time_seed1.npz": "4ddb7482e7345ab5cebd21fd5ac1c628adf670a025fa0a3f903fa6622d293cba",
+        "results/gnn_preds_a2a_time_seed2.npz": "a0eea6dc3803b8f01219c049163d48f36691dc396cd038009636fa1ea5f86e2c"
+      },
+      "prediction_sha256": {
+        "preds_a2a_time_seed42.npz": "7e2c65bcc86a66e867889dc03df91259755d3588578b13c9494e5f4c16da3a48",
+        "preds_a2a_time_seed1.npz": "e68dca78895cee04c1bf7c659bcc5912832edbfff2b7fe232495ad9f7b054821",
+        "preds_a2a_time_seed2.npz": "b02e1e5bf79f5905309dcb8c6e934be441424f8bb049128b7379e7df1b6a52bf",
+        "preds_a2a_time_seed3.npz": "257334179fd19ee53d59c405bee181c04374613badaab47a28c3fed38041e9e8",
+        "preds_a2a_time_seed4.npz": "9ca6f12080cbda8b1b1150ee28db9ed3ab1cf501c836bc20c396d1cff724c1e2"
+      },
+      "published_parameters": {
+        "bootstrap": true,
+        "ccp_alpha": 0.0,
+        "criterion": "squared_error",
+        "max_depth": null,
+        "max_features": 1.0,
+        "max_leaf_nodes": null,
+        "max_samples": null,
+        "min_impurity_decrease": 0.0,
+        "min_samples_leaf": 1,
+        "min_samples_split": 2,
+        "min_weight_fraction_leaf": 0.0,
+        "monotonic_cst": null,
+        "n_estimators": 500,
+        "n_jobs": 1,
+        "oob_score": false,
+        "random_state": 42,
+        "verbose": 0,
+        "warm_start": false
+      },
+      "label_id": "b35580bb601adf4fb9e604dee3dd0f8989d11ebd4f14eaafc3e25a4e40f44b5b",
+      "changes_from_published_parameters": {
+        "random_state": [
+          42,
+          1,
+          2,
+          3,
+          4
+        ],
+        "n_jobs": 4
+      }
+    },
+    "herg": {
+      "input_sha256": {
+        "data/processed/herg_fingerprints.npz": "78bed5f5f0816091ade54f658d1eaf5479cecd71905ded194e57527a8da71baa",
+        "data/processed/splits/herg_time.npz": "90933252420671d709bdf0de5e4782e6f8351dfe0fb96977c9ee143fcb370647",
+        "results/metrics_herg.json": "7fe0e44a3da8d79f3fb313a236dbdd6149c603a6c27f2537ff983709e2520680",
+        "results/rf_preds_herg_time.npz": "f4818b247dd6ba553de567f532f832b19cb5d0d42a876035f7934e1d4055c47d",
+        "results/gnn_preds_herg_time.npz": "20f29327532fbb1fc3435d2faa6bfb573378c217c53612ab03941c38de84095c",
+        "results/gnn_preds_herg_time_seed1.npz": "ca40e88f985afd1f0f14073566c10fc717669e3474765cbde42207bdebf2785a",
+        "results/gnn_preds_herg_time_seed2.npz": "43e002097d0a90f17a923d0e02f4a48f04d87cb4f2c468c5a852f720b2674ea3"
+      },
+      "prediction_sha256": {
+        "preds_herg_time_seed42.npz": "458592b5de5d3691fafbd5590c4dc6828808f90972787a8ca61fe1035e70b6af",
+        "preds_herg_time_seed1.npz": "7c1feca219f1e686f2cc7f8b856f30b9b0adead1bba4bc595b0a23e746744f40",
+        "preds_herg_time_seed2.npz": "091559cfcc230aa4949ec7b7030fc2e1a95142d8840eeaa0878315452b4b44bb",
+        "preds_herg_time_seed3.npz": "c50ba992c4679986de6f591e7e351e55b5f2127ba7715cb5b43d3935f62126f2",
+        "preds_herg_time_seed4.npz": "549bc29a6e9376d542422c1d6e2ad8e840da5666053af12b7e2fd3971303226b"
+      },
+      "published_parameters": {
+        "bootstrap": true,
+        "ccp_alpha": 0.0,
+        "criterion": "squared_error",
+        "max_depth": null,
+        "max_features": 1.0,
+        "max_leaf_nodes": null,
+        "max_samples": null,
+        "min_impurity_decrease": 0.0,
+        "min_samples_leaf": 1,
+        "min_samples_split": 2,
+        "min_weight_fraction_leaf": 0.0,
+        "monotonic_cst": null,
+        "n_estimators": 500,
+        "n_jobs": 1,
+        "oob_score": false,
+        "random_state": 42,
+        "verbose": 0,
+        "warm_start": false
+      },
+      "label_id": "369e86d94fe32622d959806abc5379f5487ab2f63282a4642af6c5003c628e93",
+      "changes_from_published_parameters": {
+        "random_state": [
+          42,
+          1,
+          2,
+          3,
+          4
+        ],
+        "n_jobs": 4
+      }
+    }
+  },
+  "summary": [
+    {
+      "tag": "a2a",
+      "n_seeds": 5,
+      "r2_mean": -0.3054367133711082,
+      "r2_std_ddof0": 0.023456690277189312,
+      "r2_std_ddof1": 0.026225376993476844,
+      "r2_min": -0.3448823875789655,
+      "r2_max": -0.2731775621180179,
+      "rmse_mean": 1.190927447907175,
+      "rmse_std_ddof0": 0.01068096282225931,
+      "rmse_std_ddof1": 0.01194167946785991,
+      "rmse_min": 1.1761679676593964,
+      "rmse_max": 1.2088349625589097,
+      "mae_mean": 0.9824530016799683,
+      "mae_std_ddof0": 0.010990886809133743,
+      "mae_std_ddof1": 0.012288185019114403,
+      "mae_min": 0.9650510256033085,
+      "mae_max": 0.9978353339419013,
+      "delta_fixed_gin_minus_rf_mean": 0.42081291958635847,
+      "delta_fixed_gin_minus_rf_std_ddof0": 0.023456690277189312,
+      "delta_fixed_gin_minus_rf_std_ddof1": 0.026225376993476844,
+      "delta_fixed_gin_minus_rf_min": 0.38855376833326816,
+      "delta_fixed_gin_minus_rf_max": 0.46025859379421574
+    },
+    {
+      "tag": "herg",
+      "n_seeds": 5,
+      "r2_mean": -0.0516675031600089,
+      "r2_std_ddof0": 0.0054882726483852715,
+      "r2_std_ddof1": 0.006136075360421134,
+      "r2_min": -0.058191441180758474,
+      "r2_max": -0.042333382173439515,
+      "rmse_mean": 0.9744769211814146,
+      "rmse_std_ddof0": 0.0025446941341598812,
+      "rmse_std_ddof1": 0.0028450545329632318,
+      "rmse_min": 0.970146084229066,
+      "rmse_max": 0.9774981270589406,
+      "mae_mean": 0.6967327596227222,
+      "mae_std_ddof0": 0.001692260894918103,
+      "mae_std_ddof1": 0.0018920051983507536,
+      "mae_min": 0.6942971674017686,
+      "mae_max": 0.6988044625187172,
+      "delta_fixed_gin_minus_rf_mean": 0.01802481611056983,
+      "delta_fixed_gin_minus_rf_std_ddof0": 0.0054882726483852715,
+      "delta_fixed_gin_minus_rf_std_ddof1": 0.006136075360421134,
+      "delta_fixed_gin_minus_rf_min": 0.008690695124000447,
+      "delta_fixed_gin_minus_rf_max": 0.024548754131319406
+    }
+  ],
+  "source_sha256": {
+    "experiments/rf_seed_sensitivity.py": "211ede305ed3731b22b4887cd56e4a8c824c6ccc21f30f82f4a17ff6bfe42794",
+    "scripts/time_labels.py": "aa2c47560527d24813c58f3456e6766e27482c50b28a669d6c59c7dfbbe5e8a7"
+  },
+  "limitations": [
+    "New current-as-of five-seed study; original review's target, seeds and configuration are undocumented.",
+    "Not a reproduction or verification of the review-reported SD approximately 0.006.",
+    "Fixed selected hyperparameters; no search repeated, so variability excludes selection uncertainty.",
+    "Held-out cohort and GIN seed42/1/2 ensemble are fixed; no test-resampling uncertainty measured.",
+    "Five seed draws give a descriptive sensitivity estimate, not a confidence interval or equivalence test.",
+    "Published environment version is not inferred; seed42 prediction agreement is measured directly."
+  ]
+}

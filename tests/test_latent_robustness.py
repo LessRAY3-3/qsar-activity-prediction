@@ -164,15 +164,15 @@ def test_multi_target_verdict_follows_the_data(load_experiment, capsys):
     mod.print_conclusion([{"tag": "t1", "d_r2_random": 0.05,
                            "d_r2_scaffold": 0.0}])
     out = capsys.readouterr().out
-    assert "the GIN has a clear lead on 1 cell(s): t1/random" in out
-    assert "no target gives the GIN a clear lead" not in out
+    assert "the GIN has a positive point estimate on 1 cell(s): t1/random" in out
+    assert "no target gives the GIN a positive rounded point estimate" not in out
 
     # everything rounds to 0.000 -> the verdict flips with the data
     mod.print_conclusion([{"tag": "t1", "d_r2_random": 0.0004,
                            "d_r2_scaffold": -0.0004}])
     out = capsys.readouterr().out
-    assert "no target gives the GIN a clear lead" in out
-    assert "has a clear lead" not in out
+    assert "no target gives the GIN a positive rounded point estimate" in out
+    assert "has a positive point estimate" not in out
 
 
 def test_time_split_conclusion_follows_the_data(load_experiment, capsys):
@@ -196,7 +196,10 @@ def test_time_split_conclusion_follows_the_data(load_experiment, capsys):
     assert "negative time R²: RF none; GIN none" in out
     assert "RF below constant baseline: none" in out
     assert "note: negative time-split" not in out
-    assert "caveat:" not in out
+    # The label-policy caveat applies even to positive R2. Only the data-driven
+    # large-test-pool warning should disappear for these small test fractions.
+    assert "test_frac=" not in out
+    assert "random/scaffold use all-year labels; time uses as-of labels" in out
 
     troubled = pd.DataFrame([
         {"tag": "t1", "rf_time_r2": -0.4, "rf_random_r2": 0.6,
@@ -210,7 +213,7 @@ def test_time_split_conclusion_follows_the_data(load_experiment, capsys):
     ])
     mod.print_conclusion(troubled)
     out = capsys.readouterr().out
-    assert "mean ΔR² (time − random): RF -0.600, GIN -0.475" in out
+    assert "descriptive protocol ΔR² (time − random): RF -0.600, GIN -0.475" in out
     assert "negative time R²: RF ['t1']; GIN ['t1']" in out
     assert "RF below constant baseline: t1 -0.400 < +0.100" in out
     assert "GIN ahead: ['t2']; RF ahead: none" in out

@@ -1,0 +1,74 @@
+{
+  "schema": "qsar-repair-return-v1",
+  "role": "rf",
+  "source_commit": "d13f9125af56028f60e099ec2e914dd2509c239e",
+  "created_at": "2026-10-13T16:40:38.502760+00:00",
+  "jobs": [
+    {
+      "role": "rf",
+      "tag": "herg",
+      "seed": 42,
+      "state": "success",
+      "label_id": "369e86d94fe32622d959806abc5379f5487ab2f63282a4642af6c5003c628e93",
+      "r2": -0.055579351490586903,
+      "rmse": 0.9762909303705097,
+      "mae": 0.6984463653677611,
+      "elapsed_seconds": 1625.0758199999982,
+      "started_at": "2026-10-13T16:05:14.331156+00:00",
+      "finished_at": "2026-10-13T16:32:19.415231+00:00",
+      "prediction_replay_max_abs_error": 0.0
+    }
+  ],
+  "files": [
+    {
+      "path": "campaign_status.json",
+      "bytes": 164,
+      "sha256": "42cced05e52eef8a3a5bb1c69b5325c9a4b7cef3cfec672ff92fbad3ead98dcb"
+    },
+    {
+      "path": "launch.json",
+      "bytes": 759,
+      "sha256": "d9070470b0fbc545cc0babc884eaaf5fc828daa9b9aae015cfa01d6a5dd49cdc"
+    },
+    {
+      "path": "work/figures/pred_vs_actual_time_herg.png",
+      "bytes": 137220,
+      "sha256": "8fdbbe79ead6fc8e72a17b1b2fe0b6010a63122d16429ee746c6c2fbd00eed92"
+    },
+    {
+      "path": "work/manifest.json",
+      "bytes": 19331,
+      "sha256": "f1605d440ccb31bbdc75c773e8fb217d31607ad7c36def45b6f63325ae3406ad"
+    },
+    {
+      "path": "work/models/rf_time_split_herg.joblib",
+      "bytes": 211659749,
+      "sha256": "514a3f9a4aa01e82801e241d46113fb171d18f3446d6473eff78821902ac7908"
+    },
+    {
+      "path": "work/results/metrics_herg.json",
+      "bytes": 803,
+      "sha256": "55f5ebebddc8b42acc4ff04fa7ef64642b8287484046e42862a4c7ebd6b34754"
+    },
+    {
+      "path": "work/results/rf_preds_herg_time.npz",
+      "bytes": 47762,
+      "sha256": "f4818b247dd6ba553de567f532f832b19cb5d0d42a876035f7934e1d4055c47d"
+    },
+    {
+      "path": "work/results/time_campaign/rf_herg_seed42/20261013T160514_bfcb7567/train.log",
+      "bytes": 608,
+      "sha256": "6b00475c6d64d42f91c9fbde2eecb321ae9643105783a2bf960d8e9310e2639f"
+    },
+    {
+      "path": "work/results/time_campaign/rf_herg_seed42/status.json",
+      "bytes": 3086,
+      "sha256": "3467d6acd677ae79629f3c35869c24d3e6dc8a0d7d661386986b3aabdfd3a2a2"
+    },
+    {
+      "path": "worker.log",
+      "bytes": 2693,
+      "sha256": "4629c8aac32e9ba8ab99af5a9ea356995568eb1ee3d5db31b11f50c229d26d93"
+    }
+  ]
+}

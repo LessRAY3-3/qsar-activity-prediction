@@ -406,7 +406,7 @@ def screening_summary(pred, std, max_sim, y_true, ad_thresholds=AD_THRESHOLDS,
 
 # ---------------------------------------------------------------- figures
 
-def plot_calibration(tag, split, calib, fig_path):
+def plot_calibration(tag, split, calib, fig_path, model_kind="gin"):
     import matplotlib
     matplotlib.use("Agg")
     import matplotlib.pyplot as plt
@@ -417,8 +417,9 @@ def plot_calibration(tag, split, calib, fig_path):
         c = calib.get(model)
         if c is None:
             continue
+        display_model = model_kind.upper() if model == "gin" else model.upper()
         ax.plot(c["bin_mean_std"], c["bin_rmse"], marker="o", color=color,
-                label=f"{model.upper()}  slope={c['slope']:.2f}, "
+                label=f"{display_model}  slope={c['slope']:.2f}, "
                       f"ρ={c['spearman_std_vs_abs_err']:.2f}")
     lo = min(min(calib[m]["bin_mean_std"]) for m in calib
              if calib.get(m) is not None)
@@ -437,7 +438,7 @@ def plot_calibration(tag, split, calib, fig_path):
     plt.close(fig)
 
 
-def plot_ad_error(tag, split, y_true, preds, max_sim, ad_thr, fig_path):
+def plot_ad_error(tag, split, y_true, preds, max_sim, ad_thr, fig_path, model_kind="gin"):
     import matplotlib
     matplotlib.use("Agg")
     import matplotlib.pyplot as plt
@@ -457,8 +458,9 @@ def plot_ad_error(tag, split, y_true, preds, max_sim, ad_thr, fig_path):
                   if len(b)]
         means_x = [sim[b].mean() for b in groups]
         means_y = [abs_err[b].mean() for b in groups]
+        display_model = model_kind.upper() if model == "gin" else model.upper()
         ax.plot(means_x, means_y, marker="s", color=color, linewidth=2,
-                label=f"{model.upper()} binned |error| mean")
+                label=f"{display_model} binned |error| mean")
     ax.axvline(ad_thr, color="black", linestyle="--", linewidth=1,
                label=f"AD threshold {ad_thr}")
     ax.set_xlabel("max Tanimoto similarity to fitted molecules")
@@ -546,6 +548,42 @@ def model_ad_similarities(smiles, split, fp_cache=None, *, split_name):
             for model, idx in pools.items()}
 
 
+def redraw_stored_figures(tag, split, model_kind, out_dir, fig_dir):
+    """Render saved calibration/AD values only; do not run inference or write data.
+
+    The stored schema uses the legacy key 'gin' for either GNN architecture;
+    summary.model_kind identifies the architecture used for display labels.
+    """
+    suffix = "" if model_kind == "gin" else f"_{model_kind}"
+    with open(os.path.join(out_dir, f"summary_{tag}{suffix}.json")) as fh:
+        summary = json.load(fh)
+    if summary.get("tag") != tag or summary.get("model_kind") != model_kind:
+        raise ValueError("stored summary identifies a different campaign")
+    cell = summary["splits"][split]
+    frame = pd.read_csv(os.path.join(out_dir, f"{tag}_{split}{suffix}.csv"))
+    rf = frame[frame["model"] == "rf"]
+    if len(rf) != cell["n_test"] or rf["test_idx"].duplicated().any():
+        raise ValueError("stored RF rows do not match summary test count")
+    preds, sims = [], {}
+    for model, color in (("rf", "tab:orange"), ("gin", "tab:green")):
+        rows = frame[frame["model"] == model]
+        if rows.empty:
+            if model in cell["calibration"]:
+                raise ValueError("stored CSV is missing a calibration model")
+            continue
+        if (not np.array_equal(rows["test_idx"], rf["test_idx"])
+                or not np.array_equal(rows["y_true"], rf["y_true"])):
+            raise ValueError("stored model rows do not align with RF indices/labels")
+        preds.append((model, rows["pred"].to_numpy(), color))
+        sims[model] = rows["max_sim"].to_numpy()
+    paths = [os.path.join(fig_dir, f"calib_{tag}_{split}{suffix}.png"),
+             os.path.join(fig_dir, f"ad_error_{tag}_{split}{suffix}.png")]
+    plot_calibration(tag, split, cell["calibration"], paths[0], model_kind=model_kind)
+    plot_ad_error(tag, split, rf["y_true"].to_numpy(), preds, sims,
+                  summary["ad_threshold"], paths[1], model_kind=model_kind)
+    return paths
+
+
 def refresh_stored_ad(tag, split, model_kind, out_dir, fig_dir, fp_cache=None):
     """Recompute AD from saved predictions/std; no inference or retraining."""
     suffix = "" if model_kind == "gin" else f"_{model_kind}"
@@ -618,7 +656,7 @@ def refresh_stored_ad(tag, split, model_kind, out_dir, fig_dir, fp_cache=None):
     original_text["max_sim"] = frame["max_sim"].map(str)
     original_text.to_csv(csv_path, index=False)
     plot_ad_error(tag, split, y, plot_inputs, sims, AD_PRIMARY,
-                  os.path.join(fig_dir, f"ad_error_{tag}_{split}{suffix}.png"))
+                  os.path.join(fig_dir, f"ad_error_{tag}_{split}{suffix}.png"), model_kind=model_kind)
     return cell
 
 
@@ -717,13 +755,13 @@ def process_cell(tag, split, model_kind, out_dir, fig_dir, fp_cache=None,
         ad[model] = ad_metrics(y_true, pred, max_sim[model], AD_PRIMARY)
 
     plot_calibration(tag, split, calib,
-                     os.path.join(fig_dir, f"calib_{tag}_{split}{suffix}.png"))
+                     os.path.join(fig_dir, f"calib_{tag}_{split}{suffix}.png"), model_kind=model_kind)
     scatter_inputs = [("rf", rf_pred, "tab:orange")]
     if gin_pred is not None:
         scatter_inputs.append(("gin", gin_pred, "tab:green"))
     plot_ad_error(tag, split, y_true, scatter_inputs, max_sim,
                   AD_PRIMARY,
-                  os.path.join(fig_dir, f"ad_error_{tag}_{split}{suffix}.png"))
+                  os.path.join(fig_dir, f"ad_error_{tag}_{split}{suffix}.png"), model_kind=model_kind)
 
     screening = screening_summary(rf_pred, rf_std, max_sim["rf"], y_true)
     print(f"  [{tag}/{split}] n={len(y_true)}  "
@@ -799,8 +837,11 @@ def parse_args(argv=None):
     p.add_argument("--tags", default=",".join(TAGS))
     p.add_argument("--splits", default=",".join(SPLITS))
     p.add_argument("--batch-size", type=int, default=BATCH_SIZE)
-    p.add_argument("--refresh-ad-only", action="store_true",
-                   help="reuse stored predictions/std and refresh AD/screening only")
+    refresh = p.add_mutually_exclusive_group()
+    refresh.add_argument("--refresh-ad-only", action="store_true",
+                         help="reuse stored predictions/std and refresh AD/screening only")
+    refresh.add_argument("--refresh-figures-only", action="store_true",
+                         help="redraw calibration/AD figures from stored CSV/JSON only")
     p.add_argument("--out-dir", default=os.path.join(BASE, "results",
                                                      "uncertainty"))
     p.add_argument("--fig-dir", default=os.path.join(BASE, "figures",
@@ -820,6 +861,13 @@ def main(argv=None):
         raise ValueError("batch size must be positive")
     model_kind = args.model
     suffix = "" if model_kind == "gin" else f"_{model_kind}"
+
+    if args.refresh_figures_only:
+        for tag in tags:
+            for split in splits:
+                paths = redraw_stored_figures(tag, split, model_kind, args.out_dir, args.fig_dir)
+                print(f"  figures only -> {', '.join(paths)}")
+        return
 
     if not args.refresh_ad_only and not any(available_seed_suffixes(t, s, model_kind)
                for t in tags for s in splits):

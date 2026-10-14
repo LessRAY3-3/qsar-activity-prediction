@@ -1,0 +1,29 @@
+{
+  "status": "passed",
+  "predictions_verified": 10,
+  "verified_files": [
+    "preds_a2a_time_seed42.npz",
+    "preds_a2a_time_seed1.npz",
+    "preds_a2a_time_seed2.npz",
+    "preds_a2a_time_seed3.npz",
+    "preds_a2a_time_seed4.npz",
+    "preds_herg_time_seed42.npz",
+    "preds_herg_time_seed1.npz",
+    "preds_herg_time_seed2.npz",
+    "preds_herg_time_seed3.npz",
+    "preds_herg_time_seed4.npz"
+  ],
+  "metrics_recomputed_atol": 1e-12,
+  "input_and_source_sha256_verified": true,
+  "published_sklearn_versions": {
+    "a2a": "1.9.1",
+    "herg": "1.9.1"
+  },
+  "current_sklearn_version": "1.9.1",
+  "published_environment_source": "results/time_split/campaign_acceptance.json",
+  "published_environment_source_sha256": "e93b3acf812110613f032a68bc75c53f6cda93960afc609cf38dcd0ff42aa412",
+  "seed42_max_abs_differences": {
+    "a2a": 1.7763568394002505e-15,
+    "herg": 8.881784197001252e-16
+  }
+}

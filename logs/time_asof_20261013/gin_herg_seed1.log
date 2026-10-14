@@ -1,0 +1,17 @@
+<GIN_CAMPAIGN>/.venv/lib/python3.12/site-packages/torch/jit/_script.py:1491: FutureWarning: `torch.jit.script` is deprecated. Please switch to `torch.compile` or `torch.export`.
+  warnings.warn(
+[herg/time] device=cuda  y_mean=5.412 y_std=0.978
+<GIN_CAMPAIGN>/work/scripts/gnn_03_train_gin.py:273: UserWarning: Converting a tensor with requires_grad=True to a scalar may lead to unexpected behavior.
+Consider using tensor.detach() first. (Triggered internally at /__w/pytorch/pytorch/torch/csrc/autograd/generated/python_variable_methods.cpp:820.)
+  total += float(loss) * len(batch.y)
+  epoch   1  train_mse=0.9157  valid_rmse=0.7429  lr=1.0e-03 *
+  epoch   4  train_mse=0.7557  valid_rmse=0.7391  lr=1.0e-03 *
+  epoch  10  train_mse=0.6099  valid_rmse=0.7685  lr=1.0e-03
+  epoch  11  train_mse=0.5898  valid_rmse=0.7286  lr=1.0e-03 *
+  epoch  20  train_mse=0.4727  valid_rmse=0.7328  lr=5.0e-04
+  epoch  21  train_mse=0.4632  valid_rmse=0.7251  lr=5.0e-04 *
+  epoch  30  train_mse=0.4168  valid_rmse=0.7316  lr=2.5e-04
+  epoch  40  train_mse=0.3747  valid_rmse=0.7340  lr=1.3e-04
+  early stop at epoch 41 (best epoch 21)
+  TEST  R2=-0.1437  RMSE=1.0162  MAE=0.6844  (13s)
+  saved -> results/gnn_models/herg_gin_time_seed1.pt, results/gnn_preds_herg_time_seed1.npz, results/gnn_metrics_herg_seed1.json

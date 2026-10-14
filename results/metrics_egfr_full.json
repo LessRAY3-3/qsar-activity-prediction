@@ -1,18 +1,4 @@
 {
-  "target": "Epidermal growth factor receptor",
-  "tag": "egfr_full",
-  "random": {
-    "split": "random",
-    "r2": 0.7288614787245249,
-    "rmse": 0.6952617554968835,
-    "mae": 0.5040977424033877
-  },
-  "scaffold": {
-    "split": "scaffold",
-    "r2": 0.6081481592074331,
-    "rmse": 0.8943902203393498,
-    "mae": 0.689044361608425
-  },
   "best_params_random": {
     "bootstrap": true,
     "ccp_alpha": 0.0,
@@ -53,12 +39,6 @@
     "verbose": 0,
     "warm_start": false
   },
-  "time": {
-    "split": "time",
-    "r2": -0.7363389184961711,
-    "rmse": 1.5774437830047525,
-    "mae": 1.3366185952494885
-  },
   "best_params_time": {
     "bootstrap": true,
     "ccp_alpha": 0.0,
@@ -78,5 +58,31 @@
     "random_state": 42,
     "verbose": 0,
     "warm_start": false
+  },
+  "random": {
+    "mae": 0.5040977424033877,
+    "r2": 0.7288614787245249,
+    "rmse": 0.6952617554968835,
+    "split": "random"
+  },
+  "scaffold": {
+    "mae": 0.689044361608425,
+    "r2": 0.6081481592074331,
+    "rmse": 0.8943902203393498,
+    "split": "scaffold"
+  },
+  "tag": "egfr_full",
+  "target": "Epidermal growth factor receptor",
+  "time": {
+    "label_id": "09e7659309a88d077bdad0001daf441245aa9b9f88573d2cf755cd8697b3680b",
+    "mae": 1.3453344574301194,
+    "r2": -0.752734389912745,
+    "rmse": 1.584873832435118,
+    "runtime": {
+      "cv_backend": "loky",
+      "rf_jobs": 4,
+      "seed": 42
+    },
+    "split": "time"
   }
 }

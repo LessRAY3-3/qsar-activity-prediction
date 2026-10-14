@@ -368,9 +368,10 @@ def print_table(df):
         print(f"  RF significantly ahead ({len(rf_wins)}): "
               f"{', '.join(rf_wins)}")
     if afp_wins:
-        verdict = (f"AttentiveFP beats RF significantly in "
-                   f"{len(afp_wins)} cell(s); the attention readout is "
-                   "real somewhere.")
+        verdict = (f"AttentiveFP has a nominal per-cell 95% CI above zero in "
+                   f"{len(afp_wins)} cell(s). These intervals are uncorrected for "
+                   "multiple comparisons and do not establish robustness to "
+                   "dropping a training seed or isolate the attention readout.")
     else:
         verdict = (f"AttentiveFP never beats RF significantly: 0/{n_ci} "
                    "bootstrapped cells have a CI above 0 -- attention over "

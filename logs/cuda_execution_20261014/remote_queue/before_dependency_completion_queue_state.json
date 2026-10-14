@@ -1,0 +1,29 @@
+{
+  "state": "failed",
+  "start_utc": "2026-10-14T13:26:39.203294+00:00",
+  "pid": 4332,
+  "host": "lessray-JiguangX-Series-GM6AQ7C",
+  "phase": {
+    "name": "budget_comparison",
+    "state": "exited",
+    "command": [
+      "bash",
+      "/home/lessray/qsar-campaigns/cuda-ready-20261014/study/run.sh"
+    ],
+    "child_pid": 4339,
+    "process_group": 4339,
+    "exit_code": 1,
+    "end_utc": "2026-10-14T13:26:40.014853+00:00"
+  },
+  "delivery_manifest_sha256": "52aba68d3fd794de376daeecb2017e50db22d405175b88d3f5f30d7c992dd44c",
+  "stages": [
+    {
+      "name": "budget_comparison",
+      "exit_code": 1,
+      "end_utc": "2026-10-14T13:26:40.014864+00:00"
+    }
+  ],
+  "current_stage": "budget_comparison",
+  "error": "RuntimeError: budget_comparison failed (1); inspect logs before resume",
+  "end_utc": "2026-10-14T13:26:40.015083+00:00"
+}

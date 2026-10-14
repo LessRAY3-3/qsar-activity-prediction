@@ -117,6 +117,10 @@ def test_train_artifacts_per_model(tmp_path, monkeypatch, load_script, model):
     assert {"r2", "rmse", "mae", "params", "best_epoch",
             "convergence_flag", "max_epochs", "train_mse",
             "device"} <= set(m)
+    assert m["runtime"] == ckpt["runtime"]
+    assert m["runtime"]["seed"] == ckpt["args"]["seed"]
+    assert m["runtime"]["device"] == m["device"] == "cpu"
+    assert m["runtime"]["torch_threads"] == torch.get_num_threads()
     assert np.isfinite([m["r2"], m["rmse"], m["mae"]]).all()
     assert m["params"]["model"] == model
     # the json records the device the run actually trained on; both GPU
@@ -165,11 +169,26 @@ def test_convergence_flag_fires_on_degenerate_early_stop(
     monkeypatch.setattr(mod, "BASE", str(tmp_path))
     monkeypatch.setattr(torch.backends.mps, "is_available", lambda: False)
     monkeypatch.setattr(torch.cuda, "is_available", lambda: False)
-    # degenerate trainer: loss never decreases, the model never improves
-    # its validation RMSE, so best stays at epoch 1 and patience=3 stops
-    # at epoch 4 (4 < 30% of 20) with train MSE stuck at 0.9 (> 0.5)
-    monkeypatch.setattr(mod, "run_epoch",
-                        lambda model, loader, device, opt=None: 0.9)
+    # Validation chooses epoch 1; the last epoch reports a low training loss.
+    # The diagnostic must restore epoch 1 and evaluate it without dropout.
+    epochs = []
+
+    def epoch(model, loader, device, opt=None):
+        parameter = next(model.parameters())
+        if opt is not None:
+            epochs.append(len(epochs) + 1)
+            with torch.no_grad():
+                parameter.fill_(epochs[-1])
+            return 0.1
+        assert float(parameter.flatten()[0]) == 1.0
+        return 0.9
+
+    def prediction(model, loader, device):
+        value = float(next(model.parameters()).flatten()[0])
+        return np.full(len(loader.dataset), value), np.zeros(len(loader.dataset))
+
+    monkeypatch.setattr(mod, "run_epoch", epoch)
+    monkeypatch.setattr(mod, "predict", prediction)
     monkeypatch.setattr(sys, "argv",
                         ["gnn_03_train_gin.py", "--tag", TAG, "--split", "random",
                          "--epochs", "20", "--patience", "3", "--batch-size", "2",
@@ -186,6 +205,8 @@ def test_convergence_flag_fires_on_degenerate_early_stop(
     assert m["best_epoch"] == 1
     assert m["max_epochs"] == 20
     assert m["train_mse"] == pytest.approx(0.9)
+    assert m["last_epoch_train_mse"] == pytest.approx(0.1)
+    assert m["train_mse_source"] == "best_checkpoint_eval"
     # same stub training path still records the device actually used
     assert m["device"] == "cpu"
 
@@ -209,3 +230,59 @@ def test_min_epochs_defers_early_stopping(tmp_path, monkeypatch, load_script, ca
     assert "early stopping deferred until epoch 10" in out
     # patience is satisfied from epoch 4 but the floor defers the stop
     assert "early stop at epoch 10 (best epoch 1)" in out
+
+
+@pytest.mark.parametrize("intra,interop,expected", [
+    (None, None, []), ("4", None, [("intra", 4)]),
+    (None, "1", [("interop", 1)]), ("4", "1", [("intra", 4), ("interop", 1)]),
+])
+def test_explicit_torch_thread_limits_preserve_unset_defaults(load_script, monkeypatch, intra, interop, expected):
+    mod = load_script("gnn_03_train_gin")
+    for name, value in (("QSAR_TORCH_THREADS", intra), ("QSAR_TORCH_INTEROP_THREADS", interop)):
+        if value is None:
+            monkeypatch.delenv(name, raising=False)
+        else:
+            monkeypatch.setenv(name, value)
+    calls = []
+    monkeypatch.setattr(mod.torch, "set_num_threads", lambda value: calls.append(("intra", value)))
+    monkeypatch.setattr(mod.torch, "set_num_interop_threads", lambda value: calls.append(("interop", value)))
+    mod.configure_torch_threads()
+    assert calls == expected
+
+
+@pytest.mark.parametrize("name", ["QSAR_TORCH_THREADS", "QSAR_TORCH_INTEROP_THREADS"])
+@pytest.mark.parametrize("value", ["", "0", "-1", "1.5", "invalid"])
+def test_invalid_torch_thread_limits_fail_before_any_changes(load_script, monkeypatch, name, value):
+    mod = load_script("gnn_03_train_gin")
+    monkeypatch.setenv("QSAR_TORCH_THREADS", "4")
+    monkeypatch.setenv("QSAR_TORCH_INTEROP_THREADS", "1")
+    monkeypatch.setenv(name, value)
+    def unexpected(*args):
+        pytest.fail("Both thread settings must be validated before changing process threads")
+    monkeypatch.setattr(mod.torch, "set_num_threads", unexpected)
+    monkeypatch.setattr(mod.torch, "set_num_interop_threads", unexpected)
+    with pytest.raises(ValueError, match=f"{name} must be a positive integer"):
+        mod.configure_torch_threads()
+
+
+def test_thread_limits_applied_before_runtime_metadata(load_script, monkeypatch):
+    mod = load_script("gnn_03_train_gin")
+    monkeypatch.setattr(sys, "argv", ["gin", "--split", "time", "--device", "cpu"])
+    monkeypatch.setenv("QSAR_TORCH_THREADS", "4")
+    monkeypatch.setenv("QSAR_TORCH_INTEROP_THREADS", "1")
+    counts = {}
+    monkeypatch.setattr(mod.torch, "set_num_threads", lambda value: counts.update(intra=value))
+    monkeypatch.setattr(mod.torch, "set_num_interop_threads", lambda value: counts.update(interop=value))
+    monkeypatch.setattr(mod.torch, "get_num_threads", lambda: counts["intra"])
+    monkeypatch.setattr(mod.torch, "get_num_interop_threads", lambda: counts["interop"])
+    original = mod.runtime_metadata
+    class MetadataChecked(Exception):
+        pass
+    def check(args, device):
+        metadata = original(args, device)
+        assert metadata["torch_threads"] == 4
+        assert metadata["torch_interop_threads"] == 1
+        raise MetadataChecked
+    monkeypatch.setattr(mod, "runtime_metadata", check)
+    with pytest.raises(MetadataChecked):
+        mod.main()

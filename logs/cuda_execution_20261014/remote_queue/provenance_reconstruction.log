@@ -1,0 +1,21 @@
+Starting: egfr_gin_random_seed42 (attempt-587168b689e341449dbb487a5620c7da)
+/home/lessray/qsar-campaigns/cuda-runtime-20261014/.venv/lib/python3.12/site-packages/torch/jit/_script.py:1491: FutureWarning: `torch.jit.script` is deprecated. Please switch to `torch.compile` or `torch.export`.
+  warnings.warn(
+Starting: egfr_gin_scaffold_seed42 (attempt-346ea6b5b1e549d8aac2633be482160c)
+Starting: mt_random_seed42 (attempt-2848020f688e4be79c0df0d72aba5aaf)
+Starting: mt_scaffold_seed42 (attempt-3b04aa9dd73f456ab14e7de829a4010a)
+Starting: pooled_random_seed42 (attempt-5474e33d6320423e8d5c87eb7714fbb7)
+Starting: pooled_scaffold_seed42 (attempt-26a676b91a5e42a2af1bb99d79ef236c)
+Starting: egfr_gin_random_seed1 (attempt-ee27413a67104dd08e672929df4fa379)
+Starting: egfr_gin_scaffold_seed1 (attempt-41fe1cfd90d74de5a18e2d93493f739a)
+Starting: mt_random_seed1 (attempt-649f05720804421e95ffa2aeb20d2399)
+Starting: mt_scaffold_seed1 (attempt-1f06da5cc9f34eabbc72b5242da92d0a)
+Starting: pooled_random_seed1 (attempt-8edc97ea122a426b99f16341521f52dd)
+Starting: pooled_scaffold_seed1 (attempt-632d5205997b4aff8d8e37cae0e41460)
+Starting: egfr_gin_random_seed2 (attempt-90d3f64b23774af989f7cb1047f5e42a)
+Starting: egfr_gin_scaffold_seed2 (attempt-f98ab75873294add89869c5a5e9ffe84)
+Starting: mt_random_seed2 (attempt-ea36ba52dc8a48cd9eccf77772e0ec43)
+Starting: mt_scaffold_seed2 (attempt-a2a9eceafa294b26915fe9695ee5584c)
+Starting: pooled_random_seed2 (attempt-3538d024d260483f88b8c56c0bbf7c6b)
+Starting: pooled_scaffold_seed2 (attempt-a3eab8e2a5dc41809bfc9b49cf61a092)
+All selected 18 reconstruction jobs verified complete.

@@ -1,0 +1,74 @@
+{"archive_sha256": "867266319667d8b629db6c8876fe7bc524045935c8bac2beb364a222551cccd7", "files_verified": 143, "root": "/home/lessray/qsar-campaigns/cuda-ready-20261014"}
+{
+  "state": "offline_verified",
+  "jobs": 128,
+  "plan": {
+    "schema": 1,
+    "study_kind": "time-budget-seed-extension",
+    "manifest_sha256": "ab9c71cb1ff48505f14e8759c37d5e00c0c138cc50cf0d6e6baf752f96d9d802",
+    "source_commit": "85210630c475e8733089a476b8d5bf4852dbf773",
+    "coordinator_sha256": "758d289570d7409c8335b343c8050531c58d59703a801dd311f0c7637a981703",
+    "wrapper_sha256": "0d9a0f69c5a70addb2337e56785d0f2e0df894109f43c31f9c2aa8796ba783a6",
+    "arms": {
+      "control": {
+        "epochs": 100,
+        "min_epochs": 0,
+        "patience": 20
+      },
+      "extended": {
+        "epochs": 200,
+        "min_epochs": 60,
+        "patience": 40
+      }
+    },
+    "lanes": [
+      [
+        "a2a",
+        "egfr"
+      ],
+      [
+        "egfr_full",
+        "hivpr"
+      ],
+      [
+        "herg",
+        "mpro"
+      ],
+      [
+        "abl1",
+        "vegfr2"
+      ]
+    ],
+    "seeds": [
+      42,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7
+    ],
+    "jobs": 128,
+    "device": "cuda",
+    "parallel_workers": 1,
+    "thread_environment": {
+      "QSAR_TORCH_THREADS": "4",
+      "QSAR_TORCH_INTEROP_THREADS": "1",
+      "OMP_NUM_THREADS": "4",
+      "MKL_NUM_THREADS": "4",
+      "OPENBLAS_NUM_THREADS": "1",
+      "VECLIB_MAXIMUM_THREADS": "4",
+      "PYTHONHASHSEED": "0",
+      "PYTHONUNBUFFERED": "1"
+    },
+    "selection": "Lowest validation RMSE; unchanged scheduler and 1e-5 improvement tolerance",
+    "primary_comparison": "Paired same-host best-checkpoint train MSE and validation RMSE",
+    "common_flag": "best_epoch < 30 and best_checkpoint_train_mse > 0.5 in both arms",
+    "test_policy": "Complete-cohort secondary report; never select budget or seed from test scores",
+    "publication_policy": "Preserve the original three-seed study and all main CUDA/RF results",
+    "environment_caveat": "CPU/CUDA contrasts also include OS, architecture and numerical libraries"
+  }
+}
+{"jobs": 18, "source_files": 36, "input_files": 12, "status": "validated_no_training"}
+{"state": "offline_ready", "jobs": {"budget_comparison": 128, "provenance_reconstruction": 18}, "no_cuda_or_training": true}

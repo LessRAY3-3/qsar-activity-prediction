@@ -1,0 +1,4254 @@
+{
+  "accepted_at": "2026-10-13T16:41:32.068641+00:00",
+  "analysis": {
+    "delta_convention": "point=ensemble_mean-pred_R2;ci=ensemble_mean-pred_R2",
+    "files": [
+      {
+        "path": "results/time_split/summary.csv",
+        "sha256": "6c28bef94b70cf027ca83a3bd578b297d627bf6ada2a4919aff87435f0b05c3d"
+      },
+      {
+        "path": "results/significance/summary_time.csv",
+        "sha256": "8afc59a243b838e570c372e38a17237f6d2d75c56fb456ab83fd41afc6138722"
+      },
+      {
+        "path": "figures/time_split/panel_3splits.png",
+        "sha256": "11f7570c89703d17116c3416f9d86741764d2c307c21dc4d2974205475c0d38d"
+      },
+      {
+        "path": "figures/significance/ci_panel_time.png",
+        "sha256": "2ab5d3f0bd8a0201161902228cccf6f07e46c64927359068448a1cba05aef233"
+      }
+    ],
+    "frozen_input_manifest": "results/time_split/inputs/manifest.json",
+    "frozen_input_manifest_sha256": "d341acc273682f75482370359597ed7970387ea2ca174e0c8ba7d6823d9dc697",
+    "label_audit_sha256": "df4f9b0d4fea753d3065757263b82354d14b4897a9035de58dceb342ca587d49",
+    "paired_bootstrap_replicates": 10000,
+    "presentation_history": [
+      {
+        "change": "Panel title updated to describe protocol comparison; numerical CSVs unchanged.",
+        "script_sha256": "c6a54e0e516ad1ed816102c5f8f6cb5cb4be308a308695a9e5e9240b6a432ff2",
+        "source_commit": "3da94f118a8c68dd2d1d5ec98e6e9278751b4be8"
+      }
+    ],
+    "presentation_revision": {
+      "change": "Added explicit all-year versus as-of label protocol caveat to the panel and console; numerical CSVs unchanged.",
+      "script_sha256": "8b1474249d46e5d2fcc4d10fbf6269e4b443d4c01bc75c52f6d151f2ee7dd9af",
+      "source_commit": "314447da0b56969c639bcc418e0fec3b5f535f95"
+    },
+    "source_commit": "0b4fb296568452b86b74eb82b12177f289661957"
+  },
+  "baseline_diagnostics": {
+    "bootstrap_replicates": 10000,
+    "file": "results/time_split/baseline_diagnostics.csv",
+    "script": "experiments/time_baseline_diagnostics.py",
+    "script_sha256": "7d964b67f9198360edcc3250a32f2983b6baaf11694714737dbbb4f125caaceb",
+    "seed": 42,
+    "sha256": "54a9de9d1aeaba7db39231e34cbc86f7e122e190ece63a1a9725ff98b8e1359e"
+  },
+  "best_checkpoint_diagnostics": {
+    "definition": "best_epoch < 0.3 * max_epochs and standardized train MSE > 0.5, evaluated on the restored checkpoint without dropout",
+    "file": "results/time_split/checkpoint_diagnostics.csv",
+    "flagged": 13,
+    "jobs": 24,
+    "original_model_and_metric_files_preserved": true,
+    "script": "experiments/time_checkpoint_diagnostics.py",
+    "script_sha256": "6a2fd8111cb5ca3548ada998c2cb3b87edb5dc4048e087038c5d58f3e1af92e5",
+    "sha256": "64e1f64616b18d12018a1bf4832f696745b276a49a4c87aaadd0103c5aed6ec6",
+    "training_performed": false
+  },
+  "checks": {
+    "checkpoint_loading": true,
+    "gin_seed_test_rows_identical": true,
+    "metrics_recomputed": true,
+    "non_time_metric_entries_preserved": true,
+    "prediction_replay": true,
+    "source_input_label_hashes": true
+  },
+  "gin_jobs": 24,
+  "gin_max_cuda_replay_abs_error": 9.5367431640625e-07,
+  "gin_original_last_epoch_flags": 0,
+  "hosts": {
+    "coordinator": "M4 MacBook Air, 10 CPU cores, 16 GiB RAM",
+    "gin": "RTX 4070 Laptop GPU, 8 GiB VRAM, CUDA 12.6",
+    "rf": "M3 Max, 16 CPU cores, 64 GiB RAM"
+  },
+  "initial_campaign_acceptance": "results/time_split/initial_campaign_acceptance.json",
+  "initial_gin_wall_seconds": 225.281504,
+  "initial_independent_review": {
+    "blocking_findings": 0,
+    "cpu_threads": 2,
+    "gin_best_validation_rmse_max_abs_error": 1.1920928955078125e-07,
+    "gin_checkpoints_validated_on_cpu": 24,
+    "gin_train_normalization_matches_split": true,
+    "jobs_rechecked": 32,
+    "non_time_metric_entries_compared_with_source_commit": true,
+    "validation_batch_size": 512
+  },
+  "initial_remote_return_archive_sha256": {
+    "gin": "928d7245b7fe4735a2ab4dd7109ca1e2edf732c5afa946a5aa699b24f7e3f304",
+    "rf": "dca7e7f77dba41f50f02cd3bdaf0237a7d52742f310fa4983130c9225bb7bbc7"
+  },
+  "initial_rf_wall_seconds": 7071.198738,
+  "initial_source_commit": "7ce15c1f0849ae69e0ca208f781a9824517eb328",
+  "initial_verification": {
+    "diff_check": "passed",
+    "pytest_passed": 292,
+    "pytest_warnings": 3,
+    "ruff": "passed"
+  },
+  "integrated_files": [
+    {
+      "path": "figures/pred_vs_actual_time_a2a.png",
+      "sha256": "369bc3d63cdbd9f482a7a35394a066fdc616103739941ce845cdbbbb04e7c7ba"
+    },
+    {
+      "path": "figures/pred_vs_actual_time_abl1.png",
+      "sha256": "528d632f870b13ea993a28b0409b7aa4abd64023ecd92a0a038e0831d2016c73"
+    },
+    {
+      "path": "figures/pred_vs_actual_time_egfr.png",
+      "sha256": "df2062356295bb86d5c6e3a6d037bf6e3ff9ad554a8762fd95dfc4e9db1d0473"
+    },
+    {
+      "path": "figures/pred_vs_actual_time_egfr_full.png",
+      "sha256": "f055920fd7ba5bfc6f002797d974e90eeedb0df591241bc2321a5525b5284e42"
+    },
+    {
+      "path": "figures/pred_vs_actual_time_herg.png",
+      "sha256": "8fdbbe79ead6fc8e72a17b1b2fe0b6010a63122d16429ee746c6c2fbd00eed92"
+    },
+    {
+      "path": "figures/pred_vs_actual_time_hivpr.png",
+      "sha256": "0f472775c74d0eee39a4545d7b59cc7532b72555cfc75e778be8ae6b32c1f3f9"
+    },
+    {
+      "path": "figures/pred_vs_actual_time_mpro.png",
+      "sha256": "6fd74d28287983ae166fcc0b85ad9f50d1523521e77d9a8f13538f7faa16f2e7"
+    },
+    {
+      "path": "figures/pred_vs_actual_time_vegfr2.png",
+      "sha256": "8cc40803b019d314d68479622bb4724ac4f2b6c2e938b771ff2c044f933d2451"
+    },
+    {
+      "path": "models/rf_time_split_a2a.joblib",
+      "sha256": "c3bc6529ba5c06cb0871dc014939bc66364f46c117763228e9ccbf89b3774a30"
+    },
+    {
+      "path": "models/rf_time_split_abl1.joblib",
+      "sha256": "3b9de521737b9aa68cacadb10236f08f2d9dc154f56f98cb21c04f3d0888e1ff"
+    },
+    {
+      "path": "models/rf_time_split_egfr.joblib",
+      "sha256": "4b1466abcad7bf9c7b762a4e4c4fcac040176a7d121581877840121af57fec72"
+    },
+    {
+      "path": "models/rf_time_split_egfr_full.joblib",
+      "sha256": "84743a08bca2b9415d353e3c055ce2bee87e1fc3436b008bc71ea941b44f3e01"
+    },
+    {
+      "path": "models/rf_time_split_herg.joblib",
+      "sha256": "514a3f9a4aa01e82801e241d46113fb171d18f3446d6473eff78821902ac7908"
+    },
+    {
+      "path": "models/rf_time_split_hivpr.joblib",
+      "sha256": "22e21a4b6c373c7d50954f10a29027e6a647f7b5a97e88fea0d4f3d016f07541"
+    },
+    {
+      "path": "models/rf_time_split_mpro.joblib",
+      "sha256": "867e31eb18f0684f32590dfaef544d548e313fb78bf85e873fb3d7d9b4295d0e"
+    },
+    {
+      "path": "models/rf_time_split_vegfr2.joblib",
+      "sha256": "52c06e77ab44306fd3a57066f354b54f2311406a475a6a0ef39b4832f72c2532"
+    },
+    {
+      "path": "results/gnn_metrics_a2a.json",
+      "sha256": "96e9370865b8c2b0e12f52e30ac4b9fee658f0e3b46e9b12256cef90c62fab1e"
+    },
+    {
+      "path": "results/gnn_metrics_a2a_seed1.json",
+      "sha256": "19ea85acca4096b85a94c13eac3b81435e1ab5af92ed6a883575dfd43c8f8de5"
+    },
+    {
+      "path": "results/gnn_metrics_a2a_seed2.json",
+      "sha256": "c5835678957be8c71910b11c0a3e0d1df8e40aa271a06d1b63c4b0b46e568952"
+    },
+    {
+      "path": "results/gnn_metrics_abl1.json",
+      "sha256": "685441a2e0e314beffe7c64703d5f940edb4c1add22c7923c625651ae46469c1"
+    },
+    {
+      "path": "results/gnn_metrics_abl1_seed1.json",
+      "sha256": "3dc809d0d85df5986006f01a8d831c67a14aa02023b641ac076074b61d25f708"
+    },
+    {
+      "path": "results/gnn_metrics_abl1_seed2.json",
+      "sha256": "2dd9cd499192e86bc120cb6f80d7fd6b354f200f515b3bc0d758927c1facba2b"
+    },
+    {
+      "path": "results/gnn_metrics_egfr.json",
+      "sha256": "9c19a700129dd7944b2a5b6a3d7bae7d80552d16075ceffbe1de7f8d0e337577"
+    },
+    {
+      "path": "results/gnn_metrics_egfr_full.json",
+      "sha256": "023f78ae517537e97c35100be8142d5a2779d556609a6c665ecd6a211c5e797e"
+    },
+    {
+      "path": "results/gnn_metrics_egfr_full_seed1.json",
+      "sha256": "7ac41b702765ea6a19de2cf9699f7252f1c3a29926eb706e9a58ccab839481e9"
+    },
+    {
+      "path": "results/gnn_metrics_egfr_full_seed2.json",
+      "sha256": "f579184cbf41470fe73e8ec53bc744fa44274d9fa8de1aa23ad66c33ac693673"
+    },
+    {
+      "path": "results/gnn_metrics_egfr_seed1.json",
+      "sha256": "f878d249deb5243621d674e5fcce1094fbd8521b4d2456c3a6c49b8d397af169"
+    },
+    {
+      "path": "results/gnn_metrics_egfr_seed2.json",
+      "sha256": "068c1d5a5760a74fa66e3356fede747a0e458c4e880a9ae886bf2e7606a3f8b0"
+    },
+    {
+      "path": "results/gnn_metrics_herg.json",
+      "sha256": "6144253bc9b81ee0a3ba668d0968fcf82ef8590cb0cb0955194267928372c7e9"
+    },
+    {
+      "path": "results/gnn_metrics_herg_seed1.json",
+      "sha256": "23ea5c3c7200bc7219ebed82dab837b70873007443e06e5c9b1fe4bf6dcc78f8"
+    },
+    {
+      "path": "results/gnn_metrics_herg_seed2.json",
+      "sha256": "d3f317990148698abc13c7c78f7c4873ae3b8d03e4060293fac800785733794f"
+    },
+    {
+      "path": "results/gnn_metrics_hivpr.json",
+      "sha256": "02f9f13d9b621cd2b75fda9daa8c908db073df56417378c548df97e1329d82ea"
+    },
+    {
+      "path": "results/gnn_metrics_hivpr_seed1.json",
+      "sha256": "e8fa35bee60c26d412a8c1d62746fc0aad1f88342dd9ebd5fc0cd991f64ec7d3"
+    },
+    {
+      "path": "results/gnn_metrics_hivpr_seed2.json",
+      "sha256": "05cf988d5ac080cae41698c63645b351885a630fc2084ce4e9d4d676f44adbb3"
+    },
+    {
+      "path": "results/gnn_metrics_mpro.json",
+      "sha256": "9a418817c6f459dbe487cb0fbedab83216ebcdded0a33e849701887ff1a58708"
+    },
+    {
+      "path": "results/gnn_metrics_mpro_seed1.json",
+      "sha256": "eccfea8dfb33a8f090d867d204190a57ab07e766ac95ae0fdc925006d974d825"
+    },
+    {
+      "path": "results/gnn_metrics_mpro_seed2.json",
+      "sha256": "0cde7dfb5eff20f071318e95f2f4f4bee8ef842006fceba7525aad4b238d7232"
+    },
+    {
+      "path": "results/gnn_metrics_vegfr2.json",
+      "sha256": "9e8116227990111eea2a12e45c7489e3354e867cb489131b23ca77112b595964"
+    },
+    {
+      "path": "results/gnn_metrics_vegfr2_seed1.json",
+      "sha256": "5904e72fa089c7609a0c0589cc5cd6dc860c2e8e313f9862845b75ec55412d89"
+    },
+    {
+      "path": "results/gnn_metrics_vegfr2_seed2.json",
+      "sha256": "c070847014c76789eee1bbde877e0bddd04f3dfbfe76fdb1fda84155f0d5e2bb"
+    },
+    {
+      "path": "results/gnn_models/a2a_gin_time.pt",
+      "sha256": "44091a2e3a227f1af38f6ac3eab85428fead67ab6beeb8c6de46aac89b47d36b"
+    },
+    {
+      "path": "results/gnn_models/a2a_gin_time_seed1.pt",
+      "sha256": "8072a008d6a3b774bde8ed203b9330359bfca1cd33c9d7b3b37d49ef7c9fed9b"
+    },
+    {
+      "path": "results/gnn_models/a2a_gin_time_seed2.pt",
+      "sha256": "2f34293a4c712f2ef5bcd77d628555e2d9deaf948039280270e15d0e218fc3e9"
+    },
+    {
+      "path": "results/gnn_models/abl1_gin_time.pt",
+      "sha256": "ed9006e3d41a4431980b589f88441272ae631df07e48f86b5796f96e6c04322c"
+    },
+    {
+      "path": "results/gnn_models/abl1_gin_time_seed1.pt",
+      "sha256": "20b88ebb9644eb7a21b10fb437b7c1e8b1ee98838583d447f6531512de342159"
+    },
+    {
+      "path": "results/gnn_models/abl1_gin_time_seed2.pt",
+      "sha256": "1d70aa1e82786524be7c33b56fc5a2b997adc472374033b1a61d589facc943d5"
+    },
+    {
+      "path": "results/gnn_models/egfr_full_gin_time.pt",
+      "sha256": "11ce30347a37e19fcff29d8e8b5f7027c6db752c8e21f61a8f7fd2e791bfffcb"
+    },
+    {
+      "path": "results/gnn_models/egfr_full_gin_time_seed1.pt",
+      "sha256": "9d44a527e26468804192f724e589c3bec674393df931503d7453534c901bac80"
+    },
+    {
+      "path": "results/gnn_models/egfr_full_gin_time_seed2.pt",
+      "sha256": "7e3cf35a69dbb4632b75aa9ab6a1124cef9aa977ff7b20ed547b1797ea529e0b"
+    },
+    {
+      "path": "results/gnn_models/egfr_gin_time.pt",
+      "sha256": "e759d465088392636b21a149253769c6384de5a2108ad58dec01267d343a32e2"
+    },
+    {
+      "path": "results/gnn_models/egfr_gin_time_seed1.pt",
+      "sha256": "e58a011e94f2bb745493d901e3fc2ccbe85452d8e5ca3ea073fdba08bfb45d7a"
+    },
+    {
+      "path": "results/gnn_models/egfr_gin_time_seed2.pt",
+      "sha256": "41bc01366d3d98abdd940cce3b777c67bdae7dc48555c4991588160ec9a9394c"
+    },
+    {
+      "path": "results/gnn_models/herg_gin_time.pt",
+      "sha256": "71a6b5e6705bde0ba75b2d27d6ccdefa9fb9e745d532fe27b5cc88115342222b"
+    },
+    {
+      "path": "results/gnn_models/herg_gin_time_seed1.pt",
+      "sha256": "76f3188bef46b49d9f4754a6053a6cb6687b901f639b88ee01a700c0f3cf492e"
+    },
+    {
+      "path": "results/gnn_models/herg_gin_time_seed2.pt",
+      "sha256": "b46ef10767d23d14ffea48476d7716fcec0f2da543907d694a35bfdbb61ba8e7"
+    },
+    {
+      "path": "results/gnn_models/hivpr_gin_time.pt",
+      "sha256": "87cc106eb96405f78c98f75a089d8077c8e2e4500c0930901d78ccd1493a659d"
+    },
+    {
+      "path": "results/gnn_models/hivpr_gin_time_seed1.pt",
+      "sha256": "5a4128718c4c6d0976f898b84a2068d394bb82ae1ae7cb39f3dcc6c071ea1e8d"
+    },
+    {
+      "path": "results/gnn_models/hivpr_gin_time_seed2.pt",
+      "sha256": "3f26a219e358c3182e9e13884bf1ec5723a17c1b2d91321017407e9401f71736"
+    },
+    {
+      "path": "results/gnn_models/mpro_gin_time.pt",
+      "sha256": "7fa4c0c7d0cd83fe89fca20a7a6305fba624a706f5a06adde69d3cc2555e6fea"
+    },
+    {
+      "path": "results/gnn_models/mpro_gin_time_seed1.pt",
+      "sha256": "f32d6a039265b3f43c244fead0b88753aa45a1083acbadd436f67749011dbef2"
+    },
+    {
+      "path": "results/gnn_models/mpro_gin_time_seed2.pt",
+      "sha256": "4a7498008d1cdb90107f4ea702da1aaccf87c2ae5b5da1fbc9dc358713cd1ee5"
+    },
+    {
+      "path": "results/gnn_models/vegfr2_gin_time.pt",
+      "sha256": "78488144bcb26cc85d7bcfeab87a9f1c9251b494dbc4824f11cb6c8e8b805db1"
+    },
+    {
+      "path": "results/gnn_models/vegfr2_gin_time_seed1.pt",
+      "sha256": "30652b6a912a2056aeee79b268496c7c928ee47c5dd7f72778a839b6ed5afd57"
+    },
+    {
+      "path": "results/gnn_models/vegfr2_gin_time_seed2.pt",
+      "sha256": "753657751f6e2a778708669e8e601672f3ade7b56f5e5eb318a1d6cf585e8bb9"
+    },
+    {
+      "path": "results/gnn_preds_a2a_time.npz",
+      "sha256": "f53e9ffd433f3a435fa41a1d8a106a2a24a0230d0cc9f5d68edfb6b8a8b93bfd"
+    },
+    {
+      "path": "results/gnn_preds_a2a_time_seed1.npz",
+      "sha256": "4ddb7482e7345ab5cebd21fd5ac1c628adf670a025fa0a3f903fa6622d293cba"
+    },
+    {
+      "path": "results/gnn_preds_a2a_time_seed2.npz",
+      "sha256": "a0eea6dc3803b8f01219c049163d48f36691dc396cd038009636fa1ea5f86e2c"
+    },
+    {
+      "path": "results/gnn_preds_abl1_time.npz",
+      "sha256": "52be82ed0ff571397e0d600ee3902b422769a2ec67621f4c80982725a72decee"
+    },
+    {
+      "path": "results/gnn_preds_abl1_time_seed1.npz",
+      "sha256": "885dc3f77db9bebece61330eb95ff5aafbd73be8d834e5a409fc5510957d8ac0"
+    },
+    {
+      "path": "results/gnn_preds_abl1_time_seed2.npz",
+      "sha256": "fa32dd28dbf9a96560a5046a29d08cf337b221d6aaa28037ea4b8d62a69ac1a7"
+    },
+    {
+      "path": "results/gnn_preds_egfr_full_time.npz",
+      "sha256": "123976c5f9ea4bf6f1d0c1fc04110202fe8f6a5052e684093ee29050f0605ebf"
+    },
+    {
+      "path": "results/gnn_preds_egfr_full_time_seed1.npz",
+      "sha256": "9b3117a4b35360cc7763f87600de4953183dedec0283105de1280f41c4d1350e"
+    },
+    {
+      "path": "results/gnn_preds_egfr_full_time_seed2.npz",
+      "sha256": "58f5ef46e42b21b7fbfd39de78e6a3fc6d86cef4420f2f580c4c59c9753ad7b3"
+    },
+    {
+      "path": "results/gnn_preds_egfr_time.npz",
+      "sha256": "26476114cb3dbfff7362a5b1a0042e3acc50716ba79d580f1f378d241bb0869c"
+    },
+    {
+      "path": "results/gnn_preds_egfr_time_seed1.npz",
+      "sha256": "9d5b99560990f418b9949bf28630b21dbdb241004feae398de5d046834dac0cd"
+    },
+    {
+      "path": "results/gnn_preds_egfr_time_seed2.npz",
+      "sha256": "8ba0800f0117e611d1b5e7e3a9b8ed91c2c3d772a0a9bdaa5df07fb1071ce7fb"
+    },
+    {
+      "path": "results/gnn_preds_herg_time.npz",
+      "sha256": "20f29327532fbb1fc3435d2faa6bfb573378c217c53612ab03941c38de84095c"
+    },
+    {
+      "path": "results/gnn_preds_herg_time_seed1.npz",
+      "sha256": "ca40e88f985afd1f0f14073566c10fc717669e3474765cbde42207bdebf2785a"
+    },
+    {
+      "path": "results/gnn_preds_herg_time_seed2.npz",
+      "sha256": "43e002097d0a90f17a923d0e02f4a48f04d87cb4f2c468c5a852f720b2674ea3"
+    },
+    {
+      "path": "results/gnn_preds_hivpr_time.npz",
+      "sha256": "6bee6df1415435624f1210860f0d61bf83a3c0d61042ef59c0338f785b86a4ff"
+    },
+    {
+      "path": "results/gnn_preds_hivpr_time_seed1.npz",
+      "sha256": "6b5ae3862c4f9a750caf2cf630a1b28b9bde95a049c907b11ab884754894e868"
+    },
+    {
+      "path": "results/gnn_preds_hivpr_time_seed2.npz",
+      "sha256": "2fd3a226c7fcfa481f31c7e48989adc505f6b1ae2e72842b05cdc95f58194cdf"
+    },
+    {
+      "path": "results/gnn_preds_mpro_time.npz",
+      "sha256": "9948c5e5f1aaf1ab2e3ff79d55ad274f9f9dc612040bf5f06266dbc2b0c7e3ef"
+    },
+    {
+      "path": "results/gnn_preds_mpro_time_seed1.npz",
+      "sha256": "27a05aed9b797c9aa8898f5325d83a5dc517d9eac4fe7bc4a264a3cea9d9751b"
+    },
+    {
+      "path": "results/gnn_preds_mpro_time_seed2.npz",
+      "sha256": "0511d0114a1b35d4b268d974e47d5812236e4e52dcba6ec8975586b7ce177190"
+    },
+    {
+      "path": "results/gnn_preds_vegfr2_time.npz",
+      "sha256": "12a2210d459476343083741cec48534db0af7036754779a67756f9665473e3df"
+    },
+    {
+      "path": "results/gnn_preds_vegfr2_time_seed1.npz",
+      "sha256": "65d1b746030f5e43d8cdde883234b4021b49ae62fa4ed5cdbcdb2f331eb5d20e"
+    },
+    {
+      "path": "results/gnn_preds_vegfr2_time_seed2.npz",
+      "sha256": "5c26c6398c36d290bcde1817c795e399344486efdfa4b9c677bf4ca235658a69"
+    },
+    {
+      "path": "results/metrics_a2a.json",
+      "sha256": "9b6ef30cd7f2e58a4ba93c511b1d22453f4e1e16415a12ee168a6a408489592c"
+    },
+    {
+      "path": "results/metrics_abl1.json",
+      "sha256": "9857267434d983efb448bd3ba2dc4b98908f36d24194695bfa7084dbd151985d"
+    },
+    {
+      "path": "results/metrics_egfr.json",
+      "sha256": "9037505ca8c7504be9adcc05fb81d60a54402d21fc9da748bdbb4faedeb80778"
+    },
+    {
+      "path": "results/metrics_egfr_full.json",
+      "sha256": "9781c93f8d13f8d3bcca7976577443ef5a0cda3426c57cfdf8a955976f3a2591"
+    },
+    {
+      "path": "results/metrics_herg.json",
+      "sha256": "7fe0e44a3da8d79f3fb313a236dbdd6149c603a6c27f2537ff983709e2520680"
+    },
+    {
+      "path": "results/metrics_hivpr.json",
+      "sha256": "9e11ebff07755c9afa53bc881f97be4d3da7b757af16ffbb65569ab5f32159b4"
+    },
+    {
+      "path": "results/metrics_mpro.json",
+      "sha256": "7538182cfeb64c623c956dd4f91d8be7063b9e2e3cc7a783d2f33bc055ad13b9"
+    },
+    {
+      "path": "results/metrics_vegfr2.json",
+      "sha256": "ceb93e9688950ab26829e8472c55eb5751915d23b57c7540a369151a3738cc79"
+    },
+    {
+      "path": "results/rf_preds_a2a_time.npz",
+      "sha256": "6d56584ae7d3a70c90a51c8b8d973a0022e0fd51f8c2c16cf6ddfe3a01deebe2"
+    },
+    {
+      "path": "results/rf_preds_abl1_time.npz",
+      "sha256": "d0c34e9d889d30d0d14fa4b92f41702ba017020379b31fe3d629212da69c787e"
+    },
+    {
+      "path": "results/rf_preds_egfr_full_time.npz",
+      "sha256": "e595058276e5e883f913a86f9bf6f426dad160ad682df09e649d8346a2b7d9a1"
+    },
+    {
+      "path": "results/rf_preds_egfr_time.npz",
+      "sha256": "3aa33f113183a7247b244af84a38a854ffd1cef5de413319c8ead03101ea8a1b"
+    },
+    {
+      "path": "results/rf_preds_herg_time.npz",
+      "sha256": "f4818b247dd6ba553de567f532f832b19cb5d0d42a876035f7934e1d4055c47d"
+    },
+    {
+      "path": "results/rf_preds_hivpr_time.npz",
+      "sha256": "949b4f7f620b573d3460c6da307c2310fb5750798f4d0213412e72c72242236a"
+    },
+    {
+      "path": "results/rf_preds_mpro_time.npz",
+      "sha256": "fcd9a179d6031a63111c9647e31c88ba0c8880a1584e65b644c7449fab6f50d2"
+    },
+    {
+      "path": "results/rf_preds_vegfr2_time.npz",
+      "sha256": "3af30570cf701cb0050cd6671442bf05ec8280346c2ac86185da1670bf43a7a7"
+    }
+  ],
+  "jobs": [
+    {
+      "elapsed_seconds": 116.19728720800049,
+      "finished_at": "2026-10-13T12:28:42.801282+00:00",
+      "input_manifest": "results/time_split/input_manifest_rf.json",
+      "label_id": "b35580bb601adf4fb9e604dee3dd0f8989d11ebd4f14eaafc3e25a4e40f44b5b",
+      "mae": 0.9650510256033085,
+      "n_test": 802,
+      "n_train": 399,
+      "prediction_replay_max_abs_error": 0.0,
+      "provenance": {
+        "bundle_manifest": {
+          "sha256": "7f898588665878ec5d9f4f34beeb500300f7f30507beca212b7d2733b4d79f71",
+          "source_git_head": "7ce15c1f0849ae69e0ca208f781a9824517eb328"
+        },
+        "code": {
+          "scripts/04_train_and_evaluate.py": "a8cb621f18279ab7ea0a0ca515ef45bf52d71bf1fb91a50993d66b13709ae329",
+          "scripts/qsar_common.py": "86be4f6672aab3a9564a8e0c7e2213f0cab870154f2ea9b68b13b32c41bb250c",
+          "scripts/run_time_campaign.py": "97a3f38ccd610691db05222c37eb6c71d015936f76e13a3f6d1798067baa5fc6",
+          "scripts/time_labels.py": "6c88a8a3cede0bf10d69edcbb8d51bc5f004d85293bd34e0a6ccfc659361d9ca"
+        },
+        "command": [
+          "scripts/04_train_and_evaluate.py",
+          "--split",
+          "time"
+        ],
+        "environment": {
+          "packages": {
+            "joblib": "1.6.0",
+            "numpy": "2.5.3",
+            "rdkit": "2026.3.6",
+            "scikit-learn": "1.9.1",
+            "torch": "unavailable",
+            "torch-geometric": "unavailable"
+          },
+          "platform": "macOS-27.0-arm64-arm-64bit",
+          "python": "3.12.14",
+          "variables": {
+            "CUBLAS_WORKSPACE_CONFIG": null,
+            "CUDA_VISIBLE_DEVICES": null,
+            "MKL_NUM_THREADS": "1",
+            "OMP_NUM_THREADS": "1",
+            "OPENBLAS_NUM_THREADS": "1",
+            "PYTHONHASHSEED": null,
+            "QSAR_CV_BACKEND": "loky",
+            "QSAR_RF_JOBS": "4"
+          }
+        },
+        "hyperparameters": {
+          "cv_folds": 5,
+          "device": "cpu",
+          "grid": "PARAM_GRID in hashed RF source",
+          "seed": 42
+        },
+        "inputs": {
+          "data/processed/a2a_fingerprints.npz": "7c50c66bacc7dc2361b4e6e827a77e987c69e27a984ccc2c895108a98566a412",
+          "data/processed/splits/a2a_time.npz": "5a28451cf757e4f547197bf7ae45701c496917e11cf07a699287fa7f7932eecd"
+        },
+        "label_id": "b35580bb601adf4fb9e604dee3dd0f8989d11ebd4f14eaafc3e25a4e40f44b5b",
+        "role": "rf",
+        "schema": 1,
+        "tag": "a2a"
+      },
+      "r2": -0.2731775621180179,
+      "returned_artifact_sha256": {
+        "figures/pred_vs_actual_time_a2a.png": "369bc3d63cdbd9f482a7a35394a066fdc616103739941ce845cdbbbb04e7c7ba",
+        "models/rf_time_split_a2a.joblib": "c3bc6529ba5c06cb0871dc014939bc66364f46c117763228e9ccbf89b3774a30",
+        "results/metrics_a2a.json": "9f7e535757be4d369a45771a7e38286b71d5dce949826744138cf96c960c29c2",
+        "results/rf_preds_a2a_time.npz": "6d56584ae7d3a70c90a51c8b8d973a0022e0fd51f8c2c16cf6ddfe3a01deebe2"
+      },
+      "rf_jobs": 4,
+      "rmse": 1.1761679676593964,
+      "role": "rf",
+      "signature": "f2cd9bca90dc62fa4be9f639915e673d21865168cbd204dc25834a296e9379c6",
+      "source_commit": "7ce15c1f0849ae69e0ca208f781a9824517eb328",
+      "started_at": "2026-10-13T12:26:46.603780+00:00",
+      "state": "success",
+      "tag": "a2a",
+      "train_mean_constant_r2": -0.007020406482593611
+    },
+    {
+      "elapsed_seconds": 1970.8538322919994,
+      "finished_at": "2026-10-13T13:01:33.689510+00:00",
+      "input_manifest": "results/time_split/input_manifest_rf.json",
+      "label_id": "09e7659309a88d077bdad0001daf441245aa9b9f88573d2cf755cd8697b3680b",
+      "mae": 1.3453344574301194,
+      "n_test": 3043,
+      "n_train": 6848,
+      "prediction_replay_max_abs_error": 0.0,
+      "provenance": {
+        "bundle_manifest": {
+          "sha256": "7f898588665878ec5d9f4f34beeb500300f7f30507beca212b7d2733b4d79f71",
+          "source_git_head": "7ce15c1f0849ae69e0ca208f781a9824517eb328"
+        },
+        "code": {
+          "scripts/04_train_and_evaluate.py": "a8cb621f18279ab7ea0a0ca515ef45bf52d71bf1fb91a50993d66b13709ae329",
+          "scripts/qsar_common.py": "86be4f6672aab3a9564a8e0c7e2213f0cab870154f2ea9b68b13b32c41bb250c",
+          "scripts/run_time_campaign.py": "97a3f38ccd610691db05222c37eb6c71d015936f76e13a3f6d1798067baa5fc6",
+          "scripts/time_labels.py": "6c88a8a3cede0bf10d69edcbb8d51bc5f004d85293bd34e0a6ccfc659361d9ca"
+        },
+        "command": [
+          "scripts/04_train_and_evaluate.py",
+          "--split",
+          "time"
+        ],
+        "environment": {
+          "packages": {
+            "joblib": "1.6.0",
+            "numpy": "2.5.3",
+            "rdkit": "2026.3.6",
+            "scikit-learn": "1.9.1",
+            "torch": "unavailable",
+            "torch-geometric": "unavailable"
+          },
+          "platform": "macOS-27.0-arm64-arm-64bit",
+          "python": "3.12.14",
+          "variables": {
+            "CUBLAS_WORKSPACE_CONFIG": null,
+            "CUDA_VISIBLE_DEVICES": null,
+            "MKL_NUM_THREADS": "1",
+            "OMP_NUM_THREADS": "1",
+            "OPENBLAS_NUM_THREADS": "1",
+            "PYTHONHASHSEED": null,
+            "QSAR_CV_BACKEND": "loky",
+            "QSAR_RF_JOBS": "4"
+          }
+        },
+        "hyperparameters": {
+          "cv_folds": 5,
+          "device": "cpu",
+          "grid": "PARAM_GRID in hashed RF source",
+          "seed": 42
+        },
+        "inputs": {
+          "data/processed/egfr_full_fingerprints.npz": "ef24026b48434a6fd7e307e4693b1dad15661744cea6d93cd5ad442ef7a3d206",
+          "data/processed/splits/egfr_full_time.npz": "fdcd58f8ea2a2e83a2529160581202a6295f073dfa0bb6560a10dd4eb4a4f993"
+        },
+        "label_id": "09e7659309a88d077bdad0001daf441245aa9b9f88573d2cf755cd8697b3680b",
+        "role": "rf",
+        "schema": 1,
+        "tag": "egfr_full"
+      },
+      "r2": -0.752734389912745,
+      "returned_artifact_sha256": {
+        "figures/pred_vs_actual_time_egfr_full.png": "f055920fd7ba5bfc6f002797d974e90eeedb0df591241bc2321a5525b5284e42",
+        "models/rf_time_split_egfr_full.joblib": "84743a08bca2b9415d353e3c055ce2bee87e1fc3436b008bc71ea941b44f3e01",
+        "results/metrics_egfr_full.json": "af54e5b6dcafcc462249b70e5ba38e1bcf3b866bbc2bef7f69905392c65ccaf2",
+        "results/rf_preds_egfr_full_time.npz": "e595058276e5e883f913a86f9bf6f426dad160ad682df09e649d8346a2b7d9a1"
+      },
+      "rf_jobs": 4,
+      "rmse": 1.584873832435118,
+      "role": "rf",
+      "signature": "7cc2f21da72ce3d9a6ff48c5fd64e251dc1d4f37bbf21c51c445abbc6117ecb2",
+      "source_commit": "7ce15c1f0849ae69e0ca208f781a9824517eb328",
+      "started_at": "2026-10-13T12:28:42.833890+00:00",
+      "state": "success",
+      "tag": "egfr_full",
+      "train_mean_constant_r2": -0.45980379735519694
+    },
+    {
+      "elapsed_seconds": 215.9423139579958,
+      "finished_at": "2026-10-13T13:05:09.680556+00:00",
+      "input_manifest": "results/time_split/input_manifest_rf.json",
+      "label_id": "999bd88ee0bf093ad765dd8c7769f26756c3f4a47935e0de22391af8feb6e7c3",
+      "mae": 0.8868448061318323,
+      "n_test": 531,
+      "n_train": 1387,
+      "prediction_replay_max_abs_error": 0.0,
+      "provenance": {
+        "bundle_manifest": {
+          "sha256": "7f898588665878ec5d9f4f34beeb500300f7f30507beca212b7d2733b4d79f71",
+          "source_git_head": "7ce15c1f0849ae69e0ca208f781a9824517eb328"
+        },
+        "code": {
+          "scripts/04_train_and_evaluate.py": "a8cb621f18279ab7ea0a0ca515ef45bf52d71bf1fb91a50993d66b13709ae329",
+          "scripts/qsar_common.py": "86be4f6672aab3a9564a8e0c7e2213f0cab870154f2ea9b68b13b32c41bb250c",
+          "scripts/run_time_campaign.py": "97a3f38ccd610691db05222c37eb6c71d015936f76e13a3f6d1798067baa5fc6",
+          "scripts/time_labels.py": "6c88a8a3cede0bf10d69edcbb8d51bc5f004d85293bd34e0a6ccfc659361d9ca"
+        },
+        "command": [
+          "scripts/04_train_and_evaluate.py",
+          "--split",
+          "time"
+        ],
+        "environment": {
+          "packages": {
+            "joblib": "1.6.0",
+            "numpy": "2.5.3",
+            "rdkit": "2026.3.6",
+            "scikit-learn": "1.9.1",
+            "torch": "unavailable",
+            "torch-geometric": "unavailable"
+          },
+          "platform": "macOS-27.0-arm64-arm-64bit",
+          "python": "3.12.14",
+          "variables": {
+            "CUBLAS_WORKSPACE_CONFIG": null,
+            "CUDA_VISIBLE_DEVICES": null,
+            "MKL_NUM_THREADS": "1",
+            "OMP_NUM_THREADS": "1",
+            "OPENBLAS_NUM_THREADS": "1",
+            "PYTHONHASHSEED": null,
+            "QSAR_CV_BACKEND": "loky",
+            "QSAR_RF_JOBS": "4"
+          }
+        },
+        "hyperparameters": {
+          "cv_folds": 5,
+          "device": "cpu",
+          "grid": "PARAM_GRID in hashed RF source",
+          "seed": 42
+        },
+        "inputs": {
+          "data/processed/abl1_fingerprints.npz": "59a5bd1d0f4a5b2da1fa2561ef0ae03bacbff3bbc464af263c4afb02b1faac41",
+          "data/processed/splits/abl1_time.npz": "7d5bc03ae5ac43bf776df73f11223069b6d574cde84f0633e5cf18d9e9c9ed62"
+        },
+        "label_id": "999bd88ee0bf093ad765dd8c7769f26756c3f4a47935e0de22391af8feb6e7c3",
+        "role": "rf",
+        "schema": 1,
+        "tag": "abl1"
+      },
+      "r2": 0.559081982968605,
+      "returned_artifact_sha256": {
+        "figures/pred_vs_actual_time_abl1.png": "528d632f870b13ea993a28b0409b7aa4abd64023ecd92a0a038e0831d2016c73",
+        "models/rf_time_split_abl1.joblib": "3b9de521737b9aa68cacadb10236f08f2d9dc154f56f98cb21c04f3d0888e1ff",
+        "results/metrics_abl1.json": "8882effc7e81e5674f0284726bc257022181a011a786510aa5c972a61ae35325",
+        "results/rf_preds_abl1_time.npz": "d0c34e9d889d30d0d14fa4b92f41702ba017020379b31fe3d629212da69c787e"
+      },
+      "rf_jobs": 4,
+      "rmse": 1.0296852351157821,
+      "role": "rf",
+      "signature": "9c58c339b8322183f37daca7a0a85ab41d7fe6d057c994cdbe2e2a3e9935f0b2",
+      "source_commit": "7ce15c1f0849ae69e0ca208f781a9824517eb328",
+      "started_at": "2026-10-13T13:01:33.737956+00:00",
+      "state": "success",
+      "tag": "abl1",
+      "train_mean_constant_r2": -0.11985406628388495
+    },
+    {
+      "elapsed_seconds": 588.4045981250019,
+      "finished_at": "2026-10-13T13:14:58.137472+00:00",
+      "input_manifest": "results/time_split/input_manifest_rf.json",
+      "label_id": "b181f531e8ac9454c8ce55a1669a28259e7d3aa65852a74ce38eac44be846761",
+      "mae": 0.9223231841139535,
+      "n_test": 1233,
+      "n_train": 2948,
+      "prediction_replay_max_abs_error": 0.0,
+      "provenance": {
+        "bundle_manifest": {
+          "sha256": "7f898588665878ec5d9f4f34beeb500300f7f30507beca212b7d2733b4d79f71",
+          "source_git_head": "7ce15c1f0849ae69e0ca208f781a9824517eb328"
+        },
+        "code": {
+          "scripts/04_train_and_evaluate.py": "a8cb621f18279ab7ea0a0ca515ef45bf52d71bf1fb91a50993d66b13709ae329",
+          "scripts/qsar_common.py": "86be4f6672aab3a9564a8e0c7e2213f0cab870154f2ea9b68b13b32c41bb250c",
+          "scripts/run_time_campaign.py": "97a3f38ccd610691db05222c37eb6c71d015936f76e13a3f6d1798067baa5fc6",
+          "scripts/time_labels.py": "6c88a8a3cede0bf10d69edcbb8d51bc5f004d85293bd34e0a6ccfc659361d9ca"
+        },
+        "command": [
+          "scripts/04_train_and_evaluate.py",
+          "--split",
+          "time"
+        ],
+        "environment": {
+          "packages": {
+            "joblib": "1.6.0",
+            "numpy": "2.5.3",
+            "rdkit": "2026.3.6",
+            "scikit-learn": "1.9.1",
+            "torch": "unavailable",
+            "torch-geometric": "unavailable"
+          },
+          "platform": "macOS-27.0-arm64-arm-64bit",
+          "python": "3.12.14",
+          "variables": {
+            "CUBLAS_WORKSPACE_CONFIG": null,
+            "CUDA_VISIBLE_DEVICES": null,
+            "MKL_NUM_THREADS": "1",
+            "OMP_NUM_THREADS": "1",
+            "OPENBLAS_NUM_THREADS": "1",
+            "PYTHONHASHSEED": null,
+            "QSAR_CV_BACKEND": "loky",
+            "QSAR_RF_JOBS": "4"
+          }
+        },
+        "hyperparameters": {
+          "cv_folds": 5,
+          "device": "cpu",
+          "grid": "PARAM_GRID in hashed RF source",
+          "seed": 42
+        },
+        "inputs": {
+          "data/processed/egfr_fingerprints.npz": "c6f0cc1cf48c335b980ca10d671070ed3c52ee8103124847ccd2b185cfd0ec91",
+          "data/processed/splits/egfr_time.npz": "47d2d02eac0f9faac7024f34f722602ce40c19db36726353aa81a6b13b4aa966"
+        },
+        "label_id": "b181f531e8ac9454c8ce55a1669a28259e7d3aa65852a74ce38eac44be846761",
+        "role": "rf",
+        "schema": 1,
+        "tag": "egfr"
+      },
+      "r2": 0.13991046691971176,
+      "returned_artifact_sha256": {
+        "figures/pred_vs_actual_time_egfr.png": "df2062356295bb86d5c6e3a6d037bf6e3ff9ad554a8762fd95dfc4e9db1d0473",
+        "models/rf_time_split_egfr.joblib": "4b1466abcad7bf9c7b762a4e4c4fcac040176a7d121581877840121af57fec72",
+        "results/metrics_egfr.json": "eaf5ce5c178765d2f8a6ea6991337c01ee8fa0c3e62f653146ae92209bec9670",
+        "results/rf_preds_egfr_time.npz": "3aa33f113183a7247b244af84a38a854ffd1cef5de413319c8ead03101ea8a1b"
+      },
+      "rf_jobs": 4,
+      "rmse": 1.1871786023910091,
+      "role": "rf",
+      "signature": "35040a3d765499384478e4db465999d58b624e5ff819264fa3bf6a1e35243000",
+      "source_commit": "7ce15c1f0849ae69e0ca208f781a9824517eb328",
+      "started_at": "2026-10-13T13:05:09.728957+00:00",
+      "state": "success",
+      "tag": "egfr",
+      "train_mean_constant_r2": -0.05441273324492779
+    },
+    {
+      "elapsed_seconds": 134.16837850000593,
+      "finished_at": "2026-10-13T13:54:47.447410+00:00",
+      "input_manifest": "results/time_split/input_manifest_rf.json",
+      "label_id": "66a8a839e6cff2f4d7b9664c286fd8d2b716b784faab4aa60d7bf5e74d94eec6",
+      "mae": 1.4039708164781963,
+      "n_test": 529,
+      "n_train": 1812,
+      "prediction_replay_max_abs_error": 0.0,
+      "provenance": {
+        "bundle_manifest": {
+          "sha256": "7f898588665878ec5d9f4f34beeb500300f7f30507beca212b7d2733b4d79f71",
+          "source_git_head": "7ce15c1f0849ae69e0ca208f781a9824517eb328"
+        },
+        "code": {
+          "scripts/04_train_and_evaluate.py": "a8cb621f18279ab7ea0a0ca515ef45bf52d71bf1fb91a50993d66b13709ae329",
+          "scripts/qsar_common.py": "86be4f6672aab3a9564a8e0c7e2213f0cab870154f2ea9b68b13b32c41bb250c",
+          "scripts/run_time_campaign.py": "97a3f38ccd610691db05222c37eb6c71d015936f76e13a3f6d1798067baa5fc6",
+          "scripts/time_labels.py": "6c88a8a3cede0bf10d69edcbb8d51bc5f004d85293bd34e0a6ccfc659361d9ca"
+        },
+        "command": [
+          "scripts/04_train_and_evaluate.py",
+          "--split",
+          "time"
+        ],
+        "environment": {
+          "packages": {
+            "joblib": "1.6.0",
+            "numpy": "2.5.3",
+            "rdkit": "2026.3.6",
+            "scikit-learn": "1.9.1",
+            "torch": "unavailable",
+            "torch-geometric": "unavailable"
+          },
+          "platform": "macOS-27.0-arm64-arm-64bit",
+          "python": "3.12.14",
+          "variables": {
+            "CUBLAS_WORKSPACE_CONFIG": null,
+            "CUDA_VISIBLE_DEVICES": null,
+            "MKL_NUM_THREADS": "1",
+            "OMP_NUM_THREADS": "1",
+            "OPENBLAS_NUM_THREADS": "1",
+            "PYTHONHASHSEED": null,
+            "QSAR_CV_BACKEND": "loky",
+            "QSAR_RF_JOBS": "16"
+          }
+        },
+        "hyperparameters": {
+          "cv_folds": 5,
+          "device": "cpu",
+          "grid": "PARAM_GRID in hashed RF source",
+          "seed": 42
+        },
+        "inputs": {
+          "data/processed/hivpr_fingerprints.npz": "8da16c31e32d456882e299ecedf14bf0698f3ee08c6d0b875827804593725ad4",
+          "data/processed/splits/hivpr_time.npz": "57f292a4333ae6a94922236d0ec5e183dd46fb438ba0db0c942eaf503f928455"
+        },
+        "label_id": "66a8a839e6cff2f4d7b9664c286fd8d2b716b784faab4aa60d7bf5e74d94eec6",
+        "role": "rf",
+        "schema": 1,
+        "tag": "hivpr"
+      },
+      "r2": -0.043910857959849725,
+      "returned_artifact_sha256": {
+        "figures/pred_vs_actual_time_hivpr.png": "0f472775c74d0eee39a4545d7b59cc7532b72555cfc75e778be8ae6b32c1f3f9",
+        "models/rf_time_split_hivpr.joblib": "22e21a4b6c373c7d50954f10a29027e6a647f7b5a97e88fea0d4f3d016f07541",
+        "results/metrics_hivpr.json": "142a4e04d18860b6ede78c0ba30edfb52d50a058c401f0c62726aa3974343d1f",
+        "results/rf_preds_hivpr_time.npz": "949b4f7f620b573d3460c6da307c2310fb5750798f4d0213412e72c72242236a"
+      },
+      "rf_jobs": 16,
+      "rmse": 1.7573408496671954,
+      "role": "rf",
+      "signature": "8b049d0c6bc52442bc1c2cadfb91ea0a9020f8848148bfd8b04c5cc554410fdf",
+      "source_commit": "7ce15c1f0849ae69e0ca208f781a9824517eb328",
+      "started_at": "2026-10-13T13:52:33.278534+00:00",
+      "state": "success",
+      "tag": "hivpr",
+      "train_mean_constant_r2": -0.001763981404235615
+    },
+    {
+      "elapsed_seconds": 78.324686208005,
+      "finished_at": "2026-10-13T13:56:05.806780+00:00",
+      "input_manifest": "results/time_split/input_manifest_rf.json",
+      "label_id": "75bb580c77d0dbe64c7aed1178c0dbc2505f44f3c3c91cc0344a95e8c305c17c",
+      "mae": 0.8205771422854266,
+      "n_test": 1750,
+      "n_train": 1017,
+      "prediction_replay_max_abs_error": 0.0,
+      "provenance": {
+        "bundle_manifest": {
+          "sha256": "7f898588665878ec5d9f4f34beeb500300f7f30507beca212b7d2733b4d79f71",
+          "source_git_head": "7ce15c1f0849ae69e0ca208f781a9824517eb328"
+        },
+        "code": {
+          "scripts/04_train_and_evaluate.py": "a8cb621f18279ab7ea0a0ca515ef45bf52d71bf1fb91a50993d66b13709ae329",
+          "scripts/qsar_common.py": "86be4f6672aab3a9564a8e0c7e2213f0cab870154f2ea9b68b13b32c41bb250c",
+          "scripts/run_time_campaign.py": "97a3f38ccd610691db05222c37eb6c71d015936f76e13a3f6d1798067baa5fc6",
+          "scripts/time_labels.py": "6c88a8a3cede0bf10d69edcbb8d51bc5f004d85293bd34e0a6ccfc659361d9ca"
+        },
+        "command": [
+          "scripts/04_train_and_evaluate.py",
+          "--split",
+          "time"
+        ],
+        "environment": {
+          "packages": {
+            "joblib": "1.6.0",
+            "numpy": "2.5.3",
+            "rdkit": "2026.3.6",
+            "scikit-learn": "1.9.1",
+            "torch": "unavailable",
+            "torch-geometric": "unavailable"
+          },
+          "platform": "macOS-27.0-arm64-arm-64bit",
+          "python": "3.12.14",
+          "variables": {
+            "CUBLAS_WORKSPACE_CONFIG": null,
+            "CUDA_VISIBLE_DEVICES": null,
+            "MKL_NUM_THREADS": "1",
+            "OMP_NUM_THREADS": "1",
+            "OPENBLAS_NUM_THREADS": "1",
+            "PYTHONHASHSEED": null,
+            "QSAR_CV_BACKEND": "loky",
+            "QSAR_RF_JOBS": "16"
+          }
+        },
+        "hyperparameters": {
+          "cv_folds": 5,
+          "device": "cpu",
+          "grid": "PARAM_GRID in hashed RF source",
+          "seed": 42
+        },
+        "inputs": {
+          "data/processed/mpro_fingerprints.npz": "6a5628f1f2bfa4acd6225eb4515cc2a5a1f664208c6a3110d683343870ea570e",
+          "data/processed/splits/mpro_time.npz": "a04f76855f5e0114854af278c7c86d26abe6b4d96acf691fbb49b9869267419f"
+        },
+        "label_id": "75bb580c77d0dbe64c7aed1178c0dbc2505f44f3c3c91cc0344a95e8c305c17c",
+        "role": "rf",
+        "schema": 1,
+        "tag": "mpro"
+      },
+      "r2": 0.0069747212589171825,
+      "returned_artifact_sha256": {
+        "figures/pred_vs_actual_time_mpro.png": "6fd74d28287983ae166fcc0b85ad9f50d1523521e77d9a8f13538f7faa16f2e7",
+        "models/rf_time_split_mpro.joblib": "867e31eb18f0684f32590dfaef544d548e313fb78bf85e873fb3d7d9b4295d0e",
+        "results/metrics_mpro.json": "22c3cebeeaa86d473a1d225fe872438c3b2c551780185edf839060be97ed2ea1",
+        "results/rf_preds_mpro_time.npz": "fcd9a179d6031a63111c9647e31c88ba0c8880a1584e65b644c7449fab6f50d2"
+      },
+      "rf_jobs": 16,
+      "rmse": 1.0503746926423576,
+      "role": "rf",
+      "signature": "b4ed5973abfbeffe07ccf81710e45fb18eaa3d8c1f1250a538ac074876ebb29c",
+      "source_commit": "7ce15c1f0849ae69e0ca208f781a9824517eb328",
+      "started_at": "2026-10-13T13:54:47.481577+00:00",
+      "state": "success",
+      "tag": "mpro",
+      "train_mean_constant_r2": -9.356547758798683e-09
+    },
+    {
+      "elapsed_seconds": 1711.9424697499999,
+      "finished_at": "2026-10-13T14:24:37.802518+00:00",
+      "input_manifest": "results/time_split/input_manifest_rf.json",
+      "label_id": "0257d96ee9bd87e1664b7ac0bfb946a556acdd78ef5389fbb62256c0462beb78",
+      "mae": 0.949414680355855,
+      "n_test": 2038,
+      "n_train": 6294,
+      "prediction_replay_max_abs_error": 0.0,
+      "provenance": {
+        "bundle_manifest": {
+          "sha256": "7f898588665878ec5d9f4f34beeb500300f7f30507beca212b7d2733b4d79f71",
+          "source_git_head": "7ce15c1f0849ae69e0ca208f781a9824517eb328"
+        },
+        "code": {
+          "scripts/04_train_and_evaluate.py": "a8cb621f18279ab7ea0a0ca515ef45bf52d71bf1fb91a50993d66b13709ae329",
+          "scripts/qsar_common.py": "86be4f6672aab3a9564a8e0c7e2213f0cab870154f2ea9b68b13b32c41bb250c",
+          "scripts/run_time_campaign.py": "97a3f38ccd610691db05222c37eb6c71d015936f76e13a3f6d1798067baa5fc6",
+          "scripts/time_labels.py": "6c88a8a3cede0bf10d69edcbb8d51bc5f004d85293bd34e0a6ccfc659361d9ca"
+        },
+        "command": [
+          "scripts/04_train_and_evaluate.py",
+          "--split",
+          "time"
+        ],
+        "environment": {
+          "packages": {
+            "joblib": "1.6.0",
+            "numpy": "2.5.3",
+            "rdkit": "2026.3.6",
+            "scikit-learn": "1.9.1",
+            "torch": "unavailable",
+            "torch-geometric": "unavailable"
+          },
+          "platform": "macOS-27.0-arm64-arm-64bit",
+          "python": "3.12.14",
+          "variables": {
+            "CUBLAS_WORKSPACE_CONFIG": null,
+            "CUDA_VISIBLE_DEVICES": null,
+            "MKL_NUM_THREADS": "1",
+            "OMP_NUM_THREADS": "1",
+            "OPENBLAS_NUM_THREADS": "1",
+            "PYTHONHASHSEED": null,
+            "QSAR_CV_BACKEND": "loky",
+            "QSAR_RF_JOBS": "16"
+          }
+        },
+        "hyperparameters": {
+          "cv_folds": 5,
+          "device": "cpu",
+          "grid": "PARAM_GRID in hashed RF source",
+          "seed": 42
+        },
+        "inputs": {
+          "data/processed/splits/vegfr2_time.npz": "7cd41dc7b53d23150416536830f6cdeb7b8160233620727162ef0b9e20751653",
+          "data/processed/vegfr2_fingerprints.npz": "0524de2eba2191fdc341c855c598e759a3ebb75aaada23ab197c2286e8ee4b71"
+        },
+        "label_id": "0257d96ee9bd87e1664b7ac0bfb946a556acdd78ef5389fbb62256c0462beb78",
+        "role": "rf",
+        "schema": 1,
+        "tag": "vegfr2"
+      },
+      "r2": 0.14991609229324,
+      "returned_artifact_sha256": {
+        "figures/pred_vs_actual_time_vegfr2.png": "8cc40803b019d314d68479622bb4724ac4f2b6c2e938b771ff2c044f933d2451",
+        "models/rf_time_split_vegfr2.joblib": "52c06e77ab44306fd3a57066f354b54f2311406a475a6a0ef39b4832f72c2532",
+        "results/metrics_vegfr2.json": "21859c85ffa92b6a848b51aa98205dad83c7e1b2c8cc1077525d780cb4e5363c",
+        "results/rf_preds_vegfr2_time.npz": "3af30570cf701cb0050cd6671442bf05ec8280346c2ac86185da1670bf43a7a7"
+      },
+      "rf_jobs": 16,
+      "rmse": 1.1669492680626685,
+      "role": "rf",
+      "signature": "43599f659e14e0fc182c588458179f6258b4ff0ca9af0ca86bcb61ba86ab611b",
+      "source_commit": "7ce15c1f0849ae69e0ca208f781a9824517eb328",
+      "started_at": "2026-10-13T13:56:05.839401+00:00",
+      "state": "success",
+      "tag": "vegfr2",
+      "train_mean_constant_r2": -0.006197116849724793
+    },
+    {
+      "best_epoch": 13,
+      "convergence_flag": false,
+      "device": "cuda",
+      "elapsed_seconds": 5.9729992469999615,
+      "finished_at": "2026-10-13T15:14:33.863300+00:00",
+      "input_manifest": "results/time_split/input_manifest_gin.json",
+      "label_id": "b35580bb601adf4fb9e604dee3dd0f8989d11ebd4f14eaafc3e25a4e40f44b5b",
+      "mae": 0.7875807881355286,
+      "prediction_replay_max_abs_error": 9.5367431640625e-07,
+      "provenance": {
+        "bundle_manifest": {
+          "sha256": "880bb231510b1f89cdb5277ec56ca37692b9fee31e41d6483c8d7a18d762d305",
+          "source_git_head": "7ce15c1f0849ae69e0ca208f781a9824517eb328"
+        },
+        "code": {
+          "scripts/gnn_03_train_gin.py": "8267a295abc303ae66be276b6045ad2a4043d41ed2d02c59004b0ae5841da360",
+          "scripts/gnn_graph_dataset.py": "e004eefea627c97f379dcded339843bdd3318c790ff390a58ba6da7c883a1fea",
+          "scripts/qsar_common.py": "86be4f6672aab3a9564a8e0c7e2213f0cab870154f2ea9b68b13b32c41bb250c",
+          "scripts/run_time_campaign.py": "97a3f38ccd610691db05222c37eb6c71d015936f76e13a3f6d1798067baa5fc6",
+          "scripts/time_labels.py": "6c88a8a3cede0bf10d69edcbb8d51bc5f004d85293bd34e0a6ccfc659361d9ca"
+        },
+        "command": [
+          "scripts/gnn_03_train_gin.py",
+          "--tag",
+          "a2a",
+          "--split",
+          "time",
+          "--model",
+          "gin",
+          "--seed",
+          "42",
+          "--hidden",
+          "128",
+          "--num-layers",
+          "4",
+          "--dropout",
+          "0.2",
+          "--lr",
+          "0.001",
+          "--batch-size",
+          "128",
+          "--epochs",
+          "100",
+          "--patience",
+          "20",
+          "--min-epochs",
+          "0",
+          "--device",
+          "cuda"
+        ],
+        "environment": {
+          "packages": {
+            "joblib": "1.6.0",
+            "numpy": "2.5.3",
+            "rdkit": "2026.3.6",
+            "scikit-learn": "1.9.1",
+            "torch": "2.14.0+cu126",
+            "torch-geometric": "2.8.0.post1"
+          },
+          "platform": "Linux-7.0.0-38-generic-x86_64-with-glibc2.39",
+          "python": "3.12.15",
+          "variables": {
+            "CUBLAS_WORKSPACE_CONFIG": null,
+            "CUDA_VISIBLE_DEVICES": "0",
+            "MKL_NUM_THREADS": "2",
+            "OMP_NUM_THREADS": "2",
+            "OPENBLAS_NUM_THREADS": "2",
+            "PYTHONHASHSEED": null,
+            "QSAR_CV_BACKEND": null,
+            "QSAR_RF_JOBS": null
+          }
+        },
+        "hyperparameters": {
+          "batch_size": 128,
+          "device": "cuda",
+          "dropout": 0.2,
+          "epochs": 100,
+          "hidden": 128,
+          "lr": 0.001,
+          "min_epochs": 0,
+          "num_layers": 4,
+          "patience": 20,
+          "seed": 42
+        },
+        "inputs": {
+          "data/processed/a2a_graphs.npz": "16f91508a395a6150b9f1369c7347fee56e53d857fd863ee4b25650ad6451e73",
+          "data/processed/splits/a2a_time.npz": "5a28451cf757e4f547197bf7ae45701c496917e11cf07a699287fa7f7932eecd"
+        },
+        "label_id": "b35580bb601adf4fb9e604dee3dd0f8989d11ebd4f14eaafc3e25a4e40f44b5b",
+        "role": "gin",
+        "schema": 1,
+        "tag": "a2a"
+      },
+      "r2": 0.1234479546546936,
+      "returned_artifact_sha256": {
+        "results/gnn_metrics_a2a.json": "df38f2e76d562cbcd131f9326d914db508c9129e3fcf9c4f960c4aef51387eeb",
+        "results/gnn_models/a2a_gin_time.pt": "44091a2e3a227f1af38f6ac3eab85428fead67ab6beeb8c6de46aac89b47d36b",
+        "results/gnn_preds_a2a_time.npz": "f53e9ffd433f3a435fa41a1d8a106a2a24a0230d0cc9f5d68edfb6b8a8b93bfd"
+      },
+      "rmse": 0.975918885809907,
+      "role": "gin",
+      "seed": 42,
+      "signature": "99b0731c970329425f5557ed8801270adef8b430a0bff8da952dfac092047aa1",
+      "source_commit": "7ce15c1f0849ae69e0ca208f781a9824517eb328",
+      "started_at": "2026-10-13T15:14:27.890009+00:00",
+      "state": "success",
+      "tag": "a2a"
+    },
+    {
+      "best_epoch": 2,
+      "convergence_flag": false,
+      "device": "cuda",
+      "elapsed_seconds": 5.626597783999841,
+      "finished_at": "2026-10-13T15:14:57.185547+00:00",
+      "input_manifest": "results/time_split/input_manifest_gin.json",
+      "label_id": "b35580bb601adf4fb9e604dee3dd0f8989d11ebd4f14eaafc3e25a4e40f44b5b",
+      "mae": 0.8622844219207764,
+      "prediction_replay_max_abs_error": 4.76837158203125e-07,
+      "provenance": {
+        "bundle_manifest": {
+          "sha256": "880bb231510b1f89cdb5277ec56ca37692b9fee31e41d6483c8d7a18d762d305",
+          "source_git_head": "7ce15c1f0849ae69e0ca208f781a9824517eb328"
+        },
+        "code": {
+          "scripts/gnn_03_train_gin.py": "8267a295abc303ae66be276b6045ad2a4043d41ed2d02c59004b0ae5841da360",
+          "scripts/gnn_graph_dataset.py": "e004eefea627c97f379dcded339843bdd3318c790ff390a58ba6da7c883a1fea",
+          "scripts/qsar_common.py": "86be4f6672aab3a9564a8e0c7e2213f0cab870154f2ea9b68b13b32c41bb250c",
+          "scripts/run_time_campaign.py": "97a3f38ccd610691db05222c37eb6c71d015936f76e13a3f6d1798067baa5fc6",
+          "scripts/time_labels.py": "6c88a8a3cede0bf10d69edcbb8d51bc5f004d85293bd34e0a6ccfc659361d9ca"
+        },
+        "command": [
+          "scripts/gnn_03_train_gin.py",
+          "--tag",
+          "a2a",
+          "--split",
+          "time",
+          "--model",
+          "gin",
+          "--seed",
+          "1",
+          "--hidden",
+          "128",
+          "--num-layers",
+          "4",
+          "--dropout",
+          "0.2",
+          "--lr",
+          "0.001",
+          "--batch-size",
+          "128",
+          "--epochs",
+          "100",
+          "--patience",
+          "20",
+          "--min-epochs",
+          "0",
+          "--device",
+          "cuda",
+          "--suffix",
+          "_seed1"
+        ],
+        "environment": {
+          "packages": {
+            "joblib": "1.6.0",
+            "numpy": "2.5.3",
+            "rdkit": "2026.3.6",
+            "scikit-learn": "1.9.1",
+            "torch": "2.14.0+cu126",
+            "torch-geometric": "2.8.0.post1"
+          },
+          "platform": "Linux-7.0.0-38-generic-x86_64-with-glibc2.39",
+          "python": "3.12.15",
+          "variables": {
+            "CUBLAS_WORKSPACE_CONFIG": null,
+            "CUDA_VISIBLE_DEVICES": "0",
+            "MKL_NUM_THREADS": "2",
+            "OMP_NUM_THREADS": "2",
+            "OPENBLAS_NUM_THREADS": "2",
+            "PYTHONHASHSEED": null,
+            "QSAR_CV_BACKEND": null,
+            "QSAR_RF_JOBS": null
+          }
+        },
+        "hyperparameters": {
+          "batch_size": 128,
+          "device": "cuda",
+          "dropout": 0.2,
+          "epochs": 100,
+          "hidden": 128,
+          "lr": 0.001,
+          "min_epochs": 0,
+          "num_layers": 4,
+          "patience": 20,
+          "seed": 1
+        },
+        "inputs": {
+          "data/processed/a2a_graphs.npz": "16f91508a395a6150b9f1369c7347fee56e53d857fd863ee4b25650ad6451e73",
+          "data/processed/splits/a2a_time.npz": "5a28451cf757e4f547197bf7ae45701c496917e11cf07a699287fa7f7932eecd"
+        },
+        "label_id": "b35580bb601adf4fb9e604dee3dd0f8989d11ebd4f14eaafc3e25a4e40f44b5b",
+        "role": "gin",
+        "schema": 1,
+        "tag": "a2a"
+      },
+      "r2": 0.0351833701133728,
+      "returned_artifact_sha256": {
+        "results/gnn_metrics_a2a_seed1.json": "a388f780648adf3f189ca375beb7c1f29ec7e8d75542ae2d6ce849e3a974c486",
+        "results/gnn_models/a2a_gin_time_seed1.pt": "8072a008d6a3b774bde8ed203b9330359bfca1cd33c9d7b3b37d49ef7c9fed9b",
+        "results/gnn_preds_a2a_time_seed1.npz": "4ddb7482e7345ab5cebd21fd5ac1c628adf670a025fa0a3f903fa6622d293cba"
+      },
+      "rmse": 1.0238757760239758,
+      "role": "gin",
+      "seed": 1,
+      "signature": "a30b0ebc2d81aa6bd7ab4f6ebd57bafcc7466decb86266798a01beac868a708c",
+      "source_commit": "7ce15c1f0849ae69e0ca208f781a9824517eb328",
+      "started_at": "2026-10-13T15:14:51.558624+00:00",
+      "state": "success",
+      "tag": "a2a"
+    },
+    {
+      "best_epoch": 4,
+      "convergence_flag": false,
+      "device": "cuda",
+      "elapsed_seconds": 3.5618439939999007,
+      "finished_at": "2026-10-13T15:15:00.751995+00:00",
+      "input_manifest": "results/time_split/input_manifest_gin.json",
+      "label_id": "b35580bb601adf4fb9e604dee3dd0f8989d11ebd4f14eaafc3e25a4e40f44b5b",
+      "mae": 0.8361777067184448,
+      "prediction_replay_max_abs_error": 4.76837158203125e-07,
+      "provenance": {
+        "bundle_manifest": {
+          "sha256": "880bb231510b1f89cdb5277ec56ca37692b9fee31e41d6483c8d7a18d762d305",
+          "source_git_head": "7ce15c1f0849ae69e0ca208f781a9824517eb328"
+        },
+        "code": {
+          "scripts/gnn_03_train_gin.py": "8267a295abc303ae66be276b6045ad2a4043d41ed2d02c59004b0ae5841da360",
+          "scripts/gnn_graph_dataset.py": "e004eefea627c97f379dcded339843bdd3318c790ff390a58ba6da7c883a1fea",
+          "scripts/qsar_common.py": "86be4f6672aab3a9564a8e0c7e2213f0cab870154f2ea9b68b13b32c41bb250c",
+          "scripts/run_time_campaign.py": "97a3f38ccd610691db05222c37eb6c71d015936f76e13a3f6d1798067baa5fc6",
+          "scripts/time_labels.py": "6c88a8a3cede0bf10d69edcbb8d51bc5f004d85293bd34e0a6ccfc659361d9ca"
+        },
+        "command": [
+          "scripts/gnn_03_train_gin.py",
+          "--tag",
+          "a2a",
+          "--split",
+          "time",
+          "--model",
+          "gin",
+          "--seed",
+          "2",
+          "--hidden",
+          "128",
+          "--num-layers",
+          "4",
+          "--dropout",
+          "0.2",
+          "--lr",
+          "0.001",
+          "--batch-size",
+          "128",
+          "--epochs",
+          "100",
+          "--patience",
+          "20",
+          "--min-epochs",
+          "0",
+          "--device",
+          "cuda",
+          "--suffix",
+          "_seed2"
+        ],
+        "environment": {
+          "packages": {
+            "joblib": "1.6.0",
+            "numpy": "2.5.3",
+            "rdkit": "2026.3.6",
+            "scikit-learn": "1.9.1",
+            "torch": "2.14.0+cu126",
+            "torch-geometric": "2.8.0.post1"
+          },
+          "platform": "Linux-7.0.0-38-generic-x86_64-with-glibc2.39",
+          "python": "3.12.15",
+          "variables": {
+            "CUBLAS_WORKSPACE_CONFIG": null,
+            "CUDA_VISIBLE_DEVICES": "0",
+            "MKL_NUM_THREADS": "2",
+            "OMP_NUM_THREADS": "2",
+            "OPENBLAS_NUM_THREADS": "2",
+            "PYTHONHASHSEED": null,
+            "QSAR_CV_BACKEND": null,
+            "QSAR_RF_JOBS": null
+          }
+        },
+        "hyperparameters": {
+          "batch_size": 128,
+          "device": "cuda",
+          "dropout": 0.2,
+          "epochs": 100,
+          "hidden": 128,
+          "lr": 0.001,
+          "min_epochs": 0,
+          "num_layers": 4,
+          "patience": 20,
+          "seed": 2
+        },
+        "inputs": {
+          "data/processed/a2a_graphs.npz": "16f91508a395a6150b9f1369c7347fee56e53d857fd863ee4b25650ad6451e73",
+          "data/processed/splits/a2a_time.npz": "5a28451cf757e4f547197bf7ae45701c496917e11cf07a699287fa7f7932eecd"
+        },
+        "label_id": "b35580bb601adf4fb9e604dee3dd0f8989d11ebd4f14eaafc3e25a4e40f44b5b",
+        "role": "gin",
+        "schema": 1,
+        "tag": "a2a"
+      },
+      "r2": 0.08439922332763672,
+      "returned_artifact_sha256": {
+        "results/gnn_metrics_a2a_seed2.json": "9083ad0f27d5c17c09af2e01e19d65b7f81c9e61c154974e59cfe847cdf541cf",
+        "results/gnn_models/a2a_gin_time_seed2.pt": "2f34293a4c712f2ef5bcd77d628555e2d9deaf948039280270e15d0e218fc3e9",
+        "results/gnn_preds_a2a_time_seed2.npz": "a0eea6dc3803b8f01219c049163d48f36691dc396cd038009636fa1ea5f86e2c"
+      },
+      "rmse": 0.9974197238753411,
+      "role": "gin",
+      "seed": 2,
+      "signature": "7f78ce96d28f10a1a3bf965577f8c1d0e33a70e8e934de1868abdf87cb0e05f8",
+      "source_commit": "7ce15c1f0849ae69e0ca208f781a9824517eb328",
+      "started_at": "2026-10-13T15:14:57.189848+00:00",
+      "state": "success",
+      "tag": "a2a"
+    },
+    {
+      "best_epoch": 16,
+      "convergence_flag": false,
+      "device": "cuda",
+      "elapsed_seconds": 16.816397526999936,
+      "finished_at": "2026-10-13T15:14:50.684239+00:00",
+      "input_manifest": "results/time_split/input_manifest_gin.json",
+      "label_id": "09e7659309a88d077bdad0001daf441245aa9b9f88573d2cf755cd8697b3680b",
+      "mae": 1.123979926109314,
+      "prediction_replay_max_abs_error": 9.5367431640625e-07,
+      "provenance": {
+        "bundle_manifest": {
+          "sha256": "880bb231510b1f89cdb5277ec56ca37692b9fee31e41d6483c8d7a18d762d305",
+          "source_git_head": "7ce15c1f0849ae69e0ca208f781a9824517eb328"
+        },
+        "code": {
+          "scripts/gnn_03_train_gin.py": "8267a295abc303ae66be276b6045ad2a4043d41ed2d02c59004b0ae5841da360",
+          "scripts/gnn_graph_dataset.py": "e004eefea627c97f379dcded339843bdd3318c790ff390a58ba6da7c883a1fea",
+          "scripts/qsar_common.py": "86be4f6672aab3a9564a8e0c7e2213f0cab870154f2ea9b68b13b32c41bb250c",
+          "scripts/run_time_campaign.py": "97a3f38ccd610691db05222c37eb6c71d015936f76e13a3f6d1798067baa5fc6",
+          "scripts/time_labels.py": "6c88a8a3cede0bf10d69edcbb8d51bc5f004d85293bd34e0a6ccfc659361d9ca"
+        },
+        "command": [
+          "scripts/gnn_03_train_gin.py",
+          "--tag",
+          "egfr_full",
+          "--split",
+          "time",
+          "--model",
+          "gin",
+          "--seed",
+          "42",
+          "--hidden",
+          "128",
+          "--num-layers",
+          "4",
+          "--dropout",
+          "0.2",
+          "--lr",
+          "0.001",
+          "--batch-size",
+          "128",
+          "--epochs",
+          "100",
+          "--patience",
+          "20",
+          "--min-epochs",
+          "0",
+          "--device",
+          "cuda"
+        ],
+        "environment": {
+          "packages": {
+            "joblib": "1.6.0",
+            "numpy": "2.5.3",
+            "rdkit": "2026.3.6",
+            "scikit-learn": "1.9.1",
+            "torch": "2.14.0+cu126",
+            "torch-geometric": "2.8.0.post1"
+          },
+          "platform": "Linux-7.0.0-38-generic-x86_64-with-glibc2.39",
+          "python": "3.12.15",
+          "variables": {
+            "CUBLAS_WORKSPACE_CONFIG": null,
+            "CUDA_VISIBLE_DEVICES": "0",
+            "MKL_NUM_THREADS": "2",
+            "OMP_NUM_THREADS": "2",
+            "OPENBLAS_NUM_THREADS": "2",
+            "PYTHONHASHSEED": null,
+            "QSAR_CV_BACKEND": null,
+            "QSAR_RF_JOBS": null
+          }
+        },
+        "hyperparameters": {
+          "batch_size": 128,
+          "device": "cuda",
+          "dropout": 0.2,
+          "epochs": 100,
+          "hidden": 128,
+          "lr": 0.001,
+          "min_epochs": 0,
+          "num_layers": 4,
+          "patience": 20,
+          "seed": 42
+        },
+        "inputs": {
+          "data/processed/egfr_full_graphs.npz": "6789bf07e2066ec38b3e517ee02fd683212f88f10dd1ff124d820f925f9664a8",
+          "data/processed/splits/egfr_full_time.npz": "fdcd58f8ea2a2e83a2529160581202a6295f073dfa0bb6560a10dd4eb4a4f993"
+        },
+        "label_id": "09e7659309a88d077bdad0001daf441245aa9b9f88573d2cf755cd8697b3680b",
+        "role": "gin",
+        "schema": 1,
+        "tag": "egfr_full"
+      },
+      "r2": -0.32504045963287354,
+      "returned_artifact_sha256": {
+        "results/gnn_metrics_egfr_full.json": "d7b71d7a61456f405e528c079b8f1ba945f9781da788695727a04a9595636c6b",
+        "results/gnn_models/egfr_full_gin_time.pt": "11ce30347a37e19fcff29d8e8b5f7027c6db752c8e21f61a8f7fd2e791bfffcb",
+        "results/gnn_preds_egfr_full_time.npz": "123976c5f9ea4bf6f1d0c1fc04110202fe8f6a5052e684093ee29050f0605ebf"
+      },
+      "rmse": 1.3780063794352408,
+      "role": "gin",
+      "seed": 42,
+      "signature": "e383f7bd2b0b163179e8ae310b75e6030c3642bef0382a44ed175e1d7ea7a66e",
+      "source_commit": "7ce15c1f0849ae69e0ca208f781a9824517eb328",
+      "started_at": "2026-10-13T15:14:33.867661+00:00",
+      "state": "success",
+      "tag": "egfr_full"
+    },
+    {
+      "best_epoch": 7,
+      "convergence_flag": false,
+      "device": "cuda",
+      "elapsed_seconds": 13.120864383000026,
+      "finished_at": "2026-10-13T15:15:13.878196+00:00",
+      "input_manifest": "results/time_split/input_manifest_gin.json",
+      "label_id": "09e7659309a88d077bdad0001daf441245aa9b9f88573d2cf755cd8697b3680b",
+      "mae": 1.024499773979187,
+      "prediction_replay_max_abs_error": 9.5367431640625e-07,
+      "provenance": {
+        "bundle_manifest": {
+          "sha256": "880bb231510b1f89cdb5277ec56ca37692b9fee31e41d6483c8d7a18d762d305",
+          "source_git_head": "7ce15c1f0849ae69e0ca208f781a9824517eb328"
+        },
+        "code": {
+          "scripts/gnn_03_train_gin.py": "8267a295abc303ae66be276b6045ad2a4043d41ed2d02c59004b0ae5841da360",
+          "scripts/gnn_graph_dataset.py": "e004eefea627c97f379dcded339843bdd3318c790ff390a58ba6da7c883a1fea",
+          "scripts/qsar_common.py": "86be4f6672aab3a9564a8e0c7e2213f0cab870154f2ea9b68b13b32c41bb250c",
+          "scripts/run_time_campaign.py": "97a3f38ccd610691db05222c37eb6c71d015936f76e13a3f6d1798067baa5fc6",
+          "scripts/time_labels.py": "6c88a8a3cede0bf10d69edcbb8d51bc5f004d85293bd34e0a6ccfc659361d9ca"
+        },
+        "command": [
+          "scripts/gnn_03_train_gin.py",
+          "--tag",
+          "egfr_full",
+          "--split",
+          "time",
+          "--model",
+          "gin",
+          "--seed",
+          "1",
+          "--hidden",
+          "128",
+          "--num-layers",
+          "4",
+          "--dropout",
+          "0.2",
+          "--lr",
+          "0.001",
+          "--batch-size",
+          "128",
+          "--epochs",
+          "100",
+          "--patience",
+          "20",
+          "--min-epochs",
+          "0",
+          "--device",
+          "cuda",
+          "--suffix",
+          "_seed1"
+        ],
+        "environment": {
+          "packages": {
+            "joblib": "1.6.0",
+            "numpy": "2.5.3",
+            "rdkit": "2026.3.6",
+            "scikit-learn": "1.9.1",
+            "torch": "2.14.0+cu126",
+            "torch-geometric": "2.8.0.post1"
+          },
+          "platform": "Linux-7.0.0-38-generic-x86_64-with-glibc2.39",
+          "python": "3.12.15",
+          "variables": {
+            "CUBLAS_WORKSPACE_CONFIG": null,
+            "CUDA_VISIBLE_DEVICES": "0",
+            "MKL_NUM_THREADS": "2",
+            "OMP_NUM_THREADS": "2",
+            "OPENBLAS_NUM_THREADS": "2",
+            "PYTHONHASHSEED": null,
+            "QSAR_CV_BACKEND": null,
+            "QSAR_RF_JOBS": null
+          }
+        },
+        "hyperparameters": {
+          "batch_size": 128,
+          "device": "cuda",
+          "dropout": 0.2,
+          "epochs": 100,
+          "hidden": 128,
+          "lr": 0.001,
+          "min_epochs": 0,
+          "num_layers": 4,
+          "patience": 20,
+          "seed": 1
+        },
+        "inputs": {
+          "data/processed/egfr_full_graphs.npz": "6789bf07e2066ec38b3e517ee02fd683212f88f10dd1ff124d820f925f9664a8",
+          "data/processed/splits/egfr_full_time.npz": "fdcd58f8ea2a2e83a2529160581202a6295f073dfa0bb6560a10dd4eb4a4f993"
+        },
+        "label_id": "09e7659309a88d077bdad0001daf441245aa9b9f88573d2cf755cd8697b3680b",
+        "role": "gin",
+        "schema": 1,
+        "tag": "egfr_full"
+      },
+      "r2": -0.18528175354003906,
+      "returned_artifact_sha256": {
+        "results/gnn_metrics_egfr_full_seed1.json": "9b956cf930f21164f92adc3b2bfd9a5faaac3afb9ca5f7b4c0170e58612526b6",
+        "results/gnn_models/egfr_full_gin_time_seed1.pt": "9d44a527e26468804192f724e589c3bec674393df931503d7453534c901bac80",
+        "results/gnn_preds_egfr_full_time_seed1.npz": "9b3117a4b35360cc7763f87600de4953183dedec0283105de1280f41c4d1350e"
+      },
+      "rmse": 1.3033091865475113,
+      "role": "gin",
+      "seed": 1,
+      "signature": "390de1c9c856cee56768a18dab7bec071dad7e23d151e83cb7ffa80ec11f2981",
+      "source_commit": "7ce15c1f0849ae69e0ca208f781a9824517eb328",
+      "started_at": "2026-10-13T15:15:00.757017+00:00",
+      "state": "success",
+      "tag": "egfr_full"
+    },
+    {
+      "best_epoch": 2,
+      "convergence_flag": false,
+      "device": "cuda",
+      "elapsed_seconds": 11.41244034600004,
+      "finished_at": "2026-10-13T15:15:25.295366+00:00",
+      "input_manifest": "results/time_split/input_manifest_gin.json",
+      "label_id": "09e7659309a88d077bdad0001daf441245aa9b9f88573d2cf755cd8697b3680b",
+      "mae": 1.0545932054519653,
+      "prediction_replay_max_abs_error": 4.76837158203125e-07,
+      "provenance": {
+        "bundle_manifest": {
+          "sha256": "880bb231510b1f89cdb5277ec56ca37692b9fee31e41d6483c8d7a18d762d305",
+          "source_git_head": "7ce15c1f0849ae69e0ca208f781a9824517eb328"
+        },
+        "code": {
+          "scripts/gnn_03_train_gin.py": "8267a295abc303ae66be276b6045ad2a4043d41ed2d02c59004b0ae5841da360",
+          "scripts/gnn_graph_dataset.py": "e004eefea627c97f379dcded339843bdd3318c790ff390a58ba6da7c883a1fea",
+          "scripts/qsar_common.py": "86be4f6672aab3a9564a8e0c7e2213f0cab870154f2ea9b68b13b32c41bb250c",
+          "scripts/run_time_campaign.py": "97a3f38ccd610691db05222c37eb6c71d015936f76e13a3f6d1798067baa5fc6",
+          "scripts/time_labels.py": "6c88a8a3cede0bf10d69edcbb8d51bc5f004d85293bd34e0a6ccfc659361d9ca"
+        },
+        "command": [
+          "scripts/gnn_03_train_gin.py",
+          "--tag",
+          "egfr_full",
+          "--split",
+          "time",
+          "--model",
+          "gin",
+          "--seed",
+          "2",
+          "--hidden",
+          "128",
+          "--num-layers",
+          "4",
+          "--dropout",
+          "0.2",
+          "--lr",
+          "0.001",
+          "--batch-size",
+          "128",
+          "--epochs",
+          "100",
+          "--patience",
+          "20",
+          "--min-epochs",
+          "0",
+          "--device",
+          "cuda",
+          "--suffix",
+          "_seed2"
+        ],
+        "environment": {
+          "packages": {
+            "joblib": "1.6.0",
+            "numpy": "2.5.3",
+            "rdkit": "2026.3.6",
+            "scikit-learn": "1.9.1",
+            "torch": "2.14.0+cu126",
+            "torch-geometric": "2.8.0.post1"
+          },
+          "platform": "Linux-7.0.0-38-generic-x86_64-with-glibc2.39",
+          "python": "3.12.15",
+          "variables": {
+            "CUBLAS_WORKSPACE_CONFIG": null,
+            "CUDA_VISIBLE_DEVICES": "0",
+            "MKL_NUM_THREADS": "2",
+            "OMP_NUM_THREADS": "2",
+            "OPENBLAS_NUM_THREADS": "2",
+            "PYTHONHASHSEED": null,
+            "QSAR_CV_BACKEND": null,
+            "QSAR_RF_JOBS": null
+          }
+        },
+        "hyperparameters": {
+          "batch_size": 128,
+          "device": "cuda",
+          "dropout": 0.2,
+          "epochs": 100,
+          "hidden": 128,
+          "lr": 0.001,
+          "min_epochs": 0,
+          "num_layers": 4,
+          "patience": 20,
+          "seed": 2
+        },
+        "inputs": {
+          "data/processed/egfr_full_graphs.npz": "6789bf07e2066ec38b3e517ee02fd683212f88f10dd1ff124d820f925f9664a8",
+          "data/processed/splits/egfr_full_time.npz": "fdcd58f8ea2a2e83a2529160581202a6295f073dfa0bb6560a10dd4eb4a4f993"
+        },
+        "label_id": "09e7659309a88d077bdad0001daf441245aa9b9f88573d2cf755cd8697b3680b",
+        "role": "gin",
+        "schema": 1,
+        "tag": "egfr_full"
+      },
+      "r2": -0.1881345510482788,
+      "returned_artifact_sha256": {
+        "results/gnn_metrics_egfr_full_seed2.json": "ae2e9021ce2c3d5061f6d6e42674219e139a729a9e75c546ef877d41a2c4b6f8",
+        "results/gnn_models/egfr_full_gin_time_seed2.pt": "7e3cf35a69dbb4632b75aa9ab6a1124cef9aa977ff7b20ed547b1797ea529e0b",
+        "results/gnn_preds_egfr_full_time_seed2.npz": "58f5ef46e42b21b7fbfd39de78e6a3fc6d86cef4420f2f580c4c59c9753ad7b3"
+      },
+      "rmse": 1.3048766221811894,
+      "role": "gin",
+      "seed": 2,
+      "signature": "231040cf8049ec16ca1b3b00749309b6c268ae598854de8dda17e04fb02c4c1d",
+      "source_commit": "7ce15c1f0849ae69e0ca208f781a9824517eb328",
+      "started_at": "2026-10-13T15:15:13.882611+00:00",
+      "state": "success",
+      "tag": "egfr_full"
+    },
+    {
+      "best_epoch": 8,
+      "convergence_flag": false,
+      "device": "cuda",
+      "elapsed_seconds": 5.08261340099989,
+      "finished_at": "2026-10-13T15:15:30.382467+00:00",
+      "input_manifest": "results/time_split/input_manifest_gin.json",
+      "label_id": "999bd88ee0bf093ad765dd8c7769f26756c3f4a47935e0de22391af8feb6e7c3",
+      "mae": 1.2706624269485474,
+      "prediction_replay_max_abs_error": 9.5367431640625e-07,
+      "provenance": {
+        "bundle_manifest": {
+          "sha256": "880bb231510b1f89cdb5277ec56ca37692b9fee31e41d6483c8d7a18d762d305",
+          "source_git_head": "7ce15c1f0849ae69e0ca208f781a9824517eb328"
+        },
+        "code": {
+          "scripts/gnn_03_train_gin.py": "8267a295abc303ae66be276b6045ad2a4043d41ed2d02c59004b0ae5841da360",
+          "scripts/gnn_graph_dataset.py": "e004eefea627c97f379dcded339843bdd3318c790ff390a58ba6da7c883a1fea",
+          "scripts/qsar_common.py": "86be4f6672aab3a9564a8e0c7e2213f0cab870154f2ea9b68b13b32c41bb250c",
+          "scripts/run_time_campaign.py": "97a3f38ccd610691db05222c37eb6c71d015936f76e13a3f6d1798067baa5fc6",
+          "scripts/time_labels.py": "6c88a8a3cede0bf10d69edcbb8d51bc5f004d85293bd34e0a6ccfc659361d9ca"
+        },
+        "command": [
+          "scripts/gnn_03_train_gin.py",
+          "--tag",
+          "abl1",
+          "--split",
+          "time",
+          "--model",
+          "gin",
+          "--seed",
+          "42",
+          "--hidden",
+          "128",
+          "--num-layers",
+          "4",
+          "--dropout",
+          "0.2",
+          "--lr",
+          "0.001",
+          "--batch-size",
+          "128",
+          "--epochs",
+          "100",
+          "--patience",
+          "20",
+          "--min-epochs",
+          "0",
+          "--device",
+          "cuda"
+        ],
+        "environment": {
+          "packages": {
+            "joblib": "1.6.0",
+            "numpy": "2.5.3",
+            "rdkit": "2026.3.6",
+            "scikit-learn": "1.9.1",
+            "torch": "2.14.0+cu126",
+            "torch-geometric": "2.8.0.post1"
+          },
+          "platform": "Linux-7.0.0-38-generic-x86_64-with-glibc2.39",
+          "python": "3.12.15",
+          "variables": {
+            "CUBLAS_WORKSPACE_CONFIG": null,
+            "CUDA_VISIBLE_DEVICES": "0",
+            "MKL_NUM_THREADS": "2",
+            "OMP_NUM_THREADS": "2",
+            "OPENBLAS_NUM_THREADS": "2",
+            "PYTHONHASHSEED": null,
+            "QSAR_CV_BACKEND": null,
+            "QSAR_RF_JOBS": null
+          }
+        },
+        "hyperparameters": {
+          "batch_size": 128,
+          "device": "cuda",
+          "dropout": 0.2,
+          "epochs": 100,
+          "hidden": 128,
+          "lr": 0.001,
+          "min_epochs": 0,
+          "num_layers": 4,
+          "patience": 20,
+          "seed": 42
+        },
+        "inputs": {
+          "data/processed/abl1_graphs.npz": "b1cf65db6aa62b1ae3c43de1eece05bf4003140f8718b1e26f25c1c9e1c750b4",
+          "data/processed/splits/abl1_time.npz": "7d5bc03ae5ac43bf776df73f11223069b6d574cde84f0633e5cf18d9e9c9ed62"
+        },
+        "label_id": "999bd88ee0bf093ad765dd8c7769f26756c3f4a47935e0de22391af8feb6e7c3",
+        "role": "gin",
+        "schema": 1,
+        "tag": "abl1"
+      },
+      "r2": 0.09186351299285889,
+      "returned_artifact_sha256": {
+        "results/gnn_metrics_abl1.json": "e9deb7e497218c0c9e8fa7b3c49a9cb8d2e32b40801fb7bdbb3c59e261147678",
+        "results/gnn_models/abl1_gin_time.pt": "ed9006e3d41a4431980b589f88441272ae631df07e48f86b5796f96e6c04322c",
+        "results/gnn_preds_abl1_time.npz": "52be82ed0ff571397e0d600ee3902b422769a2ec67621f4c80982725a72decee"
+      },
+      "rmse": 1.4777505122006231,
+      "role": "gin",
+      "seed": 42,
+      "signature": "2c243f49e021e1057a271c315ce90d55f07fa8e379367c12a20e8a6546284615",
+      "source_commit": "7ce15c1f0849ae69e0ca208f781a9824517eb328",
+      "started_at": "2026-10-13T15:15:25.299679+00:00",
+      "state": "success",
+      "tag": "abl1"
+    },
+    {
+      "best_epoch": 16,
+      "convergence_flag": false,
+      "device": "cuda",
+      "elapsed_seconds": 5.759350812000093,
+      "finished_at": "2026-10-13T15:15:36.146448+00:00",
+      "input_manifest": "results/time_split/input_manifest_gin.json",
+      "label_id": "999bd88ee0bf093ad765dd8c7769f26756c3f4a47935e0de22391af8feb6e7c3",
+      "mae": 0.9113582372665405,
+      "prediction_replay_max_abs_error": 9.5367431640625e-07,
+      "provenance": {
+        "bundle_manifest": {
+          "sha256": "880bb231510b1f89cdb5277ec56ca37692b9fee31e41d6483c8d7a18d762d305",
+          "source_git_head": "7ce15c1f0849ae69e0ca208f781a9824517eb328"
+        },
+        "code": {
+          "scripts/gnn_03_train_gin.py": "8267a295abc303ae66be276b6045ad2a4043d41ed2d02c59004b0ae5841da360",
+          "scripts/gnn_graph_dataset.py": "e004eefea627c97f379dcded339843bdd3318c790ff390a58ba6da7c883a1fea",
+          "scripts/qsar_common.py": "86be4f6672aab3a9564a8e0c7e2213f0cab870154f2ea9b68b13b32c41bb250c",
+          "scripts/run_time_campaign.py": "97a3f38ccd610691db05222c37eb6c71d015936f76e13a3f6d1798067baa5fc6",
+          "scripts/time_labels.py": "6c88a8a3cede0bf10d69edcbb8d51bc5f004d85293bd34e0a6ccfc659361d9ca"
+        },
+        "command": [
+          "scripts/gnn_03_train_gin.py",
+          "--tag",
+          "abl1",
+          "--split",
+          "time",
+          "--model",
+          "gin",
+          "--seed",
+          "1",
+          "--hidden",
+          "128",
+          "--num-layers",
+          "4",
+          "--dropout",
+          "0.2",
+          "--lr",
+          "0.001",
+          "--batch-size",
+          "128",
+          "--epochs",
+          "100",
+          "--patience",
+          "20",
+          "--min-epochs",
+          "0",
+          "--device",
+          "cuda",
+          "--suffix",
+          "_seed1"
+        ],
+        "environment": {
+          "packages": {
+            "joblib": "1.6.0",
+            "numpy": "2.5.3",
+            "rdkit": "2026.3.6",
+            "scikit-learn": "1.9.1",
+            "torch": "2.14.0+cu126",
+            "torch-geometric": "2.8.0.post1"
+          },
+          "platform": "Linux-7.0.0-38-generic-x86_64-with-glibc2.39",
+          "python": "3.12.15",
+          "variables": {
+            "CUBLAS_WORKSPACE_CONFIG": null,
+            "CUDA_VISIBLE_DEVICES": "0",
+            "MKL_NUM_THREADS": "2",
+            "OMP_NUM_THREADS": "2",
+            "OPENBLAS_NUM_THREADS": "2",
+            "PYTHONHASHSEED": null,
+            "QSAR_CV_BACKEND": null,
+            "QSAR_RF_JOBS": null
+          }
+        },
+        "hyperparameters": {
+          "batch_size": 128,
+          "device": "cuda",
+          "dropout": 0.2,
+          "epochs": 100,
+          "hidden": 128,
+          "lr": 0.001,
+          "min_epochs": 0,
+          "num_layers": 4,
+          "patience": 20,
+          "seed": 1
+        },
+        "inputs": {
+          "data/processed/abl1_graphs.npz": "b1cf65db6aa62b1ae3c43de1eece05bf4003140f8718b1e26f25c1c9e1c750b4",
+          "data/processed/splits/abl1_time.npz": "7d5bc03ae5ac43bf776df73f11223069b6d574cde84f0633e5cf18d9e9c9ed62"
+        },
+        "label_id": "999bd88ee0bf093ad765dd8c7769f26756c3f4a47935e0de22391af8feb6e7c3",
+        "role": "gin",
+        "schema": 1,
+        "tag": "abl1"
+      },
+      "r2": 0.4556283950805664,
+      "returned_artifact_sha256": {
+        "results/gnn_metrics_abl1_seed1.json": "bc7daaf46d47b4410b8f4acb9129d360422bac7f13eac12b0ba52ef49663f43f",
+        "results/gnn_models/abl1_gin_time_seed1.pt": "20b88ebb9644eb7a21b10fb437b7c1e8b1ee98838583d447f6531512de342159",
+        "results/gnn_preds_abl1_time_seed1.npz": "885dc3f77db9bebece61330eb95ff5aafbd73be8d834e5a409fc5510957d8ac0"
+      },
+      "rmse": 1.1441245023529827,
+      "role": "gin",
+      "seed": 1,
+      "signature": "fbd74bb3f1074735e417843f2f9aa82aa982711f3d1e99e0d6b9c7af9bac7244",
+      "source_commit": "7ce15c1f0849ae69e0ca208f781a9824517eb328",
+      "started_at": "2026-10-13T15:15:30.386827+00:00",
+      "state": "success",
+      "tag": "abl1"
+    },
+    {
+      "best_epoch": 8,
+      "convergence_flag": false,
+      "device": "cuda",
+      "elapsed_seconds": 5.098912302999906,
+      "finished_at": "2026-10-13T15:15:41.249952+00:00",
+      "input_manifest": "results/time_split/input_manifest_gin.json",
+      "label_id": "999bd88ee0bf093ad765dd8c7769f26756c3f4a47935e0de22391af8feb6e7c3",
+      "mae": 1.2550756931304932,
+      "prediction_replay_max_abs_error": 9.5367431640625e-07,
+      "provenance": {
+        "bundle_manifest": {
+          "sha256": "880bb231510b1f89cdb5277ec56ca37692b9fee31e41d6483c8d7a18d762d305",
+          "source_git_head": "7ce15c1f0849ae69e0ca208f781a9824517eb328"
+        },
+        "code": {
+          "scripts/gnn_03_train_gin.py": "8267a295abc303ae66be276b6045ad2a4043d41ed2d02c59004b0ae5841da360",
+          "scripts/gnn_graph_dataset.py": "e004eefea627c97f379dcded339843bdd3318c790ff390a58ba6da7c883a1fea",
+          "scripts/qsar_common.py": "86be4f6672aab3a9564a8e0c7e2213f0cab870154f2ea9b68b13b32c41bb250c",
+          "scripts/run_time_campaign.py": "97a3f38ccd610691db05222c37eb6c71d015936f76e13a3f6d1798067baa5fc6",
+          "scripts/time_labels.py": "6c88a8a3cede0bf10d69edcbb8d51bc5f004d85293bd34e0a6ccfc659361d9ca"
+        },
+        "command": [
+          "scripts/gnn_03_train_gin.py",
+          "--tag",
+          "abl1",
+          "--split",
+          "time",
+          "--model",
+          "gin",
+          "--seed",
+          "2",
+          "--hidden",
+          "128",
+          "--num-layers",
+          "4",
+          "--dropout",
+          "0.2",
+          "--lr",
+          "0.001",
+          "--batch-size",
+          "128",
+          "--epochs",
+          "100",
+          "--patience",
+          "20",
+          "--min-epochs",
+          "0",
+          "--device",
+          "cuda",
+          "--suffix",
+          "_seed2"
+        ],
+        "environment": {
+          "packages": {
+            "joblib": "1.6.0",
+            "numpy": "2.5.3",
+            "rdkit": "2026.3.6",
+            "scikit-learn": "1.9.1",
+            "torch": "2.14.0+cu126",
+            "torch-geometric": "2.8.0.post1"
+          },
+          "platform": "Linux-7.0.0-38-generic-x86_64-with-glibc2.39",
+          "python": "3.12.15",
+          "variables": {
+            "CUBLAS_WORKSPACE_CONFIG": null,
+            "CUDA_VISIBLE_DEVICES": "0",
+            "MKL_NUM_THREADS": "2",
+            "OMP_NUM_THREADS": "2",
+            "OPENBLAS_NUM_THREADS": "2",
+            "PYTHONHASHSEED": null,
+            "QSAR_CV_BACKEND": null,
+            "QSAR_RF_JOBS": null
+          }
+        },
+        "hyperparameters": {
+          "batch_size": 128,
+          "device": "cuda",
+          "dropout": 0.2,
+          "epochs": 100,
+          "hidden": 128,
+          "lr": 0.001,
+          "min_epochs": 0,
+          "num_layers": 4,
+          "patience": 20,
+          "seed": 2
+        },
+        "inputs": {
+          "data/processed/abl1_graphs.npz": "b1cf65db6aa62b1ae3c43de1eece05bf4003140f8718b1e26f25c1c9e1c750b4",
+          "data/processed/splits/abl1_time.npz": "7d5bc03ae5ac43bf776df73f11223069b6d574cde84f0633e5cf18d9e9c9ed62"
+        },
+        "label_id": "999bd88ee0bf093ad765dd8c7769f26756c3f4a47935e0de22391af8feb6e7c3",
+        "role": "gin",
+        "schema": 1,
+        "tag": "abl1"
+      },
+      "r2": 0.060912251472473145,
+      "returned_artifact_sha256": {
+        "results/gnn_metrics_abl1_seed2.json": "93967e89087a7670b12909ccfbadc5393c2f983bafac79a219d5dfdbc1da37f6",
+        "results/gnn_models/abl1_gin_time_seed2.pt": "1d70aa1e82786524be7c33b56fc5a2b997adc472374033b1a61d589facc943d5",
+        "results/gnn_preds_abl1_time_seed2.npz": "fa32dd28dbf9a96560a5046a29d08cf337b221d6aaa28037ea4b8d62a69ac1a7"
+      },
+      "rmse": 1.5027220187808388,
+      "role": "gin",
+      "seed": 2,
+      "signature": "450ea261ae8a5441829d51bff16e12461e93af8fead096d06e966d674ae5131f",
+      "source_commit": "7ce15c1f0849ae69e0ca208f781a9824517eb328",
+      "started_at": "2026-10-13T15:15:36.150737+00:00",
+      "state": "success",
+      "tag": "abl1"
+    },
+    {
+      "best_epoch": 18,
+      "convergence_flag": false,
+      "device": "cuda",
+      "elapsed_seconds": 9.176521799000056,
+      "finished_at": "2026-10-13T15:15:50.431115+00:00",
+      "input_manifest": "results/time_split/input_manifest_gin.json",
+      "label_id": "b181f531e8ac9454c8ce55a1669a28259e7d3aa65852a74ce38eac44be846761",
+      "mae": 0.9531881809234619,
+      "prediction_replay_max_abs_error": 9.5367431640625e-07,
+      "provenance": {
+        "bundle_manifest": {
+          "sha256": "880bb231510b1f89cdb5277ec56ca37692b9fee31e41d6483c8d7a18d762d305",
+          "source_git_head": "7ce15c1f0849ae69e0ca208f781a9824517eb328"
+        },
+        "code": {
+          "scripts/gnn_03_train_gin.py": "8267a295abc303ae66be276b6045ad2a4043d41ed2d02c59004b0ae5841da360",
+          "scripts/gnn_graph_dataset.py": "e004eefea627c97f379dcded339843bdd3318c790ff390a58ba6da7c883a1fea",
+          "scripts/qsar_common.py": "86be4f6672aab3a9564a8e0c7e2213f0cab870154f2ea9b68b13b32c41bb250c",
+          "scripts/run_time_campaign.py": "97a3f38ccd610691db05222c37eb6c71d015936f76e13a3f6d1798067baa5fc6",
+          "scripts/time_labels.py": "6c88a8a3cede0bf10d69edcbb8d51bc5f004d85293bd34e0a6ccfc659361d9ca"
+        },
+        "command": [
+          "scripts/gnn_03_train_gin.py",
+          "--tag",
+          "egfr",
+          "--split",
+          "time",
+          "--model",
+          "gin",
+          "--seed",
+          "42",
+          "--hidden",
+          "128",
+          "--num-layers",
+          "4",
+          "--dropout",
+          "0.2",
+          "--lr",
+          "0.001",
+          "--batch-size",
+          "128",
+          "--epochs",
+          "100",
+          "--patience",
+          "20",
+          "--min-epochs",
+          "0",
+          "--device",
+          "cuda"
+        ],
+        "environment": {
+          "packages": {
+            "joblib": "1.6.0",
+            "numpy": "2.5.3",
+            "rdkit": "2026.3.6",
+            "scikit-learn": "1.9.1",
+            "torch": "2.14.0+cu126",
+            "torch-geometric": "2.8.0.post1"
+          },
+          "platform": "Linux-7.0.0-38-generic-x86_64-with-glibc2.39",
+          "python": "3.12.15",
+          "variables": {
+            "CUBLAS_WORKSPACE_CONFIG": null,
+            "CUDA_VISIBLE_DEVICES": "0",
+            "MKL_NUM_THREADS": "2",
+            "OMP_NUM_THREADS": "2",
+            "OPENBLAS_NUM_THREADS": "2",
+            "PYTHONHASHSEED": null,
+            "QSAR_CV_BACKEND": null,
+            "QSAR_RF_JOBS": null
+          }
+        },
+        "hyperparameters": {
+          "batch_size": 128,
+          "device": "cuda",
+          "dropout": 0.2,
+          "epochs": 100,
+          "hidden": 128,
+          "lr": 0.001,
+          "min_epochs": 0,
+          "num_layers": 4,
+          "patience": 20,
+          "seed": 42
+        },
+        "inputs": {
+          "data/processed/egfr_graphs.npz": "8490a7da9249e6bec71f3389580513e1356bc85240f86565f46c478594f33a2d",
+          "data/processed/splits/egfr_time.npz": "47d2d02eac0f9faac7024f34f722602ce40c19db36726353aa81a6b13b4aa966"
+        },
+        "label_id": "b181f531e8ac9454c8ce55a1669a28259e7d3aa65852a74ce38eac44be846761",
+        "role": "gin",
+        "schema": 1,
+        "tag": "egfr"
+      },
+      "r2": 0.13862526416778564,
+      "returned_artifact_sha256": {
+        "results/gnn_metrics_egfr.json": "bd621633329179457abc915acac2fbd98aa23e7d872647e21c9d9e19abc7a3d0",
+        "results/gnn_models/egfr_gin_time.pt": "e759d465088392636b21a149253769c6384de5a2108ad58dec01267d343a32e2",
+        "results/gnn_preds_egfr_time.npz": "26476114cb3dbfff7362a5b1a0042e3acc50716ba79d580f1f378d241bb0869c"
+      },
+      "rmse": 1.1880651935934368,
+      "role": "gin",
+      "seed": 42,
+      "signature": "36dff5348191e53078552e5c61b29e694c1d85abe96204d847f08a6d5be37715",
+      "source_commit": "7ce15c1f0849ae69e0ca208f781a9824517eb328",
+      "started_at": "2026-10-13T15:15:41.254315+00:00",
+      "state": "success",
+      "tag": "egfr"
+    },
+    {
+      "best_epoch": 27,
+      "convergence_flag": false,
+      "device": "cuda",
+      "elapsed_seconds": 10.691109835000134,
+      "finished_at": "2026-10-13T15:16:01.126608+00:00",
+      "input_manifest": "results/time_split/input_manifest_gin.json",
+      "label_id": "b181f531e8ac9454c8ce55a1669a28259e7d3aa65852a74ce38eac44be846761",
+      "mae": 0.9697027802467346,
+      "prediction_replay_max_abs_error": 9.5367431640625e-07,
+      "provenance": {
+        "bundle_manifest": {
+          "sha256": "880bb231510b1f89cdb5277ec56ca37692b9fee31e41d6483c8d7a18d762d305",
+          "source_git_head": "7ce15c1f0849ae69e0ca208f781a9824517eb328"
+        },
+        "code": {
+          "scripts/gnn_03_train_gin.py": "8267a295abc303ae66be276b6045ad2a4043d41ed2d02c59004b0ae5841da360",
+          "scripts/gnn_graph_dataset.py": "e004eefea627c97f379dcded339843bdd3318c790ff390a58ba6da7c883a1fea",
+          "scripts/qsar_common.py": "86be4f6672aab3a9564a8e0c7e2213f0cab870154f2ea9b68b13b32c41bb250c",
+          "scripts/run_time_campaign.py": "97a3f38ccd610691db05222c37eb6c71d015936f76e13a3f6d1798067baa5fc6",
+          "scripts/time_labels.py": "6c88a8a3cede0bf10d69edcbb8d51bc5f004d85293bd34e0a6ccfc659361d9ca"
+        },
+        "command": [
+          "scripts/gnn_03_train_gin.py",
+          "--tag",
+          "egfr",
+          "--split",
+          "time",
+          "--model",
+          "gin",
+          "--seed",
+          "1",
+          "--hidden",
+          "128",
+          "--num-layers",
+          "4",
+          "--dropout",
+          "0.2",
+          "--lr",
+          "0.001",
+          "--batch-size",
+          "128",
+          "--epochs",
+          "100",
+          "--patience",
+          "20",
+          "--min-epochs",
+          "0",
+          "--device",
+          "cuda",
+          "--suffix",
+          "_seed1"
+        ],
+        "environment": {
+          "packages": {
+            "joblib": "1.6.0",
+            "numpy": "2.5.3",
+            "rdkit": "2026.3.6",
+            "scikit-learn": "1.9.1",
+            "torch": "2.14.0+cu126",
+            "torch-geometric": "2.8.0.post1"
+          },
+          "platform": "Linux-7.0.0-38-generic-x86_64-with-glibc2.39",
+          "python": "3.12.15",
+          "variables": {
+            "CUBLAS_WORKSPACE_CONFIG": null,
+            "CUDA_VISIBLE_DEVICES": "0",
+            "MKL_NUM_THREADS": "2",
+            "OMP_NUM_THREADS": "2",
+            "OPENBLAS_NUM_THREADS": "2",
+            "PYTHONHASHSEED": null,
+            "QSAR_CV_BACKEND": null,
+            "QSAR_RF_JOBS": null
+          }
+        },
+        "hyperparameters": {
+          "batch_size": 128,
+          "device": "cuda",
+          "dropout": 0.2,
+          "epochs": 100,
+          "hidden": 128,
+          "lr": 0.001,
+          "min_epochs": 0,
+          "num_layers": 4,
+          "patience": 20,
+          "seed": 1
+        },
+        "inputs": {
+          "data/processed/egfr_graphs.npz": "8490a7da9249e6bec71f3389580513e1356bc85240f86565f46c478594f33a2d",
+          "data/processed/splits/egfr_time.npz": "47d2d02eac0f9faac7024f34f722602ce40c19db36726353aa81a6b13b4aa966"
+        },
+        "label_id": "b181f531e8ac9454c8ce55a1669a28259e7d3aa65852a74ce38eac44be846761",
+        "role": "gin",
+        "schema": 1,
+        "tag": "egfr"
+      },
+      "r2": 0.10089480876922607,
+      "returned_artifact_sha256": {
+        "results/gnn_metrics_egfr_seed1.json": "b2b0b975c74b953051ebb9cf520eb2340e655ecb00769ece2d90445bae8891f2",
+        "results/gnn_models/egfr_gin_time_seed1.pt": "e58a011e94f2bb745493d901e3fc2ccbe85452d8e5ca3ea073fdba08bfb45d7a",
+        "results/gnn_preds_egfr_time_seed1.npz": "9d5b99560990f418b9949bf28630b21dbdb241004feae398de5d046834dac0cd"
+      },
+      "rmse": 1.2138065436537095,
+      "role": "gin",
+      "seed": 1,
+      "signature": "7d17a208b9645c6416e2bf8b4498d5163f2310476fd0fb871a421124e5e3ed6c",
+      "source_commit": "7ce15c1f0849ae69e0ca208f781a9824517eb328",
+      "started_at": "2026-10-13T15:15:50.435337+00:00",
+      "state": "success",
+      "tag": "egfr"
+    },
+    {
+      "best_epoch": 7,
+      "convergence_flag": false,
+      "device": "cuda",
+      "elapsed_seconds": 7.268777870000122,
+      "finished_at": "2026-10-13T15:16:08.399978+00:00",
+      "input_manifest": "results/time_split/input_manifest_gin.json",
+      "label_id": "b181f531e8ac9454c8ce55a1669a28259e7d3aa65852a74ce38eac44be846761",
+      "mae": 0.9931879043579102,
+      "prediction_replay_max_abs_error": 9.5367431640625e-07,
+      "provenance": {
+        "bundle_manifest": {
+          "sha256": "880bb231510b1f89cdb5277ec56ca37692b9fee31e41d6483c8d7a18d762d305",
+          "source_git_head": "7ce15c1f0849ae69e0ca208f781a9824517eb328"
+        },
+        "code": {
+          "scripts/gnn_03_train_gin.py": "8267a295abc303ae66be276b6045ad2a4043d41ed2d02c59004b0ae5841da360",
+          "scripts/gnn_graph_dataset.py": "e004eefea627c97f379dcded339843bdd3318c790ff390a58ba6da7c883a1fea",
+          "scripts/qsar_common.py": "86be4f6672aab3a9564a8e0c7e2213f0cab870154f2ea9b68b13b32c41bb250c",
+          "scripts/run_time_campaign.py": "97a3f38ccd610691db05222c37eb6c71d015936f76e13a3f6d1798067baa5fc6",
+          "scripts/time_labels.py": "6c88a8a3cede0bf10d69edcbb8d51bc5f004d85293bd34e0a6ccfc659361d9ca"
+        },
+        "command": [
+          "scripts/gnn_03_train_gin.py",
+          "--tag",
+          "egfr",
+          "--split",
+          "time",
+          "--model",
+          "gin",
+          "--seed",
+          "2",
+          "--hidden",
+          "128",
+          "--num-layers",
+          "4",
+          "--dropout",
+          "0.2",
+          "--lr",
+          "0.001",
+          "--batch-size",
+          "128",
+          "--epochs",
+          "100",
+          "--patience",
+          "20",
+          "--min-epochs",
+          "0",
+          "--device",
+          "cuda",
+          "--suffix",
+          "_seed2"
+        ],
+        "environment": {
+          "packages": {
+            "joblib": "1.6.0",
+            "numpy": "2.5.3",
+            "rdkit": "2026.3.6",
+            "scikit-learn": "1.9.1",
+            "torch": "2.14.0+cu126",
+            "torch-geometric": "2.8.0.post1"
+          },
+          "platform": "Linux-7.0.0-38-generic-x86_64-with-glibc2.39",
+          "python": "3.12.15",
+          "variables": {
+            "CUBLAS_WORKSPACE_CONFIG": null,
+            "CUDA_VISIBLE_DEVICES": "0",
+            "MKL_NUM_THREADS": "2",
+            "OMP_NUM_THREADS": "2",
+            "OPENBLAS_NUM_THREADS": "2",
+            "PYTHONHASHSEED": null,
+            "QSAR_CV_BACKEND": null,
+            "QSAR_RF_JOBS": null
+          }
+        },
+        "hyperparameters": {
+          "batch_size": 128,
+          "device": "cuda",
+          "dropout": 0.2,
+          "epochs": 100,
+          "hidden": 128,
+          "lr": 0.001,
+          "min_epochs": 0,
+          "num_layers": 4,
+          "patience": 20,
+          "seed": 2
+        },
+        "inputs": {
+          "data/processed/egfr_graphs.npz": "8490a7da9249e6bec71f3389580513e1356bc85240f86565f46c478594f33a2d",
+          "data/processed/splits/egfr_time.npz": "47d2d02eac0f9faac7024f34f722602ce40c19db36726353aa81a6b13b4aa966"
+        },
+        "label_id": "b181f531e8ac9454c8ce55a1669a28259e7d3aa65852a74ce38eac44be846761",
+        "role": "gin",
+        "schema": 1,
+        "tag": "egfr"
+      },
+      "r2": 0.05062747001647949,
+      "returned_artifact_sha256": {
+        "results/gnn_metrics_egfr_seed2.json": "0e8a1a4f20d971320ebeacd4e91af50513042d1f869b61194fd1a053ab1d304c",
+        "results/gnn_models/egfr_gin_time_seed2.pt": "41bc01366d3d98abdd940cce3b777c67bdae7dc48555c4991588160ec9a9394c",
+        "results/gnn_preds_egfr_time_seed2.npz": "8ba0800f0117e611d1b5e7e3a9b8ed91c2c3d772a0a9bdaa5df07fb1071ce7fb"
+      },
+      "rmse": 1.2472759606004538,
+      "role": "gin",
+      "seed": 2,
+      "signature": "e27a8ec1effa15f4e1f704d9005dc15482e0d62b8a9df7040df8c96614ff1851",
+      "source_commit": "7ce15c1f0849ae69e0ca208f781a9824517eb328",
+      "started_at": "2026-10-13T15:16:01.130919+00:00",
+      "state": "success",
+      "tag": "egfr"
+    },
+    {
+      "best_epoch": 22,
+      "convergence_flag": false,
+      "device": "cuda",
+      "elapsed_seconds": 7.363401516999829,
+      "finished_at": "2026-10-13T15:17:02.504346+00:00",
+      "input_manifest": "results/time_split/input_manifest_gin.json",
+      "label_id": "66a8a839e6cff2f4d7b9664c286fd8d2b716b784faab4aa60d7bf5e74d94eec6",
+      "mae": 1.31492018699646,
+      "prediction_replay_max_abs_error": 9.5367431640625e-07,
+      "provenance": {
+        "bundle_manifest": {
+          "sha256": "880bb231510b1f89cdb5277ec56ca37692b9fee31e41d6483c8d7a18d762d305",
+          "source_git_head": "7ce15c1f0849ae69e0ca208f781a9824517eb328"
+        },
+        "code": {
+          "scripts/gnn_03_train_gin.py": "8267a295abc303ae66be276b6045ad2a4043d41ed2d02c59004b0ae5841da360",
+          "scripts/gnn_graph_dataset.py": "e004eefea627c97f379dcded339843bdd3318c790ff390a58ba6da7c883a1fea",
+          "scripts/qsar_common.py": "86be4f6672aab3a9564a8e0c7e2213f0cab870154f2ea9b68b13b32c41bb250c",
+          "scripts/run_time_campaign.py": "97a3f38ccd610691db05222c37eb6c71d015936f76e13a3f6d1798067baa5fc6",
+          "scripts/time_labels.py": "6c88a8a3cede0bf10d69edcbb8d51bc5f004d85293bd34e0a6ccfc659361d9ca"
+        },
+        "command": [
+          "scripts/gnn_03_train_gin.py",
+          "--tag",
+          "hivpr",
+          "--split",
+          "time",
+          "--model",
+          "gin",
+          "--seed",
+          "42",
+          "--hidden",
+          "128",
+          "--num-layers",
+          "4",
+          "--dropout",
+          "0.2",
+          "--lr",
+          "0.001",
+          "--batch-size",
+          "128",
+          "--epochs",
+          "100",
+          "--patience",
+          "20",
+          "--min-epochs",
+          "0",
+          "--device",
+          "cuda"
+        ],
+        "environment": {
+          "packages": {
+            "joblib": "1.6.0",
+            "numpy": "2.5.3",
+            "rdkit": "2026.3.6",
+            "scikit-learn": "1.9.1",
+            "torch": "2.14.0+cu126",
+            "torch-geometric": "2.8.0.post1"
+          },
+          "platform": "Linux-7.0.0-38-generic-x86_64-with-glibc2.39",
+          "python": "3.12.15",
+          "variables": {
+            "CUBLAS_WORKSPACE_CONFIG": null,
+            "CUDA_VISIBLE_DEVICES": "0",
+            "MKL_NUM_THREADS": "2",
+            "OMP_NUM_THREADS": "2",
+            "OPENBLAS_NUM_THREADS": "2",
+            "PYTHONHASHSEED": null,
+            "QSAR_CV_BACKEND": null,
+            "QSAR_RF_JOBS": null
+          }
+        },
+        "hyperparameters": {
+          "batch_size": 128,
+          "device": "cuda",
+          "dropout": 0.2,
+          "epochs": 100,
+          "hidden": 128,
+          "lr": 0.001,
+          "min_epochs": 0,
+          "num_layers": 4,
+          "patience": 20,
+          "seed": 42
+        },
+        "inputs": {
+          "data/processed/hivpr_graphs.npz": "c765ebe2a90e70f70a6a16649ee42209ec2fc3746f8bb74861f4d0ffb574ea36",
+          "data/processed/splits/hivpr_time.npz": "57f292a4333ae6a94922236d0ec5e183dd46fb438ba0db0c942eaf503f928455"
+        },
+        "label_id": "66a8a839e6cff2f4d7b9664c286fd8d2b716b784faab4aa60d7bf5e74d94eec6",
+        "role": "gin",
+        "schema": 1,
+        "tag": "hivpr"
+      },
+      "r2": 0.07971596717834473,
+      "returned_artifact_sha256": {
+        "results/gnn_metrics_hivpr.json": "b7d2c9312fc27f091b2a901eed39b3d8fcf6025532f2d42c73ffbe2ac575c29b",
+        "results/gnn_models/hivpr_gin_time.pt": "87cc106eb96405f78c98f75a089d8077c8e2e4500c0930901d78ccd1493a659d",
+        "results/gnn_preds_hivpr_time.npz": "6bee6df1415435624f1210860f0d61bf83a3c0d61042ef59c0338f785b86a4ff"
+      },
+      "rmse": 1.6500049388695985,
+      "role": "gin",
+      "seed": 42,
+      "signature": "0c97b9dde4f89b963c541a0dfcadac8f49f93706e000d7efbc154fa6f74664d0",
+      "source_commit": "7ce15c1f0849ae69e0ca208f781a9824517eb328",
+      "started_at": "2026-10-13T15:16:55.140660+00:00",
+      "state": "success",
+      "tag": "hivpr"
+    },
+    {
+      "best_epoch": 5,
+      "convergence_flag": false,
+      "device": "cuda",
+      "elapsed_seconds": 5.535627710999961,
+      "finished_at": "2026-10-13T15:17:08.044552+00:00",
+      "input_manifest": "results/time_split/input_manifest_gin.json",
+      "label_id": "66a8a839e6cff2f4d7b9664c286fd8d2b716b784faab4aa60d7bf5e74d94eec6",
+      "mae": 1.2951709032058716,
+      "prediction_replay_max_abs_error": 9.5367431640625e-07,
+      "provenance": {
+        "bundle_manifest": {
+          "sha256": "880bb231510b1f89cdb5277ec56ca37692b9fee31e41d6483c8d7a18d762d305",
+          "source_git_head": "7ce15c1f0849ae69e0ca208f781a9824517eb328"
+        },
+        "code": {
+          "scripts/gnn_03_train_gin.py": "8267a295abc303ae66be276b6045ad2a4043d41ed2d02c59004b0ae5841da360",
+          "scripts/gnn_graph_dataset.py": "e004eefea627c97f379dcded339843bdd3318c790ff390a58ba6da7c883a1fea",
+          "scripts/qsar_common.py": "86be4f6672aab3a9564a8e0c7e2213f0cab870154f2ea9b68b13b32c41bb250c",
+          "scripts/run_time_campaign.py": "97a3f38ccd610691db05222c37eb6c71d015936f76e13a3f6d1798067baa5fc6",
+          "scripts/time_labels.py": "6c88a8a3cede0bf10d69edcbb8d51bc5f004d85293bd34e0a6ccfc659361d9ca"
+        },
+        "command": [
+          "scripts/gnn_03_train_gin.py",
+          "--tag",
+          "hivpr",
+          "--split",
+          "time",
+          "--model",
+          "gin",
+          "--seed",
+          "1",
+          "--hidden",
+          "128",
+          "--num-layers",
+          "4",
+          "--dropout",
+          "0.2",
+          "--lr",
+          "0.001",
+          "--batch-size",
+          "128",
+          "--epochs",
+          "100",
+          "--patience",
+          "20",
+          "--min-epochs",
+          "0",
+          "--device",
+          "cuda",
+          "--suffix",
+          "_seed1"
+        ],
+        "environment": {
+          "packages": {
+            "joblib": "1.6.0",
+            "numpy": "2.5.3",
+            "rdkit": "2026.3.6",
+            "scikit-learn": "1.9.1",
+            "torch": "2.14.0+cu126",
+            "torch-geometric": "2.8.0.post1"
+          },
+          "platform": "Linux-7.0.0-38-generic-x86_64-with-glibc2.39",
+          "python": "3.12.15",
+          "variables": {
+            "CUBLAS_WORKSPACE_CONFIG": null,
+            "CUDA_VISIBLE_DEVICES": "0",
+            "MKL_NUM_THREADS": "2",
+            "OMP_NUM_THREADS": "2",
+            "OPENBLAS_NUM_THREADS": "2",
+            "PYTHONHASHSEED": null,
+            "QSAR_CV_BACKEND": null,
+            "QSAR_RF_JOBS": null
+          }
+        },
+        "hyperparameters": {
+          "batch_size": 128,
+          "device": "cuda",
+          "dropout": 0.2,
+          "epochs": 100,
+          "hidden": 128,
+          "lr": 0.001,
+          "min_epochs": 0,
+          "num_layers": 4,
+          "patience": 20,
+          "seed": 1
+        },
+        "inputs": {
+          "data/processed/hivpr_graphs.npz": "c765ebe2a90e70f70a6a16649ee42209ec2fc3746f8bb74861f4d0ffb574ea36",
+          "data/processed/splits/hivpr_time.npz": "57f292a4333ae6a94922236d0ec5e183dd46fb438ba0db0c942eaf503f928455"
+        },
+        "label_id": "66a8a839e6cff2f4d7b9664c286fd8d2b716b784faab4aa60d7bf5e74d94eec6",
+        "role": "gin",
+        "schema": 1,
+        "tag": "hivpr"
+      },
+      "r2": 0.1366705298423767,
+      "returned_artifact_sha256": {
+        "results/gnn_metrics_hivpr_seed1.json": "d47764eb1511431316943624c48255d308f6e859eb274b55f2a2efd926cb448d",
+        "results/gnn_models/hivpr_gin_time_seed1.pt": "5a4128718c4c6d0976f898b84a2068d394bb82ae1ae7cb39f3dcc6c071ea1e8d",
+        "results/gnn_preds_hivpr_time_seed1.npz": "6b5ae3862c4f9a750caf2cf630a1b28b9bde95a049c907b11ab884754894e868"
+      },
+      "rmse": 1.5981317759143818,
+      "role": "gin",
+      "seed": 1,
+      "signature": "dccff41b602292767af912968a209827e117bb90c4aa0d7f921f4d4ac9e57bcb",
+      "source_commit": "7ce15c1f0849ae69e0ca208f781a9824517eb328",
+      "started_at": "2026-10-13T15:17:02.508647+00:00",
+      "state": "success",
+      "tag": "hivpr"
+    },
+    {
+      "best_epoch": 15,
+      "convergence_flag": false,
+      "device": "cuda",
+      "elapsed_seconds": 6.676010852000218,
+      "finished_at": "2026-10-13T15:17:14.725286+00:00",
+      "input_manifest": "results/time_split/input_manifest_gin.json",
+      "label_id": "66a8a839e6cff2f4d7b9664c286fd8d2b716b784faab4aa60d7bf5e74d94eec6",
+      "mae": 1.3984668254852295,
+      "prediction_replay_max_abs_error": 9.5367431640625e-07,
+      "provenance": {
+        "bundle_manifest": {
+          "sha256": "880bb231510b1f89cdb5277ec56ca37692b9fee31e41d6483c8d7a18d762d305",
+          "source_git_head": "7ce15c1f0849ae69e0ca208f781a9824517eb328"
+        },
+        "code": {
+          "scripts/gnn_03_train_gin.py": "8267a295abc303ae66be276b6045ad2a4043d41ed2d02c59004b0ae5841da360",
+          "scripts/gnn_graph_dataset.py": "e004eefea627c97f379dcded339843bdd3318c790ff390a58ba6da7c883a1fea",
+          "scripts/qsar_common.py": "86be4f6672aab3a9564a8e0c7e2213f0cab870154f2ea9b68b13b32c41bb250c",
+          "scripts/run_time_campaign.py": "97a3f38ccd610691db05222c37eb6c71d015936f76e13a3f6d1798067baa5fc6",
+          "scripts/time_labels.py": "6c88a8a3cede0bf10d69edcbb8d51bc5f004d85293bd34e0a6ccfc659361d9ca"
+        },
+        "command": [
+          "scripts/gnn_03_train_gin.py",
+          "--tag",
+          "hivpr",
+          "--split",
+          "time",
+          "--model",
+          "gin",
+          "--seed",
+          "2",
+          "--hidden",
+          "128",
+          "--num-layers",
+          "4",
+          "--dropout",
+          "0.2",
+          "--lr",
+          "0.001",
+          "--batch-size",
+          "128",
+          "--epochs",
+          "100",
+          "--patience",
+          "20",
+          "--min-epochs",
+          "0",
+          "--device",
+          "cuda",
+          "--suffix",
+          "_seed2"
+        ],
+        "environment": {
+          "packages": {
+            "joblib": "1.6.0",
+            "numpy": "2.5.3",
+            "rdkit": "2026.3.6",
+            "scikit-learn": "1.9.1",
+            "torch": "2.14.0+cu126",
+            "torch-geometric": "2.8.0.post1"
+          },
+          "platform": "Linux-7.0.0-38-generic-x86_64-with-glibc2.39",
+          "python": "3.12.15",
+          "variables": {
+            "CUBLAS_WORKSPACE_CONFIG": null,
+            "CUDA_VISIBLE_DEVICES": "0",
+            "MKL_NUM_THREADS": "2",
+            "OMP_NUM_THREADS": "2",
+            "OPENBLAS_NUM_THREADS": "2",
+            "PYTHONHASHSEED": null,
+            "QSAR_CV_BACKEND": null,
+            "QSAR_RF_JOBS": null
+          }
+        },
+        "hyperparameters": {
+          "batch_size": 128,
+          "device": "cuda",
+          "dropout": 0.2,
+          "epochs": 100,
+          "hidden": 128,
+          "lr": 0.001,
+          "min_epochs": 0,
+          "num_layers": 4,
+          "patience": 20,
+          "seed": 2
+        },
+        "inputs": {
+          "data/processed/hivpr_graphs.npz": "c765ebe2a90e70f70a6a16649ee42209ec2fc3746f8bb74861f4d0ffb574ea36",
+          "data/processed/splits/hivpr_time.npz": "57f292a4333ae6a94922236d0ec5e183dd46fb438ba0db0c942eaf503f928455"
+        },
+        "label_id": "66a8a839e6cff2f4d7b9664c286fd8d2b716b784faab4aa60d7bf5e74d94eec6",
+        "role": "gin",
+        "schema": 1,
+        "tag": "hivpr"
+      },
+      "r2": -0.01860499382019043,
+      "returned_artifact_sha256": {
+        "results/gnn_metrics_hivpr_seed2.json": "36bd2c766e406a8b145dffceaf542c7787e9fbbfa262daadcea720d59243cb61",
+        "results/gnn_models/hivpr_gin_time_seed2.pt": "3f26a219e358c3182e9e13884bf1ec5723a17c1b2d91321017407e9401f71736",
+        "results/gnn_preds_hivpr_time_seed2.npz": "2fd3a226c7fcfa481f31c7e48989adc505f6b1ae2e72842b05cdc95f58194cdf"
+      },
+      "rmse": 1.735910028468603,
+      "role": "gin",
+      "seed": 2,
+      "signature": "0b7ef812e144176f73d8949fcb2251c167566f4ad8f550e9eb121725805f9c07",
+      "source_commit": "7ce15c1f0849ae69e0ca208f781a9824517eb328",
+      "started_at": "2026-10-13T15:17:08.048993+00:00",
+      "state": "success",
+      "tag": "hivpr"
+    },
+    {
+      "best_epoch": 4,
+      "convergence_flag": false,
+      "device": "cuda",
+      "elapsed_seconds": 4.67885929199997,
+      "finished_at": "2026-10-13T15:17:19.408896+00:00",
+      "input_manifest": "results/time_split/input_manifest_gin.json",
+      "label_id": "75bb580c77d0dbe64c7aed1178c0dbc2505f44f3c3c91cc0344a95e8c305c17c",
+      "mae": 0.8373159766197205,
+      "prediction_replay_max_abs_error": 4.76837158203125e-07,
+      "provenance": {
+        "bundle_manifest": {
+          "sha256": "880bb231510b1f89cdb5277ec56ca37692b9fee31e41d6483c8d7a18d762d305",
+          "source_git_head": "7ce15c1f0849ae69e0ca208f781a9824517eb328"
+        },
+        "code": {
+          "scripts/gnn_03_train_gin.py": "8267a295abc303ae66be276b6045ad2a4043d41ed2d02c59004b0ae5841da360",
+          "scripts/gnn_graph_dataset.py": "e004eefea627c97f379dcded339843bdd3318c790ff390a58ba6da7c883a1fea",
+          "scripts/qsar_common.py": "86be4f6672aab3a9564a8e0c7e2213f0cab870154f2ea9b68b13b32c41bb250c",
+          "scripts/run_time_campaign.py": "97a3f38ccd610691db05222c37eb6c71d015936f76e13a3f6d1798067baa5fc6",
+          "scripts/time_labels.py": "6c88a8a3cede0bf10d69edcbb8d51bc5f004d85293bd34e0a6ccfc659361d9ca"
+        },
+        "command": [
+          "scripts/gnn_03_train_gin.py",
+          "--tag",
+          "mpro",
+          "--split",
+          "time",
+          "--model",
+          "gin",
+          "--seed",
+          "42",
+          "--hidden",
+          "128",
+          "--num-layers",
+          "4",
+          "--dropout",
+          "0.2",
+          "--lr",
+          "0.001",
+          "--batch-size",
+          "128",
+          "--epochs",
+          "100",
+          "--patience",
+          "20",
+          "--min-epochs",
+          "0",
+          "--device",
+          "cuda"
+        ],
+        "environment": {
+          "packages": {
+            "joblib": "1.6.0",
+            "numpy": "2.5.3",
+            "rdkit": "2026.3.6",
+            "scikit-learn": "1.9.1",
+            "torch": "2.14.0+cu126",
+            "torch-geometric": "2.8.0.post1"
+          },
+          "platform": "Linux-7.0.0-38-generic-x86_64-with-glibc2.39",
+          "python": "3.12.15",
+          "variables": {
+            "CUBLAS_WORKSPACE_CONFIG": null,
+            "CUDA_VISIBLE_DEVICES": "0",
+            "MKL_NUM_THREADS": "2",
+            "OMP_NUM_THREADS": "2",
+            "OPENBLAS_NUM_THREADS": "2",
+            "PYTHONHASHSEED": null,
+            "QSAR_CV_BACKEND": null,
+            "QSAR_RF_JOBS": null
+          }
+        },
+        "hyperparameters": {
+          "batch_size": 128,
+          "device": "cuda",
+          "dropout": 0.2,
+          "epochs": 100,
+          "hidden": 128,
+          "lr": 0.001,
+          "min_epochs": 0,
+          "num_layers": 4,
+          "patience": 20,
+          "seed": 42
+        },
+        "inputs": {
+          "data/processed/mpro_graphs.npz": "b842e69be1f22ea3e5f3970f66c40b76f300a4a662585fafc27e912744092d8f",
+          "data/processed/splits/mpro_time.npz": "a04f76855f5e0114854af278c7c86d26abe6b4d96acf691fbb49b9869267419f"
+        },
+        "label_id": "75bb580c77d0dbe64c7aed1178c0dbc2505f44f3c3c91cc0344a95e8c305c17c",
+        "role": "gin",
+        "schema": 1,
+        "tag": "mpro"
+      },
+      "r2": 0.02363663911819458,
+      "returned_artifact_sha256": {
+        "results/gnn_metrics_mpro.json": "57ea92786806db8b09fc733fb965675d528a06741357a7e7fde360905523a830",
+        "results/gnn_models/mpro_gin_time.pt": "7fa4c0c7d0cd83fe89fca20a7a6305fba624a706f5a06adde69d3cc2555e6fea",
+        "results/gnn_preds_mpro_time.npz": "9948c5e5f1aaf1ab2e3ff79d55ad274f9f9dc612040bf5f06266dbc2b0c7e3ef"
+      },
+      "rmse": 1.041525367054298,
+      "role": "gin",
+      "seed": 42,
+      "signature": "cc3162a2a540e8cf8be1d7f1f9c8f83733076f1700acbb5d54914f785bd2aff1",
+      "source_commit": "7ce15c1f0849ae69e0ca208f781a9824517eb328",
+      "started_at": "2026-10-13T15:17:14.729728+00:00",
+      "state": "success",
+      "tag": "mpro"
+    },
+    {
+      "best_epoch": 9,
+      "convergence_flag": false,
+      "device": "cuda",
+      "elapsed_seconds": 5.00664722800002,
+      "finished_at": "2026-10-13T15:17:24.420217+00:00",
+      "input_manifest": "results/time_split/input_manifest_gin.json",
+      "label_id": "75bb580c77d0dbe64c7aed1178c0dbc2505f44f3c3c91cc0344a95e8c305c17c",
+      "mae": 0.8436951637268066,
+      "prediction_replay_max_abs_error": 4.76837158203125e-07,
+      "provenance": {
+        "bundle_manifest": {
+          "sha256": "880bb231510b1f89cdb5277ec56ca37692b9fee31e41d6483c8d7a18d762d305",
+          "source_git_head": "7ce15c1f0849ae69e0ca208f781a9824517eb328"
+        },
+        "code": {
+          "scripts/gnn_03_train_gin.py": "8267a295abc303ae66be276b6045ad2a4043d41ed2d02c59004b0ae5841da360",
+          "scripts/gnn_graph_dataset.py": "e004eefea627c97f379dcded339843bdd3318c790ff390a58ba6da7c883a1fea",
+          "scripts/qsar_common.py": "86be4f6672aab3a9564a8e0c7e2213f0cab870154f2ea9b68b13b32c41bb250c",
+          "scripts/run_time_campaign.py": "97a3f38ccd610691db05222c37eb6c71d015936f76e13a3f6d1798067baa5fc6",
+          "scripts/time_labels.py": "6c88a8a3cede0bf10d69edcbb8d51bc5f004d85293bd34e0a6ccfc659361d9ca"
+        },
+        "command": [
+          "scripts/gnn_03_train_gin.py",
+          "--tag",
+          "mpro",
+          "--split",
+          "time",
+          "--model",
+          "gin",
+          "--seed",
+          "1",
+          "--hidden",
+          "128",
+          "--num-layers",
+          "4",
+          "--dropout",
+          "0.2",
+          "--lr",
+          "0.001",
+          "--batch-size",
+          "128",
+          "--epochs",
+          "100",
+          "--patience",
+          "20",
+          "--min-epochs",
+          "0",
+          "--device",
+          "cuda",
+          "--suffix",
+          "_seed1"
+        ],
+        "environment": {
+          "packages": {
+            "joblib": "1.6.0",
+            "numpy": "2.5.3",
+            "rdkit": "2026.3.6",
+            "scikit-learn": "1.9.1",
+            "torch": "2.14.0+cu126",
+            "torch-geometric": "2.8.0.post1"
+          },
+          "platform": "Linux-7.0.0-38-generic-x86_64-with-glibc2.39",
+          "python": "3.12.15",
+          "variables": {
+            "CUBLAS_WORKSPACE_CONFIG": null,
+            "CUDA_VISIBLE_DEVICES": "0",
+            "MKL_NUM_THREADS": "2",
+            "OMP_NUM_THREADS": "2",
+            "OPENBLAS_NUM_THREADS": "2",
+            "PYTHONHASHSEED": null,
+            "QSAR_CV_BACKEND": null,
+            "QSAR_RF_JOBS": null
+          }
+        },
+        "hyperparameters": {
+          "batch_size": 128,
+          "device": "cuda",
+          "dropout": 0.2,
+          "epochs": 100,
+          "hidden": 128,
+          "lr": 0.001,
+          "min_epochs": 0,
+          "num_layers": 4,
+          "patience": 20,
+          "seed": 1
+        },
+        "inputs": {
+          "data/processed/mpro_graphs.npz": "b842e69be1f22ea3e5f3970f66c40b76f300a4a662585fafc27e912744092d8f",
+          "data/processed/splits/mpro_time.npz": "a04f76855f5e0114854af278c7c86d26abe6b4d96acf691fbb49b9869267419f"
+        },
+        "label_id": "75bb580c77d0dbe64c7aed1178c0dbc2505f44f3c3c91cc0344a95e8c305c17c",
+        "role": "gin",
+        "schema": 1,
+        "tag": "mpro"
+      },
+      "r2": -0.015300273895263672,
+      "returned_artifact_sha256": {
+        "results/gnn_metrics_mpro_seed1.json": "269a3854349f4b714f32beb0227d89334cce2aeda0f4c47063fe37ca13546b82",
+        "results/gnn_models/mpro_gin_time_seed1.pt": "f32d6a039265b3f43c244fead0b88753aa45a1083acbadd436f67749011dbef2",
+        "results/gnn_preds_mpro_time_seed1.npz": "27a05aed9b797c9aa8898f5325d83a5dc517d9eac4fe7bc4a264a3cea9d9751b"
+      },
+      "rmse": 1.062090065357238,
+      "role": "gin",
+      "seed": 1,
+      "signature": "4196bf3ecb20ad9cd8cd4705310297b48dd4b0a7f25946657d2b708c95a49995",
+      "source_commit": "7ce15c1f0849ae69e0ca208f781a9824517eb328",
+      "started_at": "2026-10-13T15:17:19.413295+00:00",
+      "state": "success",
+      "tag": "mpro"
+    },
+    {
+      "best_epoch": 3,
+      "convergence_flag": false,
+      "device": "cuda",
+      "elapsed_seconds": 4.632973658999845,
+      "finished_at": "2026-10-13T15:17:29.057952+00:00",
+      "input_manifest": "results/time_split/input_manifest_gin.json",
+      "label_id": "75bb580c77d0dbe64c7aed1178c0dbc2505f44f3c3c91cc0344a95e8c305c17c",
+      "mae": 0.800666868686676,
+      "prediction_replay_max_abs_error": 4.76837158203125e-07,
+      "provenance": {
+        "bundle_manifest": {
+          "sha256": "880bb231510b1f89cdb5277ec56ca37692b9fee31e41d6483c8d7a18d762d305",
+          "source_git_head": "7ce15c1f0849ae69e0ca208f781a9824517eb328"
+        },
+        "code": {
+          "scripts/gnn_03_train_gin.py": "8267a295abc303ae66be276b6045ad2a4043d41ed2d02c59004b0ae5841da360",
+          "scripts/gnn_graph_dataset.py": "e004eefea627c97f379dcded339843bdd3318c790ff390a58ba6da7c883a1fea",
+          "scripts/qsar_common.py": "86be4f6672aab3a9564a8e0c7e2213f0cab870154f2ea9b68b13b32c41bb250c",
+          "scripts/run_time_campaign.py": "97a3f38ccd610691db05222c37eb6c71d015936f76e13a3f6d1798067baa5fc6",
+          "scripts/time_labels.py": "6c88a8a3cede0bf10d69edcbb8d51bc5f004d85293bd34e0a6ccfc659361d9ca"
+        },
+        "command": [
+          "scripts/gnn_03_train_gin.py",
+          "--tag",
+          "mpro",
+          "--split",
+          "time",
+          "--model",
+          "gin",
+          "--seed",
+          "2",
+          "--hidden",
+          "128",
+          "--num-layers",
+          "4",
+          "--dropout",
+          "0.2",
+          "--lr",
+          "0.001",
+          "--batch-size",
+          "128",
+          "--epochs",
+          "100",
+          "--patience",
+          "20",
+          "--min-epochs",
+          "0",
+          "--device",
+          "cuda",
+          "--suffix",
+          "_seed2"
+        ],
+        "environment": {
+          "packages": {
+            "joblib": "1.6.0",
+            "numpy": "2.5.3",
+            "rdkit": "2026.3.6",
+            "scikit-learn": "1.9.1",
+            "torch": "2.14.0+cu126",
+            "torch-geometric": "2.8.0.post1"
+          },
+          "platform": "Linux-7.0.0-38-generic-x86_64-with-glibc2.39",
+          "python": "3.12.15",
+          "variables": {
+            "CUBLAS_WORKSPACE_CONFIG": null,
+            "CUDA_VISIBLE_DEVICES": "0",
+            "MKL_NUM_THREADS": "2",
+            "OMP_NUM_THREADS": "2",
+            "OPENBLAS_NUM_THREADS": "2",
+            "PYTHONHASHSEED": null,
+            "QSAR_CV_BACKEND": null,
+            "QSAR_RF_JOBS": null
+          }
+        },
+        "hyperparameters": {
+          "batch_size": 128,
+          "device": "cuda",
+          "dropout": 0.2,
+          "epochs": 100,
+          "hidden": 128,
+          "lr": 0.001,
+          "min_epochs": 0,
+          "num_layers": 4,
+          "patience": 20,
+          "seed": 2
+        },
+        "inputs": {
+          "data/processed/mpro_graphs.npz": "b842e69be1f22ea3e5f3970f66c40b76f300a4a662585fafc27e912744092d8f",
+          "data/processed/splits/mpro_time.npz": "a04f76855f5e0114854af278c7c86d26abe6b4d96acf691fbb49b9869267419f"
+        },
+        "label_id": "75bb580c77d0dbe64c7aed1178c0dbc2505f44f3c3c91cc0344a95e8c305c17c",
+        "role": "gin",
+        "schema": 1,
+        "tag": "mpro"
+      },
+      "r2": 0.09617257118225098,
+      "returned_artifact_sha256": {
+        "results/gnn_metrics_mpro_seed2.json": "64efd4ff5d52f1961f2788c173a61d3b893c264a025b8b1b1006437a4e228876",
+        "results/gnn_models/mpro_gin_time_seed2.pt": "4a7498008d1cdb90107f4ea702da1aaccf87c2ae5b5da1fbc9dc358713cd1ee5",
+        "results/gnn_preds_mpro_time_seed2.npz": "0511d0114a1b35d4b268d974e47d5812236e4e52dcba6ec8975586b7ce177190"
+      },
+      "rmse": 1.0020902959908202,
+      "role": "gin",
+      "seed": 2,
+      "signature": "1a2d91e979b5d2ca31a8c0b593d82085238149badf676639430f568e37ebaef8",
+      "source_commit": "7ce15c1f0849ae69e0ca208f781a9824517eb328",
+      "started_at": "2026-10-13T15:17:24.424671+00:00",
+      "state": "success",
+      "tag": "mpro"
+    },
+    {
+      "best_epoch": 13,
+      "convergence_flag": false,
+      "device": "cuda",
+      "elapsed_seconds": 15.544388749000063,
+      "finished_at": "2026-10-13T15:17:44.607535+00:00",
+      "input_manifest": "results/time_split/input_manifest_gin.json",
+      "label_id": "0257d96ee9bd87e1664b7ac0bfb946a556acdd78ef5389fbb62256c0462beb78",
+      "mae": 0.9940931797027588,
+      "prediction_replay_max_abs_error": 9.5367431640625e-07,
+      "provenance": {
+        "bundle_manifest": {
+          "sha256": "880bb231510b1f89cdb5277ec56ca37692b9fee31e41d6483c8d7a18d762d305",
+          "source_git_head": "7ce15c1f0849ae69e0ca208f781a9824517eb328"
+        },
+        "code": {
+          "scripts/gnn_03_train_gin.py": "8267a295abc303ae66be276b6045ad2a4043d41ed2d02c59004b0ae5841da360",
+          "scripts/gnn_graph_dataset.py": "e004eefea627c97f379dcded339843bdd3318c790ff390a58ba6da7c883a1fea",
+          "scripts/qsar_common.py": "86be4f6672aab3a9564a8e0c7e2213f0cab870154f2ea9b68b13b32c41bb250c",
+          "scripts/run_time_campaign.py": "97a3f38ccd610691db05222c37eb6c71d015936f76e13a3f6d1798067baa5fc6",
+          "scripts/time_labels.py": "6c88a8a3cede0bf10d69edcbb8d51bc5f004d85293bd34e0a6ccfc659361d9ca"
+        },
+        "command": [
+          "scripts/gnn_03_train_gin.py",
+          "--tag",
+          "vegfr2",
+          "--split",
+          "time",
+          "--model",
+          "gin",
+          "--seed",
+          "42",
+          "--hidden",
+          "128",
+          "--num-layers",
+          "4",
+          "--dropout",
+          "0.2",
+          "--lr",
+          "0.001",
+          "--batch-size",
+          "128",
+          "--epochs",
+          "100",
+          "--patience",
+          "20",
+          "--min-epochs",
+          "0",
+          "--device",
+          "cuda"
+        ],
+        "environment": {
+          "packages": {
+            "joblib": "1.6.0",
+            "numpy": "2.5.3",
+            "rdkit": "2026.3.6",
+            "scikit-learn": "1.9.1",
+            "torch": "2.14.0+cu126",
+            "torch-geometric": "2.8.0.post1"
+          },
+          "platform": "Linux-7.0.0-38-generic-x86_64-with-glibc2.39",
+          "python": "3.12.15",
+          "variables": {
+            "CUBLAS_WORKSPACE_CONFIG": null,
+            "CUDA_VISIBLE_DEVICES": "0",
+            "MKL_NUM_THREADS": "2",
+            "OMP_NUM_THREADS": "2",
+            "OPENBLAS_NUM_THREADS": "2",
+            "PYTHONHASHSEED": null,
+            "QSAR_CV_BACKEND": null,
+            "QSAR_RF_JOBS": null
+          }
+        },
+        "hyperparameters": {
+          "batch_size": 128,
+          "device": "cuda",
+          "dropout": 0.2,
+          "epochs": 100,
+          "hidden": 128,
+          "lr": 0.001,
+          "min_epochs": 0,
+          "num_layers": 4,
+          "patience": 20,
+          "seed": 42
+        },
+        "inputs": {
+          "data/processed/splits/vegfr2_time.npz": "7cd41dc7b53d23150416536830f6cdeb7b8160233620727162ef0b9e20751653",
+          "data/processed/vegfr2_graphs.npz": "50213134224178d8b2da350f5748b0da90aa52d1ea694c1d9fe7f9f9cdd9ffe9"
+        },
+        "label_id": "0257d96ee9bd87e1664b7ac0bfb946a556acdd78ef5389fbb62256c0462beb78",
+        "role": "gin",
+        "schema": 1,
+        "tag": "vegfr2"
+      },
+      "r2": 0.023467659950256348,
+      "returned_artifact_sha256": {
+        "results/gnn_metrics_vegfr2.json": "eea29db5f2d910ad158aa09415cd8c94d7bcefde82f742bb2b5273d41439a6ff",
+        "results/gnn_models/vegfr2_gin_time.pt": "78488144bcb26cc85d7bcfeab87a9f1c9251b494dbc4824f11cb6c8e8b805db1",
+        "results/gnn_preds_vegfr2_time.npz": "12a2210d459476343083741cec48534db0af7036754779a67756f9665473e3df"
+      },
+      "rmse": 1.2507323503913093,
+      "role": "gin",
+      "seed": 42,
+      "signature": "db2d284e448f89933a6d99f2eb8961036ecafd50d1354d9a409da06bb10fbe8f",
+      "source_commit": "7ce15c1f0849ae69e0ca208f781a9824517eb328",
+      "started_at": "2026-10-13T15:17:29.062771+00:00",
+      "state": "success",
+      "tag": "vegfr2"
+    },
+    {
+      "best_epoch": 10,
+      "convergence_flag": false,
+      "device": "cuda",
+      "elapsed_seconds": 14.070506039000065,
+      "finished_at": "2026-10-13T15:17:58.682632+00:00",
+      "input_manifest": "results/time_split/input_manifest_gin.json",
+      "label_id": "0257d96ee9bd87e1664b7ac0bfb946a556acdd78ef5389fbb62256c0462beb78",
+      "mae": 1.056694746017456,
+      "prediction_replay_max_abs_error": 4.76837158203125e-07,
+      "provenance": {
+        "bundle_manifest": {
+          "sha256": "880bb231510b1f89cdb5277ec56ca37692b9fee31e41d6483c8d7a18d762d305",
+          "source_git_head": "7ce15c1f0849ae69e0ca208f781a9824517eb328"
+        },
+        "code": {
+          "scripts/gnn_03_train_gin.py": "8267a295abc303ae66be276b6045ad2a4043d41ed2d02c59004b0ae5841da360",
+          "scripts/gnn_graph_dataset.py": "e004eefea627c97f379dcded339843bdd3318c790ff390a58ba6da7c883a1fea",
+          "scripts/qsar_common.py": "86be4f6672aab3a9564a8e0c7e2213f0cab870154f2ea9b68b13b32c41bb250c",
+          "scripts/run_time_campaign.py": "97a3f38ccd610691db05222c37eb6c71d015936f76e13a3f6d1798067baa5fc6",
+          "scripts/time_labels.py": "6c88a8a3cede0bf10d69edcbb8d51bc5f004d85293bd34e0a6ccfc659361d9ca"
+        },
+        "command": [
+          "scripts/gnn_03_train_gin.py",
+          "--tag",
+          "vegfr2",
+          "--split",
+          "time",
+          "--model",
+          "gin",
+          "--seed",
+          "1",
+          "--hidden",
+          "128",
+          "--num-layers",
+          "4",
+          "--dropout",
+          "0.2",
+          "--lr",
+          "0.001",
+          "--batch-size",
+          "128",
+          "--epochs",
+          "100",
+          "--patience",
+          "20",
+          "--min-epochs",
+          "0",
+          "--device",
+          "cuda",
+          "--suffix",
+          "_seed1"
+        ],
+        "environment": {
+          "packages": {
+            "joblib": "1.6.0",
+            "numpy": "2.5.3",
+            "rdkit": "2026.3.6",
+            "scikit-learn": "1.9.1",
+            "torch": "2.14.0+cu126",
+            "torch-geometric": "2.8.0.post1"
+          },
+          "platform": "Linux-7.0.0-38-generic-x86_64-with-glibc2.39",
+          "python": "3.12.15",
+          "variables": {
+            "CUBLAS_WORKSPACE_CONFIG": null,
+            "CUDA_VISIBLE_DEVICES": "0",
+            "MKL_NUM_THREADS": "2",
+            "OMP_NUM_THREADS": "2",
+            "OPENBLAS_NUM_THREADS": "2",
+            "PYTHONHASHSEED": null,
+            "QSAR_CV_BACKEND": null,
+            "QSAR_RF_JOBS": null
+          }
+        },
+        "hyperparameters": {
+          "batch_size": 128,
+          "device": "cuda",
+          "dropout": 0.2,
+          "epochs": 100,
+          "hidden": 128,
+          "lr": 0.001,
+          "min_epochs": 0,
+          "num_layers": 4,
+          "patience": 20,
+          "seed": 1
+        },
+        "inputs": {
+          "data/processed/splits/vegfr2_time.npz": "7cd41dc7b53d23150416536830f6cdeb7b8160233620727162ef0b9e20751653",
+          "data/processed/vegfr2_graphs.npz": "50213134224178d8b2da350f5748b0da90aa52d1ea694c1d9fe7f9f9cdd9ffe9"
+        },
+        "label_id": "0257d96ee9bd87e1664b7ac0bfb946a556acdd78ef5389fbb62256c0462beb78",
+        "role": "gin",
+        "schema": 1,
+        "tag": "vegfr2"
+      },
+      "r2": -0.10840713977813721,
+      "returned_artifact_sha256": {
+        "results/gnn_metrics_vegfr2_seed1.json": "60084b394bda4e75ea41a8f0e2fd4394fb5b39adea1641bdf6e7071bb86c32fc",
+        "results/gnn_models/vegfr2_gin_time_seed1.pt": "30652b6a912a2056aeee79b268496c7c928ee47c5dd7f72778a839b6ed5afd57",
+        "results/gnn_preds_vegfr2_time_seed1.npz": "65d1b746030f5e43d8cdde883234b4021b49ae62fa4ed5cdbcdb2f331eb5d20e"
+      },
+      "rmse": 1.332510763987281,
+      "role": "gin",
+      "seed": 1,
+      "signature": "d0be418c80af4f5570e5e2c746acc10d8eb1f48ce34e11f2c64c25d877a62f85",
+      "source_commit": "7ce15c1f0849ae69e0ca208f781a9824517eb328",
+      "started_at": "2026-10-13T15:17:44.611830+00:00",
+      "state": "success",
+      "tag": "vegfr2"
+    },
+    {
+      "best_epoch": 9,
+      "convergence_flag": false,
+      "device": "cuda",
+      "elapsed_seconds": 13.776100163000137,
+      "finished_at": "2026-10-13T15:18:12.463418+00:00",
+      "input_manifest": "results/time_split/input_manifest_gin.json",
+      "label_id": "0257d96ee9bd87e1664b7ac0bfb946a556acdd78ef5389fbb62256c0462beb78",
+      "mae": 0.9803918600082397,
+      "prediction_replay_max_abs_error": 9.5367431640625e-07,
+      "provenance": {
+        "bundle_manifest": {
+          "sha256": "880bb231510b1f89cdb5277ec56ca37692b9fee31e41d6483c8d7a18d762d305",
+          "source_git_head": "7ce15c1f0849ae69e0ca208f781a9824517eb328"
+        },
+        "code": {
+          "scripts/gnn_03_train_gin.py": "8267a295abc303ae66be276b6045ad2a4043d41ed2d02c59004b0ae5841da360",
+          "scripts/gnn_graph_dataset.py": "e004eefea627c97f379dcded339843bdd3318c790ff390a58ba6da7c883a1fea",
+          "scripts/qsar_common.py": "86be4f6672aab3a9564a8e0c7e2213f0cab870154f2ea9b68b13b32c41bb250c",
+          "scripts/run_time_campaign.py": "97a3f38ccd610691db05222c37eb6c71d015936f76e13a3f6d1798067baa5fc6",
+          "scripts/time_labels.py": "6c88a8a3cede0bf10d69edcbb8d51bc5f004d85293bd34e0a6ccfc659361d9ca"
+        },
+        "command": [
+          "scripts/gnn_03_train_gin.py",
+          "--tag",
+          "vegfr2",
+          "--split",
+          "time",
+          "--model",
+          "gin",
+          "--seed",
+          "2",
+          "--hidden",
+          "128",
+          "--num-layers",
+          "4",
+          "--dropout",
+          "0.2",
+          "--lr",
+          "0.001",
+          "--batch-size",
+          "128",
+          "--epochs",
+          "100",
+          "--patience",
+          "20",
+          "--min-epochs",
+          "0",
+          "--device",
+          "cuda",
+          "--suffix",
+          "_seed2"
+        ],
+        "environment": {
+          "packages": {
+            "joblib": "1.6.0",
+            "numpy": "2.5.3",
+            "rdkit": "2026.3.6",
+            "scikit-learn": "1.9.1",
+            "torch": "2.14.0+cu126",
+            "torch-geometric": "2.8.0.post1"
+          },
+          "platform": "Linux-7.0.0-38-generic-x86_64-with-glibc2.39",
+          "python": "3.12.15",
+          "variables": {
+            "CUBLAS_WORKSPACE_CONFIG": null,
+            "CUDA_VISIBLE_DEVICES": "0",
+            "MKL_NUM_THREADS": "2",
+            "OMP_NUM_THREADS": "2",
+            "OPENBLAS_NUM_THREADS": "2",
+            "PYTHONHASHSEED": null,
+            "QSAR_CV_BACKEND": null,
+            "QSAR_RF_JOBS": null
+          }
+        },
+        "hyperparameters": {
+          "batch_size": 128,
+          "device": "cuda",
+          "dropout": 0.2,
+          "epochs": 100,
+          "hidden": 128,
+          "lr": 0.001,
+          "min_epochs": 0,
+          "num_layers": 4,
+          "patience": 20,
+          "seed": 2
+        },
+        "inputs": {
+          "data/processed/splits/vegfr2_time.npz": "7cd41dc7b53d23150416536830f6cdeb7b8160233620727162ef0b9e20751653",
+          "data/processed/vegfr2_graphs.npz": "50213134224178d8b2da350f5748b0da90aa52d1ea694c1d9fe7f9f9cdd9ffe9"
+        },
+        "label_id": "0257d96ee9bd87e1664b7ac0bfb946a556acdd78ef5389fbb62256c0462beb78",
+        "role": "gin",
+        "schema": 1,
+        "tag": "vegfr2"
+      },
+      "r2": 0.06621366739273071,
+      "returned_artifact_sha256": {
+        "results/gnn_metrics_vegfr2_seed2.json": "9fb74dbfa55eac3cbb41b5c7a3aa87c45a433f43ca237eb53ea1c6dc60426e9c",
+        "results/gnn_models/vegfr2_gin_time_seed2.pt": "753657751f6e2a778708669e8e601672f3ade7b56f5e5eb318a1d6cf585e8bb9",
+        "results/gnn_preds_vegfr2_time_seed2.npz": "5c26c6398c36d290bcde1817c795e399344486efdfa4b9c677bf4ca235658a69"
+      },
+      "rmse": 1.223051744547007,
+      "role": "gin",
+      "seed": 2,
+      "signature": "58aaeab2cb1d7e79f8a03ef5187b0c1386d7c2440e8a2524c6d97f34ed160855",
+      "source_commit": "7ce15c1f0849ae69e0ca208f781a9824517eb328",
+      "started_at": "2026-10-13T15:17:58.687028+00:00",
+      "state": "success",
+      "tag": "vegfr2"
+    },
+    {
+      "elapsed_seconds": 1625.0758199999982,
+      "finished_at": "2026-10-13T16:32:19.415231+00:00",
+      "input_manifest": "results/time_split/input_manifest_rf_repair.json",
+      "label_id": "369e86d94fe32622d959806abc5379f5487ab2f63282a4642af6c5003c628e93",
+      "mae": 0.6984463653677611,
+      "prediction_replay_max_abs_error": 0.0,
+      "provenance": {
+        "bundle_manifest": {
+          "sha256": "f1605d440ccb31bbdc75c773e8fb217d31607ad7c36def45b6f63325ae3406ad",
+          "source_git_head": "d13f9125af56028f60e099ec2e914dd2509c239e"
+        },
+        "code": {
+          "scripts/04_train_and_evaluate.py": "a8cb621f18279ab7ea0a0ca515ef45bf52d71bf1fb91a50993d66b13709ae329",
+          "scripts/qsar_common.py": "86be4f6672aab3a9564a8e0c7e2213f0cab870154f2ea9b68b13b32c41bb250c",
+          "scripts/run_time_campaign.py": "e48aa8f606f1852ab5990e5069d23fb2b3a62cd7bb32de600b5ed6b7223c8773",
+          "scripts/time_labels.py": "6c88a8a3cede0bf10d69edcbb8d51bc5f004d85293bd34e0a6ccfc659361d9ca"
+        },
+        "command": [
+          "scripts/04_train_and_evaluate.py",
+          "--split",
+          "time"
+        ],
+        "environment": {
+          "packages": {
+            "joblib": "1.6.0",
+            "numpy": "2.5.3",
+            "rdkit": "2026.3.6",
+            "scikit-learn": "1.9.1",
+            "torch": "unavailable",
+            "torch-geometric": "unavailable"
+          },
+          "platform": "macOS-27.0-arm64-arm-64bit",
+          "python": "3.12.14",
+          "variables": {
+            "CUBLAS_WORKSPACE_CONFIG": null,
+            "CUDA_VISIBLE_DEVICES": null,
+            "MKL_NUM_THREADS": "1",
+            "OMP_NUM_THREADS": "1",
+            "OPENBLAS_NUM_THREADS": "1",
+            "PYTHONHASHSEED": null,
+            "QSAR_CV_BACKEND": "loky",
+            "QSAR_RF_JOBS": "16"
+          }
+        },
+        "hyperparameters": {
+          "cv_folds": 5,
+          "device": "cpu",
+          "grid": "PARAM_GRID in hashed RF source",
+          "seed": 42
+        },
+        "inputs": {
+          "data/processed/herg_fingerprints.npz": "78bed5f5f0816091ade54f658d1eaf5479cecd71905ded194e57527a8da71baa",
+          "data/processed/splits/herg_time.npz": "90933252420671d709bdf0de5e4782e6f8351dfe0fb96977c9ee143fcb370647"
+        },
+        "label_id": "369e86d94fe32622d959806abc5379f5487ab2f63282a4642af6c5003c628e93",
+        "role": "rf",
+        "schema": 1,
+        "tag": "herg"
+      },
+      "r2": -0.055579351490586903,
+      "returned_artifact_sha256": {
+        "figures/pred_vs_actual_time_herg.png": "8fdbbe79ead6fc8e72a17b1b2fe0b6010a63122d16429ee746c6c2fbd00eed92",
+        "models/rf_time_split_herg.joblib": "514a3f9a4aa01e82801e241d46113fb171d18f3446d6473eff78821902ac7908",
+        "results/metrics_herg.json": "55f5ebebddc8b42acc4ff04fa7ef64642b8287484046e42862a4c7ebd6b34754",
+        "results/rf_preds_herg_time.npz": "f4818b247dd6ba553de567f532f832b19cb5d0d42a876035f7934e1d4055c47d"
+      },
+      "rmse": 0.9762909303705097,
+      "role": "rf",
+      "seed": 42,
+      "signature": "7fa67708fb42efe1dcb3cf96cf0538a18857813531a3c1374b5dfa3dc8d55959",
+      "source_commit": "d13f9125af56028f60e099ec2e914dd2509c239e",
+      "started_at": "2026-10-13T16:05:14.331156+00:00",
+      "state": "success",
+      "tag": "herg"
+    },
+    {
+      "best_epoch": 23,
+      "convergence_flag": false,
+      "device": "cuda",
+      "elapsed_seconds": 17.524865263999345,
+      "finished_at": "2026-10-13T15:59:56.575196+00:00",
+      "input_manifest": "results/time_split/input_manifest_gin_repair.json",
+      "label_id": "369e86d94fe32622d959806abc5379f5487ab2f63282a4642af6c5003c628e93",
+      "mae": 0.6659982204437256,
+      "prediction_replay_max_abs_error": 4.76837158203125e-07,
+      "provenance": {
+        "bundle_manifest": {
+          "sha256": "c4ac95061ed9dcc7820e8c44358616be61e6369acda382df5dce87cbd4089925",
+          "source_git_head": "d13f9125af56028f60e099ec2e914dd2509c239e"
+        },
+        "code": {
+          "scripts/gnn_03_train_gin.py": "8267a295abc303ae66be276b6045ad2a4043d41ed2d02c59004b0ae5841da360",
+          "scripts/gnn_graph_dataset.py": "e004eefea627c97f379dcded339843bdd3318c790ff390a58ba6da7c883a1fea",
+          "scripts/qsar_common.py": "86be4f6672aab3a9564a8e0c7e2213f0cab870154f2ea9b68b13b32c41bb250c",
+          "scripts/run_time_campaign.py": "e48aa8f606f1852ab5990e5069d23fb2b3a62cd7bb32de600b5ed6b7223c8773",
+          "scripts/time_labels.py": "6c88a8a3cede0bf10d69edcbb8d51bc5f004d85293bd34e0a6ccfc659361d9ca"
+        },
+        "command": [
+          "scripts/gnn_03_train_gin.py",
+          "--tag",
+          "herg",
+          "--split",
+          "time",
+          "--model",
+          "gin",
+          "--seed",
+          "42",
+          "--hidden",
+          "128",
+          "--num-layers",
+          "4",
+          "--dropout",
+          "0.2",
+          "--lr",
+          "0.001",
+          "--batch-size",
+          "128",
+          "--epochs",
+          "100",
+          "--patience",
+          "20",
+          "--min-epochs",
+          "0",
+          "--device",
+          "cuda"
+        ],
+        "environment": {
+          "packages": {
+            "joblib": "1.6.0",
+            "numpy": "2.5.3",
+            "rdkit": "2026.3.6",
+            "scikit-learn": "1.9.1",
+            "torch": "2.14.0+cu126",
+            "torch-geometric": "2.8.0.post1"
+          },
+          "platform": "Linux-7.0.0-38-generic-x86_64-with-glibc2.39",
+          "python": "3.12.15",
+          "variables": {
+            "CUBLAS_WORKSPACE_CONFIG": null,
+            "CUDA_VISIBLE_DEVICES": "0",
+            "MKL_NUM_THREADS": "2",
+            "OMP_NUM_THREADS": "2",
+            "OPENBLAS_NUM_THREADS": "2",
+            "PYTHONHASHSEED": null,
+            "QSAR_CV_BACKEND": null,
+            "QSAR_RF_JOBS": null
+          }
+        },
+        "hyperparameters": {
+          "batch_size": 128,
+          "device": "cuda",
+          "dropout": 0.2,
+          "epochs": 100,
+          "hidden": 128,
+          "lr": 0.001,
+          "min_epochs": 0,
+          "num_layers": 4,
+          "patience": 20,
+          "seed": 42
+        },
+        "inputs": {
+          "data/processed/herg_graphs.npz": "0d060f03d6852fab51c27444f9655c9c50111bb43899ea3fff7a8a932ef7458f",
+          "data/processed/splits/herg_time.npz": "90933252420671d709bdf0de5e4782e6f8351dfe0fb96977c9ee143fcb370647"
+        },
+        "label_id": "369e86d94fe32622d959806abc5379f5487ab2f63282a4642af6c5003c628e93",
+        "role": "gin",
+        "schema": 1,
+        "tag": "herg"
+      },
+      "r2": -0.038910508155822754,
+      "returned_artifact_sha256": {
+        "results/gnn_metrics_herg.json": "a6e75ab1c89cfc83d6efab09e28a1ac431de6a620112ec9dc4816ec1b6b4c716",
+        "results/gnn_models/herg_gin_time.pt": "71a6b5e6705bde0ba75b2d27d6ccdefa9fb9e745d532fe27b5cc88115342222b",
+        "results/gnn_preds_herg_time.npz": "20f29327532fbb1fc3435d2faa6bfb573378c217c53612ab03941c38de84095c"
+      },
+      "rmse": 0.9685518308190851,
+      "role": "gin",
+      "seed": 42,
+      "signature": "df6879f51ea3194c5be94d675e0e395e50e7f8e45bff6e32132630b2c265bf50",
+      "source_commit": "d13f9125af56028f60e099ec2e914dd2509c239e",
+      "started_at": "2026-10-13T15:59:39.049942+00:00",
+      "state": "success",
+      "tag": "herg"
+    },
+    {
+      "best_epoch": 25,
+      "convergence_flag": false,
+      "device": "cuda",
+      "elapsed_seconds": 16.091038724999635,
+      "finished_at": "2026-10-13T16:00:12.706542+00:00",
+      "input_manifest": "results/time_split/input_manifest_gin_repair.json",
+      "label_id": "369e86d94fe32622d959806abc5379f5487ab2f63282a4642af6c5003c628e93",
+      "mae": 0.6708722710609436,
+      "prediction_replay_max_abs_error": 4.76837158203125e-07,
+      "provenance": {
+        "bundle_manifest": {
+          "sha256": "c4ac95061ed9dcc7820e8c44358616be61e6369acda382df5dce87cbd4089925",
+          "source_git_head": "d13f9125af56028f60e099ec2e914dd2509c239e"
+        },
+        "code": {
+          "scripts/gnn_03_train_gin.py": "8267a295abc303ae66be276b6045ad2a4043d41ed2d02c59004b0ae5841da360",
+          "scripts/gnn_graph_dataset.py": "e004eefea627c97f379dcded339843bdd3318c790ff390a58ba6da7c883a1fea",
+          "scripts/qsar_common.py": "86be4f6672aab3a9564a8e0c7e2213f0cab870154f2ea9b68b13b32c41bb250c",
+          "scripts/run_time_campaign.py": "e48aa8f606f1852ab5990e5069d23fb2b3a62cd7bb32de600b5ed6b7223c8773",
+          "scripts/time_labels.py": "6c88a8a3cede0bf10d69edcbb8d51bc5f004d85293bd34e0a6ccfc659361d9ca"
+        },
+        "command": [
+          "scripts/gnn_03_train_gin.py",
+          "--tag",
+          "herg",
+          "--split",
+          "time",
+          "--model",
+          "gin",
+          "--seed",
+          "1",
+          "--hidden",
+          "128",
+          "--num-layers",
+          "4",
+          "--dropout",
+          "0.2",
+          "--lr",
+          "0.001",
+          "--batch-size",
+          "128",
+          "--epochs",
+          "100",
+          "--patience",
+          "20",
+          "--min-epochs",
+          "0",
+          "--device",
+          "cuda",
+          "--suffix",
+          "_seed1"
+        ],
+        "environment": {
+          "packages": {
+            "joblib": "1.6.0",
+            "numpy": "2.5.3",
+            "rdkit": "2026.3.6",
+            "scikit-learn": "1.9.1",
+            "torch": "2.14.0+cu126",
+            "torch-geometric": "2.8.0.post1"
+          },
+          "platform": "Linux-7.0.0-38-generic-x86_64-with-glibc2.39",
+          "python": "3.12.15",
+          "variables": {
+            "CUBLAS_WORKSPACE_CONFIG": null,
+            "CUDA_VISIBLE_DEVICES": "0",
+            "MKL_NUM_THREADS": "2",
+            "OMP_NUM_THREADS": "2",
+            "OPENBLAS_NUM_THREADS": "2",
+            "PYTHONHASHSEED": null,
+            "QSAR_CV_BACKEND": null,
+            "QSAR_RF_JOBS": null
+          }
+        },
+        "hyperparameters": {
+          "batch_size": 128,
+          "device": "cuda",
+          "dropout": 0.2,
+          "epochs": 100,
+          "hidden": 128,
+          "lr": 0.001,
+          "min_epochs": 0,
+          "num_layers": 4,
+          "patience": 20,
+          "seed": 1
+        },
+        "inputs": {
+          "data/processed/herg_graphs.npz": "0d060f03d6852fab51c27444f9655c9c50111bb43899ea3fff7a8a932ef7458f",
+          "data/processed/splits/herg_time.npz": "90933252420671d709bdf0de5e4782e6f8351dfe0fb96977c9ee143fcb370647"
+        },
+        "label_id": "369e86d94fe32622d959806abc5379f5487ab2f63282a4642af6c5003c628e93",
+        "role": "gin",
+        "schema": 1,
+        "tag": "herg"
+      },
+      "r2": -0.044777631759643555,
+      "returned_artifact_sha256": {
+        "results/gnn_metrics_herg_seed1.json": "e428ebcb80cb9ace45f982ea86a5ffda99de19ccd8ee4d78005a291a0e2fbe59",
+        "results/gnn_models/herg_gin_time_seed1.pt": "76f3188bef46b49d9f4754a6053a6cb6687b901f639b88ee01a700c0f3cf492e",
+        "results/gnn_preds_herg_time_seed1.npz": "ca40e88f985afd1f0f14073566c10fc717669e3474765cbde42207bdebf2785a"
+      },
+      "rmse": 0.9712828779608585,
+      "role": "gin",
+      "seed": 1,
+      "signature": "cd26911787544c27992f3155ffa175f73512b9b3a9dd2b7eec93ce6ed22dd6bf",
+      "source_commit": "d13f9125af56028f60e099ec2e914dd2509c239e",
+      "started_at": "2026-10-13T15:59:56.615206+00:00",
+      "state": "success",
+      "tag": "herg"
+    },
+    {
+      "best_epoch": 13,
+      "convergence_flag": false,
+      "device": "cuda",
+      "elapsed_seconds": 12.691621838000174,
+      "finished_at": "2026-10-13T16:00:25.438669+00:00",
+      "input_manifest": "results/time_split/input_manifest_gin_repair.json",
+      "label_id": "369e86d94fe32622d959806abc5379f5487ab2f63282a4642af6c5003c628e93",
+      "mae": 0.6757155060768127,
+      "prediction_replay_max_abs_error": 9.5367431640625e-07,
+      "provenance": {
+        "bundle_manifest": {
+          "sha256": "c4ac95061ed9dcc7820e8c44358616be61e6369acda382df5dce87cbd4089925",
+          "source_git_head": "d13f9125af56028f60e099ec2e914dd2509c239e"
+        },
+        "code": {
+          "scripts/gnn_03_train_gin.py": "8267a295abc303ae66be276b6045ad2a4043d41ed2d02c59004b0ae5841da360",
+          "scripts/gnn_graph_dataset.py": "e004eefea627c97f379dcded339843bdd3318c790ff390a58ba6da7c883a1fea",
+          "scripts/qsar_common.py": "86be4f6672aab3a9564a8e0c7e2213f0cab870154f2ea9b68b13b32c41bb250c",
+          "scripts/run_time_campaign.py": "e48aa8f606f1852ab5990e5069d23fb2b3a62cd7bb32de600b5ed6b7223c8773",
+          "scripts/time_labels.py": "6c88a8a3cede0bf10d69edcbb8d51bc5f004d85293bd34e0a6ccfc659361d9ca"
+        },
+        "command": [
+          "scripts/gnn_03_train_gin.py",
+          "--tag",
+          "herg",
+          "--split",
+          "time",
+          "--model",
+          "gin",
+          "--seed",
+          "2",
+          "--hidden",
+          "128",
+          "--num-layers",
+          "4",
+          "--dropout",
+          "0.2",
+          "--lr",
+          "0.001",
+          "--batch-size",
+          "128",
+          "--epochs",
+          "100",
+          "--patience",
+          "20",
+          "--min-epochs",
+          "0",
+          "--device",
+          "cuda",
+          "--suffix",
+          "_seed2"
+        ],
+        "environment": {
+          "packages": {
+            "joblib": "1.6.0",
+            "numpy": "2.5.3",
+            "rdkit": "2026.3.6",
+            "scikit-learn": "1.9.1",
+            "torch": "2.14.0+cu126",
+            "torch-geometric": "2.8.0.post1"
+          },
+          "platform": "Linux-7.0.0-38-generic-x86_64-with-glibc2.39",
+          "python": "3.12.15",
+          "variables": {
+            "CUBLAS_WORKSPACE_CONFIG": null,
+            "CUDA_VISIBLE_DEVICES": "0",
+            "MKL_NUM_THREADS": "2",
+            "OMP_NUM_THREADS": "2",
+            "OPENBLAS_NUM_THREADS": "2",
+            "PYTHONHASHSEED": null,
+            "QSAR_CV_BACKEND": null,
+            "QSAR_RF_JOBS": null
+          }
+        },
+        "hyperparameters": {
+          "batch_size": 128,
+          "device": "cuda",
+          "dropout": 0.2,
+          "epochs": 100,
+          "hidden": 128,
+          "lr": 0.001,
+          "min_epochs": 0,
+          "num_layers": 4,
+          "patience": 20,
+          "seed": 2
+        },
+        "inputs": {
+          "data/processed/herg_graphs.npz": "0d060f03d6852fab51c27444f9655c9c50111bb43899ea3fff7a8a932ef7458f",
+          "data/processed/splits/herg_time.npz": "90933252420671d709bdf0de5e4782e6f8351dfe0fb96977c9ee143fcb370647"
+        },
+        "label_id": "369e86d94fe32622d959806abc5379f5487ab2f63282a4642af6c5003c628e93",
+        "role": "gin",
+        "schema": 1,
+        "tag": "herg"
+      },
+      "r2": -0.11230778694152832,
+      "returned_artifact_sha256": {
+        "results/gnn_metrics_herg_seed2.json": "de56a4f4321a6bd6956014db683ef96cbe98c652177fc7a42ed5b6145ef5bfe3",
+        "results/gnn_models/herg_gin_time_seed2.pt": "b46ef10767d23d14ffea48476d7716fcec0f2da543907d694a35bfdbb61ba8e7",
+        "results/gnn_preds_herg_time_seed2.npz": "43e002097d0a90f17a923d0e02f4a48f04d87cb4f2c468c5a852f720b2674ea3"
+      },
+      "rmse": 1.002181296738261,
+      "role": "gin",
+      "seed": 2,
+      "signature": "881a4f8ba53535d02bd5283ba2bb583dc916b509da4276b351518e444a395ece",
+      "source_commit": "d13f9125af56028f60e099ec2e914dd2509c239e",
+      "started_at": "2026-10-13T16:00:12.746741+00:00",
+      "state": "success",
+      "tag": "herg"
+    }
+  ],
+  "jobs_accepted": 32,
+  "label_policy": "exact-dated-asof-v1",
+  "legacy_artifacts_git_revision": "7ce15c1f0849ae69e0ca208f781a9824517eb328",
+  "pr8_followup_verification": {
+    "checkpoint_count": 24,
+    "checkpoint_train_mse_flags": 13,
+    "diff_check": "passed",
+    "label_mutants_detected": 6,
+    "label_mutants_tested": 6,
+    "models_and_predictions_changed": false,
+    "pytest_passed": 412,
+    "pytest_warnings": 3,
+    "ruff": "passed",
+    "study_status": "M3 48-job CPU sensitivity study accepted; fresh CUDA arms pending user connection; see results/time_budget_sensitivity/m3/acceptance.json"
+  },
+  "repair": {
+    "accepted_at": "2026-10-13T16:41:32.068641+00:00",
+    "independent_data_and_gin_review": "results/time_split/repair_independent_review.json",
+    "jobs_replaced": 4,
+    "jobs_retained": 28,
+    "reason": "Preserve once-normalized cached parent key; recover CHEMBL2035183 (2012, 7200 nM) into hERG train",
+    "remote_return_archive_sha256": {
+      "gin": "a1f9d0a48ef5fefc4d7ef0b771af22839c123936484f1e809201592f439a7eee",
+      "rf": "b6714ee0a176792a3545d5844e0eee8ee0719483fadfdfe048e91386d1bec8a0"
+    },
+    "source_commit": "d13f9125af56028f60e099ec2e914dd2509c239e",
+    "split_comparison": "results/time_split/repair_split_comparison.json",
+    "superseded_jobs": [
+      {
+        "elapsed_seconds": 2254.270277415999,
+        "finished_at": "2026-10-13T13:52:32.464196+00:00",
+        "label_id": "cfa8bc4a32d0b179943f36a1234f46c2ea95e6518ae1d368609fd3520fb1f8d4",
+        "mae": 0.6957801125776217,
+        "n_test": 2325,
+        "n_train": 4943,
+        "prediction_replay_max_abs_error": 0.0,
+        "provenance": {
+          "bundle_manifest": {
+            "sha256": "7f898588665878ec5d9f4f34beeb500300f7f30507beca212b7d2733b4d79f71",
+            "source_git_head": "7ce15c1f0849ae69e0ca208f781a9824517eb328"
+          },
+          "code": {
+            "scripts/04_train_and_evaluate.py": "a8cb621f18279ab7ea0a0ca515ef45bf52d71bf1fb91a50993d66b13709ae329",
+            "scripts/qsar_common.py": "86be4f6672aab3a9564a8e0c7e2213f0cab870154f2ea9b68b13b32c41bb250c",
+            "scripts/run_time_campaign.py": "97a3f38ccd610691db05222c37eb6c71d015936f76e13a3f6d1798067baa5fc6",
+            "scripts/time_labels.py": "6c88a8a3cede0bf10d69edcbb8d51bc5f004d85293bd34e0a6ccfc659361d9ca"
+          },
+          "command": [
+            "scripts/04_train_and_evaluate.py",
+            "--split",
+            "time"
+          ],
+          "environment": {
+            "packages": {
+              "joblib": "1.6.0",
+              "numpy": "2.5.3",
+              "rdkit": "2026.3.6",
+              "scikit-learn": "1.9.1",
+              "torch": "unavailable",
+              "torch-geometric": "unavailable"
+            },
+            "platform": "macOS-27.0-arm64-arm-64bit",
+            "python": "3.12.14",
+            "variables": {
+              "CUBLAS_WORKSPACE_CONFIG": null,
+              "CUDA_VISIBLE_DEVICES": null,
+              "MKL_NUM_THREADS": "1",
+              "OMP_NUM_THREADS": "1",
+              "OPENBLAS_NUM_THREADS": "1",
+              "PYTHONHASHSEED": null,
+              "QSAR_CV_BACKEND": "loky",
+              "QSAR_RF_JOBS": "4"
+            }
+          },
+          "hyperparameters": {
+            "cv_folds": 5,
+            "device": "cpu",
+            "grid": "PARAM_GRID in hashed RF source",
+            "seed": 42
+          },
+          "inputs": {
+            "data/processed/herg_fingerprints.npz": "78bed5f5f0816091ade54f658d1eaf5479cecd71905ded194e57527a8da71baa",
+            "data/processed/splits/herg_time.npz": "fdeb6f3b6fa5b7e2eaaa2fc5f2e1af3146a2fc6c092a4034c0bdc17bd7c28790"
+          },
+          "label_id": "cfa8bc4a32d0b179943f36a1234f46c2ea95e6518ae1d368609fd3520fb1f8d4",
+          "role": "rf",
+          "schema": 1,
+          "tag": "herg"
+        },
+        "r2": -0.046743799717638757,
+        "returned_artifact_sha256": {
+          "figures/pred_vs_actual_time_herg.png": "8190f79a75252ea7ccb4c6a5f3d568d8309c6dcaff637fbcabc0cd10221b19de",
+          "models/rf_time_split_herg.joblib": "4d2caecf5aeab36f9a7ea0dce00542fc4a0a3e11ad9689cacd750f70a9665986",
+          "results/metrics_herg.json": "1bf1df0d13665c2021b723275073141e07dad82bb85fb45d85b66f6f30c439a3",
+          "results/rf_preds_herg_time.npz": "b9360f7c35bc20a18db3b90c3638219d980e78289bc4d94a3c296f1ec453b2a1"
+        },
+        "rf_jobs": 4,
+        "rmse": 0.9721964036248725,
+        "role": "rf",
+        "signature": "c55fa996ab9bd9eaa3632cf06a47fa0e2c8621da6473869c10f1b0fcdb4e27e1",
+        "started_at": "2026-10-13T13:14:58.187272+00:00",
+        "state": "success",
+        "tag": "herg",
+        "train_mean_constant_r2": -0.002632902392021741
+      },
+      {
+        "best_epoch": 13,
+        "convergence_flag": false,
+        "device": "cuda",
+        "elapsed_seconds": 12.924699229999987,
+        "finished_at": "2026-10-13T15:16:21.329315+00:00",
+        "label_id": "cfa8bc4a32d0b179943f36a1234f46c2ea95e6518ae1d368609fd3520fb1f8d4",
+        "mae": 0.6600233316421509,
+        "prediction_replay_max_abs_error": 4.76837158203125e-07,
+        "provenance": {
+          "bundle_manifest": {
+            "sha256": "880bb231510b1f89cdb5277ec56ca37692b9fee31e41d6483c8d7a18d762d305",
+            "source_git_head": "7ce15c1f0849ae69e0ca208f781a9824517eb328"
+          },
+          "code": {
+            "scripts/gnn_03_train_gin.py": "8267a295abc303ae66be276b6045ad2a4043d41ed2d02c59004b0ae5841da360",
+            "scripts/gnn_graph_dataset.py": "e004eefea627c97f379dcded339843bdd3318c790ff390a58ba6da7c883a1fea",
+            "scripts/qsar_common.py": "86be4f6672aab3a9564a8e0c7e2213f0cab870154f2ea9b68b13b32c41bb250c",
+            "scripts/run_time_campaign.py": "97a3f38ccd610691db05222c37eb6c71d015936f76e13a3f6d1798067baa5fc6",
+            "scripts/time_labels.py": "6c88a8a3cede0bf10d69edcbb8d51bc5f004d85293bd34e0a6ccfc659361d9ca"
+          },
+          "command": [
+            "scripts/gnn_03_train_gin.py",
+            "--tag",
+            "herg",
+            "--split",
+            "time",
+            "--model",
+            "gin",
+            "--seed",
+            "42",
+            "--hidden",
+            "128",
+            "--num-layers",
+            "4",
+            "--dropout",
+            "0.2",
+            "--lr",
+            "0.001",
+            "--batch-size",
+            "128",
+            "--epochs",
+            "100",
+            "--patience",
+            "20",
+            "--min-epochs",
+            "0",
+            "--device",
+            "cuda"
+          ],
+          "environment": {
+            "packages": {
+              "joblib": "1.6.0",
+              "numpy": "2.5.3",
+              "rdkit": "2026.3.6",
+              "scikit-learn": "1.9.1",
+              "torch": "2.14.0+cu126",
+              "torch-geometric": "2.8.0.post1"
+            },
+            "platform": "Linux-7.0.0-38-generic-x86_64-with-glibc2.39",
+            "python": "3.12.15",
+            "variables": {
+              "CUBLAS_WORKSPACE_CONFIG": null,
+              "CUDA_VISIBLE_DEVICES": "0",
+              "MKL_NUM_THREADS": "2",
+              "OMP_NUM_THREADS": "2",
+              "OPENBLAS_NUM_THREADS": "2",
+              "PYTHONHASHSEED": null,
+              "QSAR_CV_BACKEND": null,
+              "QSAR_RF_JOBS": null
+            }
+          },
+          "hyperparameters": {
+            "batch_size": 128,
+            "device": "cuda",
+            "dropout": 0.2,
+            "epochs": 100,
+            "hidden": 128,
+            "lr": 0.001,
+            "min_epochs": 0,
+            "num_layers": 4,
+            "patience": 20,
+            "seed": 42
+          },
+          "inputs": {
+            "data/processed/herg_graphs.npz": "0d060f03d6852fab51c27444f9655c9c50111bb43899ea3fff7a8a932ef7458f",
+            "data/processed/splits/herg_time.npz": "fdeb6f3b6fa5b7e2eaaa2fc5f2e1af3146a2fc6c092a4034c0bdc17bd7c28790"
+          },
+          "label_id": "cfa8bc4a32d0b179943f36a1234f46c2ea95e6518ae1d368609fd3520fb1f8d4",
+          "role": "gin",
+          "schema": 1,
+          "tag": "herg"
+        },
+        "r2": -0.013348102569580078,
+        "returned_artifact_sha256": {
+          "results/gnn_metrics_herg.json": "eaeac151bd62d5c94f47ef50ebacb944aab7b35ba0a3eeb2912baf87b10c7042",
+          "results/gnn_models/herg_gin_time.pt": "6f10f789bfbadff37dfe9bb8e88bc16274c200a3f8b99269ebef791c54abd8f3",
+          "results/gnn_preds_herg_time.npz": "2c130011b907d132bca2f65fe38732f7064ec201c8fb12ff26f6a6939b71f0bf"
+        },
+        "rmse": 0.9565620362044827,
+        "role": "gin",
+        "seed": 42,
+        "signature": "0f757897988b6c462ded28298661b0c2403471e35889b0a3ad6868c1d6cc9020",
+        "started_at": "2026-10-13T15:16:08.404321+00:00",
+        "state": "success",
+        "tag": "herg"
+      },
+      {
+        "best_epoch": 21,
+        "convergence_flag": false,
+        "device": "cuda",
+        "elapsed_seconds": 14.89906267099991,
+        "finished_at": "2026-10-13T15:16:36.232801+00:00",
+        "label_id": "cfa8bc4a32d0b179943f36a1234f46c2ea95e6518ae1d368609fd3520fb1f8d4",
+        "mae": 0.6844193935394287,
+        "prediction_replay_max_abs_error": 4.76837158203125e-07,
+        "provenance": {
+          "bundle_manifest": {
+            "sha256": "880bb231510b1f89cdb5277ec56ca37692b9fee31e41d6483c8d7a18d762d305",
+            "source_git_head": "7ce15c1f0849ae69e0ca208f781a9824517eb328"
+          },
+          "code": {
+            "scripts/gnn_03_train_gin.py": "8267a295abc303ae66be276b6045ad2a4043d41ed2d02c59004b0ae5841da360",
+            "scripts/gnn_graph_dataset.py": "e004eefea627c97f379dcded339843bdd3318c790ff390a58ba6da7c883a1fea",
+            "scripts/qsar_common.py": "86be4f6672aab3a9564a8e0c7e2213f0cab870154f2ea9b68b13b32c41bb250c",
+            "scripts/run_time_campaign.py": "97a3f38ccd610691db05222c37eb6c71d015936f76e13a3f6d1798067baa5fc6",
+            "scripts/time_labels.py": "6c88a8a3cede0bf10d69edcbb8d51bc5f004d85293bd34e0a6ccfc659361d9ca"
+          },
+          "command": [
+            "scripts/gnn_03_train_gin.py",
+            "--tag",
+            "herg",
+            "--split",
+            "time",
+            "--model",
+            "gin",
+            "--seed",
+            "1",
+            "--hidden",
+            "128",
+            "--num-layers",
+            "4",
+            "--dropout",
+            "0.2",
+            "--lr",
+            "0.001",
+            "--batch-size",
+            "128",
+            "--epochs",
+            "100",
+            "--patience",
+            "20",
+            "--min-epochs",
+            "0",
+            "--device",
+            "cuda",
+            "--suffix",
+            "_seed1"
+          ],
+          "environment": {
+            "packages": {
+              "joblib": "1.6.0",
+              "numpy": "2.5.3",
+              "rdkit": "2026.3.6",
+              "scikit-learn": "1.9.1",
+              "torch": "2.14.0+cu126",
+              "torch-geometric": "2.8.0.post1"
+            },
+            "platform": "Linux-7.0.0-38-generic-x86_64-with-glibc2.39",
+            "python": "3.12.15",
+            "variables": {
+              "CUBLAS_WORKSPACE_CONFIG": null,
+              "CUDA_VISIBLE_DEVICES": "0",
+              "MKL_NUM_THREADS": "2",
+              "OMP_NUM_THREADS": "2",
+              "OPENBLAS_NUM_THREADS": "2",
+              "PYTHONHASHSEED": null,
+              "QSAR_CV_BACKEND": null,
+              "QSAR_RF_JOBS": null
+            }
+          },
+          "hyperparameters": {
+            "batch_size": 128,
+            "device": "cuda",
+            "dropout": 0.2,
+            "epochs": 100,
+            "hidden": 128,
+            "lr": 0.001,
+            "min_epochs": 0,
+            "num_layers": 4,
+            "patience": 20,
+            "seed": 1
+          },
+          "inputs": {
+            "data/processed/herg_graphs.npz": "0d060f03d6852fab51c27444f9655c9c50111bb43899ea3fff7a8a932ef7458f",
+            "data/processed/splits/herg_time.npz": "fdeb6f3b6fa5b7e2eaaa2fc5f2e1af3146a2fc6c092a4034c0bdc17bd7c28790"
+          },
+          "label_id": "cfa8bc4a32d0b179943f36a1234f46c2ea95e6518ae1d368609fd3520fb1f8d4",
+          "role": "gin",
+          "schema": 1,
+          "tag": "herg"
+        },
+        "r2": -0.14366066455841064,
+        "returned_artifact_sha256": {
+          "results/gnn_metrics_herg_seed1.json": "1b1e14a41c40348d305133c8dc1b86dab11cec7ceaf682f8fa30831a8738da60",
+          "results/gnn_models/herg_gin_time_seed1.pt": "b417fea5150a7a6480ab265db92a833a46230b4b4d6f21449582d8a0710462a1",
+          "results/gnn_preds_herg_time_seed1.npz": "5fcdc857b2bbd2c4e04c29cd33dc4dd6403f9725ffbbd21c15e821642814de66"
+        },
+        "rmse": 1.0162074839577104,
+        "role": "gin",
+        "seed": 1,
+        "signature": "f65ac0390e58203763ad555dc859efcabcad46b99008f6a96bc724c8a6c48a66",
+        "started_at": "2026-10-13T15:16:21.333591+00:00",
+        "state": "success",
+        "tag": "herg"
+      },
+      {
+        "best_epoch": 33,
+        "convergence_flag": false,
+        "device": "cuda",
+        "elapsed_seconds": 18.89909542600003,
+        "finished_at": "2026-10-13T15:16:55.136449+00:00",
+        "label_id": "cfa8bc4a32d0b179943f36a1234f46c2ea95e6518ae1d368609fd3520fb1f8d4",
+        "mae": 0.6672236919403076,
+        "prediction_replay_max_abs_error": 4.76837158203125e-07,
+        "provenance": {
+          "bundle_manifest": {
+            "sha256": "880bb231510b1f89cdb5277ec56ca37692b9fee31e41d6483c8d7a18d762d305",
+            "source_git_head": "7ce15c1f0849ae69e0ca208f781a9824517eb328"
+          },
+          "code": {
+            "scripts/gnn_03_train_gin.py": "8267a295abc303ae66be276b6045ad2a4043d41ed2d02c59004b0ae5841da360",
+            "scripts/gnn_graph_dataset.py": "e004eefea627c97f379dcded339843bdd3318c790ff390a58ba6da7c883a1fea",
+            "scripts/qsar_common.py": "86be4f6672aab3a9564a8e0c7e2213f0cab870154f2ea9b68b13b32c41bb250c",
+            "scripts/run_time_campaign.py": "97a3f38ccd610691db05222c37eb6c71d015936f76e13a3f6d1798067baa5fc6",
+            "scripts/time_labels.py": "6c88a8a3cede0bf10d69edcbb8d51bc5f004d85293bd34e0a6ccfc659361d9ca"
+          },
+          "command": [
+            "scripts/gnn_03_train_gin.py",
+            "--tag",
+            "herg",
+            "--split",
+            "time",
+            "--model",
+            "gin",
+            "--seed",
+            "2",
+            "--hidden",
+            "128",
+            "--num-layers",
+            "4",
+            "--dropout",
+            "0.2",
+            "--lr",
+            "0.001",
+            "--batch-size",
+            "128",
+            "--epochs",
+            "100",
+            "--patience",
+            "20",
+            "--min-epochs",
+            "0",
+            "--device",
+            "cuda",
+            "--suffix",
+            "_seed2"
+          ],
+          "environment": {
+            "packages": {
+              "joblib": "1.6.0",
+              "numpy": "2.5.3",
+              "rdkit": "2026.3.6",
+              "scikit-learn": "1.9.1",
+              "torch": "2.14.0+cu126",
+              "torch-geometric": "2.8.0.post1"
+            },
+            "platform": "Linux-7.0.0-38-generic-x86_64-with-glibc2.39",
+            "python": "3.12.15",
+            "variables": {
+              "CUBLAS_WORKSPACE_CONFIG": null,
+              "CUDA_VISIBLE_DEVICES": "0",
+              "MKL_NUM_THREADS": "2",
+              "OMP_NUM_THREADS": "2",
+              "OPENBLAS_NUM_THREADS": "2",
+              "PYTHONHASHSEED": null,
+              "QSAR_CV_BACKEND": null,
+              "QSAR_RF_JOBS": null
+            }
+          },
+          "hyperparameters": {
+            "batch_size": 128,
+            "device": "cuda",
+            "dropout": 0.2,
+            "epochs": 100,
+            "hidden": 128,
+            "lr": 0.001,
+            "min_epochs": 0,
+            "num_layers": 4,
+            "patience": 20,
+            "seed": 2
+          },
+          "inputs": {
+            "data/processed/herg_graphs.npz": "0d060f03d6852fab51c27444f9655c9c50111bb43899ea3fff7a8a932ef7458f",
+            "data/processed/splits/herg_time.npz": "fdeb6f3b6fa5b7e2eaaa2fc5f2e1af3146a2fc6c092a4034c0bdc17bd7c28790"
+          },
+          "label_id": "cfa8bc4a32d0b179943f36a1234f46c2ea95e6518ae1d368609fd3520fb1f8d4",
+          "role": "gin",
+          "schema": 1,
+          "tag": "herg"
+        },
+        "r2": -0.08131420612335205,
+        "returned_artifact_sha256": {
+          "results/gnn_metrics_herg_seed2.json": "f9c722d97c446f9eaba1a91a9f0e38c6f913bdd0ae7254d93279f8497f4b86ac",
+          "results/gnn_models/herg_gin_time_seed2.pt": "5c8653814cdc97bcb26ae45c64ac8650dd92b5c80164078408e2af12d1a60e49",
+          "results/gnn_preds_herg_time_seed2.npz": "63befca063071e69429b0dce365f6c0728fe5a991a100d58981df0cd947fa1d6"
+        },
+        "rmse": 0.9881201752286091,
+        "role": "gin",
+        "seed": 2,
+        "signature": "85f0ef1346fd79523e98b0e0d54eb67f93f968c33e0a427a7f1bc29ebd8d66e4",
+        "started_at": "2026-10-13T15:16:36.237081+00:00",
+        "state": "success",
+        "tag": "herg"
+      }
+    ],
+    "wall_seconds": {
+      "gin": 47.04795185100011,
+      "rf": 1625.3009551249997
+    }
+  },
+  "rf_jobs": 8,
+  "rf_prediction_replay_max_abs_error": 0.0,
+  "schema": "qsar-temporal-campaign-acceptance-v2",
+  "source_commits": [
+    "7ce15c1f0849ae69e0ca208f781a9824517eb328",
+    "d13f9125af56028f60e099ec2e914dd2509c239e"
+  ],
+  "verification": {
+    "all_current_labels_independently_recomputed": 42636,
+    "bootstrap_replicates_per_row": 10000,
+    "bootstrap_rows_independently_recomputed": 16,
+    "clean_checkout_pytest_passed": 327,
+    "diff_check": "passed",
+    "excluded_rows_audited": 168,
+    "fresh_checkout_reproduction": "results/time_split/repair_reproduction_verification.json",
+    "independent_data_audit": "logs/time_asof_repair_20261014/independent_data_audit.log",
+    "non_time_metrics_unchanged": true,
+    "pytest_passed": 327,
+    "pytest_warnings": 3,
+    "ruff": "passed"
+  }
+}

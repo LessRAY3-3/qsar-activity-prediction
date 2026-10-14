@@ -1,0 +1,321 @@
+{
+  "state": "cuda_preflight_passed",
+  "time": "2026-10-14T13:52:12.413702+00:00",
+  "python": "3.12.15",
+  "platform": "Linux-7.0.0-38-generic-x86_64-with-glibc2.39",
+  "packages": {
+    "pandas": "3.0.6",
+    "numpy": "2.5.3",
+    "scikit-learn": "1.9.1",
+    "matplotlib": "3.11.2",
+    "rdkit": "2026.3.6",
+    "joblib": "1.6.0",
+    "nbformat": "5.11.1",
+    "torch": "2.14.0+cu126",
+    "torch_geometric": "2.8.0.post1",
+    "xgboost": "3.4.1",
+    "shap": "0.52.0",
+    "requests": "2.34.2",
+    "scipy": "1.18.1"
+  },
+  "cuda": "12.6",
+  "gpu": "NVIDIA GeForce RTX 4070 Laptop GPU",
+  "total_memory": 8184725504,
+  "nvidia_smi": "name, driver_version, memory.free [MiB], memory.total [MiB]\nNVIDIA GeForce RTX 4070 Laptop GPU, 580.178.04, 7773 MiB, 8188 MiB\n",
+  "plan": {
+    "schema": 1,
+    "study_kind": "time-budget-seed-extension",
+    "manifest_sha256": "ab9c71cb1ff48505f14e8759c37d5e00c0c138cc50cf0d6e6baf752f96d9d802",
+    "source_commit": "85210630c475e8733089a476b8d5bf4852dbf773",
+    "coordinator_sha256": "758d289570d7409c8335b343c8050531c58d59703a801dd311f0c7637a981703",
+    "wrapper_sha256": "0d9a0f69c5a70addb2337e56785d0f2e0df894109f43c31f9c2aa8796ba783a6",
+    "arms": {
+      "control": {
+        "epochs": 100,
+        "min_epochs": 0,
+        "patience": 20
+      },
+      "extended": {
+        "epochs": 200,
+        "min_epochs": 60,
+        "patience": 40
+      }
+    },
+    "lanes": [
+      [
+        "a2a",
+        "egfr"
+      ],
+      [
+        "egfr_full",
+        "hivpr"
+      ],
+      [
+        "herg",
+        "mpro"
+      ],
+      [
+        "abl1",
+        "vegfr2"
+      ]
+    ],
+    "seeds": [
+      42,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7
+    ],
+    "jobs": 128,
+    "device": "cuda",
+    "parallel_workers": 1,
+    "thread_environment": {
+      "QSAR_TORCH_THREADS": "4",
+      "QSAR_TORCH_INTEROP_THREADS": "1",
+      "OMP_NUM_THREADS": "4",
+      "MKL_NUM_THREADS": "4",
+      "OPENBLAS_NUM_THREADS": "1",
+      "VECLIB_MAXIMUM_THREADS": "4",
+      "PYTHONHASHSEED": "0",
+      "PYTHONUNBUFFERED": "1"
+    },
+    "selection": "Lowest validation RMSE; unchanged scheduler and 1e-5 improvement tolerance",
+    "primary_comparison": "Paired same-host best-checkpoint train MSE and validation RMSE",
+    "common_flag": "best_epoch < 30 and best_checkpoint_train_mse > 0.5 in both arms",
+    "test_policy": "Complete-cohort secondary report; never select budget or seed from test scores",
+    "publication_policy": "Preserve the original three-seed study and all main CUDA/RF results",
+    "environment_caveat": "CPU/CUDA contrasts also include OS, architecture and numerical libraries"
+  },
+  "checks": [
+    {
+      "tag": "a2a",
+      "pool": "train",
+      "graphs": 128,
+      "nodes": 5151,
+      "edges": 11480,
+      "peak_allocated_mib": 67.52978515625,
+      "peak_reserved_mib": 86.0
+    },
+    {
+      "tag": "a2a",
+      "pool": "valid",
+      "graphs": 143,
+      "nodes": 3931,
+      "edges": 8766,
+      "peak_allocated_mib": 28.1572265625,
+      "peak_reserved_mib": 42.0
+    },
+    {
+      "tag": "a2a",
+      "pool": "test",
+      "graphs": 512,
+      "nodes": 16854,
+      "edges": 37498,
+      "peak_allocated_mib": 63.26416015625,
+      "peak_reserved_mib": 84.0
+    },
+    {
+      "tag": "egfr_full",
+      "pool": "train",
+      "graphs": 128,
+      "nodes": 6612,
+      "edges": 14624,
+      "peak_allocated_mib": 84.15966796875,
+      "peak_reserved_mib": 106.0
+    },
+    {
+      "tag": "egfr_full",
+      "pool": "valid",
+      "graphs": 512,
+      "nodes": 20223,
+      "edges": 44338,
+      "peak_allocated_mib": 72.61328125,
+      "peak_reserved_mib": 106.0
+    },
+    {
+      "tag": "egfr_full",
+      "pool": "test",
+      "graphs": 512,
+      "nodes": 26474,
+      "edges": 58718,
+      "peak_allocated_mib": 89.77099609375,
+      "peak_reserved_mib": 146.0
+    },
+    {
+      "tag": "abl1",
+      "pool": "train",
+      "graphs": 128,
+      "nodes": 5896,
+      "edges": 12946,
+      "peak_allocated_mib": 76.1396484375,
+      "peak_reserved_mib": 106.0
+    },
+    {
+      "tag": "abl1",
+      "pool": "valid",
+      "graphs": 202,
+      "nodes": 5148,
+      "edges": 11446,
+      "peak_allocated_mib": 30.85009765625,
+      "peak_reserved_mib": 42.0
+    },
+    {
+      "tag": "abl1",
+      "pool": "test",
+      "graphs": 512,
+      "nodes": 17323,
+      "edges": 38374,
+      "peak_allocated_mib": 65.3173828125,
+      "peak_reserved_mib": 84.0
+    },
+    {
+      "tag": "egfr",
+      "pool": "train",
+      "graphs": 128,
+      "nodes": 5722,
+      "edges": 12880,
+      "peak_allocated_mib": 75.12255859375,
+      "peak_reserved_mib": 86.0
+    },
+    {
+      "tag": "egfr",
+      "pool": "valid",
+      "graphs": 340,
+      "nodes": 10466,
+      "edges": 23040,
+      "peak_allocated_mib": 45.89892578125,
+      "peak_reserved_mib": 76.0
+    },
+    {
+      "tag": "egfr",
+      "pool": "test",
+      "graphs": 512,
+      "nodes": 20776,
+      "edges": 45626,
+      "peak_allocated_mib": 73.31787109375,
+      "peak_reserved_mib": 128.0
+    },
+    {
+      "tag": "herg",
+      "pool": "train",
+      "graphs": 128,
+      "nodes": 6187,
+      "edges": 13736,
+      "peak_allocated_mib": 79.60546875,
+      "peak_reserved_mib": 106.0
+    },
+    {
+      "tag": "herg",
+      "pool": "valid",
+      "graphs": 512,
+      "nodes": 18277,
+      "edges": 40764,
+      "peak_allocated_mib": 67.60986328125,
+      "peak_reserved_mib": 84.0
+    },
+    {
+      "tag": "herg",
+      "pool": "test",
+      "graphs": 512,
+      "nodes": 19814,
+      "edges": 43564,
+      "peak_allocated_mib": 72.5810546875,
+      "peak_reserved_mib": 108.0
+    },
+    {
+      "tag": "hivpr",
+      "pool": "train",
+      "graphs": 128,
+      "nodes": 8872,
+      "edges": 18796,
+      "peak_allocated_mib": 107.01904296875,
+      "peak_reserved_mib": 126.0
+    },
+    {
+      "tag": "hivpr",
+      "pool": "valid",
+      "graphs": 232,
+      "nodes": 10408,
+      "edges": 22398,
+      "peak_allocated_mib": 44.72021484375,
+      "peak_reserved_mib": 76.0
+    },
+    {
+      "tag": "hivpr",
+      "pool": "test",
+      "graphs": 512,
+      "nodes": 23110,
+      "edges": 48942,
+      "peak_allocated_mib": 80.7509765625,
+      "peak_reserved_mib": 128.0
+    },
+    {
+      "tag": "mpro",
+      "pool": "train",
+      "graphs": 128,
+      "nodes": 5661,
+      "edges": 12116,
+      "peak_allocated_mib": 73.72412109375,
+      "peak_reserved_mib": 86.0
+    },
+    {
+      "tag": "mpro",
+      "pool": "valid",
+      "graphs": 512,
+      "nodes": 17349,
+      "edges": 37404,
+      "peak_allocated_mib": 64.83251953125,
+      "peak_reserved_mib": 84.0
+    },
+    {
+      "tag": "mpro",
+      "pool": "test",
+      "graphs": 512,
+      "nodes": 23023,
+      "edges": 49862,
+      "peak_allocated_mib": 81.1318359375,
+      "peak_reserved_mib": 132.0
+    },
+    {
+      "tag": "vegfr2",
+      "pool": "train",
+      "graphs": 128,
+      "nodes": 5911,
+      "edges": 13018,
+      "peak_allocated_mib": 76.2685546875,
+      "peak_reserved_mib": 106.0
+    },
+    {
+      "tag": "vegfr2",
+      "pool": "valid",
+      "graphs": 512,
+      "nodes": 20118,
+      "edges": 44000,
+      "peak_allocated_mib": 72.599609375,
+      "peak_reserved_mib": 106.0
+    },
+    {
+      "tag": "vegfr2",
+      "pool": "test",
+      "graphs": 512,
+      "nodes": 20947,
+      "edges": 46404,
+      "peak_allocated_mib": 73.97998046875,
+      "peak_reserved_mib": 128.0
+    }
+  ],
+  "max_peak_reserved_mib": 146.0,
+  "environment": {
+    "QSAR_TORCH_THREADS": "4",
+    "QSAR_TORCH_INTEROP_THREADS": "1",
+    "OMP_NUM_THREADS": "4",
+    "MKL_NUM_THREADS": "4",
+    "OPENBLAS_NUM_THREADS": "1",
+    "VECLIB_MAXIMUM_THREADS": "4",
+    "PYTHONHASHSEED": "0",
+    "PYTHONUNBUFFERED": "1"
+  }
+}
