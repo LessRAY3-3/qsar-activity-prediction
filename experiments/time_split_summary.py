@@ -274,7 +274,9 @@ def make_panel(df, fig_path):
                frameon=False, title="bar shade / position (hue = panel model)",
                title_fontsize=8)
     fig.suptitle("Test R² across label/split protocols: random, scaffold and "
-                 "time splits (8 targets)", fontsize=12)
+                 "time splits (8 targets)\n"
+                 "Random/scaffold: all-year labels; time: as-of labels — not a split-only contrast",
+                 fontsize=10)
     fig.tight_layout(rect=(0, 0.08, 1, 0.95))
     fig.savefig(fig_path, dpi=150)
     plt.close(fig)
@@ -294,8 +296,10 @@ def print_conclusion(df):
     df = df.copy()
     df["rf_drop"] = df["rf_time_r2"] - df["rf_random_r2"]
     df["gin_drop"] = df["gin_time_r2_mean"] - df["gin_random_r2_mean"]
-    print(f"  mean ΔR² (time − random): RF {df['rf_drop'].mean():+.3f}, "
+    print(f"  descriptive protocol ΔR² (time − random): RF {df['rf_drop'].mean():+.3f}, "
           f"GIN {df['gin_drop'].mean():+.3f}")
+    print("  caveat: random/scaffold use all-year labels; time uses as-of labels. "
+          "This contrast does not isolate splitting or temporal drift.")
     rf_neg = df.loc[df["rf_time_r2"] < 0, "tag"].tolist()
     gin_neg = df.loc[df["gin_time_r2_mean"] < 0, "tag"].tolist()
     print(f"  negative time R²: RF {rf_neg or 'none'}; GIN {gin_neg or 'none'}")

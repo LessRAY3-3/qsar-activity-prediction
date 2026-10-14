@@ -1,5 +1,10 @@
 """Campaign safety tests use tiny frozen arrays and mocked training, never real fits."""
 import json
+import os
+import shutil
+import signal
+import socket
+import sys
 from pathlib import Path
 import subprocess
 
@@ -16,17 +21,17 @@ def campaign(load_script, tmp_path, monkeypatch):
     monkeypatch.setattr(worker, "build_checkpoint_model", lambda root, args: torch.nn.Linear(1, 1))
     root = tmp_path / "repo"
     sources = ("run_time_campaign", "time_labels", "qsar_common", "04_train_and_evaluate",
-               "gnn_03_train_gin", "gnn_graph_dataset")
+               "gnn_03_train_gin", "gnn_graph_dataset", "time_campaign_bundle")
     (root / "scripts").mkdir(parents=True)
     for source in sources:
         (root / "scripts" / f"{source}.py").write_text("# frozen source\n")
     directory = root / "data" / "processed"
     (directory / "splits").mkdir(parents=True)
-    smiles = np.array(["C", "CC", "CCC", "CCCC"])
-    y = np.array([5., 6., 7., 8.], dtype=np.float32)
+    smiles = np.array(["C", "CC", "CCC", "CCCC", "CCCCC"])
+    y = np.array([5., 6., 6.5, 7., 8.], dtype=np.float32)
     split = dict(label_policy=LABEL_POLICY, smiles=smiles, y=y, original_y=y,
-                 year=np.array([2000., 2010., 2020., 2021.]), train_idx=np.array([0]),
-                 valid_idx=np.array([1]), test_idx=np.array([2, 3]), excluded_idx=np.array([], dtype=int),
+                 year=np.array([2000., 2001., 2010., 2020., 2021.]), train_idx=np.array([0, 1]),
+                 valid_idx=np.array([2]), test_idx=np.array([3, 4]), excluded_idx=np.array([], dtype=int),
                  cutoff_valid=2010, cutoff_test=2020, source_sha256="frozen raw",
                  dataset_signature=dataset_signature(smiles, y))
     split["label_id"] = label_signature(split)
@@ -36,6 +41,29 @@ def campaign(load_script, tmp_path, monkeypatch):
     args = worker.parse_args(["--role", "gin", "--tags", "a2a", "--seeds", "42", "1",
                               "--campaign-dir", str(tmp_path / "campaign")])
     return worker, root, args
+
+
+def write_bundle_manifest(root):
+    import time_campaign_bundle as bundle
+
+    for name in bundle.SPECS:
+        (root / name).write_text("# dependency fixture\n")
+    for tag in bundle.TAGS:
+        if tag != "a2a":
+            shutil.copy2(root / "data/processed/a2a_graphs.npz", root / f"data/processed/{tag}_graphs.npz")
+            shutil.copy2(root / "data/processed/splits/a2a_time.npz", root / f"data/processed/splits/{tag}_time.npz")
+    paths = bundle.data_paths("gin") | set(bundle.SPECS) | {
+        str(p.relative_to(root)) for p in (root / "scripts").glob("*.py")}
+    files = [{"path": name, "size": (root / name).stat().st_size, "sha256": bundle.sha256(root / name)}
+             for name in sorted(paths)]
+    hashes = {entry["path"]: entry["sha256"] for entry in files}
+    manifest = {"schema": bundle.SCHEMA, "role": "gin", "files": files,
+                "source": {"git_head": "f" * 40, "dirty": False, "status": [],
+                           "sha256": {p: h for p, h in hashes.items() if p.startswith("scripts/")}},
+                "dependency_sha256": {p: hashes[p] for p in bundle.SPECS},
+                "targets": bundle.target_metadata(root, "gin")}
+    (root / "manifest.json").write_text(json.dumps(manifest))
+    return manifest
 
 
 def write_outputs(job, root):
@@ -63,7 +91,7 @@ def write_outputs(job, root):
         else:
             torch.save({"state_dict": torch.nn.Linear(1, 1).state_dict(), "args": args,
                         "runtime": runtime, "label_id": job["provenance"]["label_id"],
-                        "y_mean": 5., "y_std": 1.}, path)
+                        "y_mean": 5.5, "y_std": 0.5}, path)
 
 
     if job["provenance"]["role"] == "rf":
@@ -101,8 +129,8 @@ def test_plan_rejects_na_and_mismatched_cache(campaign):
     with pytest.raises(ValueError, match="NA marker"):
         worker.build_jobs(args, root)
     marker.unlink()
-    np.savez(root / "data/processed/a2a_graphs.npz", smiles=np.array(["N", "CC", "CCC", "CCCC"]),
-             y=np.array([5., 6., 7., 8.]))
+    np.savez(root / "data/processed/a2a_graphs.npz", smiles=np.array(["N", "CC", "CCC", "CCCC", "CCCCC"]),
+             y=np.array([5., 6., 6.5, 7., 8.]))
     with pytest.raises(ValueError, match="row order"):
         worker.build_jobs(args, root)
 
@@ -229,9 +257,9 @@ def test_output_metrics_and_checkpoint_seed_weights_guards(campaign):
 
 def test_bundle_manifest_and_missing_git(campaign, monkeypatch):
     worker, root, args = campaign
-    (root / "manifest.json").write_text('{"source":{"git_head":"frozen-commit"}}')
+    write_bundle_manifest(root)
     job = worker.build_jobs(args, root)[0]
-    assert job["provenance"]["bundle_manifest"]["source_git_head"] == "frozen-commit"
+    assert job["provenance"]["bundle_manifest"]["source_git_head"] == "f" * 40
     def missing(*a, **kw):
         raise FileNotFoundError("git")
     monkeypatch.setattr(worker.subprocess, "run", missing)
@@ -321,7 +349,7 @@ def test_fresh_attempt_cannot_accept_old_or_partial_outputs(campaign, monkeypatc
 @pytest.mark.parametrize("during_training", [False, True])
 def test_recheck_current_inputs_and_source(campaign, monkeypatch, change, during_training):
     worker, root, args = campaign
-    (root / "manifest.json").write_text('{"source":{"git_head":"frozen"}}')
+    write_bundle_manifest(root)
     job = worker.build_jobs(args, root)[0]
     paths = {"input": next(iter(job["provenance"]["inputs"])),
              "source": "scripts/gnn_graph_dataset.py", "manifest": "manifest.json"}
@@ -442,3 +470,137 @@ def test_explicit_torch_threads_recorded_and_invalidate_resume(campaign, monkeyp
     changed = worker.build_jobs(args, root)[0]
     assert changed["provenance"]["environment"]["variables"][name] == value
     assert changed["signature"] != original["signature"]
+
+
+@pytest.mark.parametrize("when", ["planning", "execution"])
+def test_worker_verifies_entire_manifest_not_only_job_inputs(campaign, when):
+    worker, root, args = campaign
+    write_bundle_manifest(root)
+    job = worker.build_jobs(args, root)[0]
+    # Another target is outside this a2a job's two input hashes, but is frozen
+    # by the bundle; leaving manifest.json itself unchanged must not hide it.
+    (root / "data/processed/herg_graphs.npz").write_bytes(b"stale bundled input")
+    with pytest.raises(ValueError, match="file changed"):
+        worker.build_jobs(args, root) if when == "planning" else worker.run_job(job, args, root)
+    assert not args.campaign_dir.exists()
+
+
+def test_nested_directory_does_not_inherit_parent_git_revision(tmp_path, load_script):
+    worker = load_script("run_time_campaign")
+    subprocess.run(["git", "init", "-q", str(tmp_path)], check=True)
+    nested = tmp_path / "unpacked"
+    nested.mkdir()
+    info = worker.git_info(nested)
+    assert info["revision"] == "unavailable"
+    assert info["diff_sha256"] is None
+
+
+@pytest.mark.parametrize("owner", ["alive", "foreign", "invalid"])
+def test_explicit_recovery_refuses_live_foreign_or_invalid_lock(tmp_path, load_script, owner):
+    worker = load_script("run_time_campaign")
+    value = {"pid": os.getpid(), "host": socket.gethostname(), "role": "gin"}
+    if owner == "foreign":
+        value["host"] = "other-machine"
+    elif owner == "invalid":
+        value["pid"] = -1
+    path = tmp_path / ".time_campaign_gin.lock"
+    path.write_text(json.dumps(value))
+    before = path.read_bytes()
+    with pytest.raises(RuntimeError, match="Cannot recover"):
+        with worker.worker_lock(tmp_path, "gin", recover=True):
+            pytest.fail("Unsafe lock must not be acquired")
+    assert path.read_bytes() == before
+
+
+@pytest.mark.parametrize("signum", [signal.SIGTERM, signal.SIGKILL])
+@pytest.mark.parametrize("point", ["during_publish", "after_status"])
+def test_real_process_signal_publication_recovers_without_training(campaign, signum, point):
+    worker, root, args = campaign
+    job = worker.build_jobs(args, root)[0]
+    write_outputs(job, root)
+    before = {name: (root / name).read_bytes() for name in job["files"]}
+    child = r"""
+import json, os, signal, sys
+from pathlib import Path
+import run_time_campaign as worker
+root, campaign, signum, point = Path(sys.argv[1]), Path(sys.argv[2]), int(sys.argv[3]), sys.argv[4]
+args = worker.parse_args(['--role','gin','--tags','a2a','--seeds','42','--campaign-dir',str(campaign)])
+job = worker.build_jobs(args, root)[0]
+worker.git_info = lambda root: {}
+worker.validate_outputs = lambda *args: None  # fault injection targets publication, not fitting
+
+def train(*args, **kwargs):
+    for name in job['files']:
+        path = kwargs['cwd'] / name
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(json.dumps({'time': {'new': True}}) if 'metrics_' in name else 'new output')
+worker.subprocess.run = train
+replace = worker.os.replace
+
+def interrupted_replace(source, target):
+    replace(source, target)
+    if point == 'during_publish' and Path(target) == root / job['files'][0]:
+        os.kill(os.getpid(), signum)
+worker.os.replace = interrupted_replace
+atomic = worker.atomic_json
+
+def interrupted_status(path, value):
+    atomic(path, value)
+    if point == 'after_status' and Path(path).name == 'status.json' and value.get('state') == 'success':
+        os.kill(os.getpid(), signum)
+worker.atomic_json = interrupted_status
+with worker.worker_lock(root, 'gin'):
+    worker.run_job(job, args, root)
+"""
+    env = {**os.environ, "PYTHONPATH": str(Path(worker.__file__).parent)}
+    result = subprocess.run([sys.executable, "-c", child, str(root), str(args.campaign_dir),
+                             str(signum), point], env=env, capture_output=True, text=True, timeout=30)
+    assert result.returncode == -signum, result.stderr
+    directory = args.campaign_dir / job["id"]
+    journal = next(directory.glob("*/publication.json"))
+    assert json.loads(journal.read_text())["state"] == "prepared"
+    with pytest.raises(RuntimeError, match="Worker lock exists"):
+        with worker.worker_lock(root, "gin"):
+            pass
+    # Explicit dead-owner recovery only restores/finalizes publication; it does
+    # not invoke run_job or any training process.
+    with worker.worker_lock(root, "gin", recover=True):
+        worker.recover_publications(args.campaign_dir, root, "gin")
+        worker.recover_publications(args.campaign_dir, root, "gin")
+    status = json.loads((directory / "status.json").read_text())
+    if point == "during_publish":
+        assert before == {name: (root / name).read_bytes() for name in job["files"]}
+        assert status["state"] == "failed"
+        assert json.loads(journal.read_text())["state"] == "rolled_back"
+    else:
+        assert status["state"] == "success"
+        assert json.loads(journal.read_text())["state"] == "committed"
+        assert worker.can_resume(status, job, root, directory)
+    assert not list(root.rglob("*.publish.tmp"))
+    assert not list(root.rglob("*.restore.tmp"))
+
+
+
+def test_manifest_verifier_source_participates_in_job_signature(campaign):
+    worker, root, args = campaign
+    before = worker.build_jobs(args, root)[0]
+    assert "scripts/time_campaign_bundle.py" in before["provenance"]["code"]
+    (root / "scripts/time_campaign_bundle.py").write_text("# changed verification policy\n")
+    assert worker.build_jobs(args, root)[0]["signature"] != before["signature"]
+
+
+def test_explicit_recovery_never_trains_and_dry_run_never_recovers(campaign, monkeypatch):
+    worker, root, args = campaign
+    monkeypatch.setattr(worker, "ROOT", root)
+    operations = []
+    monkeypatch.setattr(worker, "recover_publications", lambda *a: operations.append("recovery"))
+    monkeypatch.setattr(worker, "run_job", lambda *a: pytest.fail("Recovery must not train"))
+    original = worker.build_jobs
+    monkeypatch.setattr(worker, "build_jobs", lambda options: original(options, root))
+    cli = ["--role", "gin", "--tags", "a2a", "--seeds", "42", "--recover-interrupted",
+           "--campaign-dir", str(args.campaign_dir)]
+    worker.main(cli)
+    assert operations == [] and not args.campaign_dir.exists()
+    worker.main(cli + ["--execute"])
+    assert operations == ["recovery"]
+    assert not (root / ".time_campaign_gin.lock").exists()

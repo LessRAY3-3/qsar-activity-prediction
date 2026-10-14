@@ -581,6 +581,46 @@ three training MSEs are 0.749–0.976. See
 convergence nor establishes that more training would help. Models and test
 predictions are unchanged; no test score selected a new training budget.
 
+**RF training uncertainty.** Each published temporal RF result is one fit
+(`random_state=42`). The paired molecule bootstrap conditions on that fit and
+the fitted GIN ensemble; it does not cover RF training randomness. The hERG
+repair changed ensemble ΔR² from +0.005748 to +0.021937, but also changed the
+training input and retrained all three GIN seeds, so this is not an estimate
+of RF seed variance. A review mentioned R² SD ≈ 0.006 across five RF random
+states; no corresponding five-fit cohort was found in the published artifacts,
+and that review-reported value has not been independently reproduced here.
+
+A reproducible supplementary RF sensitivity run should fix the current
+`{tag}_time.npz` label ID and train/test indices, fingerprint cache and selected
+`best_params_time`, then refit cloned RF estimators with random states
+**42, 1, 2, 3, 4** on that same train pool. Save each seed's parameters,
+input hashes and predictions in a separate directory; report per-seed R²/RMSE,
+the declared population SD, and Δ against the unchanged GIN ensemble. This
+measures refit randomness conditional on selected hyperparameters, not search
+or data-sampling uncertainty. It is a proposed supplement, not an experiment
+performed in this Low-fix pass; do not replace the published seed-42 fit.
+
+**A2A document concentration, checked against raw rows and frozen labels.**
+`CHEMBL5728996` (2022) contributes 378 eligible exact nM activity rows for
+**371 of 802 test parents (46.26%)**; all 371 have no other eligible test-era
+document. Raw IC50 values are **30 nM (80 rows), 75 nM (77), 300 nM (221)**,
+with one shared assay description. After taking parent medians, these parents
+have **six** distinct frozen pIC50 values, not merely three. The full 802-row
+test-label reconstruction matches the frozen values within 4.71e−7.
+A document and identical description do not independently verify one batch or
+the measurement precision. Source/assay dependence and discretization can
+contribute to apparent time-protocol performance; a molecule bootstrap does
+not resolve them. Document/assay-group sensitivity or an external temporal
+cohort would be needed before generalizing beyond these sources.
+
+Reproduce these descriptive checks without training:
+`python experiments/low_review_diagnostics.py`. It reads the raw a2a and
+document-year CSVs plus restored frozen time inputs and the per-molecule RF AD
+CSVs. `results/review_low_diagnostics/` contains source hashes, document counts,
+subset metrics, and an initial hERG summary read from Git `920bc28` whose hash
+is verified against `initial_campaign_acceptance.json`. A shallow checkout
+without that Git blob explicitly reports the historical comparison unavailable.
+
 **Current results.** Unweighted means over the eight tags are RF **−0.034**,
 GIN per-seed **+0.022**, and GIN ensemble **+0.062** time R2. The ensemble
 ΔR2 molecule-bootstrap CI excludes zero in six cells: four favour GIN
@@ -646,7 +686,15 @@ molecules from silently becoming its training-domain references.
 - **RF AD, recomputed:** max Morgan Tanimoto to train + valid ≥ 0.4 yields
   mean coverage 0.9696. In-AD R2 averages 0.638 (0.390–0.825); out-of-AD R2
   averages −0.418 across 13 scorable cells (worst `egfr`/random −1.417).
-  The threshold and aggregate R2 are descriptive panel diagnostics.
+  The threshold and aggregate R2 are descriptive panel diagnostics. Because
+  R² = 1 − MSE / Var(y), comparing in/out subsets changes the denominator.
+  The independent per-molecule calculation in
+  `results/review_low_diagnostics/ad_subset_metrics.csv` reports n, label
+  variance, R², RMSE and MAE for every subset. On the same 13 cells with
+  scorable in/out R², out-of-AD RMSE is higher in **10/13**, with unweighted
+  cell means **1.074599 outside vs 0.745936 inside**; mean MAE is
+  **0.861382 vs 0.548032**. These are paired cell averages, not pooled
+  molecule-weighted errors or evidence that AD status causes error.
 - **Retrospective screening:** applying AD changes RF P@100 in 1/16 cells
   (`herg`/random 0.65 → 0.66). For report positives (prediction ≥ 7),
   keeping std ≤ the **whole test library's median** raises mean precision
@@ -1006,8 +1054,7 @@ This campaign replaces the historical time-split results with results from
 are outside this campaign. New scores must not be inferred from the old
 scores or from the number of changed labels.
 
-**Status: complete and accepted.** After the user enabled each connection,
-all 32 jobs ran in isolated remote environments and passed coordinator
+**Status: complete and accepted.** All 32 jobs ran in isolated remote environments and passed coordinator
 acceptance. Preparation lives in the `retrain/time-asof-2026-10-13` worktree,
 based on main commit `d925163431b419a1b66e2417e8528447f0cbdeb4`. Training used
 initial frozen source commit `7ce15c1f0849ae69e0ca208f781a9824517eb328`.
@@ -1050,8 +1097,9 @@ cache or remote machine. The frozen NPZs contain the split indices, as-of labels
 original labels, publication years and dataset/label signatures needed to validate
 the committed predictions and calculate the train-only constant baseline.
 Restoration checks schema, exactly eight regular archive members, byte hashes,
-internal split signatures and every RF/GIN prediction and metric label version.
-All checks finish before any split is written. Existing different splits and NA
+internal split checksums, every RF/GIN prediction and metric label version,
+and all 24 GIN checkpoint label/role/seed records. All validation finishes before
+any split is atomically installed. Existing different splits and NA
 markers cause an error and remain untouched; use a fresh checkout or inspect and
 archive the conflicting local files explicitly. Matching files are retained.
 The command validates consistency with the checked-out publication, not independent
@@ -1140,6 +1188,71 @@ SSH/shell transcript, and do not establish every historical invocation. Their
 purpose is to expose the historical implementation; the supported read-only
 re-audit commands are the parameterized commands above.
 
+### Low-review input integrity and interruption recovery
+
+The post-review tools preserve accepted model, prediction and frozen-input
+bytes. Regeneration computes in staging first: an input/plotting failure, or
+an unavailable replacement for an existing split, raises an error while
+retaining the existing split. Split restoration validates the package and all
+24 published GIN checkpoint label/role/seed fields before publication. It
+writes and syncs temporary files on the destination filesystem, then uses an
+atomic no-clobber link; a killed copy cannot leave a truncated final NPZ.
+Conflicting existing files are preserved and rejected.
+
+Legacy `label_id` values retain their original algorithm. They do not cover
+`scaffold_smiles`; legacy archive SHA256 checks cover the complete file. New
+splits additionally carry `integrity_schema` and a full-payload SHA256 that
+includes scaffold arrays, dtypes and shapes. These unkeyed hashes detect
+inconsistency, **not source authenticity**; neither old nor new files are
+cryptographically signed by an authenticated issuer.
+
+The NPZ and its timeline are published with a separate per-target journal and
+OS file lock. NPZ replacement is the commit point: a failed pre-commit
+publication restores the old timeline; after SIGKILL the next regeneration
+recovers before reading new inputs. A completed pair is retained, and unknown
+external file changes cause an error rather than being overwritten. The local
+`.<tag>_time_last_publication.json` records the recovery outcome. Readers can
+observe a short mixed-version window during publication; this is a recoverable
+transaction, not instantaneous atomic visibility of two files.
+
+Current campaign workers verify the complete bundle manifest, including files
+for targets outside the current job. The verifier itself is included in the
+worker source inventory. An extracted bundle nested in another Git repository
+does not inherit that repository's HEAD, and included gitignored Python files
+are recorded as dirty source. GIN checkpoint normalization must match the
+frozen training labels, in addition to label, parameter and architecture checks.
+
+Publication writes a recovery journal before replacing canonical outputs. A
+successful status record is the commit point. Python exceptions restore the
+old set; SIGTERM/SIGKILL may leave a temporary mixture until explicit recovery.
+For the **current** worker, run from its own checkout/bundle:
+
+```bash
+python scripts/run_time_campaign.py --role gin --execute --recover-interrupted
+```
+
+Use `--role rf` for RF and preserve any custom `--campaign-dir` from the
+interrupted run. Recovery reclaims only a confirmed dead local process's lock,
+refuses live/foreign/unknown owners, and never starts training. Rerunning a
+failed job is a separate explicit `--execute --rerun` operation. A dry-run
+without `--execute` remains read-only. Recovery is not an instantaneous
+multi-file transaction or a guarantee against storage-device failure.
+
+Tests include real short CPU GIN subprocess training, real RF fitting and
+serialized-checkpoint corruption; critical interruption checks use real
+SIGTERM/SIGKILL subprocesses. The disclosed mutation audit is reproducible:
+
+```bash
+python scripts/check_time_tooling_mutations.py --out-dir .scratch/tooling-mutation-audit
+```
+
+It removes ten named acceptance protections in isolated temporary copies.
+All ten were caught by the real-artifact tests; import/setup/training failures
+are explicitly inconclusive. PR #8 did not publish the source of its sixteen
+original mutants, so this result does not claim to reproduce that exact set.
+The pending matched CUDA experiment still uses the immutable `8521063` bundle
+and `90a4700` training core described below, not these changed worker sources.
+
 ### Follow-up: a matched environment × training-budget study
 
 The follow-up is a **cross-computing-environment reproducibility and robustness
@@ -1150,7 +1263,8 @@ cross-validation nor a comparison of different GIN model structures.
 **Current design amendment (2026-10-14): eight seeds per cell.** The initial
 three-seed M3 pilot completed all 48 jobs and passed acceptance (commit
 `54f4c7d`). After observing that completed pilot, and before the new matched
-CUDA experiment began, the user explicitly requested expansion to eight seeds:
+CUDA experiment began, the study sponsor explicitly requested expansion to
+eight seeds:
 **42, 1, 2, 3, 4, 5, 6, 7**. This sequence is recorded in
 `results/time_budget_sensitivity/replication_extension.json`; the eight-seed
 plan was not preregistered before the pilot. The original design and pilot
@@ -1169,8 +1283,8 @@ budget is `epochs=200, min_epochs=60, patience=40`. The expanded design has
 additional jobs for seeds 3/4/5/6/7 in 1,113.540 seconds
 (18 min 33.54 s). The combined **128-job CPU cohort passed independent
 artifact checks and CPU checkpoint replay**. The new 4070 CUDA campaign will
-run all 128 jobs after the user connects the machine and sends a
-connection-ready message. Only the two CPU cells are complete; the full
+run all 128 jobs when the CUDA host becomes available; no CUDA execution
+is scheduled in this revision. Only the two CPU cells are complete; the full
 four-cell study and environment contrasts remain pending.
 
 Both budgets retain the same learning-rate scheduler. Trainer, original
@@ -1186,6 +1300,19 @@ Both arms remain isolated from the input bundle and
 published outputs. The pending CUDA deployment must verify the same frozen
 training/input versions. Historical accepted CUDA runs are reference data,
 not substitutes for the newly matched 128-job CUDA cohort.
+
+**Frozen-comparison boundary after the Low fixes.** The accepted eight-seed
+M3 cohort and pending matched CUDA training must continue to use
+`results/time_budget_sensitivity/extension_inputs.tar.gz`: bundle revision
+`8521063` contains the unchanged training core from `90a4700`. This revision's
+repairs to the current worker/label utilities change source hashes even though
+training mathematics are unchanged. Do not substitute current source or a
+newly built bundle for the frozen comparison input: that would introduce a
+code change alongside the execution-environment change. New tools may validate
+or restore the immutable package externally; training still executes its
+frozen source. Post-acceptance CPU replay likewise uses the original input
+archives in the commands below. Current-source Low repairs serve subsequent
+ordinary workflows and do not modify accepted model/label artifacts.
 
 The M3 host reports 12 performance cores and 4 efficiency cores. The CPU study
 uses four concurrent workers, each with four PyTorch intra-op threads and one
@@ -1232,7 +1359,7 @@ heterogeneity. Lower loss and higher R² have opposite favorable directions.
 Targets include overlapping datasets; eight seeds increase training replication
 but do not make all target/seed rows independent. Retain every declared seed
 in every cell and report all paired contrasts, including unfavorable results.
-The seed expansion follows the explicit post-pilot user request above; it is
+The seed expansion follows the documented post-pilot sponsor request above; it is
 not conditioned on achieving a desired test ranking. Do not choose further
 seeds, budgets or replacement models from test performance. No outcome for
 the pending CUDA cells is assumed. The original accepted
@@ -1541,8 +1668,8 @@ python scripts/run_time_campaign.py --role gin --device cuda
 GIN settings are fixed at hidden size 128, 4 layers, dropout 0.2, learning
 rate 0.001, batch 128, at most 100 epochs, patience 20, and minimum epochs 0.
 Explicit CUDA selection fails if unavailable instead of falling back to CPU.
-RF started with four concurrent CV fits to bound memory. At the user's
-request, the last three targets (`hivpr`, `mpro`, `vegfr2`) used 16; all
+RF started with four concurrent CV fits to bound memory. The final three
+targets (`hivpr`, `mpro`, `vegfr2`) used 16; all
 individual forests still used one job. This concurrency change is recorded
 per job and did not change the search space, folds or model parameters.
 Initial RF wall time was 7,071 seconds (117.9 minutes); the initial 24 GIN fits completed in

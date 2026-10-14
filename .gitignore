@@ -25,6 +25,13 @@ data/processed/*.npz
 # 且 npz 内是全宽 SMILES 数组（1.4-42 MB/个，7 个新靶点合计 ~212 MB）。
 # 已 tracked 的 egfr/esol 旧副本不受影响。
 data/processed/splits/*.npz
+# Local recovery records and interrupted staging copies (never training inputs).
+data/processed/splits/.*_time_regeneration.lock
+data/processed/splits/.*_time_publication/
+data/processed/splits/.*_time_last_publication.json*
+data/processed/splits/.time-restore-*.tmp
+data/processed/.time-regenerate-*/
+.time-regenerate-*.tmp
 
 # 系统垃圾
 .DS_Store

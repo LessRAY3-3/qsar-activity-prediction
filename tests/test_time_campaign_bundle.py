@@ -11,8 +11,7 @@ import time_campaign_bundle as bundle
 from time_labels import LABEL_POLICY, dataset_signature, label_signature
 
 
-@pytest.fixture
-def repo(tmp_path):
+def make_repo(tmp_path):
     root = tmp_path / "repo"
     root.mkdir()
     subprocess.run(["git", "init", "-q", str(root)], check=True)
@@ -42,8 +41,13 @@ def repo(tmp_path):
         np.savez(root / f"data/processed/splits/{tag}_time.npz", **split)
     subprocess.run(["git", "-C", str(root), "add", "."], check=True)
     subprocess.run(["git", "-C", str(root), "-c", "user.name=Test", "-c",
-                    "user.email=test@example.invalid", "commit", "-qm", "fixture"], check=True)
+                    "user.email=test@example.invalid", "-c", "commit.gpgsign=false", "commit", "-qm", "fixture"], check=True)
     return root
+
+
+@pytest.fixture
+def repo(tmp_path):
+    return make_repo(tmp_path)
 
 
 def test_roles_share_labels_and_archives_are_deterministic(repo, tmp_path):
@@ -158,3 +162,29 @@ def test_cli_requires_explicit_output():
     with pytest.raises(SystemExit) as error:
         bundle.main(["--role", "rf"])
     assert error.value.code == 2
+
+
+
+def test_ignored_python_is_included_but_explicitly_dirty(repo):
+    (repo / ".gitignore").write_text("scripts/local_*.py\n")
+    ignored = repo / "scripts/local_experiment.py"
+    ignored.write_text("# untracked ignored training helper\n")
+    manifest = bundle.make_manifest(repo, "gin")
+    assert manifest["source"]["dirty"] is True
+    assert "!! scripts/local_experiment.py" in manifest["source"]["status"]
+    assert "scripts/local_experiment.py" in manifest["source"]["sha256"]
+
+
+def test_nested_bundle_creation_rejects_parent_repo_revision(repo):
+    nested = repo / "unpacked"
+    nested.mkdir()
+    with pytest.raises(ValueError, match="Git worktree root"):
+        bundle.make_manifest(nested, "gin")
+
+
+def test_fixture_commit_works_when_user_enables_signing(tmp_path, monkeypatch):
+    config = tmp_path / "signing.gitconfig"
+    config.write_text("[commit]\n    gpgsign = true\n[gpg]\n    program = /does/not/exist\n")
+    monkeypatch.setenv("GIT_CONFIG_GLOBAL", str(config))
+    root = make_repo(tmp_path)
+    assert subprocess.check_output(["git", "-C", str(root), "rev-parse", "HEAD"], text=True).strip()

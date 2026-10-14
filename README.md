@@ -123,8 +123,8 @@ python experiments/time_split_summary.py
 ```
 
 The restore command verifies the archive and every split's SHA256, validates
-its label signature, and checks all 32 prediction/metric label versions before
-writing the eight NPZ files under `data/processed/splits/`. It refuses conflicting
+its label checksum, and checks all 32 prediction/metric label versions plus
+all 24 GIN checkpoint label/role/seed records before atomically installing the eight NPZ files under `data/processed/splits/`. It refuses conflicting
 local splits or `*_time_NA.json` markers; inspect and archive those files first,
 or run in a clean checkout. It never replaces local data automatically. The
 as-of constant baseline reads training labels directly from these frozen splits.
@@ -850,7 +850,7 @@ nor proof of convergence. See the
 and [acceptance](results/time_budget_sensitivity/m3_eight_seed/acceptance.json).
 
 The three-seed pilot and its offline replay remain separate historical records.
-CUDA's fresh **128 jobs remain pending** the user's connection-ready message;
+CUDA's fresh **128 jobs remain pending** host availability;
 no cross-environment result is available. The documented
 [post-pilot amendment](results/time_budget_sensitivity/replication_extension.json)
 retains its actual decision chronology.
@@ -901,6 +901,24 @@ the scale/correlation interaction, not causal explanations or proposals to
 calibrate on test labels. Test fractions are 59% for a2a and 51% for mpro
 because a newest first-report year can itself exceed the target fraction.
 
+**RF training uncertainty.** Each published temporal RF result is one fit
+(`random_state=42`). The paired molecule bootstrap conditions on that fit and
+the fitted GIN ensemble; it does not cover RF training randomness. The hERG
+repair changed ensemble ΔR² from +0.005748 to +0.021937, but also changed the
+training input and retrained all three GIN seeds, so this is not an estimate
+of RF seed variance. A review mentioned R² SD ≈ 0.006 across five RF random
+states; no corresponding five-fit cohort was found in the published artifacts,
+and that review-reported value has not been independently reproduced here.
+
+**A2A source concentration.** Exact raw records from the 2022 document
+`CHEMBL5728996` supply **371/802 test parents (46.26%)**. Its 378 eligible
+activity rows use only **30, 75 and 300 nM** values and one assay description;
+parent medians yield six frozen label values. Shared document/description does
+not establish that all rows came from one laboratory batch. This concentration
+limits interpretation as broad future-chemistry generalization and makes
+source/assay dependence a relevant sensitivity check. See the reproducible
+[Low diagnostics](results/review_low_diagnostics/summary.json).
+
 These are retrospective publication-year holdouts, not evidence of a causal
 drift mechanism or deployment readiness. A negative constant R2 alone cannot
 establish drift: for any constant c,
@@ -931,6 +949,11 @@ and GIN/GINE (`results/uncertainty/`, `figures/uncertainty/`).
   R2 averaging **0.638** (0.390–0.825). Out-of-AD R2 averages **−0.418** over
   the 13 scorable cells (worst `egfr`/random **−1.417**). These aggregates
   describe this panel and threshold, not a guaranteed reliability boundary.
+  Subset R² also depends on each subset's label variance. Across the same
+  13 scorable cells, out-of-AD RMSE exceeds in-AD RMSE in **10/13**;
+  unweighted means are **1.075 vs 0.746 pIC50**, and MAE **0.861 vs 0.548**.
+  These absolute-error comparisons support a descriptive association, not a
+  universal AD reliability rule.
 - **Screening:** AD filtering changes RF P@100 in **1/16 cells**
   (`herg`/random 0.65 → 0.66). Filtering report-positive molecules
   ({prediction ≥ 7}) by std ≤ the **whole test library's median std** raises

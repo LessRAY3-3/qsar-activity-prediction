@@ -2,11 +2,17 @@
 import hashlib
 import io
 import json
+import os
+from pathlib import Path
+import subprocess
+import sys
+import time
 import shutil
 import tarfile
 
 import numpy as np
 import pytest
+import torch
 
 import restore_time_inputs as restore
 from time_labels import LABEL_POLICY, dataset_signature, label_signature
@@ -17,7 +23,7 @@ def frozen(tmp_path):
     root = tmp_path / "source"
     splits = root / "data/processed/splits"
     splits.mkdir(parents=True)
-    (root / "results").mkdir()
+    (root / "results/gnn_models").mkdir(parents=True)
     smiles = np.array(["C", "CC", "CCC", "CCCC", "CCCCC"])
     original_y = np.array([6., 7., 8., 9., 10.])
     split = dict(smiles=smiles, original_y=original_y,
@@ -35,6 +41,15 @@ def frozen(tmp_path):
                      label_id=split["label_id"], test_idx=split["test_idx"], y_true=np.array([8., 9.]))
             metric = f"{prefix + '_' if prefix == 'gnn' else ''}metrics_{tag}{suf}.json"
             (root / "results" / metric).write_text(json.dumps({"time": {"label_id": split["label_id"]}}))
+    # Actual torch serialization and weights-only loading; no mocked checkpoints.
+    from gnn_03_train_gin import GINRegressor
+    state = GINRegressor(hidden=8, num_layers=2, dropout=0.2).state_dict()
+    for tag in restore.TAGS:
+        for suffix, seed in (("", 42), ("_seed1", 1), ("_seed2", 2)):
+            torch.save({"state_dict": state, "label_id": split["label_id"],
+                        "args": {"tag": tag, "model": "gin", "split": "time",
+                                 "seed": seed, "suffix": suffix}},
+                       root / f"results/gnn_models/{tag}_gin_time{suffix}.pt")
     package = tmp_path / "package"
     restore.pack(root, package)
     fresh = tmp_path / "fresh"
@@ -115,3 +130,96 @@ def test_rehashed_unsafe_or_incomplete_archive_is_rejected(frozen, kind):
         restore.restore(fresh, package)
     assert not (fresh / "data").exists()
     assert not (fresh.parent / "outside.npz").exists()
+
+
+@pytest.mark.parametrize("change", ["label_id", "missing_label", "tag", "model", "split", "seed", "suffix"])
+def test_real_torch_checkpoint_version_and_cell_gate_before_restore(frozen, change):
+    _, fresh, package = frozen
+    checkpoint = fresh / "results/gnn_models/vegfr2_gin_time_seed2.pt"
+    data = torch.load(checkpoint, map_location="cpu", weights_only=True)
+    assert any(torch.is_tensor(value) for value in data["state_dict"].values())
+    if change == "label_id":
+        data[change] = "0" * 64
+    elif change == "missing_label":
+        data.pop("label_id")
+    else:
+        data["args"][change] = "wrong-cell"
+    torch.save(data, checkpoint)
+    with pytest.raises(ValueError, match="checkpoint"):
+        restore.restore(fresh, package)
+    assert not (fresh / "data/processed/splits/a2a_time.npz").exists()
+
+
+def test_missing_checkpoint_is_not_silently_ignored(frozen):
+    _, fresh, package = frozen
+    (fresh / "results/gnn_models/vegfr2_gin_time_seed2.pt").unlink()
+    with pytest.raises(ValueError, match="missing or nonregular"):
+        restore.restore(fresh, package)
+    assert not (fresh / "data/processed/splits/a2a_time.npz").exists()
+
+
+def test_atomic_restore_copy_error_leaves_no_partial_target_and_retry_succeeds(tmp_path, monkeypatch):
+    source, target = tmp_path / "source.npz", tmp_path / "final.npz"
+    source.write_bytes(b"complete source content" * 1000)
+    digest = restore.sha256(source)
+    original_copy = restore.shutil.copyfileobj
+    def fail_copy(input_file, output):
+        output.write(input_file.read(17))
+        raise OSError("injected disk write error")
+    monkeypatch.setattr(restore.shutil, "copyfileobj", fail_copy)
+    with pytest.raises(OSError, match="disk write"):
+        restore.atomic_install(source, target, digest)
+    assert not target.exists()
+    assert not list(tmp_path.glob(".time-restore-*"))
+    monkeypatch.setattr(restore.shutil, "copyfileobj", original_copy)
+    restore.atomic_install(source, target, digest)
+    assert target.read_bytes() == source.read_bytes()
+
+
+def test_atomic_restore_refuses_a_conflict_created_after_preflight(tmp_path, monkeypatch):
+    source, target = tmp_path / "source.npz", tmp_path / "final.npz"
+    source.write_bytes(b"new split")
+    original_link = restore.os.link
+    def concurrent_create(src, dest):
+        Path(dest).write_bytes(b"other process split")
+        original_link(src, dest)
+    monkeypatch.setattr(restore.os, "link", concurrent_create)
+    with pytest.raises(ValueError, match="conflicting"):
+        restore.atomic_install(source, target, restore.sha256(source))
+    assert target.read_bytes() == b"other process split"
+
+
+@pytest.mark.skipif(os.name != "posix", reason="POSIX signal interruption test")
+def test_sigkill_during_restore_copy_never_publishes_truncated_npz(tmp_path):
+    source, target = tmp_path / "source.npz", tmp_path / "final.npz"
+    ready = tmp_path / "ready"
+    source.write_bytes(b"complete frozen split" * 4096)
+    code = """
+import pathlib, signal, sys
+sys.path.insert(0, sys.argv[1])
+import restore_time_inputs as module
+source, target, ready = map(pathlib.Path, sys.argv[2:])
+def interrupted_copy(input_file, output):
+    output.write(input_file.read(17)); output.flush()
+    ready.touch()
+    signal.pause()
+module.shutil.copyfileobj = interrupted_copy
+module.atomic_install(source, target, module.sha256(source))
+"""
+    process = subprocess.Popen([sys.executable, "-B", "-c", code,
+                                str(Path(restore.__file__).parent), str(source), str(target), str(ready)])
+    try:
+        deadline = time.monotonic() + 30
+        while not ready.exists() and time.monotonic() < deadline:
+            assert process.poll() is None, "copy process exited before interruption point"
+            time.sleep(0.02)
+        assert ready.exists(), "copy process did not reach the interruption point"
+        process.kill()
+        process.wait(timeout=10)
+        assert not target.exists()
+        restore.atomic_install(source, target, restore.sha256(source))
+        assert target.read_bytes() == source.read_bytes()
+    finally:
+        if process.poll() is None:
+            process.kill()
+            process.wait(timeout=10)

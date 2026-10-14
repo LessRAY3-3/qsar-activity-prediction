@@ -1,12 +1,14 @@
 """Pack or restore the committed frozen inputs for temporal statistics.
 
 No downloads or model inference. Restoration checks the complete package and
-published prediction/metric label versions before writing any split. Existing
+published prediction/metric and 24 GIN checkpoint versions before writing any
+split. Checkpoints load on CPU with weights_only=True. Existing
 conflicting splits and NA markers are never overwritten or removed.
 """
 import argparse
 import gzip
 import json
+import os
 from pathlib import Path
 import re
 import shutil
@@ -26,6 +28,8 @@ MAX_FILE_BYTES = 256 * 1024 * 1024
 
 def validate_publication(root, tag, split):
     """Reject a package from a different result generation, even if self-consistent."""
+    import torch
+
     cells = [(f"rf_preds_{tag}_time.npz", f"metrics_{tag}.json")]
     cells += [(f"gnn_preds_{tag}_time{suf}.npz", f"gnn_metrics_{tag}{suf}.json")
               for suf in ("", "_seed1", "_seed2")]
@@ -35,6 +39,16 @@ def validate_publication(root, tag, split):
         scores = json.loads(safe_file(root, f"results/{metric}").read_text())["time"]
         if scores.get("label_id") != str(split["label_id"]):
             raise ValueError(f"{metric}: published metric label version differs from package")
+
+    for suffix, seed in (("", 42), ("_seed1", 1), ("_seed2", 2)):
+        relative = f"results/gnn_models/{tag}_gin_time{suffix}.pt"
+        checkpoint = torch.load(safe_file(root, relative), map_location="cpu", weights_only=True)
+        if not isinstance(checkpoint, dict) or checkpoint.get("label_id") != str(split["label_id"]):
+            raise ValueError(f"{relative}: checkpoint label version differs from package")
+        expected = {"tag": tag, "model": "gin", "split": "time", "seed": seed, "suffix": suffix}
+        args = checkpoint.get("args", {})
+        if not isinstance(args, dict) or any(args.get(key) != value for key, value in expected.items()):
+            raise ValueError(f"{relative}: checkpoint role/seed differs from published cell")
 
 
 def pack(root, package):
@@ -100,6 +114,36 @@ def read_manifest(package):
     return manifest
 
 
+
+def atomic_install(source, target, expected_sha256):
+    """Publish a fully synced file with atomic no-clobber semantics.
+
+    A killed copy can leave an ignored temporary file, never a truncated final
+    split. link() is atomic on the target filesystem and refuses an existing
+    path. Matching complete files make retries idempotent; conflicts are kept.
+    """
+    target = Path(target)
+    temporary = None
+    try:
+        with tempfile.NamedTemporaryFile(prefix=".time-restore-", suffix=".tmp",
+                                         dir=target.parent, delete=False) as output:
+            temporary = Path(output.name)
+            with Path(source).open("rb") as input_file:
+                shutil.copyfileobj(input_file, output)
+            output.flush()
+            os.fsync(output.fileno())
+        if sha256(temporary) != expected_sha256:
+            raise ValueError(f"staged split SHA256 mismatch: {target.name}")
+        try:
+            os.link(temporary, target)
+        except FileExistsError:
+            if target.is_symlink() or not target.is_file() or sha256(target) != expected_sha256:
+                raise ValueError(f"refusing to overwrite conflicting local split: {target}") from None
+    finally:
+        if temporary is not None:
+            temporary.unlink(missing_ok=True)
+
+
 def restore(root, package):
     root, package = Path(root).resolve(), Path(package).resolve()
     manifest = read_manifest(package)
@@ -142,10 +186,7 @@ def restore(root, package):
         destination.mkdir(parents=True, exist_ok=True)
         for name in entries:
             target = destination / name
-            if not target.exists():
-                # Exclusive creation also refuses files introduced since preflight.
-                with (stage / name).open("rb") as source, target.open("xb") as output:
-                    shutil.copyfileobj(source, output)
+            atomic_install(stage / name, target, entries[name]["sha256"])
     return manifest
 
 

@@ -1,0 +1,89 @@
+{
+  "schema": "pr8-low-statistical-diagnostics-v1",
+  "ad": {
+    "threshold": 0.4,
+    "aggregation": "unweighted mean over the same scorable cells",
+    "cells": 16,
+    "paired_scorable_cells": 13,
+    "out_rmse_greater_cells": 10,
+    "mean_out_rmse": 1.0745988944293148,
+    "mean_in_rmse": 0.7459355577464286,
+    "mean_out_mae": 0.8613820448109256,
+    "mean_in_mae": 0.548032320515946,
+    "limitations": "Subset R2 denominators differ; compare RMSE/MAE on paired cells too. Observational AD groups do not establish causality."
+  },
+  "a2a_source_concentration": {
+    "label_id": "b35580bb601adf4fb9e604dee3dd0f8989d11ebd4f14eaafc3e25a4e40f44b5b",
+    "test_cutoff": 2022,
+    "n_total": 1366,
+    "n_test": 802,
+    "test_fraction": 0.5871156661786238,
+    "raw_reconstruction_max_abs_error": 4.7002853520439203e-07,
+    "largest_source_document": "CHEMBL5728996",
+    "document_year": 2022,
+    "test_parents": 371,
+    "fraction_test": 0.4625935162094763,
+    "activity_rows": 378,
+    "parents_with_no_other_eligible_document": 371,
+    "ic50_nm_activity_row_counts": {
+      "30.0": 80,
+      "75.0": 77,
+      "300.0": 221
+    },
+    "assay_descriptions": [
+      "Activity Assay: Compounds (Adenosine Receptor modulators) and activity assay."
+    ],
+    "frozen_labels_for_source_parents": {
+      "6.522878646850586": 218,
+      "6.823908805847168": 2,
+      "7.022878646850586": 1,
+      "7.12493896484375": 74,
+      "7.323908805847168": 1,
+      "7.522878646850586": 75
+    },
+    "limitations": "Shared document and description are not proof of one laboratory batch; raw discrete IC50 values are source annotations, not independently verified precision. Parent medians can combine records/documents."
+  },
+  "rf_training_randomness": {
+    "published_rf_fits_per_target": 1,
+    "published_rf_random_state": 42,
+    "current_herg_ensemble_delta": 0.0219366644411478,
+    "review_five_random_states_r2_sd_claim": 0.006,
+    "five_state_claim_status": "review-reported, not independently reproduced; no five-fit artifact cohort identified",
+    "limitation": "Molecule bootstrap conditions on one RF fit. hERG input repair also retrained all three GIN seeds; before/after changes are not RF seed variance.",
+    "initial_summary_revision": "920bc28",
+    "initial_summary_sha256": "79f25dcb12e628c7f09233c7bdd01f15d9264d51c6d919837033180f325a4649",
+    "initial_herg_ensemble_delta": 0.0057484673533405,
+    "initial_herg_rf_r2": -0.0467437997176387,
+    "current_herg_rf_r2": -0.0555793514905869
+  },
+  "time_input_package": {
+    "bytes": 1415829,
+    "mib": 1.3502397537231445,
+    "sha256": "301d8e634ffd15feab6e92adaa5dc622900604faf1ebe78919568685670f686e"
+  },
+  "source_sha256": {
+    "results/uncertainty/a2a_random.csv": "0f307fe9fae974c5ea1bcf1301fb263b4ab0c29670d9f4b60c16877d67abf473",
+    "results/uncertainty/a2a_scaffold.csv": "b2d94ed35b5f14620ef42c52ee4cf54c47d8d23f6a0e8666a234856fb2290cd2",
+    "results/uncertainty/abl1_random.csv": "a6c5b45bb4db315f31b4d2f5c3236e3dfababc337cfaf0a4d21370a3af92603e",
+    "results/uncertainty/abl1_scaffold.csv": "93f3e93a9349232158ab00482445695f909e6a2c88e700e6366e62416c33c3b0",
+    "results/uncertainty/egfr_random.csv": "0e33aea8cf8831cf0ef9d1fb751a61dc8bfb98c5e9ff5fa389e5c8b58cb9d26e",
+    "results/uncertainty/egfr_scaffold.csv": "12d3a09ef35e2fbc0bafe50a8e9aa6c65bac45039cf0086ba63b11f64812218f",
+    "results/uncertainty/egfr_full_random.csv": "1afdd1568f2e769d53ece1bd724f544f403bcc39cd78da0ea07988c3ccaa1e1f",
+    "results/uncertainty/egfr_full_scaffold.csv": "a83147ef77b58311f72107b55ac8c02646ddbbe2cbb1717362791a9d0ae44d5c",
+    "results/uncertainty/herg_random.csv": "32156e95de9324df4ceaca3fc918f9b985fc31f48e2ae5f032871b3ea6d687ac",
+    "results/uncertainty/herg_scaffold.csv": "7db6f89d15b9885e5f067db92e47149b4424e00fd5bdeea2e48036c3014d14e2",
+    "results/uncertainty/hivpr_random.csv": "7f9fad7fe48fb0db99e2abb42ff2de4b2b405f7a3b00c7f9b962a4a089404a57",
+    "results/uncertainty/hivpr_scaffold.csv": "7cb7403e49cf3530aca5fee2ad4c3988ef40ee090f4757881a0391a88dc7fe39",
+    "results/uncertainty/mpro_random.csv": "b8e37d5cbfa851ed9c962bbb65532b06b7764216831e0c6ed3f65618bb7fb093",
+    "results/uncertainty/mpro_scaffold.csv": "11ac8b3d09c8b0b7ff130375d01727f7a30a155b0279397290bd2ca558378318",
+    "results/uncertainty/vegfr2_random.csv": "f1df5741883a981372d2f226a993bef916904b8f7a68b7a2c8ecf3daa8c6ae0a",
+    "results/uncertainty/vegfr2_scaffold.csv": "cbd0f667a793f4fb8f8d009515f61dcfd2d5f61dde79ba8ccb57f1cadcc133f4",
+    "data/raw/a2a_activities.csv": "145f6505eb4572bcf385877142d3da1468efce62ed6e7ec988ba71580fdabbe2",
+    "data/raw/document_years.csv": "98f08219c7bda9653528dc092dc1dc9a4ff9809abe76ab84e02b8131bd2b187b",
+    "data/processed/splits/a2a_time.npz": "5a28451cf757e4f547197bf7ae45701c496917e11cf07a699287fa7f7932eecd",
+    "scripts/02_clean_data.py": "1d57ddeb8c9ceea2787665ed15ec4979a2970d93aa05ca6d3ab9f0aca0d7b477",
+    "scripts/qsar_common.py": "86be4f6672aab3a9564a8e0c7e2213f0cab870154f2ea9b68b13b32c41bb250c",
+    "results/time_split/summary.csv": "6c28bef94b70cf027ca83a3bd578b297d627bf6ada2a4919aff87435f0b05c3d",
+    "results/time_split/initial_campaign_acceptance.json": "1d68bc99e43f603c1c9b36e36fd34fbd3ad782617457d8ddce6ffbfb836003af"
+  }
+}

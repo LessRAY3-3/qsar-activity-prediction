@@ -1,0 +1,85 @@
+{
+  "scope": "Ten specified acceptance mutations; not a reproduction of the original undisclosed sixteen",
+  "worker_sha256": "885da208868cf7d1441027972a2be2583b2b0371bcb665645b09d0e1d3ef8231",
+  "test_sha256": "90a50bc7328671d1f03e57826bfd32461bab4b56ea4da14af1273004d5d31571",
+  "rows": [
+    {
+      "case": "baseline",
+      "status": "passed",
+      "returncode": 0,
+      "mutated_source_sha256": "885da208868cf7d1441027972a2be2583b2b0371bcb665645b09d0e1d3ef8231",
+      "test": "tests/test_time_campaign_real.py"
+    },
+    {
+      "case": "checkpoint_label",
+      "status": "caught",
+      "returncode": 1,
+      "mutated_source_sha256": "de45a430c780bd5eae2545025a2ae22e177a63941208de4808b4202446bd1c7d",
+      "test": "tests/test_time_campaign_real.py::test_real_gin_checkpoint_corruption_rejected[label]"
+    },
+    {
+      "case": "checkpoint_arguments",
+      "status": "caught",
+      "returncode": 1,
+      "mutated_source_sha256": "7d9e77986da2fe89ee2e825105b0c21e27db6936b9679063eb9dcc62404db18f",
+      "test": "tests/test_time_campaign_real.py::test_real_gin_checkpoint_corruption_rejected[seed]"
+    },
+    {
+      "case": "finite_weights",
+      "status": "caught",
+      "returncode": 1,
+      "mutated_source_sha256": "5aa3290827266fc3337493286422b35a72af870a2b421cb2538fcdb0e2f11134",
+      "test": "tests/test_time_campaign_real.py::test_real_gin_checkpoint_corruption_rejected[nan]"
+    },
+    {
+      "case": "architecture_loading",
+      "status": "caught",
+      "returncode": 1,
+      "mutated_source_sha256": "5ab3de0fb9065ea901fc7ff0280dd434a37ca22c6a1c2934659d33bf8b7a2124",
+      "test": "tests/test_time_campaign_real.py::test_real_gin_checkpoint_corruption_rejected[shape]"
+    },
+    {
+      "case": "normalization",
+      "status": "caught",
+      "returncode": 1,
+      "mutated_source_sha256": "5815c65ad2879369427e42d265f7068894c804080e1d0d3f160858f39aac23ac",
+      "test": "tests/test_time_campaign_real.py::test_real_gin_checkpoint_corruption_rejected[bad_mean]"
+    },
+    {
+      "case": "prediction_label",
+      "status": "caught",
+      "returncode": 1,
+      "mutated_source_sha256": "3a6b67fed8a2379d2a95628434bcca9eae7fe329b74320bf7a5cfecdc8d3c87e",
+      "test": "tests/test_time_campaign_real.py::test_real_gin_checkpoint_corruption_rejected[prediction_version]"
+    },
+    {
+      "case": "metric_recomputation",
+      "status": "caught",
+      "returncode": 1,
+      "mutated_source_sha256": "26b0e276e9275f70adec32d3cf24c96b0b51f6b0a4b8345d76208bef7f8c2674",
+      "test": "tests/test_time_campaign_real.py::test_real_gin_checkpoint_corruption_rejected[metric]"
+    },
+    {
+      "case": "runtime_device",
+      "status": "caught",
+      "returncode": 1,
+      "mutated_source_sha256": "916bb4cc423a5f86bc327cd5aee957e9f3aea47e289f1db5cc28278234472901",
+      "test": "tests/test_time_campaign_real.py::test_real_gin_checkpoint_corruption_rejected[runtime]"
+    },
+    {
+      "case": "metric_label",
+      "status": "caught",
+      "returncode": 1,
+      "mutated_source_sha256": "6a6a52327454e5a43502150ad1db136bc38dad9bd17cb3a60ff8e06a7e2b4450",
+      "test": "tests/test_time_campaign_real.py::test_real_gin_checkpoint_corruption_rejected[metric_label]"
+    },
+    {
+      "case": "rf_label",
+      "status": "caught",
+      "returncode": 1,
+      "mutated_source_sha256": "0b1e8b7352c916ce9c41a073928e61e99824e0b251beadd744fcd52d3923b69c",
+      "test": "tests/test_time_campaign_real.py::test_real_fitted_rf_is_checked_and_wrong_generation_rejected"
+    }
+  ],
+  "all_caught": true
+}

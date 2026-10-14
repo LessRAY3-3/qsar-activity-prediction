@@ -114,6 +114,10 @@ def target_metadata(root, role):
 
 def make_manifest(root, role):
     root = Path(root).resolve()
+    top = subprocess.check_output(
+        ["git", "-C", str(root), "rev-parse", "--show-toplevel"], text=True).strip()
+    if Path(top).resolve() != root:
+        raise ValueError("bundle source must be the Git worktree root, not a nested directory")
     paths = data_paths(role) | set(SPECS)
     for folder in ("scripts", "experiments"):
         paths.update(str(p.relative_to(root)) for p in (root / folder).rglob("*.py"))
@@ -126,6 +130,10 @@ def make_manifest(root, role):
     status = subprocess.check_output(
         ["git", "-C", str(root), "status", "--porcelain", "--untracked-files=all",
          "--", "scripts", "experiments", *SPECS], text=True).splitlines()
+    ignored = subprocess.check_output(
+        ["git", "-C", str(root), "ls-files", "--others", "--ignored", "--exclude-standard", "-z",
+         "--", "scripts", "experiments", *SPECS]).decode().split("\0")
+    status.extend(f"!! {name}" for name in sorted(ignored) if name in paths)
     return {
         "schema": SCHEMA, "role": role,
         "source": {"git_head": head, "dirty": bool(status), "status": status,

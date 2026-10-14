@@ -13,6 +13,71 @@ results. The initial 2026-10-13 entry records the preceding campaign; its hERG
 scores and aggregate means are superseded. Earlier all-year-label time scores
 are historical only.**
 
+## 2026-10-14 — PR #8 Low tooling hardening
+
+- Restore publishes only complete files with atomic no-clobber semantics and
+  verifies all 24 GIN checkpoint label/role/seed records. Failed split
+  regeneration preserves the prior valid split rather than creating a failed
+  NA marker. Newly generated splits add full-payload integrity checks including
+  scaffold metadata; historical label IDs and frozen archives are unchanged.
+- Current workers verify complete manifests and record the bundle verifier's
+  source. Nested bundles no longer borrow the enclosing Git HEAD; included
+  ignored Python files are explicitly dirty. Publication journals support
+  explicit recovery after SIGTERM/SIGKILL; recovery does not start training.
+- Cross-review also caught a two-file publication boundary: a new timeline
+  could survive a failed NPZ install. A per-target lock and durable journal now
+  roll back pre-commit failures or recover a completed pair on the next run,
+  including SIGKILL before and after the NPZ commit point.
+- Real short CPU GIN training and real RF fitting exercise acceptance without
+  mocked model builders. Ten disclosed acceptance mutants were all caught;
+  these are not claimed to be the review's unpublished original sixteen.
+  Commit-signing settings no longer interfere with fixture repositories, and
+  the real CHEMBL2035183 regression fails explicitly if its RDKit premise changes.
+- No project experiment was retrained and no remote host was contacted in this
+  Low pass. Test-only tiny fits use temporary directories. The main campaign,
+  three-seed pilot and full eight-seed CPU study remain frozen; CUDA is deferred.
+- Validation: **553 tests passed, three existing warnings**; Ruff and diff
+  checks passed. Logs, all ten disclosed mutation cases and compatibility
+  evidence for eight legacy splits / 24 checkpoints are committed under
+  `logs/pr8_low_20261014/`. The two intermediate test failures were stale
+  presentation assertions; the final test preserves the numerical and
+  data-dependent warning checks with the corrected protocol wording.
+
+## 2026-10-14 — PR #8 Low statistical and presentation corrections
+
+- **Independent diagnostics:** `experiments/low_review_diagnostics.py` writes
+  `results/review_low_diagnostics/` without fitting or changing models.
+  RF AD absolute errors are recomputed from per-molecule predictions. On the
+  same 13 scorable cells, out-AD RMSE is greater in 10/13; mean RMSE is
+  1.074599 outside vs 0.745936 inside, mean MAE 0.861382 vs 0.548032.
+  Subset label variances are retained because R² denominators differ.
+- **A2A source audit:** document CHEMBL5728996 (2022) supplies 371/802 test
+  parents, 46.26%, via 378 exact rows at 30/75/300 nM (80/77/221 rows).
+  Parent medians produce six frozen label levels. All 802 as-of test labels
+  reconstruct within 4.71e−7. One document/description is not proof of a
+  single experimental batch; source dependence and discretization are caveats.
+- **RF uncertainty:** each published temporal RF uses one seed-42 fit.
+  The hERG ensemble Δ moves +0.005748 → +0.021937 between the initial and
+  repaired campaigns; the initial summary hash matches its acceptance record.
+  That change includes input correction and GIN retraining, so it is not an
+  RF seed experiment. A review's five-state R² SD ≈0.006 is explicitly
+  attributed to the review and not claimed as independently reproduced.
+  A fixed-input, fixed-hyperparameter five-refit supplement is documented but
+  has not been run; model and prediction files remain unchanged.
+- **Presentation:** protocol comparisons explicitly distinguish random/scaffold
+  all-year labels from temporal as-of labels, rather than attributing the
+  contrast to splitting alone. The actual A2A test share is 802/1366 = 58.71%,
+  and historical .62 references remain historical. Corrected frozen package
+  size is 1,415,829 bytes (1.350 MiB), not 2.1 MiB. Historical entries point to
+  their own acceptance/revision and do not overwrite later current results.
+- **Scope:** existing eight-seed CPU/pilot outcomes, model parameters and main
+  numerical metrics are untouched. No additional training or CUDA connection.
+  The pending CUDA comparison retains the published extension-input bundle
+  `8521063` and training core `90a4700`; current worker/label Low fixes must
+  not be substituted into that experiment. External validation/restoration
+  may improve while the executed training package remains immutable. Replay
+  continues to use the archived original inputs.
+
 ## 2026-10-14 — post-pilot expansion to eight seeds per environment/budget cell
 
 - **Decision chronology:** the M3 three-seed pilot was completed, accepted and
@@ -251,7 +316,7 @@ connection message.
   bootstrap retains four GIN wins, two RF wins and two intervals containing
   zero. Eight-row means are RF −0.034, GIN per-seed +0.022, ensemble +0.062.
   The original uncertainty and overlapping-target caveats still apply.
-- **Reproduction:** publish the eight frozen splits as a 2.1 MiB package in
+- **Reproduction:** publish the eight frozen splits as a 1,415,829-byte (1.350 MiB) archive in
   `results/time_split/inputs/`. `scripts/restore_time_inputs.py` verifies hashes,
   split signatures and all prediction/metric label versions before restoration.
   Conflicting local inputs are refused. The as-of constant baseline now reads
@@ -292,8 +357,10 @@ connection message.
 - **Results:** B=10,000 paired molecule bootstrap of the three-seed
   ensemble favours GIN on a2a/egfr_full/hivpr/mpro and RF on abl1/vegfr2;
   egfr/herg intervals contain zero. Unweighted mean time R² is RF −0.033,
-  GIN per-seed +0.020, GIN ensemble +0.061. Current figures and README
-  report negative scores, train-only constant baselines and uncertainty.
+  GIN per-seed +0.020, GIN ensemble +0.061. The figures and README at that
+  initial revision reported these values; the hERG repair entry supersedes
+  those aggregate means. Train-only constant baselines and uncertainty remain
+  documented in the current report.
   These intervals condition on fitted seeds; targets include overlapping
   EGFR datasets and are not independent replications.
 - **Integration:** archived previous temporal artifacts before replacing
