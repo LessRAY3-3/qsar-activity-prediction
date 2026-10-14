@@ -1140,6 +1140,63 @@ SSH/shell transcript, and do not establish every historical invocation. Their
 purpose is to expose the historical implementation; the supported read-only
 re-audit commands are the parameterized commands above.
 
+### Follow-up: a matched environment × training-budget study
+
+The follow-up is part of the project as a 2 × 2 comparison, separate from the
+accepted temporal results above. The M3 CPU campaign is currently executing its
+48-job queue. The 4070 CUDA campaign will start only after the user connects that
+machine and gives the connection-ready message; its two arms are still pending.
+
+| Execution environment | Original budget | Extended budget |
+| --- | --- | --- |
+| M3 Max CPU | 24 jobs in the current M3 campaign | 24 jobs in the current M3 campaign |
+| Ubuntu / RTX 4070 Laptop CUDA | 24 fresh jobs, awaiting connection | 24 fresh jobs, awaiting connection |
+
+Each cell covers all eight targets and seeds 42/1/2. The original budget is
+`epochs=100, min_epochs=0, patience=20`; the extended budget is
+`epochs=200, min_epochs=60, patience=40`. Thus the full study has 96 jobs, with
+48 per environment. Both budgets retain the same learning-rate scheduler; this
+is not an architecture or learning-rate search. The current M3 coordinator,
+`scripts/run_time_budget_study.py`, isolates the two arms from the input bundle
+and published outputs, records its protocol, and resumes only verified jobs.
+The pending CUDA deployment must use the same frozen training source and input
+versions as the M3 study; the historical accepted CUDA runs are reference data,
+not substitutes for a newly matched cell in this design.
+
+Freeze the labels, split indices, graph caches, model architecture, optimizer,
+scheduler, seeds and lowest-validation-RMSE checkpoint-selection rule across all
+four cells. Record the source/input hashes, actual device, package versions,
+operating system, thread/concurrency settings and numerical execution settings.
+Keep execution settings consistent between the two budgets within each
+environment. The environment contrast still combines CPU/CUDA, operating system,
+processor architecture, library builds and numerical kernels; it must be called
+an **environment effect**, not a pure causal hardware effect. Matching seed
+numbers enables paired reporting but does not imply bit-identical optimization
+across CPU and CUDA.
+
+For each target and seed, report both budgets in both environments, including
+best epoch, stopping epoch, best-checkpoint eval training MSE, validation RMSE,
+test metrics and runtime. The primary comparison concerns training/validation
+behavior; test scores are a secondary report for the complete prespecified
+cohort. Do not select budgets, seeds or replacement models from test performance.
+Use a common supplementary flag (`best_epoch < 30` and standardized training
+MSE > 0.5) across both budgets, rather than allowing the diagnostic threshold to
+double with `max_epochs`. This flag remains a heuristic, not proof of failure
+to converge.
+
+For any reported metric, let `M(environment, budget)` denote its value for the
+same target/seed. Calculate the paired budget contrast
+`M(environment, extended) − M(environment, original)` within each environment,
+the paired environment contrast `M(CUDA, budget) − M(CPU, budget)` at each
+budget, and their interaction as the CUDA budget contrast minus the CPU budget
+contrast. Preserve the target/seed rows and paired contrasts alongside any
+aggregate tables or uncertainty summaries; four grand means alone conceal
+heterogeneity. Lower loss and higher R² have opposite favorable directions.
+Targets include overlapping datasets and three seeds provide limited training
+replication, so aggregate uncertainty must not treat all rows as independent.
+No study outcome or improvement is claimed in advance, and the original accepted
+weights, predictions and metric history remain unchanged.
+
 ### Frozen inputs and local preparation
 
 The coordinator copies and hashes the 25 existing input files (document

@@ -13,7 +13,7 @@
       },
       {
         "path": "figures/time_split/panel_3splits.png",
-        "sha256": "5fe784f1e996ce7e82b3232db89d00bfbecd3567a5f2c8e15e23693655737876"
+        "sha256": "50783d490a69e0631d297623d1f824b9000fc1f6630f357b75db2f068d8fe187"
       },
       {
         "path": "figures/significance/ci_panel_time.png",
@@ -24,7 +24,31 @@
     "frozen_input_manifest_sha256": "d341acc273682f75482370359597ed7970387ea2ca174e0c8ba7d6823d9dc697",
     "label_audit_sha256": "df4f9b0d4fea753d3065757263b82354d14b4897a9035de58dceb342ca587d49",
     "paired_bootstrap_replicates": 10000,
+    "presentation_revision": {
+      "change": "Panel title updated to describe protocol comparison; numerical CSVs unchanged.",
+      "script_sha256": "c6a54e0e516ad1ed816102c5f8f6cb5cb4be308a308695a9e5e9240b6a432ff2",
+      "source_commit": "3da94f118a8c68dd2d1d5ec98e6e9278751b4be8"
+    },
     "source_commit": "0b4fb296568452b86b74eb82b12177f289661957"
+  },
+  "baseline_diagnostics": {
+    "bootstrap_replicates": 10000,
+    "file": "results/time_split/baseline_diagnostics.csv",
+    "script": "experiments/time_baseline_diagnostics.py",
+    "script_sha256": "7d964b67f9198360edcc3250a32f2983b6baaf11694714737dbbb4f125caaceb",
+    "seed": 42,
+    "sha256": "54a9de9d1aeaba7db39231e34cbc86f7e122e190ece63a1a9725ff98b8e1359e"
+  },
+  "best_checkpoint_diagnostics": {
+    "definition": "best_epoch < 0.3 * max_epochs and standardized train MSE > 0.5, evaluated on the restored checkpoint without dropout",
+    "file": "results/time_split/checkpoint_diagnostics.csv",
+    "flagged": 13,
+    "jobs": 24,
+    "original_model_and_metric_files_preserved": true,
+    "script": "experiments/time_checkpoint_diagnostics.py",
+    "script_sha256": "6a2fd8111cb5ca3548ada998c2cb3b87edb5dc4048e087038c5d58f3e1af92e5",
+    "sha256": "64e1f64616b18d12018a1bf4832f696745b276a49a4c87aaadd0103c5aed6ec6",
+    "training_performed": false
   },
   "checks": {
     "checkpoint_loading": true,
@@ -34,9 +58,9 @@
     "prediction_replay": true,
     "source_input_label_hashes": true
   },
-  "gin_convergence_flags": 0,
   "gin_jobs": 24,
   "gin_max_cuda_replay_abs_error": 9.5367431640625e-07,
+  "gin_original_last_epoch_flags": 0,
   "hosts": {
     "coordinator": "M4 MacBook Air, 10 CPU cores, 16 GiB RAM",
     "gin": "RTX 4070 Laptop GPU, 8 GiB VRAM, CUDA 12.6",
@@ -3766,6 +3790,18 @@
   "jobs_accepted": 32,
   "label_policy": "exact-dated-asof-v1",
   "legacy_artifacts_git_revision": "7ce15c1f0849ae69e0ca208f781a9824517eb328",
+  "pr8_followup_verification": {
+    "checkpoint_count": 24,
+    "checkpoint_train_mse_flags": 13,
+    "diff_check": "passed",
+    "label_mutants_detected": 6,
+    "label_mutants_tested": 6,
+    "models_and_predictions_changed": false,
+    "pytest_passed": 412,
+    "pytest_warnings": 3,
+    "ruff": "passed",
+    "study_status": "M3 environment ready; frozen-source two-budget sensitivity study prepared; new CUDA arms await user connection"
+  },
   "repair": {
     "accepted_at": "2026-10-13T16:41:32.068641+00:00",
     "independent_data_and_gin_review": "results/time_split/repair_independent_review.json",

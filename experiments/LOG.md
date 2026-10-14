@@ -13,12 +13,15 @@ results. The initial 2026-10-13 entry records the preceding campaign; its hERG
 scores and aggregate means are superseded. Earlier all-year-label time scores
 are historical only.**
 
-## 2026-10-14 — PR #8 review corrections and an authorized budget comparison
+## 2026-10-14 — PR #8 review corrections and an environment × budget study
 
 This entry records review corrections to the current repaired campaign. The
 published model weights, predictions and historical metric JSON entries are
-preserved. New diagnostics are separate artifacts; the two-budget follow-up
-described below was authorized but **had not started when this entry was written**.
+preserved. New diagnostics are separate artifacts. The authorized follow-up now
+forms a 2 × 2 environment/budget study: the M3 CPU campaign is executing its
+48-job queue; the 4070 CUDA campaign's 48 jobs must wait until the user connects
+that machine and tells the coordinator to proceed. This update supersedes the
+earlier plan's "not yet started" status; it does not report completed study results.
 
 - **T1 — resampling-unit sensitivity:** the existing 24-cell scaffold comparison
   covers eight targets and GIN/GINE/AttentiveFP. Seven of ten molecule-bootstrap
@@ -79,15 +82,31 @@ described below was authorized but **had not started when this entry was written
 - **Additional guard:** learning-curve, y-randomization and XGBoost auxiliary
   commands now reject unsupported `time` splits explicitly, instead of silently
   applying their random/scaffold label path to temporal data.
-- **Authorized follow-up, not yet executed:** compare both budgets on M3 in the
-  same environment: original `epochs=100, min_epochs=0, patience=20` versus
-  extended `epochs=200, min_epochs=60, patience=40`, each over eight targets and
-  seeds 42/1/2 (**48 jobs total**). The worker now exposes these budget arguments
-  and records them in job provenance. No follow-up scores or convergence claims
-  are available yet; current accepted results remain the reference. Both arms
-  must share the same frozen inputs and environment so budget effects are not
-  conflated with the previous CUDA-versus-M3 environment difference. This plan
-  does not authorize selecting seeds or replacement results by test performance.
+- **Authorized 2 × 2 follow-up:** both M3 CPU and 4070 CUDA run the original
+  budget (`epochs=100, min_epochs=0, patience=20`) and the extended budget
+  (`epochs=200, min_epochs=60, patience=40`). Each cell contains eight targets ×
+  seeds 42/1/2: **24 jobs per cell, 48 per environment, 96 total**. M3 is the
+  current executing campaign; the fresh 4070 pair is waiting for the user's
+  connection message. All four cells must use the same frozen current labels,
+  split indices, graph inputs, training-source revision, model, optimizer,
+  scheduler and validation-selection rule. Only the declared budget and
+  environment factors differ; environment versions and execution settings are
+  recorded rather than assumed equivalent.
+- **Analysis and interpretation:** retain every target/seed result and its
+  paired contrasts, not only four aggregate averages. Compare extended minus
+  original within each environment, CUDA minus CPU at each budget, and the
+  difference between the two within-environment budget contrasts. Primary
+  diagnostics are best-checkpoint eval training MSE and validation RMSE; report
+  the full cohort's test scores secondarily without selecting budgets, seeds or
+  replacement models by those scores. The common early-fit diagnostic uses
+  `best_epoch < 30` and standardized train MSE > 0.5 in both budget arms, avoiding
+  a changed threshold merely because the maximum epoch count doubled. Operating
+  system, architecture, numerical kernels and underlying libraries remain
+  bundled with device, so the comparison estimates an **environment-associated
+  difference, not a pure causal hardware effect**. Longer training is not
+  presumed better. The old accepted CUDA fits remain historical references and
+  are not substituted for the newly matched original-budget CUDA cell; all
+  existing accepted results remain intact while the study is performed.
 
 ## 2026-10-14 — hERG parent-key repair and reproducible temporal inputs
 
