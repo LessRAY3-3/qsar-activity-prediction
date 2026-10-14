@@ -108,7 +108,7 @@ def _record_forest(monkeypatch):
         if len(args) >= 2:
             try:
                 plots.append((float(np.ravel(args[0])[0]),
-                              float(np.ravel(args[1])[0])))
+                              float(np.ravel(args[1])[0]), dict(kwargs)))
             except (TypeError, ValueError):
                 pass
         return orig_p(self, *args, **kwargs)
@@ -185,6 +185,7 @@ def test_combined_forest_fallback_draws_whisker_and_centre_from_panel(
     assert (lo, hi) == (0.30, 0.40)        # panel summary, not the cell CSV
     fb_markers = [p for p in plots if abs(p[1] - y_fb) < 1e-9]
     assert len(fb_markers) == 1
+    assert fb_markers[0][2]["markerfacecolor"] == "white"
     assert fb_markers[0][0] == pytest.approx(0.35)   # same file as whisker
 
     # a cell summary_gine carries keeps summary_gine for whisker AND centre,

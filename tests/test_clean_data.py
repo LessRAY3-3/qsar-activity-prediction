@@ -71,7 +71,7 @@ def _run_02(tmp_path, load_script, rows, capsys, tag=None):
     out = capsys.readouterr().out
     clean = pd.read_csv(clean_csv)
     # deterministic row order for downstream npz alignment
-    assert clean["parent_smiles"].is_monotonic_increasing
+    assert clean["parent_smiles" if "parent_smiles" in clean else "canonical_smiles"].is_monotonic_increasing
     return clean, out
 
 
@@ -358,3 +358,38 @@ def test_padded_relation_values_still_count_as_exact(
     assert len(clean) == 2  # the two padded-equals rows survive
     assert set(clean["parent_smiles"]) == {"c1ccncc1", "c1ccoc1"}
     assert "removed 1 non-exact rows" in out
+
+
+@pytest.mark.parametrize("cause", ["all_censored", "all_wrong_units", "all_missing_smiles", "all_nonpositive", "empty_raw"])
+@pytest.mark.parametrize("existing_output", [False, True])
+def test_no_usable_rows_refuses_empty_success_and_preserves_output(
+        tmp_path, load_script, cause, existing_output):
+    rows = [_row("CHEMBL1", "CCO", 100.0, "=")]
+    if cause == "all_censored":
+        rows[0]["standard_relation"] = ">"
+    elif cause == "all_wrong_units":
+        rows[0]["standard_units"] = "uM"
+    elif cause == "all_missing_smiles":
+        rows[0]["canonical_smiles"] = " "
+    elif cause == "all_nonpositive":
+        rows[0]["standard_value"] = 0
+    mod, output = _prepare_02(tmp_path, load_script, rows)
+    if cause == "empty_raw":
+        pd.DataFrame(columns=list(rows[0])).to_csv(mod.IN_CSV, index=False)
+    original = b"preserved existing clean output\n"
+    if existing_output:
+        output.write_bytes(original)
+    with pytest.raises(SystemExit, match="no usable exact measurements"):
+        mod.main()
+    assert output.read_bytes() == original if existing_output else not output.exists()
+
+
+def test_bace_regeneration_preserves_legacy_charges_and_schema(tmp_path, load_script, capsys):
+    rows = [_row("BACE_1", "CC(=O)[O-]", 100., relation=None, pchembl=7.),
+            _row("BACE_2", "CC(=O)O", 10., relation=None, pchembl=8.)]
+    clean, _ = _run_02(tmp_path, load_script, rows, capsys, tag="bace")
+    assert list(clean.columns) == ["canonical_smiles", "pic50", "ic50_nm_median",
+                                   "n_measurements", "molecule_chembl_id", "target"]
+    assert set(clean.canonical_smiles) == {"CC(=O)[O-]", "CC(=O)O"}
+    assert len(clean) == 2  # the charged and neutral inputs must not collapse
+    assert clean.set_index("canonical_smiles").loc["CC(=O)[O-]", "pic50"] == 7.

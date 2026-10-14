@@ -136,12 +136,13 @@ What was rebuilt (commits `d1bebd9` -> `e37c572`, raw re-download
   `docs/reviews/readme-numbers-2026-10-11.md` appendix A.2);
 - fingerprints, graph caches, random/scaffold/time splits and
   `document_years.csv` re-derived from the new parents.
-- **BACE regeneration (disclosure).** Although the rebuild left BACE
-  alone, current `02` still applies its `Uncharger` parent step to BACE:
-  re-running it would change **838 of the 1,513** committed BACE
-  fingerprints (the committed BACE files predate that path), so BACE
-  cannot be regenerated bit-identically with today's code even though
-  its labels are unchanged.
+- **BACE regeneration (repaired 2026-10-14).** BACE retains its legacy
+  raw canonical SMILES, charges, schema and row order through an explicit
+  BACE-only cleaning path. Applying the ChEMBL Uncharger pathway would have
+  changed 838/1,513 fingerprints; it is no longer used for BACE. A temporary
+  regeneration from the actual raw BACE file reproduces all 1,513 committed
+  rows and labels exactly (`logs/all_pr_review_20261014/bace_regeneration.json`),
+  without overwriting the frozen clean data or changing ChEMBL parent handling.
 
 Recomputed **after** the rebuild (historical status at 2026-10-12; its time
 outputs were superseded by the corrected campaign below):
@@ -266,11 +267,19 @@ point reads **+0.020** (per-seed-mean) while its own ensemble CI is
 **[+0.030, +0.092]**, so the point sits outside "its own" interval
 purely because of the convention difference (`experiments/afp_panel.py`
 documents both). One more reference column: `d_*_seed42_*` is the
-single-seed convention, reference only - one seed carries ±0.02 of
-spread on the scaffold score, so a ±0.03 single-seed "win" is
-indistinguishable from noise. Whether any given Δ is separable from
-resampling noise is answered solely by the paired bootstrap under
-"Statistical significance" below.
+single-seed convention, reference only. Some scaffold cells show seed
+spread of about 0.02, so a single-seed margin should not be generalized
+to the training procedure without checking seed sensitivity. Whether any given Δ is separable from
+test-molecule resampling noise is assessed by the paired bootstrap under
+"Statistical significance" below; it does not cover every uncertainty source.
+
+**Multiplicity.** The per-cell 95% intervals and counts are exploratory and
+uncorrected across targets, splits and architectures. They do not provide
+simultaneous 95% panel coverage. The bootstrap sign fraction is not a
+calibrated null p-value; converting it to `2 × min(f, 1−f)` and applying
+Bonferroni (as in the earlier review) does not establish formal family-wise
+error control. No adjusted significance claim is made. Seed deletion and
+scaffold-cluster resampling are separate sensitivity analyses.
 
 ## GNN model & graph featurization
 
@@ -295,9 +304,12 @@ Historical random/scaffold device evidence remains scoped to committed logs:
 the non-egfr GIN cells and the GINE/AttentiveFP campaigns used win4070
 (`logs/win4070_/`, `device=cuda`). The 2026-10-12 rerun of stalled
 `abl1`/scaffold AttentiveFP seed 42 ran under local MPS
-(`logs/review11_n3_afp_abl1_scaffold_s42_min60.log`), as did the 2026-10-11
-learning-curve, y-randomization and multitask auxiliary batches
-(`logs/aux_m4_*.log`, `logs/multitask.log`). The refreshed `egfr` GIN
+(`logs/review11_n3_afp_abl1_scaffold_s42_min60.log`). The 2026-10-11
+learning-curve and y-randomization batches are associated with
+`logs/aux_m4_*.log`, but those logs do not record a device. The refreshed
+2026-10-11 multitask rerun has no committed training log and its device is
+unrecorded. `logs/multitask.log` records the superseded 2026-10-04 M3 Max
+run (egfr_full test n=2,700), not the refreshed results (n=2,146). The refreshed `egfr` GIN
 random scores (0.6694 / 0.6608 / 0.6636) and scaffold scores
 (0.6308 / 0.6074 / 0.5991) have no committed training logs. They are not the
 pre-re-pull `egfr` runs in `logs/win4070_/win4070_gin_c.log` and their device
@@ -444,7 +456,7 @@ separable from resampling noise - analysis only, nothing is retrained:
   by ~0.023.
 - **Single-seed dependence - one standard for every model.** Every
   verdict above is the paired-bootstrap CI of the 3-seed ensemble; a
-  verdict that changes when any one training seed is dropped is
+  verdict that changes when at least one training seed is dropped is
   *conditional* on that seed. Recomputing the same B = 10,000 bootstrap
   over all 48 random/scaffold GIN, GINE and AttentiveFP cells with each
   seed omitted in turn (ensemble = mean of the two kept seeds):
@@ -458,9 +470,11 @@ separable from resampling noise - analysis only, nothing is retrained:
   42 -> +0.003 [−0.031, +0.035]) and on seed 1; AFP `herg`/scaffold on
   seed 1 (drop seed 1 -> +0.031 [−0.002, +0.063]). Only GINE
   `abl1`/scaffold survives every drop (worst +0.047 [+0.017, +0.080]).
-  The asymmetry strengthens the headline: 20 of the RF's 21 wins
-  survive every drop, while 4 of the 5 GNN wins do not - the GNN wins
-  are mostly seed-sensitive, the RF wins are not.
+  This perturbation changes only the GNN arm and reduces ensemble size.
+  For predictions p_k and their mean m, mean_k (y−m_{−k})² equals
+  (y−m)² + mean_k (p_k−m)²/4, so averaging the three drops necessarily
+  worsens the GNN ensemble MSE. The asymmetry is not evidence that RF
+  wins are robust to RF training seeds; RF randomness was not varied.
 - **GINE** (`--model gine`, `results/significance/summary_gine.csv`):
   **all 16 cells have a CI** (frozen-recipe per-seed predictions for
   every tag, incl. `abl1`/`herg`/`vegfr2`): **1 favours GINE**
@@ -587,18 +601,35 @@ the fitted GIN ensemble; it does not cover RF training randomness. The hERG
 repair changed ensemble ΔR² from +0.005748 to +0.021937, but also changed the
 training input and retrained all three GIN seeds, so this is not an estimate
 of RF seed variance. A review mentioned R² SD ≈ 0.006 across five RF random
-states; no corresponding five-fit cohort was found in the published artifacts,
-and that review-reported value has not been independently reproduced here.
+states; its limitations section says only a2a RF was retrained, so the
+number must not be attributed to hERG. No corresponding five-fit cohort,
+seed list or configuration was found in the published artifacts, so that
+historical experiment remains unverified. The separate follow-up below
+provides new, reproducible evidence rather than claiming to identify that cohort.
 
-A reproducible supplementary RF sensitivity run should fix the current
-`{tag}_time.npz` label ID and train/test indices, fingerprint cache and selected
-`best_params_time`, then refit cloned RF estimators with random states
-**42, 1, 2, 3, 4** on that same train pool. Save each seed's parameters,
-input hashes and predictions in a separate directory; report per-seed R²/RMSE,
-the declared population SD, and Δ against the unchanged GIN ensemble. This
-measures refit randomness conditional on selected hyperparameters, not search
-or data-sampling uncertainty. It is a proposed supplement, not an experiment
-performed in this Low-fix pass; do not replace the published seed-42 fit.
+**Independent supplement completed 2026-10-14.**
+`experiments/rf_seed_sensitivity.py` fixes the current a2a and hERG
+`{tag}_time.npz` label IDs and train/test indices, fingerprint caches and
+selected `best_params_time`, then refits RF estimators on the same train-only
+pools with random states **42, 1, 2, 3, 4** (no renewed hyperparameter search).
+Both historical and current sklearn versions are 1.9.1.
+
+| Target | Mean RF R² | Population SD (ddof=0) | Sample SD (ddof=1) | Observed R² range |
+|---|---|---|---|---|
+| a2a | −0.305437 | 0.023457 | 0.026225 | [−0.344882, −0.273178] |
+| hERG | −0.051668 | 0.005488 | 0.006136 | [−0.058191, −0.042333] |
+
+Against the unchanged GIN ensemble, GIN-minus-RF Δ ranges from +0.388554
+to +0.460259 on a2a and +0.008691 to +0.024549 on hERG. These observed
+five-seed ranges are **not confidence intervals**. The hERG sample SD rounds
+to 0.006, but matching that rounded value cannot identify the unpublished
+review cohort. Seed-42 predictions reproduce the published fits within
+2e−15, and all ten prediction metrics were independently recomputed to
+1e−12 with source/input hashes verified. `results/rf_seed_sensitivity/`
+contains per-run R²/RMSE/MAE, predictions, both SD conventions and provenance.
+This measures refit randomness conditional on selected hyperparameters, not
+search or data-sampling uncertainty. The published seed-42 models and GIN
+checkpoints were not replaced.
 
 **A2A document concentration, checked against raw rows and frozen labels.**
 `CHEMBL5728996` (2022) contributes 378 eligible exact nM activity rows for
@@ -620,6 +651,16 @@ CSVs. `results/review_low_diagnostics/` contains source hashes, document counts,
 subset metrics, and an initial hERG summary read from Git `920bc28` whose hash
 is verified against `initial_campaign_acceptance.json`. A shallow checkout
 without that Git blob explicitly reports the historical comparison unavailable.
+
+**Current time seed sensitivity.** The published
+`.claude/skills/qsar-review/scripts/single_seed_verdicts.py` recomputes all
+8 current time cells with each of three GIN seeds removed (B=10,000, seed=42).
+All 24 deletions preserve the full-ensemble verdict: 0/8 conditional cells.
+The historical hivpr/time conditional result has been superseded by corrected
+as-of-label predictions. Input hashes and numerical results are saved in
+`logs/all_pr_review_20261014/seed_sensitivity.json`; the same run reproduces
+14/48 conditional random/scaffold cells. As above, this changes only GIN
+seeds and ensemble size, not RF training randomness.
 
 **Current results.** Unweighted means over the eight tags are RF **−0.034**,
 GIN per-seed **+0.022**, and GIN ensemble **+0.062** time R2. The ensemble
@@ -666,7 +707,13 @@ The old all-year-label scores and MSE decomposition in
 in Git revision `7ce15c1` and a coordinator scratch archive. They cannot be
 recomputed from the replaced current prediction files. Their level and
 Shapley-allocated spread/correlation terms were arithmetic descriptions of
-those old predictions, not causal evidence.
+those old predictions, not causal evidence. Only the level term and total
+are allocation-independent; spread and correlation share an interaction
+term, so their magnitudes (and sometimes signs) depend on the allocation
+convention. For the archived a2a example, assigning spread first versus
+correlation first changes the spread term from −0.128 to +0.143; this does
+not change the total. The same convention limit applies to the current
+symmetric decomposition.
 
 ## Uncertainty & applicability domain
 
@@ -716,7 +763,7 @@ units) but **degraded** test R2 (0.525 vs 0.544): with only ~490
 validation molecules, best-epoch selection was fitting validation noise.
 All three configs land at test R2 0.52-0.54, so the simplest recipe was
 kept as the final model rather than reporting a best-of-three test
-number. Tuning artifacts (pre-refresh, 2026-10-09) are kept under
+number. Tuning artifacts (run 2026-09-24, pre-refresh; archive dated 2026-10-09) are kept under
 `results/_archive-2026-10-09/` (`gnn_metrics_egfr_tuneA/B.json`,
 `gnn_preds_egfr_scaffold_tuneA/B.npz`, `egfr_gin_scaffold_tuneA/B.pt`).
 
@@ -731,9 +778,12 @@ number. Tuning artifacts (pre-refresh, 2026-10-09) are kept under
   not identify assay noise as their cause: common representation limits,
   distribution shift and label noise are alternative explanations. Independent
   assay-level evidence would be needed for a data-quality conclusion.
-- Failure modes still differ by chemotype. On the refreshed scaffold
-  test set, the documented thienopyrimidine series (n=47) costs RF 1.32
-  mean |error| vs GIN 1.02, while the 4-anilinoquinoline series (n=88,
+- The displayed error analysis uses GIN seed 42. On the refreshed scaffold
+  test set, the documented thienopyrimidine series (n=47) costs RF 1.318
+  mean |error| vs GIN 1.021. The GIN values are 1.325 and 0.996 for
+  seeds 1 and 2, so the direction changes for seed 1. It is a seed-specific
+  case study, not a stable architecture-level chemotype advantage. For seed 42,
+  the 4-anilinoquinoline series (n=88,
   scaffold `c1ccc(Nc2ccnc3ccccc23)cc1`) costs the GIN more - RF 0.779 vs
   GIN 0.962; the quinazoline series proper is the largest scaffold in
   the test set (n=355, `c1ccc(Nc2ncnc3ccccc23)cc1`), where the two
@@ -891,10 +941,17 @@ stochastic path into the fit, so `random_state` changes nothing and the
 three "seed" runs are identical models - the reported std=0 describes
 repeated deterministic fits, not data- or split-level uncertainty, and
 no algorithm change is needed to manufacture seed spread. Second
-negative result: on this featurization, boosting machinery buys nothing
-over bagging across the panel - 11 of the 16 same-pool cells are ≤ RF
-(the five exceptions all ≤ +0.032; worst cell `hivpr`/scaffold
-−0.080).
+comparison: on this featurization, 11 of the 16 same-pool XGBoost
+point estimates are ≤ RF (worst cell `hivpr`/scaffold −0.080). This
+does not rule out individual gains. The independent deterministic refits
+in `experiments/xgboost_paired.py` reproduce all 16 historical scores
+exactly under 3.4.1 and save predictions in `results/xgboost_paired/`.
+Paired molecule resampling (B=10,000, seed=42) yields 6 RF wins, 1 XGB
+win and 9 intervals containing zero; hERG/scaffold favours XGBoost by
++0.032 [+0.014, +0.051]. These are unadjusted per-cell 95% intervals
+conditional on fixed fitted models. They cover test-molecule resampling,
+not training randomness or scaffold-group dependence. Deterministic
+training is not a reason to omit this uncertainty analysis.
 
 ![xgboost](../figures/xgboost/xgboost_egfr.png)
 
@@ -946,8 +1003,9 @@ side).
 
 ## Multi-task details: sharing & head capacity
 
-**Observed result:** the tested pooled and MT configurations trail both the
-single-task GIN and RF in all six cells. On `vegfr2`, pooled scores
+**Observed mean-score result:** the tested pooled and MT configurations
+trail both the single-task GIN and RF in all six cells under the per-seed-mean
+convention. This is not a significance verdict for every fitted ensemble. On `vegfr2`, pooled scores
 0.309/0.240 versus single-task GIN 0.605/0.583; MT scores 0.510/0.533.
 MT averages about +0.09 above pooled, largely carried by `vegfr2` (the
 other four cells average +0.01); `egfr_full`/scaffold MT is below pooled.
@@ -1745,3 +1803,38 @@ archived before replacement, and only the `time` / RF `best_params_time`
 metric entries were merged, preserving all random/scaffold entries.
 The acceptance record preserves per-job hashes and environments independently
 of subsequent documentation and result-publication changes.
+
+
+### Full PR review and Release installation audit (2026-10-14)
+
+`results/review_all_prs/audit.json` maps all eight PR discussions and six
+review reports to code, statistics and documentation dispositions. Historical
+reports remain historical: a corrected claim is not automatically an instruction
+to change the model or statistical procedure. Original unpublished mutation
+patches and some training logs remain unavailable; the ledger names those limits.
+
+The actual `artifacts-v2` archives were installed in a separate scratch tree:
+18 random/scaffold RF models, 9 fingerprint caches and all 11 pinned raw files;
+no historical temporal model was installed. The archive member inventory,
+archive hashes and fetcher hash are in
+`logs/all_pr_audit_20261014/release_install.json`. The original packaging command
+was not recorded and is not inferred from the member list. Repeat the audit with:
+
+```bash
+python scripts/verify_release_install.py \
+  --work-dir .scratch/release-install-audit \
+  --report .scratch/release-install-audit-report.json
+```
+
+This downloads real Release archives and verifies/installs them in the isolated
+scratch tree. Optional `--metadata` accepts saved GitHub Release API metadata
+for asset discovery; archive download and hash checks still run normally.
+The fetcher installs only the named key files. Model/cache installation receipts
+bind every installed file hash to the current archive hash; completeness alone
+no longer permits skipping corrupt or stale files. Receipts establish consistency,
+not publisher authenticity. Safe tar root directories and ordinary AppleDouble
+sidecars are tolerated after path/type validation. Existing replaced files survive
+under `.artifacts_cache/backups/`; failed rollback leaves `.fetch_backup` files
+for recovery. A retry refuses to overwrite an unresolved backup. Catchable
+interruptions attempt rollback, but multi-file installation is not atomic under
+SIGKILL or power loss. These changes live on PR #7 until merged.

@@ -2,16 +2,69 @@
 
 Running log of the deep-dive experiments. Each entry: what ran, headline
 numbers (3-seed mean +/- std unless noted), and the commit holding the
-artifacts. Newest first. Maintained by M4 Air (this machine, Apple M4
-MacBook Air); the 2026-10-10/11 refresh-campaign panel trainings ran on
-the win4070 CUDA host (logs committed under `logs/win4070_/`) and the
-auxiliary batches (learning curve, y-randomization, multitask) on this
-M4 Air under MPS; older 2026-09/10 entries also record M3 Max runs.
+artifacts. Newer campaign summaries lead the file; older entries and appended
+review corrections retain their historical order. Device claims are scoped
+to actual records: `logs/win4070_/` records the non-EGFR GIN and GINE/AFP
+CUDA panel campaigns; the refreshed EGFR GIN runs lack training logs.
+`logs/aux_m4_*.log` does not print a device. The refreshed multitask rerun
+also lacks a committed log and has an unrecorded device; `logs/multitask.log`
+is the superseded 2026-10-04 M3 Max run. Older log line-number references
+are historical locations, not stable anchors; use entry headings and dates.
 
 **Status pointer (2026-10-14): the repair below defines the current temporal
 results. The initial 2026-10-13 entry records the preceding campaign; its hERG
 scores and aggregate means are superseded. Earlier all-year-label time scores
 are historical only.**
+
+## 2026-10-14 — All-PR narrative reconciliation
+
+- Re-read the original and follow-up reports from PR #1/#3/#5/#6/#8.
+  Corrected residual S2/S3/S4/S6 and C1/C2 framing: per-seed mean versus
+  ensemble estimands, exploratory unadjusted intervals, one-sided GNN seed
+  deletion, conditional cell wording, fairness comparisons and decomposition
+  allocation. No bootstrap sign fraction is promoted to a calibrated p-value.
+- The new reproducible seed-deletion script confirms 0/8 current time cells
+  are conditional (24 deletions), while reproducing 14/48 conditional
+  random/scaffold cells; evidence is `logs/all_pr_review_20261014/seed_sensitivity.json`.
+- The refreshed EGFR GIN and multitask provenance gaps remain explicit;
+  the old multitask MPS log is not evidence for the refreshed run. Historical
+  ep300 baselines now point at their exact pre-refresh Git revision, and its
+  incorrect CUDA explanation is replaced by the actual MPS device record.
+- Recomputed the 47-molecule EGFR thienopyrimidine case from saved predictions:
+  RF MAE 1.318; GIN seeds 42/1/2 MAE 1.021/1.325/0.996. Its direction changes
+  for seed 1. It is a case study, not a seed-stable chemotype conclusion.
+- The review-reported RF SD ≈ 0.006 has no published cohort; the report says
+  only a2a RF was retrained, so it is not attributed to hERG. A new
+  independent five-seed RF study now supplies the missing sensitivity evidence:
+  current as-of a2a / hERG R² population SD is 0.023457 / 0.005488
+  (sample SD 0.026225 / 0.006136). All ten predictions and their hashes were
+  verified; seed 42 matches published predictions within 2e−15. Results live
+  in `results/rf_seed_sensitivity/`. This does not establish the identity of
+  the original review cohort. Missing historical training logs and exact
+  historical mutant patches cannot be reconstructed from prose.
+- Separately, S5 now has 16 deterministic XGBoost refits and paired bootstrap
+  artifacts under `results/xgboost_paired/`: all historical R² values match
+  exactly, with nominal 95% intervals giving 6 RF / 1 XGB / 9 unresolved.
+  hERG/scaffold favours XGB by +0.032 [+0.014, +0.051]. The original
+  model results and frozen GIN study packages are retained; no remote
+  machine was used for this follow-up.
+
+- Full PR #1–#8 disposition and source snapshot: `results/review_all_prs/audit.json`
+  (21 technical groups and 79 documentation entries). The final suite passes
+  610 tests with 3 warnings; README verification checks 447 cells with zero
+  mismatches. The independent full temporal audit verifies 108 artifact hashes.
+- Actual Release archives were downloaded, checksum-verified and installed in
+  an isolated scratch tree: 18 random/scaffold models, 9 caches, 11 raw pins,
+  zero historical time models. Fetch receipts detect complete-but-stale local
+  installations; interrupted rollback retains recovery backups. See
+  `logs/all_pr_audit_20261014/release_install.json` for every archive member.
+- BACE raw-to-clean regeneration exactly reproduces all 1,513 rows. Seven
+  interpretability JSON copies now match their figure-source records, with
+  old copies archived. GINE-only figure labels were regenerated from saved
+  statistics; all 48 numeric uncertainty artifacts are byte-identical.
+- Accepted main time results, GIN checkpoints and the eight-seed M3 study are
+  unchanged. The 128 CUDA jobs remain deferred and must use the original
+  frozen source bundles. No new source bundle was substituted.
 
 ## 2026-10-14 — PR #8 Low tooling hardening
 
@@ -1387,9 +1440,11 @@ baseline `6c1e3bb`: 165 tests passed, ruff clean, CI green, README 431
 cells / 0 mismatches at review time). The reviewer retracted two of
 their own earlier items — P5 (under the pinned xgboost 3.4.1 the
 `egfr_full`/random 0.6814376116 reproduces) and P2's per-tag "mechanism"
-labels (partly wrong). Main conclusion unchanged and strengthened:
-**tuned RF >= GIN**, now shown robust to dropping any single training
-seed in 20 of its 21 win cells. Items R1-R5 were split across the
+labels (partly wrong). **Later correction (PR #6 addendum C1):** this
+entry originally claimed that the asymmetric seed-deletion result
+strengthened RF robustness. That claim is withdrawn: only GNN seeds were
+varied and two-seed ensembles incur an ensemble-size penalty. RF seed
+robustness was not measured. Items R1-R5 were split across the
 fetch / README / methodology / docs-records / interpretability / code /
 tests / skill batches working concurrently; per-item state below is as
 observed at this entry's write time.
@@ -1416,7 +1471,12 @@ observed at this entry's write time.
   predictions: `a2a` +0.326 = **+0.580** +0.008 −0.263 (RF predicts
   0.83 log units low — a level effect, not shrinkage), `egfr_full`
   +0.592 = +0.392 +0.032 +0.168, `abl1` −0.236 = −0.002 −0.115 −0.119;
-  only `egfr` is spread-led (+0.079 of +0.039), and on `herg` the GIN
+  These are historical all-year-label results, superseded by the current
+  as-of-label campaign. **C2 correction:** only the level term and total
+  are allocation-independent; the spread/correlation split is a convention.
+  Reduced RF over-dispersion also occurs for `egfr_full` and `mpro`, not
+  only `egfr`. Under the stated allocation `egfr` is spread-led
+  (+0.079 of +0.039), and on `herg` the GIN
   spreads *more* than RF (0.44 vs 0.41), so "compression" never fitted.
   The P2-era labels are withdrawn — the N4 annotation at the 2026-10-12
   entry above marks the superseded text; README/methodology carry the

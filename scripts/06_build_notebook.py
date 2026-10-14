@@ -28,7 +28,11 @@ SECTIONS = [
      "column aborts with a non-zero exit - only bace/non-ChEMBL sources "
      "skip the filter), standardize each structure to its parent "
      "SMILES (largest fragment, charges neutralized), and collapse "
-     "duplicate compounds **by `parent_smiles`** to the **median** pIC50."),
+     "duplicate compounds **by `parent_smiles`** to the **median** pIC50. "
+     "An empty retained pool aborts without changing existing output. "
+     "For `QSAR_TAG=bace`, preserve the legacy MoleculeNet canonical "
+     "structures and charges, group by those original SMILES, and retain "
+     "the original BACE CSV schema."),
     ("03_featurize.py", "Step 3 - Morgan fingerprints (RDKit)",
      "Each **`parent_smiles`** - the same unit Step 2 deduplicates on, so "
      "one compound = one fingerprint - becomes a 2048-bit Morgan "

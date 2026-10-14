@@ -12,7 +12,12 @@ anchors, evidence and suggested fixes, are in
 (N1-N14, the data-refresh re-review), `references/findings-2026-10-12.md`
 (P1-P8 plus Low, reviewing the N1-N14 remediation) and
 `references/findings-2026-10-13.md` (R1-R5 plus Low, reviewing the
-commit-6c1e3bb remediation of PR #5). Start every review by reading the
+commit-6c1e3bb remediation of PR #5),
+`references/findings-2026-10-13b.md` (PR #6 follow-up at 68c736f,
+including C1/C2 and S1–S7), and `references/findings-2026-10-13c.md`
+(PR #8 temporal retraining review at a8cf496). These are historical reports,
+not assertions about the current tree. Check the current all-PR disposition
+under `results/review_all_prs/` before repeating old fixes. Start every review by reading the
 newest file, then the earlier ones - on the 2026-10-10 file, first its
 dated amendment note, which points to the four claims the 2026-10-11
 re-review corrected - and checking which items are still open.
@@ -21,19 +26,20 @@ re-review corrected - and checking which items are still open.
 
 ```bash
 conda env create -f environment.yml && conda activate qsar   # Python 3.12
-ruff check scripts experiments tests
+ruff check scripts experiments tests .claude/skills/qsar-review/scripts
 pytest -q
 ```
 
-`requirements.txt` pins need Python >= 3.12 (numpy 2.5.x). On 3.11, install
-unpinned: the suite (97 tests at the 2026-10-11 refresh; 135 at the 2026-10-12
-PR #4 head reviewed in findings-2026-10-12) and ruff were verified to pass
-that way; the current head runs 205 tests, verified under the pinned
-Python 3.12 environment (findings-2026-10-13 recorded 165 at 6c1e3bb).
+`requirements.txt` pins need Python >= 3.12. Use the pinned Python 3.12
+environment for reproducibility. Earlier reports using unpinned Python 3.11
+describe historical checks, not the current installation procedure. The
+historical 68c736f head ran 205 tests; current counts belong in the latest
+validation log (findings-2026-10-13 recorded 165 at 6c1e3bb).
 Many checks below need only `data/processed/` and `results/`, which are
-tracked; `models/`, `data/raw/` and the gitignored
+tracked; random/scaffold `models/`, `data/raw/` and the gitignored
 `data/processed/*_fingerprints.npz` caches come from
-`python scripts/fetch_artifacts.py --all`.
+`python scripts/fetch_artifacts.py --all`. Legacy release time models are
+skipped; use the committed temporal restore/campaign records for as-of results.
 
 > **Release status.** `artifacts-v2` (2026-10-12; assets re-uploaded
 > 2026-10-13 with `processed_cache.tar.gz`) publishes the refreshed raw
@@ -47,10 +53,12 @@ tracked; `models/`, `data/raw/` and the gitignored
 > `.artifacts_cache/<tag>/_extract_tmp/`, never the working tree; an
 > archive member named `data/raw/sha256sums.txt` is refused; every file
 > the in-memory manifest names is sha256-checked inside the temp dir and
-> only a fully verified tree is moved into place, so a failed check leaves
-> nothing half-installed and the tracked manifest is never replaced by
-> release content (assets with no repo-side manifest, `models/` and the
-> processed cache, pass by key-file existence only). Each archive is
+> only verified allowlisted files are installed; the tracked manifest is never
+> replaced by release content. Models/cache use per-file SHA256 receipts tied
+> to the verified archive digest, and skips also check the current release
+> manifest. These are integrity checks, not independent publisher authentication.
+> Caught installation errors attempt rollback; incomplete recovery is reported
+> and its backups are preserved. Each archive is
 > additionally checked against the release's own `sha256sums.txt`, and
 > `scripts/02_clean_data.py` refuses ChEMBL-format raw files without
 > `standard_relation` (H1 cannot silently return).
@@ -147,7 +155,13 @@ are not machine-checked and need manual recomputation.
 | `scripts/reconcile_h1.py [--old-raw F] [--clean F] [--out D] [--dry-run]` | record-level historical-vs-fresh pull reconciliation for egfr_full; the pre-refresh inputs were clobbered by the refresh, so both pull defaults are the refreshed pull and a full run **refuses an old==new degenerate comparison** - run `--dry-run` first, it says what to pass; handles `standard_relation` suffixes that used to KeyError | no |
 | `scripts/regen_fp_ablation_figs.py [--out D] [--dry-run] [--force]` | regenerates missing (or, with `--force`, stale) `figures/fp_ablation/*.png` through `experiments/fingerprint_ablation.py:make_figure`; import-safe (writes only under `__main__`) | no |
 
-All scripts find the repo root on their own. Every script that writes takes
+All scripts find the repo root on their own. The fetcher skips benign tar root directories and AppleDouble regular files,
+installs only named model/cache files and raw pins, retains replaced originals
+under `.artifacts_cache/backups/`, and reports incomplete rollback honestly.
+Its multi-file install is recoverable on caught errors, not an instantaneous
+transaction or SIGKILL guarantee.
+
+Every script that writes takes
 its destination from `--out` and refuses `results/`, `data/`, `models/`
 (and `figures/`, except `regen_fp_ablation_figs.py` whose output *is*
 `figures/fp_ablation/`) via a realpath-normalized, case-insensitive path

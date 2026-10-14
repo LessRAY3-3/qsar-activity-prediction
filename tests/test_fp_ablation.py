@@ -113,8 +113,12 @@ def test_unanchorable_split_rejected_before_any_write(tmp_path, monkeypatch,
     assert csv_path.read_text() == before       # refused before any write
 
 
+@pytest.mark.parametrize("flag,value,error", [
+    ("--radii", "2", "radius"), ("--bits", "2048", "n_bits"),
+    ("--seeds", "42,1", "seed"),
+])
 def test_grid_subset_run_refuses_before_any_write(tmp_path, monkeypatch,
-                                                  load_experiment):
+                                                  load_experiment, flag, value, error):
     """A radius/bits/seed subset run never rewrites the stored full-grid
     outputs (6c1e3bb extension per PR #6: the coverage guard now checks
     all four grid dimensions, not splits only).
@@ -132,10 +136,10 @@ def test_grid_subset_run_refuses_before_any_write(tmp_path, monkeypatch,
 
     monkeypatch.setattr(sys, "argv", [
         "fingerprint_ablation.py", "--tag", "tiny",
-        "--splits", "random,scaffold", "--radii", "2",
+        "--splits", "random,scaffold", flag, value,
         "--out", str(out), "--fig-dir", str(fig)])
 
-    with pytest.raises(SystemExit, match="radius"):
+    with pytest.raises(SystemExit, match=error):
         mod.main()
 
     assert csv_path.read_text() == before       # every output untouched

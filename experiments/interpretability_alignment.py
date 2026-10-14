@@ -80,6 +80,15 @@ DOCUMENTED_FAMILIES = {
 _FIG_FAMILY_RE = re.compile(r"^(?P<fam>.+)_mol\d+_(?:gnn|rf)\.png$")
 
 
+def write_alignment_record(record, out_dir, fig_dir):
+    """Keep the numerical record next to results and figures identical."""
+    payload = json.dumps(record, indent=2) + "\n"
+    for directory in {os.path.realpath(out_dir), os.path.realpath(fig_dir)}:
+        os.makedirs(directory, exist_ok=True)
+        with open(os.path.join(directory, "alignment.json"), "w") as stream:
+            stream.write(payload)
+
+
 def _substructure_mask(smiles_list, query_smiles):
     """Boolean mask of rows whose molecule contains the query substructure."""
     from rdkit import Chem
@@ -484,7 +493,7 @@ def main():
                       "top_atom_frac": args.top_atom_frac,
                       "gnn_epochs": args.gnn_epochs, "seed": args.seed},
            "molecules": records}
-    json.dump(out, open(os.path.join(args.out, "alignment.json"), "w"), indent=2)
+    write_alignment_record(out, args.out, args.fig_dir)
     write_findings(records, os.path.join(args.out, "findings.md"), args)
     print(f"records: {len(records)}  -> "
           f"{os.path.relpath(args.out, BASE)}/alignment.json")

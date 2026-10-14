@@ -23,6 +23,7 @@ Everything runs offline in a tmpdir: `run()` accepts injectable
 import hashlib
 import io
 import os
+from pathlib import Path
 import shutil
 import tarfile
 
@@ -939,9 +940,10 @@ def test_fresh_models_install_excludes_legacy_time_and_other_extra_files(tmp_pat
     assert all(not (repo / name).exists() for name in LEGACY_TIME_FILES)
     assert not (repo / "models/extra.joblib").exists()
     # Missing temporal models never cause another download of legacy assets.
-    def unexpected(*a, **k):
-        pytest.fail("Complete random/scaffold set must skip downloading")
-    mod.run(["models"], repo_root=repo, fetch_assets=unexpected, downloader=unexpected)
+    def manifest_only(url, dest, label=""):
+        assert url.endswith("sha256sums.txt"), "Valid receipt must skip the archive download"
+        downloader(url, dest, label=label)
+    mod.run(["models"], repo_root=repo, fetch_assets=fetch_assets, downloader=manifest_only)
 
 
 @pytest.mark.parametrize("member,payload", [
@@ -960,3 +962,150 @@ def test_skipped_model_members_still_require_archive_safety(tmp_path, load_scrip
     with pytest.raises(SystemExit, match="unsafe archive members"):
         mod.run(["models"], repo_root=repo, fetch_assets=fetch_assets, downloader=downloader)
     assert not (repo / "models").exists()
+
+
+def test_cache_installs_only_declared_keys_and_ignores_tar_metadata(tmp_path, load_script):
+    mod = load_script('fetch_artifacts')
+    repo = tmp_path / 'repo'
+    _write_anchor(repo)
+    protected = repo / 'data/processed/splits/a2a_time.npz'
+    protected.parent.mkdir(parents=True)
+    protected.write_bytes(b'accepted split')
+    members = {p: b'fingerprint' for p in CACHE_FILES}
+    members.update({'.': ('dir',), '._data': b'metadata',
+                    'data/processed/._a2a_fingerprints.npz': b'metadata',
+                    'data/processed/splits/a2a_time.npz': b'unverified overwrite'})
+    fetch, dl = _offline_asset(tmp_path, repo, 'processed_cache.tar.gz', members)
+    mod.run(['cache'], repo_root=repo, fetch_assets=fetch, downloader=dl)
+    assert protected.read_bytes() == b'accepted split'
+    assert not (repo / 'data/processed/._a2a_fingerprints.npz').exists()
+
+
+@pytest.mark.parametrize('kind,archive,paths', [
+    ('models', 'models.tar.xz', MODEL_FILES),
+    ('cache', 'processed_cache.tar.gz', CACHE_FILES),
+])
+def test_complete_but_corrupt_install_is_repaired(tmp_path, load_script, kind, archive, paths):
+    mod = load_script('fetch_artifacts')
+    repo = tmp_path / 'repo'
+    _write_anchor(repo)
+    fetch, dl = _offline_asset(tmp_path, repo, archive, {p: b'current' for p in paths})
+    mod.run([kind], repo_root=repo, fetch_assets=fetch, downloader=dl)
+    stale = repo / paths[0]
+    stale.write_bytes(b'changed locally')
+    mod.run([kind], repo_root=repo, fetch_assets=fetch, downloader=dl)
+    assert stale.read_bytes() == b'current'
+    backups = list((repo / '.artifacts_cache/backups').rglob(stale.name))
+    assert any(p.read_bytes() == b'changed locally' for p in backups)
+    # Complete legacy installations without a receipt must also be verified.
+    (repo / '.artifacts_cache/artifacts-v2' / f'{kind}_installed.json').unlink()
+    stale.write_bytes(b'legacy')
+    mod.run([kind], repo_root=repo, fetch_assets=fetch, downloader=dl)
+    assert stale.read_bytes() == b'current'
+
+
+def test_install_keyboard_interrupt_restores_old_files(tmp_path, load_script, monkeypatch):
+    mod = load_script('fetch_artifacts')
+    repo, source = tmp_path / 'repo', tmp_path / 'source'
+    repo.mkdir()
+    source.mkdir()
+    for name in ['a', 'b']:
+        (repo / name).write_bytes(b'old')
+        (source / name).write_bytes(b'new')
+    real = os.replace
+    def interrupt(src, dst):
+        if Path(src) == source / 'b':
+            raise KeyboardInterrupt()
+        return real(src, dst)
+    monkeypatch.setattr(mod.os, 'replace', interrupt)
+    with pytest.raises(SystemExit, match='rolled back'):
+        mod.install_verified_files(repo, source, ['a', 'b'])
+    assert all((repo / p).read_bytes() == b'old' for p in ['a', 'b'])
+
+
+def test_failed_rollback_preserves_backup_and_reports_incomplete(tmp_path, load_script, monkeypatch):
+    mod = load_script('fetch_artifacts')
+    repo, source = tmp_path / 'repo', tmp_path / 'source'
+    repo.mkdir()
+    source.mkdir()
+    for name in ['a', 'b']:
+        (repo / name).write_bytes(b'old')
+        (source / name).write_bytes(b'new')
+    real = os.replace
+    def fail(src, dst):
+        if Path(src) == source / 'b' or str(src).endswith('a.fetch_backup'):
+            raise OSError('injected failure')
+        return real(src, dst)
+    monkeypatch.setattr(mod.os, 'replace', fail)
+    with pytest.raises(SystemExit, match='rollback incomplete'):
+        mod.install_verified_files(repo, source, ['a', 'b'])
+    assert (repo / 'a.fetch_backup').read_bytes() == b'old'
+    assert (repo / 'a').read_bytes() == b'new'
+    assert (repo / 'b').read_bytes() == b'old'
+    with pytest.raises(SystemExit, match='existing backup'):
+        mod.install_verified_files(repo, source, ['a'])
+    assert (repo / 'a.fetch_backup').read_bytes() == b'old'
+
+
+def test_models_prefix_boundary_rejected(tmp_path, load_script):
+    mod = load_script('fetch_artifacts')
+    archive = tmp_path / 'bad.tar.gz'
+    _build_archive(archive, {'models_evil/payload.py': b'wrong prefix'})
+    with pytest.raises(SystemExit, match='outside the allowed prefix'):
+        mod.extract_archive(archive, tmp_path / 'out', 'models/')
+
+
+def test_release_reupload_invalidates_complete_install_receipt(tmp_path, load_script):
+    mod = load_script('fetch_artifacts')
+    repo = tmp_path / 'repo'
+    _write_anchor(repo)
+    fetch, dl = _offline_asset(tmp_path, repo, 'models.tar.xz',
+                               {p: b'first release' for p in MODEL_FILES})
+    mod.run(['models'], repo_root=repo, fetch_assets=fetch, downloader=dl)
+    fetch, dl = _offline_asset(tmp_path, repo, 'models.tar.xz',
+                               {p: b'replaced release' for p in MODEL_FILES})
+    mod.run(['models'], repo_root=repo, fetch_assets=fetch, downloader=dl)
+    assert all((repo / p).read_bytes() == b'replaced release' for p in MODEL_FILES)
+    assert not any((repo / p).exists() for p in LEGACY_TIME_FILES)
+
+
+def test_appledouble_link_is_rejected_not_hidden(tmp_path, load_script):
+    mod = load_script('fetch_artifacts')
+    archive = tmp_path / 'link.tar.gz'
+    _build_archive(archive, {'models/._payload': ('symlink', 'elsewhere')})
+    with pytest.raises(SystemExit, match='symbolic link'):
+        mod.extract_archive(archive, tmp_path / 'out', 'models/')
+
+
+def test_receipt_cannot_skip_symlink_parent(tmp_path, load_script):
+    mod = load_script('fetch_artifacts')
+    repo = tmp_path / 'repo'
+    _write_anchor(repo)
+    fetch, dl = _offline_asset(tmp_path, repo, 'models.tar.xz',
+                               {p: b'model bytes' for p in MODEL_FILES})
+    mod.run(['models'], repo_root=repo, fetch_assets=fetch, downloader=dl)
+    elsewhere = tmp_path / 'elsewhere'
+    (repo / 'models').rename(elsewhere)
+    (repo / 'models').symlink_to(elsewhere, target_is_directory=True)
+    with pytest.raises(SystemExit, match='parent is a symlink'):
+        mod.run(['models'], repo_root=repo, fetch_assets=fetch, downloader=dl)
+    assert all(p.read_bytes() == b'model bytes' for p in elsewhere.glob('*.joblib'))
+
+
+def test_backup_archival_failure_reports_committed_state(tmp_path, load_script, monkeypatch):
+    mod = load_script('fetch_artifacts')
+    repo, source = tmp_path / 'repo', tmp_path / 'source'
+    repo.mkdir()
+    source.mkdir()
+    (repo / 'model').write_bytes(b'old')
+    (source / 'model').write_bytes(b'new')
+    real = os.replace
+    def fail(src, dst):
+        if 'backups' in Path(dst).parts:
+            raise OSError('archive failure')
+        return real(src, dst)
+    monkeypatch.setattr(mod.os, 'replace', fail)
+    with pytest.raises(SystemExit, match='verified files installed, but backup archival incomplete'):
+        mod.install_verified_files(repo, source, ['model'])
+    assert (repo / 'model').read_bytes() == b'new'
+    assert (repo / 'model.fetch_backup').read_bytes() == b'old'

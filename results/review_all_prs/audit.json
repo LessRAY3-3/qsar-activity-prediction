@@ -1,0 +1,1536 @@
+{
+  "schema": "all-pr-review-disposition-v1",
+  "date": "2026-10-14",
+  "implementation_pr": 7,
+  "review_pr": 8,
+  "baseline_revision": "cdc816370003029f2cd29446b027844aae3e82a3",
+  "scope": "All eight PR bodies plus available issue comments, inline review comments and reviews; six historical review reports and PR2 corrections. Supplemental local RF/XGB fits; no remote host contacted.",
+  "source_snapshot": "results/review_all_prs/pr_source_snapshot.json",
+  "reports": [
+    {
+      "pr": 1,
+      "path": ".claude/skills/qsar-review/references/findings-2026-10-10.md",
+      "original_pr_report_sha256": "3be0ff366f481fed7950006876707b6411b718ca42d946fda8747195ce2913ae",
+      "current_reference_sha256": "e016fe30a3f2127aef9dd19df91e3e820e67a342e6708d95bfdff204d31cadb5",
+      "reference_note": "Existing local annotations may differ from the original PR report; source URL and original hash identify the reviewed original.",
+      "url": "https://github.com/LessRAY3-3/qsar-activity-prediction/blob/5fe17f928c88ee4b0494ea710134bc7f85bfde47/.claude/skills/qsar-review/references/findings-2026-10-10.md",
+      "headings": [
+        "H1. Censored IC50 records are trained and scored as exact values",
+        "M1. Salt forms are not stripped before deduplication",
+        "M2. Scaffold-split RF refits reuse the random split's grid winner",
+        "M3. XGBoost \"3 seeds\" are three identical models",
+        "M4. Time-split Δ column is mislabelled, and the README table invites a wrong subtraction",
+        "M5. README misattributes the y-randomization control gap",
+        "L1. `p_one_sided` is P(ΔR² > 0), not a p-value for a GIN win",
+        "L2. A partial bootstrap run overwrites the campaign summary",
+        "L3. Grid-search CV folds are not shuffled on scaffold/time splits",
+        "L4. `interpretability_alignment.py` explains a different RF",
+        "L5. Latent robustness issues (current results unaffected)",
+        "L6. Environment and dependencies",
+        "L7. README wording and rounding"
+      ]
+    },
+    {
+      "pr": 3,
+      "path": ".claude/skills/qsar-review/references/findings-2026-10-11.md",
+      "original_pr_report_sha256": "b9fa46445a243ad6ca12e65b0c8b0a69383f7bdcb7ad4057a04fd755b8d8e709",
+      "current_reference_sha256": "b9fa46445a243ad6ca12e65b0c8b0a69383f7bdcb7ad4057a04fd755b8d8e709",
+      "reference_note": "Existing local annotations may differ from the original PR report; source URL and original hash identify the reviewed original.",
+      "url": "https://github.com/LessRAY3-3/qsar-activity-prediction/blob/7b248c4c062daf1cc6575edebcbe4eb8ddca616b/.claude/skills/qsar-review/references/findings-2026-10-11.md",
+      "headings": [
+        "N1. GINE: the \"no per-seed predictions\" premise is false, and one GINE win is missing",
+        "N2. README-cited GINE forest plots show pre-refresh values",
+        "N3. AttentiveFP abl1/scaffold \"RF significantly ahead\" is decided by one stalled run",
+        "N4. Time split: \"GIN degrades less\" is largely GIN shrinking to the mean",
+        "N5. Reproducibility: the published release predates the refresh, and 02 fails open on it",
+        "N6. EGFR was re-pulled, but the docs say raw row counts are unchanged",
+        "N7. EGFR XGBoost scores are pre-refresh, and the control pool does not match",
+        "N8. All GINE uncertainty/AD outputs are pre-refresh but documented as refreshed",
+        "N9. methodology.md sections still describe pre-refresh results",
+        "N10. Error-analysis and interpretability text name a chemotype that is gone",
+        "N11. The notebook still runs the pre-H1/M1 pipeline",
+        "N12. The M4 regression test pins a stale constant and never reads the stored column",
+        "N13. Pre-refresh results still cited elsewhere",
+        "N14. This skill folder is stale, and two of its scripts now mislead",
+        "Data and methodology",
+        "README and doc wording",
+        "Code (latent)",
+        "Tests and environment"
+      ]
+    },
+    {
+      "pr": 5,
+      "path": ".claude/skills/qsar-review/references/findings-2026-10-12.md",
+      "original_pr_report_sha256": "d4374beee719815bdece0e0a54a7c70becf9998010bb25883b515eed4c91b89e",
+      "current_reference_sha256": "d4374beee719815bdece0e0a54a7c70becf9998010bb25883b515eed4c91b89e",
+      "reference_note": "Existing local annotations may differ from the original PR report; source URL and original hash identify the reviewed original.",
+      "url": "https://github.com/LessRAY3-3/qsar-activity-prediction/blob/6aa33de65d5667e78241dd603e96a3e92d0c2211/.claude/skills/qsar-review/references/findings-2026-10-12.md",
+      "headings": [
+        "P1. N3: the 60-epoch floor never bound; the flip is a fresh draw on another device",
+        "P2. Time split: \"the GIN edge is largely shrinkage\" is wrong for three of four GIN wins",
+        "P3. fetch_artifacts verifies the archive against a manifest the archive just overwrote",
+        "P4. The README fast path cannot run as written",
+        "P5. XGBoost egfr_full/random cannot be reproduced from the documented protocol",
+        "P6. GNN-variant framing: two claims the committed runs do not support",
+        "P7. README interpretability paragraph predates the N10 rerun",
+        "P8. The notebook drifted again, and the new sync test cannot see it",
+        "Docs and records",
+        "Artifacts",
+        "Code (latent)",
+        "Tests",
+        "Skill folder"
+      ]
+    },
+    {
+      "pr": 6,
+      "path": ".claude/skills/qsar-review/references/findings-2026-10-13.md",
+      "original_pr_report_sha256": "bf6fd5c83046c0b10e10ced39aabe0afa373689c9f6572f67354562c27ebbfcd",
+      "current_reference_sha256": "bf6fd5c83046c0b10e10ced39aabe0afa373689c9f6572f67354562c27ebbfcd",
+      "reference_note": "Existing local annotations may differ from the original PR report; source URL and original hash identify the reviewed original.",
+      "url": "https://github.com/LessRAY3-3/qsar-activity-prediction/blob/ac82fe35682ff9e7d67de8bd45eb31d8cc7e2b48/.claude/skills/qsar-review/references/findings-2026-10-13.md",
+      "headings": [
+        "R1. Single-seed dependence is caveated for 1 of 14 cells",
+        "R2. Time split: report the error decomposition instead of mechanism labels",
+        "R3. The trust-anchor refusal checks the name only",
+        "R4. Users with existing local raw files are locked out",
+        "R5. The headline EGFR GIN runs have no committed log, and the device statement is false for them",
+        "Docs and records",
+        "Artifacts",
+        "Code (latent)",
+        "Tests",
+        "Skill folder"
+      ]
+    },
+    {
+      "pr": 6,
+      "path": ".claude/skills/qsar-review/references/findings-2026-10-13b.md",
+      "original_pr_report_sha256": "80615cdbd1db472d7d9c60fe30824226702c51abfea7415ac223f72ec8e35c49",
+      "current_reference_sha256": "80615cdbd1db472d7d9c60fe30824226702c51abfea7415ac223f72ec8e35c49",
+      "reference_note": "Existing local annotations may differ from the original PR report; source URL and original hash identify the reviewed original.",
+      "url": "https://github.com/LessRAY3-3/qsar-activity-prediction/blob/ac82fe35682ff9e7d67de8bd45eb31d8cc7e2b48/.claude/skills/qsar-review/references/findings-2026-10-13b.md",
+      "headings": [
+        "C1. The drop-one-seed check cannot show that RF wins are robust",
+        "C2. The spread/correlation split is not unique",
+        "S1. The single-seed standard is not applied to the time split",
+        "S2. Multiple comparisons are never acknowledged",
+        "S3. Strong wording on cells the README's own standard calls ties or conditional",
+        "S4. The Δ convention changes between tables",
+        "S5. XGBoost can be bootstrapped, and it wins one cell significantly",
+        "S6. The device paragraph cites the wrong multitask log",
+        "S7. Most behaviours added in 68c736f have no test",
+        "Fetch",
+        "Code (latent)",
+        "Docs",
+        "Skill folder"
+      ]
+    },
+    {
+      "pr": 8,
+      "path": ".claude/skills/qsar-review/references/findings-2026-10-13c.md",
+      "original_pr_report_sha256": "30e3b85a8ce762064e7ab6cbb5d032f3612a1022261acab9c6c886e797dea1a1",
+      "current_reference_sha256": "30e3b85a8ce762064e7ab6cbb5d032f3612a1022261acab9c6c886e797dea1a1",
+      "reference_note": "Existing local annotations may differ from the original PR report; source URL and original hash identify the reviewed original.",
+      "url": "https://github.com/LessRAY3-3/qsar-activity-prediction/blob/f1c3424a1987f2e80ea203555c22fb52b717ac52/.claude/skills/qsar-review/references/findings-2026-10-13c.md",
+      "headings": [
+        "T1. Scaffold-split significance does not survive scaffold-group resampling (c1f0523, on main)",
+        "T2. The time-split results need the constant baseline",
+        "T3. \"Passed convergence checks\" overstates",
+        "T4. The leakage fix and its version guard are untested",
+        "T5. A parent-key mismatch silently excludes molecules",
+        "T6. The code that produced the committed results is not all in the repo",
+        "T7. RF time-model distribution"
+      ]
+    }
+  ],
+  "technical_dispositions": [
+    {
+      "review_items": "PR1 H1/M1; PR3 N5; PR6b Low cleaning/QC",
+      "status": "fixed_and_rechecked",
+      "disposition": "Exact-relation/parent policy retained; empty clean pools fail without replacing output; BACE follows its legacy canonical/charged schema and regenerates all 1513 rows exactly; shared relation guard and ultra-potent audit tested.",
+      "evidence": [
+        "scripts/02_clean_data.py",
+        "scripts/07_qc_checks.py",
+        "tests/test_clean_data.py",
+        "tests/test_qc_checks.py",
+        "logs/all_pr_review_20261014/bace_regeneration.json"
+      ]
+    },
+    {
+      "review_items": "PR1 M2/L3; PR3 Low feature errors",
+      "status": "existing_fix_rechecked",
+      "disposition": "Split-specific parameters and shuffled CV retained; invalid featurization fails closed.",
+      "evidence": [
+        "tests/test_best_params.py",
+        "tests/test_split_params.py",
+        "tests/test_cv_backend.py",
+        "tests/test_featurize.py",
+        "tests/test_featurize_parent.py"
+      ]
+    },
+    {
+      "review_items": "PR1 M3; PR3 N7; PR5 P5; PR6b S5",
+      "status": "fixed_with_new_experiment",
+      "disposition": "16 deterministic XGBoost refits reproduce historical R2 exactly and publish per-molecule predictions plus B=10000 paired intervals: RF 6 / XGB 1 / unresolved 9. hERG/scaffold XGB advantage +0.032305 [0.013851,0.050841]; these are nominal fixed-model test-sample intervals.",
+      "evidence": [
+        "experiments/xgboost_paired.py",
+        "results/xgboost_paired/provenance.json",
+        "results/xgboost_paired/summary.csv",
+        "logs/all_pr_review_20261014/xgboost_paired.log"
+      ]
+    },
+    {
+      "review_items": "PR6b S7 and Low XGBoost same_pool",
+      "status": "fixed_and_tested",
+      "disposition": "Check both train and test membership; record RF pool source. Unknown membership is unverified, never accepted from matching sizes.",
+      "evidence": [
+        "experiments/xgboost_baseline.py",
+        "tests/test_xgboost_baseline.py",
+        "tests/test_review_stats_guards.py"
+      ]
+    },
+    {
+      "review_items": "PR1 L1/L2/L5; PR6b S7 and Low bootstrap",
+      "status": "fixed_and_tested",
+      "disposition": "Bootstrap fractions remain descriptive, not p-values. Guard both n_boot and boot_seed, precompute all requested cells before publication, merge partial summaries, and resolve real figure paths. This is input-error protection, not crash-atomic multi-file publication.",
+      "evidence": [
+        "experiments/paired_bootstrap.py",
+        "tests/test_p8_analysis.py",
+        "tests/test_review_stats_guards.py"
+      ]
+    },
+    {
+      "review_items": "PR1 M4; PR3 N12; PR6b S4",
+      "status": "fixed_and_rechecked",
+      "disposition": "Separate per-seed-mean and prediction-ensemble estimands; summary tests recompute stored results.",
+      "evidence": [
+        "tests/test_time_split_summary.py",
+        "docs/methodology.md",
+        "README.md"
+      ]
+    },
+    {
+      "review_items": "PR3 N1/N2/N3/N8; PR5 P1/P6; PR6b S7 markers",
+      "status": "existing_results_rechecked_and_labels_fixed",
+      "disposition": "Keep refreshed architecture results and conditional caveats; verify hollow fallback markers. Refresh 32 GINE uncertainty figure labels from saved statistics only; all 48 numeric CSV/JSON files unchanged.",
+      "evidence": [
+        "tests/test_gine_panel.py",
+        "tests/test_afp_panel.py",
+        "tests/test_ad_refresh.py",
+        "tests/test_uncertainty_labels.py",
+        "logs/all_pr_review_20261014/gine_uncertainty_relabel.json"
+      ]
+    },
+    {
+      "review_items": "PR3 N10; PR5 P7; PR6b Low interpretability and S7 output",
+      "status": "fixed_and_archived",
+      "disposition": "Reconcile seven result JSON copies with the figure-source records; archive prior copies and record differing keys and hashes. Future runs write identical JSON to both destinations; default tag directory covered.",
+      "evidence": [
+        "experiments/interpretability_alignment.py",
+        "tests/test_interpretability_record.py",
+        "results/review_all_prs/artifact_reconciliation.json",
+        "results/_archive-2026-10-14/interpretability_duplicate_records"
+      ]
+    },
+    {
+      "review_items": "PR3 N11; PR5 P8",
+      "status": "fixed_and_rechecked",
+      "disposition": "Notebook rebuilt from current pipeline, including BACE policy and empty-pool failure; byte-synchronization test passes.",
+      "evidence": [
+        "scripts/06_build_notebook.py",
+        "tests/test_notebook_sync.py",
+        "notebooks/qsar_pipeline.ipynb"
+      ]
+    },
+    {
+      "review_items": "PR5 P3/P4; PR6 R3/R4; PR6b Fetch; PR8 T7",
+      "status": "fixed_and_real_release_verified",
+      "disposition": "Only named 18 random/scaffold models and 9 caches install. Key/hash receipts detect stale/corrupt complete trees; safe tar root/AppleDouble metadata supported. Interrupt rollback and surviving backups are truthful; legacy time models never install. Actual three-archive isolated installation passes with 11 raw pins, 18 models, 9 caches, zero time models. SIGKILL multi-file atomicity and publisher authenticity are not claimed.",
+      "evidence": [
+        "scripts/fetch_artifacts.py",
+        "scripts/verify_release_install.py",
+        "tests/test_fetch_artifacts.py",
+        "logs/all_pr_audit_20261014/release_install.json",
+        "logs/all_pr_audit_20261014/release_install.log",
+        "logs/all_pr_audit_20261014/release_install_final.log"
+      ]
+    },
+    {
+      "review_items": "PR6 R1; PR6b C1/S1; PR8 status of S1",
+      "status": "fixed_and_recomputed",
+      "disposition": "Publish reproducible seed-deletion script: 14/48 historical random/scaffold cells conditional; 0/8 current time cells conditional across 24 drops. GNN-only deletion cannot establish RF seed robustness.",
+      "evidence": [
+        ".claude/skills/qsar-review/scripts/single_seed_verdicts.py",
+        "logs/all_pr_review_20261014/seed_sensitivity.json",
+        "logs/all_pr_review_20261014/seed_split_alignment.json"
+      ]
+    },
+    {
+      "review_items": "PR8 Low RF five-state SD; PR6b C1",
+      "status": "new_independent_evidence_historical_identity_unresolved",
+      "disposition": "10 RF fits across a2a/hERG and seeds 42,1,2,3,4 with fixed data/parameters. Sample SD 0.026225/0.006136; seed42 reproduces original predictions within 2e-15. This does not recover the unpublished historical cohort.",
+      "evidence": [
+        "experiments/rf_seed_sensitivity.py",
+        "results/rf_seed_sensitivity/provenance.json",
+        "results/rf_seed_sensitivity/verification.json",
+        "results/rf_seed_sensitivity/summary.csv",
+        "tests/test_rf_seed_sensitivity.py"
+      ]
+    },
+    {
+      "review_items": "PR6b S2; PR1 L1; PR2 correction",
+      "status": "qualified_not_blindly_implemented",
+      "disposition": "Disclose multiple comparisons and exploratory unadjusted per-cell intervals. Do not publish Bonferroni counts derived from 2*min(sign_fraction,1-sign_fraction): the PR2 identical-prediction counterexample refutes its calibration as a p-value.",
+      "evidence": [
+        "docs/reviews/codex-verification-2026-10-10.md",
+        "docs/methodology.md",
+        "README.md"
+      ]
+    },
+    {
+      "review_items": "PR3 N4/N9/N13; PR5 P2/P6; PR6 R2; PR6b C2/S3/S4",
+      "status": "narrative_corrected",
+      "disposition": "Remove causal shrinkage/representation claims, unsupported clear leads, unrun-split generalization and one-seed chemotype generalization; disclose allocation convention for spread/correlation. Match saved evidence rather than preserving superseded review claims.",
+      "evidence": [
+        "README.md",
+        "docs/methodology.md",
+        "docs/interview.md",
+        "experiments/multi_target_summary.py",
+        "experiments/afp_panel.py"
+      ]
+    },
+    {
+      "review_items": "PR6 R5; PR6b S6 and Low historical records",
+      "status": "disclosed_unrecoverable_provenance",
+      "disposition": "Refreshed EGFR GIN and multitask device/log gaps explicitly remain; old M3 multitask log is not evidence for refreshed run. Archived ep300 baseline pinned to actual historical revision and MPS record.",
+      "evidence": [
+        "docs/methodology.md",
+        "experiments/LOG.md",
+        "results/_archive-2026-10-09/scaling_ep300/ep300_confirmation.md"
+      ]
+    },
+    {
+      "review_items": "PR3 N14; PR6b Skill folder; PR8 Low skill records",
+      "status": "fixed_and_tested",
+      "disposition": "Index all six original reports, preserve bytes, lint skill scripts in CI. --allow-skip only permits absent splits, not corrupt/misaligned splits. README verifier checks constant baseline and conditional markers; 447 cells, zero mismatches.",
+      "evidence": [
+        ".claude/skills/qsar-review/SKILL.md",
+        "tests/test_review_skill.py",
+        ".github/workflows/ci.yml",
+        "logs/all_pr_review_20261014/readme_verification.json"
+      ]
+    },
+    {
+      "review_items": "PR6b S7 fingerprint grid",
+      "status": "fixed_and_tested",
+      "disposition": "Subgrid coverage includes bit sizes and seeds rather than assuming default grid completeness.",
+      "evidence": [
+        "tests/test_fp_ablation.py",
+        "tests/test_latent_robustness.py"
+      ]
+    },
+    {
+      "review_items": "PR8 T1",
+      "status": "existing_fix_rechecked",
+      "disposition": "All 24 scaffold-group sensitivity cells remain reported; 7/10 nominal molecule-level wins become unresolved with group resampling; limited scaffold counts disclosed.",
+      "evidence": [
+        "tests/test_scaffold_bootstrap.py",
+        "results/significance/scaffold_cluster_sensitivity.csv",
+        "README.md"
+      ]
+    },
+    {
+      "review_items": "PR8 T2/T3/T4/T5/T6",
+      "status": "existing_fix_rechecked",
+      "disposition": "Current constant/decomposition, restored-checkpoint diagnostics, label-boundary/version guards, parent mismatch failures and published audit/repair tools retained. Independent full audit verifies 108 hashes and raw-label/prediction/bootstrap consistency; no checkpoint replay in this audit.",
+      "evidence": [
+        "results/review_all_prs/time_audit.json",
+        "tests/test_time_baseline_diagnostics.py",
+        "tests/test_training_controls.py",
+        "tests/test_time_splits.py",
+        "tests/test_audit_time_campaign.py"
+      ]
+    },
+    {
+      "review_items": "PR8 Low tooling/restore/signatures/mutation tests",
+      "status": "existing_fix_rechecked_with_known_limit",
+      "disposition": "Previously published Low acceptance remains historical evidence; final suite reruns real tiny-fit, interrupted publication/recovery and bundle/restore guards. Original 16 mutants absent; published ten explicit replacements are a different set.",
+      "evidence": [
+        "results/time_split/pr8_low_acceptance.json",
+        "scripts/check_time_tooling_mutations.py",
+        "tests/test_time_campaign_real.py",
+        "tests/test_time_campaign.py",
+        "tests/test_time_campaign_bundle.py",
+        "tests/test_restore_time_inputs.py"
+      ]
+    },
+    {
+      "review_items": "PR8 Low out-of-AD/source concentrations/labels",
+      "status": "existing_fix_rechecked",
+      "disposition": "Keep subset RMSE and label variance interpretation, a2a source concentration disclosure and corrected random-to-time labels.",
+      "evidence": [
+        "results/review_low_diagnostics/summary.json",
+        "results/review_low_diagnostics/ad_subset_metrics.csv",
+        "results/review_low_diagnostics/a2a_source_groups.csv",
+        "experiments/low_review_diagnostics.py"
+      ]
+    }
+  ],
+  "documentation_dispositions": [
+    {
+      "review_file": "pr1-findings-2026-10-10.md",
+      "finding": "H1",
+      "status": "documented_existing_or_updated",
+      "scope": "documentation",
+      "disposition": "当前方法文档说明仅保留精确关系测量，并记录数据刷新。",
+      "evidence": [
+        {
+          "path": "docs/methodology.md",
+          "line": 26,
+          "anchor": "relation test"
+        }
+      ]
+    },
+    {
+      "review_file": "pr1-findings-2026-10-10.md",
+      "finding": "M1",
+      "status": "documented_existing_or_updated",
+      "scope": "documentation",
+      "disposition": "说明先标准化母体再去重，同时披露指纹相同分子的残余重叠。",
+      "evidence": [
+        {
+          "path": "docs/methodology.md",
+          "line": 35,
+          "anchor": "Parent standardization"
+        }
+      ]
+    },
+    {
+      "review_file": "pr1-findings-2026-10-10.md",
+      "finding": "M2",
+      "status": "documented_existing_or_updated",
+      "scope": "documentation",
+      "disposition": "文档记录按划分选择超参数；代码检查由主审核表记录。",
+      "evidence": [
+        {
+          "path": "docs/methodology.md",
+          "line": 343,
+          "anchor": "RF hyperparameter search"
+        }
+      ]
+    },
+    {
+      "review_file": "pr1-findings-2026-10-10.md",
+      "finding": "M3",
+      "status": "documented_existing_or_updated",
+      "scope": "documentation",
+      "disposition": "XGBoost 三种子是确定性重复，不代表训练不确定性；另补测试样本 bootstrap。",
+      "evidence": [
+        {
+          "path": "README.md",
+          "line": 688,
+          "anchor": "\"3 seeds\" here"
+        }
+      ]
+    },
+    {
+      "review_file": "pr1-findings-2026-10-10.md",
+      "finding": "M4",
+      "status": "documented_existing_or_updated",
+      "scope": "documentation",
+      "disposition": "明确逐种子 R² 均值差与平均预测的集成 R² 差是两个估计量。",
+      "evidence": [
+        {
+          "path": "README.md",
+          "line": 74,
+          "anchor": "**Δ(ensemble)"
+        }
+      ]
+    },
+    {
+      "review_file": "pr1-findings-2026-10-10.md",
+      "finding": "M5",
+      "status": "documented_existing_or_updated",
+      "scope": "documentation",
+      "disposition": "y-randomization 控制差异来自训练池不包含验证集。",
+      "evidence": [
+        {
+          "path": "README.md",
+          "line": 300,
+          "anchor": "pool, not skipped tuning"
+        }
+      ]
+    },
+    {
+      "review_file": "pr1-findings-2026-10-10.md",
+      "finding": "L1",
+      "status": "documented_existing_or_updated",
+      "scope": "documentation",
+      "disposition": "bootstrap 正号比例明确不是假设检验 p 值。",
+      "evidence": [
+        {
+          "path": "README.md",
+          "line": 435,
+          "anchor": "not a p-value"
+        }
+      ]
+    },
+    {
+      "review_file": "pr1-findings-2026-10-10.md",
+      "finding": "L3",
+      "status": "documented_existing_or_updated",
+      "scope": "documentation",
+      "disposition": "文档记录打乱的 RF 交叉验证协议。",
+      "evidence": [
+        {
+          "path": "docs/methodology.md",
+          "line": 343,
+          "anchor": "RF hyperparameter search"
+        }
+      ]
+    },
+    {
+      "review_file": "pr1-findings-2026-10-10.md",
+      "finding": "L4",
+      "status": "documented_existing_or_updated",
+      "scope": "documentation",
+      "disposition": "说明归因分析的查询家族、Murcko 回退家族和机会基线限制。",
+      "evidence": [
+        {
+          "path": "README.md",
+          "line": 281,
+          "anchor": "Murcko-fallback families"
+        }
+      ]
+    },
+    {
+      "review_file": "pr1-findings-2026-10-10.md",
+      "finding": "L6",
+      "status": "documented_existing_or_updated",
+      "scope": "documentation",
+      "disposition": "Python 版本前提已说明；依赖与标准差实现见代码审核。",
+      "evidence": [
+        {
+          "path": "README.md",
+          "line": 154,
+          "anchor": "Python"
+        }
+      ]
+    },
+    {
+      "review_file": "pr1-findings-2026-10-10.md",
+      "finding": "L7",
+      "status": "documented_existing_or_updated",
+      "scope": "documentation",
+      "disposition": "当前数值与组均值、单种子差异分别说明。",
+      "evidence": [
+        {
+          "path": "README.md",
+          "line": 296,
+          "anchor": "Individual shuffled GIN seeds"
+        }
+      ]
+    },
+    {
+      "review_file": "pr3-findings-2026-10-11.md",
+      "finding": "N1",
+      "status": "documented_existing_or_updated",
+      "scope": "documentation",
+      "disposition": "完整 GINE 面板与条件性、scaffold 分组敏感性限制已说明。",
+      "evidence": [
+        {
+          "path": "README.md",
+          "line": 572,
+          "anchor": "full GINE"
+        }
+      ]
+    },
+    {
+      "review_file": "pr3-findings-2026-10-11.md",
+      "finding": "N2",
+      "status": "documented_existing_or_updated",
+      "scope": "documentation",
+      "disposition": "文档指向更新的森林图；图件验证见产物审核。",
+      "evidence": [
+        {
+          "path": "README.md",
+          "line": 466,
+          "anchor": "ci_panel_with_gine.png"
+        }
+      ]
+    },
+    {
+      "review_file": "pr3-findings-2026-10-11.md",
+      "finding": "N3",
+      "status": "documented_existing_or_updated",
+      "scope": "documentation",
+      "disposition": "说明 AFP 改变来自独立 MPS 重跑，不能归因于未起约束作用的最低 epoch 参数。",
+      "evidence": [
+        {
+          "path": "README.md",
+          "line": 617,
+          "anchor": "independent rerun"
+        }
+      ]
+    },
+    {
+      "review_file": "pr3-findings-2026-10-11.md",
+      "finding": "N4",
+      "status": "documented_existing_or_updated",
+      "scope": "documentation",
+      "disposition": "旧机制归因已由当前常数基线和误差分解替代。",
+      "evidence": [
+        {
+          "path": "README.md",
+          "line": 901,
+          "anchor": "Constant"
+        }
+      ]
+    },
+    {
+      "review_file": "pr3-findings-2026-10-11.md",
+      "finding": "N5",
+      "status": "documented_existing_or_updated",
+      "scope": "documentation",
+      "disposition": "当前时间结果的 Git 恢复流程与旧发布包分开说明。",
+      "evidence": [
+        {
+          "path": "README.md",
+          "line": 117,
+          "anchor": "To recompute the current temporal"
+        }
+      ]
+    },
+    {
+      "review_file": "pr3-findings-2026-10-11.md",
+      "finding": "N6",
+      "status": "documented_existing_or_updated",
+      "scope": "documentation",
+      "disposition": "明确 EGFR 是重新拉取子集，另外七个拉取保持原记录数。",
+      "evidence": [
+        {
+          "path": "docs/methodology.md",
+          "line": 80,
+          "anchor": "8,000 data rows"
+        }
+      ]
+    },
+    {
+      "review_file": "pr3-findings-2026-10-11.md",
+      "finding": "N7",
+      "status": "documented_existing_or_updated",
+      "scope": "documentation",
+      "disposition": "16 个 XGBoost 分数已精确复现并补配对区间。",
+      "evidence": [
+        {
+          "path": "README.md",
+          "line": 677,
+          "anchor": "Paired test-molecule bootstrap"
+        }
+      ]
+    },
+    {
+      "review_file": "pr3-findings-2026-10-11.md",
+      "finding": "N8",
+      "status": "documented_existing_or_updated",
+      "scope": "documentation",
+      "disposition": "适用域按各模型实际训练池计算；误差排序不等于概率校准。",
+      "evidence": [
+        {
+          "path": "docs/methodology.md",
+          "line": 721,
+          "anchor": "actual fitting"
+        }
+      ]
+    },
+    {
+      "review_file": "pr3-findings-2026-10-11.md",
+      "finding": "N9",
+      "status": "documented_existing_or_updated",
+      "scope": "documentation",
+      "disposition": "当前与历史结果分开，修正旧调参实验日期与归档日期。",
+      "evidence": [
+        {
+          "path": "docs/methodology.md",
+          "line": 766,
+          "anchor": "run 2026-09-24"
+        }
+      ]
+    },
+    {
+      "review_file": "pr3-findings-2026-10-11.md",
+      "finding": "N10",
+      "status": "documented_existing_or_updated",
+      "scope": "documentation",
+      "disposition": "说明 chromone 当前零样本；复算三种子 thienopyrimidine MAE，方向不稳定。",
+      "evidence": [
+        {
+          "path": "docs/methodology.md",
+          "line": 783,
+          "anchor": "GIN values are 1.325"
+        }
+      ]
+    },
+    {
+      "review_file": "pr3-findings-2026-10-11.md",
+      "finding": "N13",
+      "status": "documented_existing_or_updated",
+      "scope": "documentation",
+      "disposition": "多任务结果限定为逐种子均值比较，并修复访谈与归档引用。",
+      "evidence": [
+        {
+          "path": "README.md",
+          "line": 784,
+          "anchor": "Both pooling configurations have lower"
+        }
+      ]
+    },
+    {
+      "review_file": "pr3-findings-2026-10-11.md",
+      "finding": "Low/data/fingerprint_twins",
+      "status": "documented_existing_or_updated",
+      "scope": "documentation",
+      "disposition": "披露 3.5–20.2% 指纹相同的测试分子；去盐只解决盐型重叠。",
+      "evidence": [
+        {
+          "path": "docs/methodology.md",
+          "line": 57,
+          "anchor": "3.5-20.2%"
+        }
+      ]
+    },
+    {
+      "review_file": "pr3-findings-2026-10-11.md",
+      "finding": "Low/data/year_policy",
+      "status": "documented_existing_or_updated",
+      "scope": "documentation",
+      "disposition": "时间标签已改为 as-of 协议，代码边界见代码审核。",
+      "evidence": [
+        {
+          "path": "README.md",
+          "line": 133,
+          "anchor": "as-of"
+        }
+      ]
+    },
+    {
+      "review_file": "pr3-findings-2026-10-11.md",
+      "finding": "Low/data/RF_train_pool",
+      "status": "documented_existing_or_updated",
+      "scope": "documentation",
+      "disposition": "明确时间 RF 仅训练于 train_idx。",
+      "evidence": [
+        {
+          "path": "docs/methodology.md",
+          "line": 576,
+          "anchor": "RF fits train only"
+        }
+      ]
+    },
+    {
+      "review_file": "pr3-findings-2026-10-11.md",
+      "finding": "Low/data/median_scale",
+      "status": "documented_existing_or_updated",
+      "scope": "documentation",
+      "disposition": "说明线性 IC50 与对数 pIC50 中位数不必互为变换。",
+      "evidence": [
+        {
+          "path": "docs/methodology.md",
+          "line": 50,
+          "anchor": "linear"
+        }
+      ]
+    },
+    {
+      "review_file": "pr3-findings-2026-10-11.md",
+      "finding": "Low/data/invalid_SMILES",
+      "status": "documented_existing_or_updated",
+      "scope": "documentation",
+      "disposition": "当前特征化遇非法 SMILES 明确失败，避免索引移动。",
+      "evidence": [
+        {
+          "path": "docs/methodology.md",
+          "line": 69,
+          "anchor": "aborts loudly"
+        }
+      ]
+    },
+    {
+      "review_file": "pr3-findings-2026-10-11.md",
+      "finding": "Low/data/BACE",
+      "status": "fixed_this_turn",
+      "scope": "documentation",
+      "disposition": "BACE 专用历史兼容清洗已精确重建 1,513 行，并保留 ChEMBL 标准化路径。",
+      "evidence": [
+        {
+          "path": "docs/methodology.md",
+          "line": 139,
+          "anchor": "BACE regeneration"
+        }
+      ]
+    },
+    {
+      "review_file": "pr3-findings-2026-10-11.md",
+      "finding": "Low/data/relation_one_direction",
+      "status": "documented_existing_or_updated",
+      "scope": "documentation",
+      "disposition": "仅观察到精确记录缺 pChEMBL 的单方向例外。",
+      "evidence": [
+        {
+          "path": "docs/methodology.md",
+          "line": 30,
+          "anchor": "one-sided"
+        }
+      ]
+    },
+    {
+      "review_file": "pr3-findings-2026-10-11.md",
+      "finding": "Low/data/overlapping_EGFR",
+      "status": "documented_existing_or_updated",
+      "scope": "documentation",
+      "disposition": "EGFR 与 egfr_full 重叠，不解释为独立八靶点证据。",
+      "evidence": [
+        {
+          "path": "README.md",
+          "line": 9,
+          "anchor": "also sits in `egfr_full`"
+        }
+      ]
+    },
+    {
+      "review_file": "pr3-findings-2026-10-11.md",
+      "finding": "Low/docs/QC_filter",
+      "status": "documented_existing_or_updated",
+      "scope": "documentation",
+      "disposition": "当前 QC 已说明精确关系过滤。",
+      "evidence": [
+        {
+          "path": "README.md",
+          "line": 217,
+          "anchor": "rows are dropped"
+        }
+      ]
+    },
+    {
+      "review_file": "pr3-findings-2026-10-11.md",
+      "finding": "Low/docs/shuffled_max",
+      "status": "documented_existing_or_updated",
+      "scope": "documentation",
+      "disposition": "明确最大单种子 +0.047 与组均值是不同口径。",
+      "evidence": [
+        {
+          "path": "README.md",
+          "line": 297,
+          "anchor": "+0.047"
+        }
+      ]
+    },
+    {
+      "review_file": "pr3-findings-2026-10-11.md",
+      "finding": "Low/docs/fingerprint_ablation",
+      "status": "documented_existing_or_updated",
+      "scope": "documentation",
+      "disposition": "区分半径和位宽主效应与特定单元的变化。",
+      "evidence": [
+        {
+          "path": "README.md",
+          "line": 738,
+          "anchor": "radius moves"
+        }
+      ]
+    },
+    {
+      "review_file": "pr3-findings-2026-10-11.md",
+      "finding": "Low/docs/fairness_grid",
+      "status": "documented_existing_or_updated",
+      "scope": "documentation",
+      "disposition": "披露最优配置位于搜索边界及重复训练波动。",
+      "evidence": [
+        {
+          "path": "README.md",
+          "line": 510,
+          "anchor": "grid's capacity corner"
+        }
+      ]
+    },
+    {
+      "review_file": "pr3-findings-2026-10-11.md",
+      "finding": "Low/docs/scaling_counts",
+      "status": "documented_existing_or_updated",
+      "scope": "documentation",
+      "disposition": "修正均值与集成非正格数混用。",
+      "evidence": [
+        {
+          "path": "README.md",
+          "line": 375,
+          "anchor": "only five of eight"
+        }
+      ]
+    },
+    {
+      "review_file": "pr3-findings-2026-10-11.md",
+      "finding": "Low/docs/interpretability_families",
+      "status": "documented_existing_or_updated",
+      "scope": "documentation",
+      "disposition": "分开查询核心和完整 Murcko 核心，说明机会水平。",
+      "evidence": [
+        {
+          "path": "README.md",
+          "line": 281,
+          "anchor": "Murcko-fallback families"
+        }
+      ]
+    },
+    {
+      "review_file": "pr5-findings-2026-10-12.md",
+      "finding": "P1",
+      "status": "documented_existing_or_updated",
+      "scope": "documentation",
+      "disposition": "重跑设备、非约束性最低 epoch 及种子条件性已说明。",
+      "evidence": [
+        {
+          "path": "README.md",
+          "line": 617,
+          "anchor": "independent rerun"
+        }
+      ]
+    },
+    {
+      "review_file": "pr5-findings-2026-10-12.md",
+      "finding": "P2",
+      "status": "documented_existing_or_updated",
+      "scope": "documentation",
+      "disposition": "原审查机制解释后来部分撤回；保留算术分解，不作因果归因。",
+      "evidence": [
+        {
+          "path": "docs/methodology.md",
+          "line": 711,
+          "anchor": "allocation-independent"
+        }
+      ]
+    },
+    {
+      "review_file": "pr5-findings-2026-10-12.md",
+      "finding": "P4",
+      "status": "documented_existing_or_updated",
+      "scope": "documentation",
+      "disposition": "当前时间统计可从 Git 恢复，经典模型复算需另取数据与缓存。",
+      "evidence": [
+        {
+          "path": "README.md",
+          "line": 117,
+          "anchor": "To recompute the current temporal"
+        }
+      ]
+    },
+    {
+      "review_file": "pr5-findings-2026-10-12.md",
+      "finding": "P5",
+      "status": "documented_existing_or_updated",
+      "scope": "documentation",
+      "disposition": "原版本不匹配指控被审查者撤回；现已复现全部 16 个 3.4.1 分数。",
+      "evidence": [
+        {
+          "path": "README.md",
+          "line": 678,
+          "anchor": "all 16 historical"
+        }
+      ]
+    },
+    {
+      "review_file": "pr5-findings-2026-10-12.md",
+      "finding": "P6",
+      "status": "documented_existing_or_updated",
+      "scope": "documentation",
+      "disposition": "限定调参、多任务及键特征的描述性比较，撤回因果过度解释。",
+      "evidence": [
+        {
+          "path": "README.md",
+          "line": 566,
+          "anchor": "do not isolate a causal"
+        }
+      ]
+    },
+    {
+      "review_file": "pr5-findings-2026-10-12.md",
+      "finding": "P7",
+      "status": "documented_existing_or_updated",
+      "scope": "documentation",
+      "disposition": "归因家族限制已说明；陈旧输出由主代理对账。",
+      "evidence": [
+        {
+          "path": "docs/methodology.md",
+          "line": 785,
+          "anchor": "case study"
+        }
+      ]
+    },
+    {
+      "review_file": "pr5-findings-2026-10-12.md",
+      "finding": "Low/docs/log_status",
+      "status": "documented_existing_or_updated",
+      "scope": "documentation",
+      "disposition": "历史中间状态已有注释，补日志顺序和设备证据范围。",
+      "evidence": [
+        {
+          "path": "experiments/LOG.md",
+          "line": 6,
+          "anchor": "Device claims are scoped"
+        }
+      ]
+    },
+    {
+      "review_file": "pr5-findings-2026-10-12.md",
+      "finding": "Low/docs/radius",
+      "status": "documented_existing_or_updated",
+      "scope": "documentation",
+      "disposition": "明确半径主效应与 r3/2048 的不同均值。",
+      "evidence": [
+        {
+          "path": "README.md",
+          "line": 738,
+          "anchor": "radius moves"
+        }
+      ]
+    },
+    {
+      "review_file": "pr5-findings-2026-10-12.md",
+      "finding": "Low/docs/chemotype_name",
+      "status": "documented_existing_or_updated",
+      "scope": "documentation",
+      "disposition": "区分 4-anilinoquinoline 与 quinazoline。",
+      "evidence": [
+        {
+          "path": "docs/methodology.md",
+          "line": 535,
+          "anchor": "4-anilinoquinoline"
+        }
+      ]
+    },
+    {
+      "review_file": "pr5-findings-2026-10-12.md",
+      "finding": "Low/docs/learning_curve_positive",
+      "status": "documented_existing_or_updated",
+      "scope": "documentation",
+      "disposition": "保留 hERG 和 ABL1 学习曲线的正向例外。",
+      "evidence": [
+        {
+          "path": "README.md",
+          "line": 485,
+          "anchor": "GIN ahead at 7"
+        }
+      ]
+    },
+    {
+      "review_file": "pr5-findings-2026-10-12.md",
+      "finding": "Low/docs/XGB_rounding",
+      "status": "documented_existing_or_updated",
+      "scope": "documentation",
+      "disposition": "只有 hivpr 正差需舍入后才不超过 0.010；确定性不妨碍样本 bootstrap。",
+      "evidence": [
+        {
+          "path": "README.md",
+          "line": 673,
+          "anchor": "Three are ≤"
+        }
+      ]
+    },
+    {
+      "review_file": "pr5-findings-2026-10-12.md",
+      "finding": "Low/docs/interview_tuning_date",
+      "status": "documented_existing_or_updated",
+      "scope": "documentation",
+      "disposition": "区分 2026-09-24 运行日期与 2026-10-09 归档日期。",
+      "evidence": [
+        {
+          "path": "docs/interview.md",
+          "line": 45,
+          "anchor": "2026-09-24"
+        }
+      ]
+    },
+    {
+      "review_file": "pr6-findings-2026-10-13.md",
+      "finding": "R1",
+      "status": "documented_existing_or_updated",
+      "scope": "documentation",
+      "disposition": "条件性措辞已统一，撤回单侧删种子“加强 RF 稳健性”的说法。",
+      "evidence": [
+        {
+          "path": "README.md",
+          "line": 429,
+          "anchor": "cannot"
+        }
+      ]
+    },
+    {
+      "review_file": "pr6-findings-2026-10-13.md",
+      "finding": "R2",
+      "status": "documented_existing_or_updated",
+      "scope": "documentation",
+      "disposition": "说明误差分解中水平项与总量不依赖分配约定，其余项依赖。",
+      "evidence": [
+        {
+          "path": "docs/methodology.md",
+          "line": 711,
+          "anchor": "allocation-independent"
+        }
+      ]
+    },
+    {
+      "review_file": "pr6-findings-2026-10-13.md",
+      "finding": "R5",
+      "status": "disclosed_missing_evidence",
+      "scope": "documentation",
+      "disposition": "原 EGFR 九次训练日志与设备仍缺失；新增显式来源限制，不伪造证据。",
+      "evidence": [
+        {
+          "path": "README.md",
+          "line": 329,
+          "anchor": "Provenance:"
+        }
+      ]
+    },
+    {
+      "review_file": "pr6-findings-2026-10-13.md",
+      "finding": "Low/docs/log_convergence",
+      "status": "documented_existing_or_updated",
+      "scope": "documentation",
+      "disposition": "历史记录已纠正停止 epoch 35 和最佳 epoch 15 的混淆。",
+      "evidence": [
+        {
+          "path": "experiments/LOG.md",
+          "line": 1322,
+          "anchor": "early-stopped at epoch 35"
+        }
+      ]
+    },
+    {
+      "review_file": "pr6-findings-2026-10-13.md",
+      "finding": "Low/docs/time_mechanism",
+      "status": "documented_existing_or_updated",
+      "scope": "documentation",
+      "disposition": "旧时间机制解释明确历史化并撤回因果过度推断。",
+      "evidence": [
+        {
+          "path": "docs/methodology.md",
+          "line": 710,
+          "anchor": "not causal evidence"
+        }
+      ]
+    },
+    {
+      "review_file": "pr6-findings-2026-10-13.md",
+      "finding": "Low/docs/fairness",
+      "status": "documented_existing_or_updated",
+      "scope": "documentation",
+      "disposition": "区分 hERG 提升与种子波动，ABL1 重跑差异和 RF 对照。",
+      "evidence": [
+        {
+          "path": "README.md",
+          "line": 542,
+          "anchor": "clearest descriptive"
+        }
+      ]
+    },
+    {
+      "review_file": "pr6-findings-2026-10-13.md",
+      "finding": "Low/docs/XGB_versions",
+      "status": "documented_existing_or_updated",
+      "scope": "documentation",
+      "disposition": "旧 3.2.0 证据只涵盖 egfr_full；3.4.1 全 16 格已复现。",
+      "evidence": [
+        {
+          "path": "README.md",
+          "line": 698,
+          "anchor": "committed 3.2.0 evidence"
+        }
+      ]
+    },
+    {
+      "review_file": "pr6-findings-2026-10-13.md",
+      "finding": "Low/docs/test_counts",
+      "status": "documented_existing_or_updated",
+      "scope": "documentation",
+      "disposition": "撤回缺日志支撑的 2026-10-13 clean_data 11 项计数，保留原日期记录。",
+      "evidence": [
+        {
+          "path": "docs/reviews/fixes-2026-10-11.md",
+          "line": 56,
+          "anchor": "原注"
+        }
+      ]
+    },
+    {
+      "review_file": "pr6-findings-2026-10-13.md",
+      "finding": "Low/artifacts/core_attribution",
+      "status": "documented_existing_or_updated",
+      "scope": "documentation",
+      "disposition": "查询和 Murcko 核心归因不跨家族直接合并。",
+      "evidence": [
+        {
+          "path": "docs/methodology.md",
+          "line": 798,
+          "anchor": "Core-attribution fractions must"
+        }
+      ]
+    },
+    {
+      "review_file": "pr6-findings-2026-10-13b.md",
+      "finding": "C1",
+      "status": "fixed_this_turn",
+      "scope": "documentation",
+      "disposition": "加入减少集成规模的代数恒等式，说明只扰动 GNN 不能证明 RF 种子稳健。",
+      "evidence": [
+        {
+          "path": "docs/methodology.md",
+          "line": 474,
+          "anchor": "mean_k (y−m_{−k})"
+        }
+      ]
+    },
+    {
+      "review_file": "pr6-findings-2026-10-13b.md",
+      "finding": "C2",
+      "status": "fixed_this_turn",
+      "scope": "documentation",
+      "disposition": "补分解交叉项分配约定和历史 a2a 例子。",
+      "evidence": [
+        {
+          "path": "docs/methodology.md",
+          "line": 711,
+          "anchor": "allocation-independent"
+        }
+      ]
+    },
+    {
+      "review_file": "pr6-findings-2026-10-13b.md",
+      "finding": "S1",
+      "status": "fixed_this_turn",
+      "scope": "documentation",
+      "disposition": "当前八个时间单元共 24 次删种子检查无翻转；旧 hivpr 条件性已被新结果取代。",
+      "evidence": [
+        {
+          "path": "README.md",
+          "line": 913,
+          "anchor": "0/8 conditional time cells"
+        }
+      ]
+    },
+    {
+      "review_file": "pr6-findings-2026-10-13b.md",
+      "finding": "S2",
+      "status": "fixed_this_turn",
+      "scope": "documentation",
+      "disposition": "明确区间与计数为未校正的探索性比较；不把 bootstrap 正号比例变成正式 Bonferroni 检验。",
+      "evidence": [
+        {
+          "path": "docs/methodology.md",
+          "line": 276,
+          "anchor": "Multiplicity."
+        }
+      ]
+    },
+    {
+      "review_file": "pr6-findings-2026-10-13b.md",
+      "finding": "S3",
+      "status": "fixed_this_turn",
+      "scope": "documentation",
+      "disposition": "修正显著性过强、至少一个种子、fairness 幅度与噪声的措辞。",
+      "evidence": [
+        {
+          "path": "README.md",
+          "line": 359,
+          "anchor": "nominal, conditional lead"
+        }
+      ]
+    },
+    {
+      "review_file": "pr6-findings-2026-10-13b.md",
+      "finding": "S4",
+      "status": "fixed_this_turn",
+      "scope": "documentation",
+      "disposition": "区分均值与集成口径；scaffold 非正格数分别为 7/8 和 5/8。",
+      "evidence": [
+        {
+          "path": "README.md",
+          "line": 375,
+          "anchor": "only five of eight"
+        }
+      ]
+    },
+    {
+      "review_file": "pr6-findings-2026-10-13b.md",
+      "finding": "S5",
+      "status": "fixed_this_turn",
+      "scope": "documentation",
+      "disposition": "新增 16 格 XGBoost 配对 bootstrap，名义区间为 RF 6 / XGB 1 / 未决 9。",
+      "evidence": [
+        {
+          "path": "README.md",
+          "line": 677,
+          "anchor": "Paired test-molecule bootstrap"
+        }
+      ]
+    },
+    {
+      "review_file": "pr6-findings-2026-10-13b.md",
+      "finding": "S6",
+      "status": "disclosed_missing_evidence",
+      "scope": "documentation",
+      "disposition": "撤回用旧 multitask 日志证明刷新后设备的引用；新日志缺口仍披露。",
+      "evidence": [
+        {
+          "path": "docs/methodology.md",
+          "line": 310,
+          "anchor": "rerun has no committed"
+        }
+      ]
+    },
+    {
+      "review_file": "pr6-findings-2026-10-13b.md",
+      "finding": "Low/docs/log_header",
+      "status": "fixed_this_turn",
+      "scope": "documentation",
+      "disposition": "修正日志设备断言、排列顺序和易失效行号引用。",
+      "evidence": [
+        {
+          "path": "experiments/LOG.md",
+          "line": 6,
+          "anchor": "Device claims are scoped"
+        }
+      ]
+    },
+    {
+      "review_file": "pr6-findings-2026-10-13b.md",
+      "finding": "Low/docs/fairness_multitask",
+      "status": "fixed_this_turn",
+      "scope": "documentation",
+      "disposition": "多任务为均值比较而非所有集成均显著；补种子级 chemotype 限制。",
+      "evidence": [
+        {
+          "path": "README.md",
+          "line": 787,
+          "anchor": "mean-score comparisons"
+        }
+      ]
+    },
+    {
+      "review_file": "pr6-findings-2026-10-13b.md",
+      "finding": "Low/docs/ep300",
+      "status": "fixed_this_turn",
+      "scope": "documentation",
+      "disposition": "六个基线指向精确历史提交；日志实际设备为 MPS，不是 CUDA。",
+      "evidence": [
+        {
+          "path": "results/_archive-2026-10-09/scaling_ep300/ep300_confirmation.md",
+          "line": 12,
+          "anchor": "43a071638e668cb79dda0335b5cbf523dae45835"
+        }
+      ]
+    },
+    {
+      "review_file": "pr6-findings-2026-10-13b.md",
+      "finding": "Low/docs/absolute_paths",
+      "status": "retained_historical_record",
+      "scope": "documentation",
+      "disposition": "保留历史运行日志里的本地路径作为记录，不声称跨机器可移植。",
+      "evidence": [
+        {
+          "path": "experiments/LOG.md",
+          "line": 12,
+          "anchor": "historical locations"
+        }
+      ]
+    },
+    {
+      "review_file": "pr8-findings-2026-10-13c.md",
+      "finding": "T1",
+      "status": "documented_existing",
+      "scope": "documentation",
+      "disposition": "已报告全部 24 格 scaffold 分组 bootstrap 及少量分组的局限。",
+      "evidence": [
+        {
+          "path": "README.md",
+          "line": 82,
+          "anchor": "24-cell"
+        }
+      ]
+    },
+    {
+      "review_file": "pr8-findings-2026-10-13c.md",
+      "finding": "T2",
+      "status": "documented_existing",
+      "scope": "documentation",
+      "disposition": "已加入训练均值常数基线及水平、排序解释。",
+      "evidence": [
+        {
+          "path": "README.md",
+          "line": 901,
+          "anchor": "Constant"
+        }
+      ]
+    },
+    {
+      "review_file": "pr8-findings-2026-10-13c.md",
+      "finding": "T3",
+      "status": "documented_existing",
+      "scope": "documentation",
+      "disposition": "使用最佳检查点诊断，13/24 启发式标记不被称为收敛证明。",
+      "evidence": [
+        {
+          "path": "README.md",
+          "line": 832,
+          "anchor": "13/24"
+        }
+      ]
+    },
+    {
+      "review_file": "pr8-findings-2026-10-13c.md",
+      "finding": "T6",
+      "status": "documented_existing",
+      "scope": "documentation",
+      "disposition": "来源版本和验收记录已定位；旧缺失资料不能靠叙述重造。",
+      "evidence": [
+        {
+          "path": "docs/methodology.md",
+          "line": 299,
+          "anchor": "campaign_acceptance.json"
+        }
+      ]
+    },
+    {
+      "review_file": "pr8-findings-2026-10-13c.md",
+      "finding": "T7",
+      "status": "documented_existing",
+      "scope": "documentation",
+      "disposition": "当前时间结果恢复路径不依赖旧 RF 时间模型发布包。",
+      "evidence": [
+        {
+          "path": "README.md",
+          "line": 117,
+          "anchor": "To recompute the current temporal"
+        }
+      ]
+    },
+    {
+      "review_file": "pr8-findings-2026-10-13c.md",
+      "finding": "Low/RF_SD",
+      "status": "independent_evidence_added_historical_identity_unresolved",
+      "scope": "documentation",
+      "disposition": "已完成 a2a 与 hERG 各五种子独立补充研究，固定当前标签、划分和已选超参数。总体 SD 分别为 0.023457 / 0.005488，样本 SD 为 0.026225 / 0.006136；不能因 hERG 舍入为 0.006 就认定复现了原审查队列。",
+      "evidence": [
+        {
+          "path": "README.md",
+          "anchor": "Independent RF seed sensitivity",
+          "line": 955
+        },
+        {
+          "path": "results/rf_seed_sensitivity/verification.json",
+          "anchor": "\"status\": \"passed\"",
+          "line": 2
+        }
+      ]
+    },
+    {
+      "review_file": "pr8-findings-2026-10-13c.md",
+      "finding": "Low/AD_R2",
+      "status": "documented_existing",
+      "scope": "documentation",
+      "disposition": "用同一子集 RMSE/MAE 解释适用域差异，不单凭跨子集 R²。",
+      "evidence": [
+        {
+          "path": "docs/methodology.md",
+          "line": 741,
+          "anchor": "10/13"
+        }
+      ]
+    },
+    {
+      "review_file": "pr8-findings-2026-10-13c.md",
+      "finding": "Low/A2A_batch",
+      "status": "documented_existing",
+      "scope": "documentation",
+      "disposition": "说明单文档 371 个测试母体、三个原始 IC50 值但六个母体标签；不能证明单实验批次。",
+      "evidence": [
+        {
+          "path": "README.md",
+          "line": 967,
+          "anchor": "371/802"
+        }
+      ]
+    },
+    {
+      "review_file": "pr8-findings-2026-10-13c.md",
+      "finding": "Low/docs/archive_size",
+      "status": "documented_existing",
+      "scope": "documentation",
+      "disposition": "当前文档不再保留错误的 2.1 MiB 声称，恢复流程由清单验证。",
+      "evidence": [
+        {
+          "path": "README.md",
+          "line": 123,
+          "anchor": "restore_time_inputs.py"
+        }
+      ]
+    },
+    {
+      "review_file": "pr8-findings-2026-10-13c.md",
+      "finding": "Low/original_mutants",
+      "status": "disclosed_missing_evidence",
+      "scope": "documentation",
+      "disposition": "原 16 个变异补丁缺失；公开新测试不冒充原实验。",
+      "evidence": [
+        {
+          "path": "docs/methodology.md",
+          "line": 81,
+          "anchor": "16"
+        }
+      ]
+    }
+  ],
+  "validation": {
+    "pytest": "610 passed, 3 warnings",
+    "pytest_log": "logs/all_pr_audit_20261014/pytest.log",
+    "ruff_log": "logs/all_pr_audit_20261014/ruff.log",
+    "readme_cells": 447,
+    "readme_mismatches": 0,
+    "real_release_install": "passed",
+    "time_audit": "passed; 108 artifact hashes verified"
+  },
+  "remaining_limits": [
+    {
+      "item": "original mutation patches/verifier notes",
+      "status": "not found in searched published/local evidence",
+      "details": "Earlier 7, PR6b 35 (19 surviving) and PR8 16 are distinct cohorts; new regression tests cannot establish exact original mutation replay."
+    },
+    {
+      "item": "historical five-state RF cohort",
+      "status": "identity unresolved; independent supplement completed",
+      "details": "a2a and hERG both recomputed; hERG SD proximity does not prove the historical target/configuration."
+    },
+    {
+      "item": "historical EGFR GIN/refreshed multitask logs/device",
+      "status": "unrecoverable from available records; disclosed"
+    },
+    {
+      "item": "release historical packaging command",
+      "status": "not recorded; actual archive member inventories and successful installation now recorded"
+    },
+    {
+      "item": "eight-seed CUDA comparison",
+      "status": "deferred until user makes 4070 available",
+      "details": "Use frozen core 90a470050367cebc4cd83dfe8d3f7fb37d53e6de and extension 85210630c475e8733089a476b8d5bf4852dbf773; do not rebuild from current changes."
+    }
+  ],
+  "preservation": {
+    "baseline": "cdc816370003029f2cd29446b027844aae3e82a3",
+    "unchanged_paths": [
+      "results/gnn_models",
+      "results/time_budget_sensitivity",
+      "results/time_split/summary.csv",
+      "results/significance/summary_time.csv",
+      "data/processed"
+    ],
+    "note": "Main accepted campaign and frozen M3 study retained; supplemental fits are separate. Numerical GINE uncertainty artifacts unchanged."
+  }
+}

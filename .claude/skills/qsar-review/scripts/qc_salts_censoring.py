@@ -20,8 +20,8 @@ What / why:
      This script counts removed rows with 02's own inclusion rule, verbatim:
      the pool is filtered exactly like 02 (unit nM, non-missing non-empty
      SMILES, value > 0) and a row counts as censored/removed iff
-     ``standard_relation != "="`` (no stripping; empty/other values such as
-     ">>" are removed by 02 and are counted here too).  When the column is
+     ``standard_relation.strip() != "="`` (empty/NaN and other values such
+     as ">>" are removed by 02 and are counted here too).  When the column is
      absent (older/bace-style download) the exact-value striations at
      10^3/10^4/10^5 nM are reported as a proxy.  ``chembl_censoring_counts.py``
      in this folder additionally audits censoring at the parent level
@@ -33,10 +33,9 @@ parent_smiles, duplicated parent_smiles, and cross-split parent overlap each
 make the script exit 1 when violated.  A split check that cannot run prints
 an explicit SKIP note and exits 1 by default - never "OK" for checks that
 did not run: no ``parent_smiles`` column (bace, which predates the M1
-parent standardization), a missing split file, or a split file whose
-molecule count differs from the clean CSV.  Pass ``--allow-skip`` to accept
-skipped checks (exit 0, SKIP notes still printed).  A split file with the
-right count but smiles that do not align with the clean CSV's
+parent standardization) or a missing split file. Pass ``--allow-skip`` to accept
+skipped checks (exit 0, SKIP notes still printed).  A split file with a different
+count or smiles that do not align with the clean CSV's
 ``parent_smiles`` is a misalignment and always exits 1.
 
 Nothing is filtered or rewritten - like ``07_qc_checks.py`` the audit is the
@@ -171,6 +170,26 @@ def check_salts(df):
     }
 
 
+def validate_indices(split, n_rows):
+    """Require a complete disjoint partition, including temporal exclusions."""
+    parts = []
+    for key in ("train_idx", "valid_idx", "test_idx", "excluded_idx"):
+        if key not in split:
+            if key in ("train_idx", "test_idx"):
+                return f"missing {key}"
+            continue
+        idx = np.asarray(split[key])
+        if idx.ndim != 1 or idx.dtype.kind not in "iu":
+            return f"{key} must be a 1D integer array"
+        if np.any(idx < 0) or np.any(idx >= n_rows):
+            return f"{key} has an out-of-range index"
+        parts.append(idx)
+    combined = np.concatenate(parts)
+    if len(combined) != n_rows or len(np.unique(combined)) != n_rows:
+        return "split indices do not form a complete disjoint partition"
+    return None
+
+
 def check_split_leakage(parents):
     """Cross-split parent overlap. Must be 0: each parent is exactly one clean-CSV row.
 
@@ -201,8 +220,9 @@ def check_split_leakage(parents):
         if len(smiles) != len(parents):
             reason = (f"split file has {len(smiles)} molecules, clean CSV has "
                       f"{len(parents)} (split/CSV out of sync?)")
-            print(f"  {split:9s} SKIP: {reason} - leakage check not run")
-            skips.append(f"{split}: {reason}")
+            out[split] = {"split_matches_clean_order": False,
+                          "alignment_error": reason}
+            print(f"  {split:9s} MISALIGNED: {reason} - FAIL")
             continue
         order_mismatch = int(np.sum(smiles != parents))
         if order_mismatch:
@@ -212,6 +232,12 @@ def check_split_leakage(parents):
                   f"parent_smiles in {order_mismatch} / {len(parents)} positions "
                   "- leakage numbers are not interpretable (split file predates "
                   "the clean CSV?) - FAIL")
+            continue
+        index_error = validate_indices(d, len(parents))
+        if index_error:
+            out[split] = {"split_matches_clean_order": False,
+                          "alignment_error": index_error}
+            print(f"  {split:9s} MISALIGNED: {index_error} - FAIL")
             continue
         train = set(parents[d["train_idx"]])
         if "valid_idx" in d.files:
@@ -246,16 +272,15 @@ def check_censoring():
     out = {"raw_available": True, "n_raw_rows": int(len(raw))}
 
     if "standard_relation" in raw.columns:
-        # 02's inclusion rule, verbatim: keep only standard_relation == "="
-        # (no stripping). Everything else - including empty and odd values
-        # like ">>" - is removed by 02 and counts as censored/removed here.
-        removed = raw["standard_relation"] != "="
+        # Match 02: whitespace-padded equals are exact, empty values are not.
+        relations = raw["standard_relation"].fillna("").astype(str).str.strip()
+        removed = relations != "="
         out["standard_relation_available"] = True
         out["n_removed_by_relation_rule"] = int(removed.sum())
         out["by_relation"] = {("(empty)" if pd.isna(k) else str(k)): int(v)
-                              for k, v in raw.loc[removed, "standard_relation"]
+                              for k, v in relations.loc[removed]
                               .value_counts(dropna=False).items()}
-        n_bounds = int(raw["standard_relation"].isin(CENSOR_RELATIONS).sum())
+        n_bounds = int(relations.isin(CENSOR_RELATIONS).sum())
         out["n_censored_bounds"] = n_bounds  # >, <, >=, <=, ~ subset of removed
         bounds = {k: v for k, v in out["by_relation"].items() if k in CENSOR_RELATIONS}
         other = {k: v for k, v in out["by_relation"].items() if k not in CENSOR_RELATIONS}
@@ -280,7 +305,7 @@ def check_censoring():
     out["exact_value_rows"] = striations
     print(f"  rows at exactly {', '.join(f'{k} nM' for k in striations)}: "
           f"{', '.join(str(v) for v in striations.values())} "
-          f"(= {total / len(raw):.1%} of raw rows; typical 'inactive above X' pins)")
+          f"(= {total / len(raw) if len(raw) else 0:.1%} of raw rows; typical 'inactive above X' pins)")
     return out
 
 
@@ -328,10 +353,10 @@ def main(argv=None):
                 f"{salts['n_parents_duplicated']} duplicated parent_smiles (must be 0)")
     for split, info in leakage.items():
         if not info.get("split_matches_clean_order", True):
-            violations.append(
-                f"{split}: split smiles differ from clean parent_smiles in "
-                f"{info['n_smiles_differing_from_parents']} positions "
-                "(misaligned - leakage not interpretable)")
+            detail = info.get("alignment_error") or (
+                "split smiles differ from clean parent_smiles in "
+                f"{info['n_smiles_differing_from_parents']} positions")
+            violations.append(f"{split}: {detail} (misaligned - leakage not interpretable)")
         elif info["n_test_with_parent_in_train"]:
             violations.append(
                 f"{split}: {info['n_test_with_parent_in_train']} test parents also in train "

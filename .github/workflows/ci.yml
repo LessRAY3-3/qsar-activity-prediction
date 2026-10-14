@@ -22,7 +22,7 @@ jobs:
           pip install -r requirements.txt -r requirements-dev.txt
 
       - name: Lint (ruff)
-        run: ruff check scripts experiments tests
+        run: ruff check scripts experiments tests .claude/skills/qsar-review/scripts
 
       - name: Tests
         run: |

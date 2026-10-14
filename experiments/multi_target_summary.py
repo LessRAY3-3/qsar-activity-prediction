@@ -250,10 +250,10 @@ def print_conclusion(rows):
           f"{len(pos)} positive")
     if pos:
         lead = ", ".join(f"{t}/{s}" for t, s in pos)
-        print(f"  verdict   : the GIN has a clear lead on {len(pos)} cell(s): "
+        print(f"  verdict   : the GIN has a positive point estimate on {len(pos)} cell(s): "
               f"{lead} (point estimates, no CI)")
     else:
-        print("  verdict   : no target gives the GIN a clear lead "
+        print("  verdict   : no target gives the GIN a positive rounded point estimate "
               "(point estimates, no CI)")
     seed42_scaf_wins = [r["tag"] for r in rows
                         if np.isfinite(r.get("d_r2_seed42_scaffold", np.nan))

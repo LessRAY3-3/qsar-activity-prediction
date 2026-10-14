@@ -54,6 +54,7 @@ def test_ultra_potent_without_relation_column_counts_every_row(
 
     mod = load_script("07_qc_checks")
     monkeypatch.setattr(mod, "RAW", str(raw))
+    monkeypatch.setattr(mod, "TAG", "bace")
     mod.check_ultra_potent()
     out = capsys.readouterr().out
 
@@ -120,11 +121,9 @@ def test_ultra_potent_mirrors_empty_smiles_filter(tmp_path, monkeypatch,
     assert "0.0500 .. 0.5000" in out
 
 
-def test_ultra_potent_skips_non_chembl_tag(tmp_path, monkeypatch,
+def test_ultra_potent_skips_solubility_endpoint(tmp_path, monkeypatch,
                                            load_script, capsys):
-    """bace/esol never run 02's censoring policy, so the labelled-rows
-    audit is skipped for them with an explanation (6c1e3bb extension,
-    PR #6 Low) -- not silently counted as if a policy existed."""
+    """ESOL's solubility labels are not IC50 and must not be audited as such."""
     raw = tmp_path / "raw.csv"
     pd.DataFrame({
         "standard_value": [0.5, 5000.0],
@@ -134,11 +133,11 @@ def test_ultra_potent_skips_non_chembl_tag(tmp_path, monkeypatch,
 
     mod = load_script("07_qc_checks")
     monkeypatch.setattr(mod, "RAW", str(raw))
-    monkeypatch.setattr(mod, "TAG", "bace")
+    monkeypatch.setattr(mod, "TAG", "esol")
     mod.check_ultra_potent()
     out = capsys.readouterr().out
 
-    assert "skipped" in out and "bace" in out
+    assert "skipped" in out and "esol" in out
     assert re.findall(r"(\d+) / (\d+)", out) == []   # no headline fraction
 
 
@@ -162,3 +161,31 @@ def test_ultra_potent_skips_chembl_ids_without_relation_column(
 
     assert "skipped" in out and "no standard_relation column" in out
     assert re.findall(r"(\d+) / (\d+)", out) == []   # no headline fraction
+
+
+def test_ultra_potent_strips_relation_values(tmp_path, monkeypatch, load_script, capsys):
+    raw = tmp_path / "raw.csv"
+    pd.DataFrame({
+        "standard_value": [0.5, 0.1, 5000.0],
+        "standard_relation": [" = ", " < ", "= "],
+        "canonical_smiles": ["CCO", "CCC", "CCCC"],
+    }).to_csv(raw, index=False)
+    mod = load_script("07_qc_checks")
+    monkeypatch.setattr(mod, "RAW", str(raw))
+    mod.check_ultra_potent()
+    assert re.findall(r"(\d+) / (\d+)", capsys.readouterr().out) == [("1", "2")]
+
+
+def test_ultra_potent_bace_with_chembl_ids_still_audited(
+        tmp_path, monkeypatch, load_script, capsys):
+    raw = tmp_path / "raw.csv"
+    pd.DataFrame({
+        "molecule_chembl_id": ["CHEMBL1", "CHEMBL2"],
+        "standard_value": [0.5, 5000.0],
+        "canonical_smiles": ["CCO", "CCC"],
+    }).to_csv(raw, index=False)
+    mod = load_script("07_qc_checks")
+    monkeypatch.setattr(mod, "RAW", str(raw))
+    monkeypatch.setattr(mod, "TAG", "bace")
+    mod.check_ultra_potent()
+    assert re.findall(r"(\d+) / (\d+)", capsys.readouterr().out) == [("1", "2")]

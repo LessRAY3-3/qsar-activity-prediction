@@ -415,7 +415,7 @@ def read_existing_summary(path):
     return old
 
 
-def merge_summary(summary, summary_path, n_boot, force=False):
+def merge_summary(summary, summary_path, n_boot, force=False, seed=BOOT_SEED):
     """Merge-update summary_path by (tag, split, pair); return the merged frame.
 
     Keys already on disk are refreshed from `summary`; untouched keys are
@@ -433,12 +433,13 @@ def merge_summary(summary, summary_path, n_boot, force=False):
     old = read_existing_summary(summary_path).set_index(list(SUMMARY_KEYS))
     new = summary.set_index(list(SUMMARY_KEYS))
     overlap = old.index.isin(new.index)
-    stale = old[overlap & (old["n_boot"] != n_boot)]
+    stale = old[overlap & ((old["n_boot"] != n_boot) | (old["boot_seed"] != seed))]
     if len(stale) and not force:
         rel = os.path.relpath(summary_path, BASE)
         raise SystemExit(
             f"{rel}: {len(stale)} stored row(s) for these cells have a "
-            f"different n_boot ({sorted(set(stale['n_boot']))} vs this "
+            f"different n_boot / boot_seed ({sorted(set(stale['n_boot']))} / "
+            f"{sorted(set(stale['boot_seed']))} vs seed={seed}, this "
             f"run's {n_boot}); refusing to mix bootstrap sizes. A smoke run "
             "should write to a scratch --out-dir (summary AND figure land "
             "there; --fig overrides), not into the campaign directory; "
@@ -540,7 +541,7 @@ def guard_campaign_coverage(summary_path, tags, splits, force=False):
           "figure is drawn from this run's cells only)")
 
 
-def guard_summary_n_boot(summary_path, tags, splits, n_boot, force=False):
+def guard_summary_n_boot(summary_path, tags, splits, n_boot, force=False, seed=BOOT_SEED):
     """Refuse summary rows for the run's cells stored at a different n_boot.
 
     Same conflict merge_summary refuses, but checked BEFORE the write
@@ -559,12 +560,13 @@ def guard_summary_n_boot(summary_path, tags, splits, n_boot, force=False):
     overlap = pd.Series([(t, s) in run
                          for t, s in zip(old["tag"], old["split"])],
                         index=old.index)
-    stale = old[overlap & (old["n_boot"] != n_boot)]
+    stale = old[overlap & ((old["n_boot"] != n_boot) | (old["boot_seed"] != seed))]
     if len(stale) and not force:
         rel = os.path.relpath(summary_path, BASE)
         raise SystemExit(
             f"{rel}: {len(stale)} stored row(s) for these cells have a "
-            f"different n_boot ({sorted(set(stale['n_boot']))} vs this "
+            f"different n_boot / boot_seed ({sorted(set(stale['n_boot']))} / "
+            f"{sorted(set(stale['boot_seed']))} vs seed={seed}, this "
             f"run's {n_boot}); refusing to mix bootstrap sizes. A smoke run "
             "should write to a scratch --out-dir (summary AND figure land "
             "there; --fig overrides), not into the campaign directory; "
@@ -578,7 +580,7 @@ def print_conclusion(summary, model="gin"):
     label = model.upper()
     print(f"\n=== Paired bootstrap significance: {label} vs RF ===")
     print(f"  dR2 = R2_{label} - R2_RF (positive favours {label}); "
-          "significant = 95% CI excludes 0")
+          "nominal significance = per-cell 95% CI excludes 0; uncorrected for multiple comparisons")
     for pair in PAIRS:
         sub = summary[summary["pair"] == pair]
         sig = sub[sub["significant"]]
@@ -667,7 +669,7 @@ def main(args=None):
     # runs after the write loop, so a late SystemExit there would leave
     # every cell CSV already rewritten (Low, PR #6)
     guard_summary_n_boot(summary_path, tags, splits, args.n_boot,
-                         force=args.force)
+                         force=args.force, seed=args.seed)
 
     # Full preflight of EVERY cell before the write loop: the old in-loop
     # check aborted on a later mismatch only after earlier cells had been
@@ -681,12 +683,16 @@ def main(args=None):
             check_cell_csv(path, args.n_boot, force=args.force,
                            seed=args.seed)
 
+    # Compute all cells before publication. Missing/corrupt later input must
+    # not leave earlier cell outputs refreshed while the summary stays stale.
+    computed = {(tag, split): cell_rows(tag, split, n_boot=args.n_boot,
+                                       seed=args.seed, model=model)
+                for tag in tags for split in splits}
     rows = []
     for tag in tags:
         for split in splits:
             path = cell_paths[(tag, split)]
-            cell = cell_rows(tag, split, n_boot=args.n_boot, seed=args.seed,
-                             model=model)
+            cell = computed[(tag, split)]
             pd.DataFrame(cell).to_csv(path, index=False)
             for r in cell:
                 rows.append(r)
@@ -714,14 +720,14 @@ def main(args=None):
                            columns=SUMMARY_COLS + ["boot_seed"]
                            + (["label_id"] if "time" in splits else []))
     merged = merge_summary(summary, summary_path, n_boot=args.n_boot,
-                           force=args.force)
+                           force=args.force, seed=args.seed)
     merged.to_csv(summary_path, index=False)
 
     default_out = os.path.abspath(os.path.join(BASE, "results",
                                                "significance"))
     if args.fig:
         fig_path = os.path.abspath(args.fig)
-    elif out_dir != default_out:
+    elif os.path.realpath(out_dir) != os.path.realpath(default_out):
         # a scratch --out-dir run must not write its figure into the
         # repo's figures/significance: the figure follows the out-dir
         # (--fig overrides)

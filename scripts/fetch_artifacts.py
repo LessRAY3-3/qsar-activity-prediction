@@ -27,8 +27,8 @@ Trust model for raw data (review findings P3 and R3):
 * Every file named by the in-memory manifest is sha256-verified inside the
   temporary directory (a missing file counts as a failure), and only after the
   whole manifest passes are those verified files moved into place — atomically,
-  one os.replace per file with backups, so a failed install rolls back instead
-  of leaving half a set behind. The tracked manifest is never replaced by
+  one os.replace per file with backups, so caught errors attempt rollback. Failed rollback is reported explicitly
+  and its backups remain available; SIGKILL is not an atomicity guarantee. The tracked manifest is never replaced by
   release content.
 
 Installation is idempotent but self-repairing (review finding R4): an asset
@@ -43,11 +43,13 @@ the local files untouched and lists exactly what is stale.
 processed_cache.tar.gz (review finding P4) ships the gitignored
 data/processed/*_fingerprints.npz caches so the fast path
 (`gnn_01_make_splits.py` onward) runs without re-featurizing first. It has
-no repo-side manifest; key-file completeness (all 9 npz) is the check.
+no repo-side manifest; only the 9 named caches are installed. Each installed
+file receives a SHA256 receipt tied to the current release archive digest.
 
 Known limitation: models/ has no repo-side manifest either — model files are
-not hash-pinned, only completeness-checked (all 18 random/scaffold joblibs) before install and
-before the "already extracted" skip.
+not independently repo-pinned. Installation receipts verify bytes against the
+previous verified extraction; skips also verify the current release digest.
+These receipts detect staleness/corruption, not publisher authenticity.
 
 Legacy RF time models in artifacts-v2 predate the accepted as-of labels.
 They are validated as archive members but never installed; existing local
@@ -68,8 +70,10 @@ import os
 import shutil
 import sys
 import tarfile
+import tempfile
 import urllib.error
 import urllib.request
+import uuid
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
@@ -291,6 +295,7 @@ def extract_archive(archive_path: Path, dest_dir: Path, allow_prefix: str) -> No
     violations = []
     with tarfile.open(archive_path) as tar:
         members = tar.getmembers()
+        extract_members = []
         for member in members:
             name = member.name
             norm = "/".join(Path(name).parts)
@@ -304,6 +309,10 @@ def extract_archive(archive_path: Path, dest_dir: Path, allow_prefix: str) -> No
             if not (member.isfile() or member.isdir()):
                 violations.append(f"special file (device/fifo): {name}")
                 continue
+            # Common tar packaging metadata carries no payload for this app.
+            # Validate path and type first; never hide a link behind a ._ name.
+            if (member.isdir() and not norm) or Path(name).name.startswith("._"):
+                continue
             if norm.casefold() == anchor_folded:
                 violations.append(
                     f"trust anchor member (matches {TRUST_ANCHOR} "
@@ -314,6 +323,8 @@ def extract_archive(archive_path: Path, dest_dir: Path, allow_prefix: str) -> No
             ancestor_dir = member.isdir() and prefix.startswith(norm + "/")
             if not in_prefix and not ancestor_dir:
                 violations.append(f"outside the allowed prefix {prefix}/: {name}")
+            else:
+                extract_members.append(member)
         if violations:
             raise SystemExit(
                 f"refusing {archive_path.name}: unsafe archive members:\n  "
@@ -324,9 +335,9 @@ def extract_archive(archive_path: Path, dest_dir: Path, allow_prefix: str) -> No
             )
         try:
             if hasattr(tarfile, "data_filter"):
-                tar.extractall(dest_dir, filter="data")
+                tar.extractall(dest_dir, members=extract_members, filter="data")
             else:
-                tar.extractall(dest_dir)
+                tar.extractall(dest_dir, members=extract_members)
         except tarfile.TarError as exc:
             raise SystemExit(f"extraction of {archive_path.name} failed: {exc}") from None
     print(f"extracted {archive_path.name}")
@@ -343,12 +354,21 @@ def key_files_for(asset_key: str, expected_raw: dict) -> list:
     return list(ASSETS[asset_key][1])
 
 
+def symlink_parent(path: Path, base: Path) -> bool:
+    for parent in path.parents:
+        if parent == base.parent:
+            break
+        if parent.is_symlink():
+            return True
+    return False
+
+
 def missing_key_files(base: Path, key_files) -> list:
     """Key files absent (or not regular files) under `base`."""
     missing = []
     for key in key_files:
         path = base / key
-        if path.is_symlink() or not path.is_file():
+        if path.is_symlink() or symlink_parent(path, base) or not path.is_file():
             missing.append(key)
     return missing
 
@@ -408,7 +428,8 @@ def verify_raw_against_manifest(base: Path, expected: dict, local_problems=None)
         if local_problems:
             msg += (
                 "\nYour local files were left unchanged; stale copies that still "
-                "need repairing (delete these specific files and re-run to force):\n  "
+                "need a release matching the tracked manifest; deleting local "
+                "files cannot repair a stale release:\n  "
                 + "\n  ".join(local_problems)
             )
         else:
@@ -423,12 +444,17 @@ def install_verified_files(repo_root: Path, tmp_dir: Path, rel_paths) -> tuple[l
     Each destination is either left untouched (bytes already identical —
     reported as kept) or replaced with an os.replace of a verified copy.
     Before any write, existing destinations are backed up; if any step fails,
-    every already-replaced file is rolled back and a SystemExit reports the
-    failure — a failed install never leaves half a set behind. Returns
-    (replaced, kept) as repo-relative path strings.
+    rollback is attempted and a SystemExit reports its outcome. Incomplete
+    recovery preserves backup files and must be repaired before retrying. Successful replacements retain originals under the cache backups folder.
+    Returns (replaced, kept) as repo-relative path strings.
     """
     for rel in rel_paths:
         dst = repo_root / rel
+        if symlink_parent(dst, repo_root):
+            raise SystemExit(f"cannot install {rel}: destination parent is a symlink")
+        backup = dst.parent / (dst.name + ".fetch_backup")
+        if backup.exists() or backup.is_symlink():
+            raise SystemExit(f"recover the existing backup before installing: {backup}")
         if dst.is_dir() and not dst.is_symlink():
             raise SystemExit(
                 f"cannot install {rel}: destination is a directory; "
@@ -450,42 +476,60 @@ def install_verified_files(repo_root: Path, tmp_dir: Path, rel_paths) -> tuple[l
             src, dst = tmp_dir / rel, repo_root / rel
             dst.parent.mkdir(parents=True, exist_ok=True)
             backup = dst.parent / (dst.name + ".fetch_backup")
-            if backup.exists() or backup.is_symlink():
-                backup.unlink()
             if dst.is_symlink():
                 os.replace(dst, backup)
                 backups[rel] = backup
             elif dst.exists():
-                shutil.copy2(dst, backup)
+                # A Ctrl-C during copying must not publish a partial backup.
+                with tempfile.NamedTemporaryFile(dir=dst.parent, delete=False) as out:
+                    staging = Path(out.name)
+                try:
+                    shutil.copy2(dst, staging)
+                    os.replace(staging, backup)
+                finally:
+                    staging.unlink(missing_ok=True)
                 backups[rel] = backup
             os.replace(src, dst)
             installed.append(rel)
-    except OSError as exc:
-        for rel in reversed(installed):
+    except BaseException as exc:
+        failures = []
+        for rel in reversed(list(dict.fromkeys(installed + list(backups)))):
             dst = repo_root / rel
             try:
                 if rel in backups:
-                    os.replace(backups.pop(rel), dst)
-                else:
-                    dst.unlink()
-            except OSError:
-                pass
-        for rel, backup in list(backups.items()):
-            dst = repo_root / rel
-            try:
-                if not dst.exists() and not dst.is_symlink():
-                    os.replace(backup, dst)
-                else:
-                    backup.unlink()
-            except OSError:
-                pass
-            backups.pop(rel, None)
+                    backup = backups[rel]
+                    unchanged = (dst.is_file() and not dst.is_symlink()
+                                 and not backup.is_symlink()
+                                 and sha256_file(dst) == sha256_file(backup))
+                    if unchanged:
+                        backup.unlink()
+                    else:
+                        os.replace(backup, dst)
+                    del backups[rel]
+                elif rel in installed:
+                    dst.unlink(missing_ok=True)
+            except BaseException as rollback_exc:
+                failures.append(f"{rel}: {type(rollback_exc).__name__}: {rollback_exc}")
+        outcome = ("rollback incomplete; preserve .fetch_backup files and recover manually: "
+                   + "; ".join(failures)) if failures else "rolled back; existing files restored"
         raise SystemExit(
-            f"failed to install verified files: {exc}; rolled back — "
-            "your existing files were left unchanged"
+            f"failed to install verified files: {type(exc).__name__}: {exc}; {outcome}"
         ) from None
-    for backup in backups.values():
-        backup.unlink()
+    # Keep replaced originals, including stale raw files, for user recovery.
+    if backups:
+        saved = repo_root / CACHE_DIR_NAME / "backups" / uuid.uuid4().hex
+        try:
+            for rel, backup in backups.items():
+                target = saved / rel
+                target.parent.mkdir(parents=True, exist_ok=True)
+                os.replace(backup, target)
+        except (OSError, KeyboardInterrupt) as exc:
+            raise SystemExit(
+                f"verified files installed, but backup archival incomplete: {exc}; "
+                f"originals remain at {saved} and/or adjacent .fetch_backup files. "
+                "Inspect and recover these before retrying."
+            ) from None
+        print(f"previous files retained at {saved.relative_to(repo_root)}")
     return to_replace, kept
 
 
@@ -558,7 +602,7 @@ def run(asset_keys, repo_root: Path = REPO_ROOT, api_url: str = API_URL,
         key_files = key_files_for(key, expected_raw)
         missing = missing_key_files(repo_root, key_files)
         local_problems = raw_manifest_problems(repo_root, expected_raw) if key == "raw" else []
-        if not missing and not local_problems:
+        if key == "raw" and not missing and not local_problems:
             print(f"already extracted, skipping: {archive_name}")
             continue
         if not missing and local_problems:
@@ -573,6 +617,20 @@ def run(asset_keys, repo_root: Path = REPO_ROOT, api_url: str = API_URL,
         if sums is None:
             cache_dir.mkdir(parents=True, exist_ok=True)
             sums = ensure_sums(cache_dir, get_urls, dl)
+        if archive_name not in sums:
+            raise SystemExit(f"{SUMS_NAME} has no entry for {archive_name}")
+        receipt_path = cache_dir / f"{key}_installed.json"
+        if key != "raw" and not missing and receipt_path.is_file():
+            try:
+                receipt = json.loads(receipt_path.read_text())
+                if (receipt.get("archive_sha256") == sums.get(archive_name)
+                        and set(receipt.get("files", {})) == set(key_files)
+                        and all(sha256_file(repo_root / p) == receipt["files"][p]
+                                for p in key_files)):
+                    print(f"already extracted, skipping: {archive_name} (receipt hashes verified)")
+                    continue
+            except (ValueError, TypeError, AttributeError, OSError):
+                pass
         archive = ensure_archive(key, cache_dir, get_urls, sums, dl)
         # (b) unpack inside the cache, never into the working tree
         tmp_dir = cache_dir / EXTRACT_TMP_NAME
@@ -595,8 +653,14 @@ def run(asset_keys, repo_root: Path = REPO_ROOT, api_url: str = API_URL,
                 # Every archive member has already passed the safety checks.
                 # Install only the current model allowlist: artifacts-v2 time
                 # models must never replace accepted as-of checkpoints.
-                install_list = key_files if key == "models" else collect_relative_files(tmp_dir)
+                install_list = key_files
             replaced, kept = install_verified_files(repo_root, tmp_dir, install_list)
+            if key != "raw":
+                receipt = {"archive_sha256": sums[archive_name],
+                           "files": {p: sha256_file(repo_root / p) for p in key_files}}
+                staged = receipt_path.with_suffix(".json.tmp")
+                staged.write_text(json.dumps(receipt, indent=2, sort_keys=True) + "\n")
+                os.replace(staged, receipt_path)
             if key == "raw":
                 # (e) the on-disk anchor must equal the bytes read at start
                 check_trust_anchor_on_disk(repo_root, anchor_bytes)

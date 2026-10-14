@@ -5,6 +5,7 @@ compare cell-by-cell; exit non-zero when any cell mismatches.
 Tables covered:
   T1 : eight-target panel   -- metrics_{tag}.json + gnn_metrics_{tag}[_seed1|_seed2].json
                                    + significance/summary.csv (mean3 rows)
+                                   + recomputed seed-deletion conditional column
   T2 : time split           -- time_split/summary.csv; delta/CI from
                                    significance/summary_time.csv (mean3 rows);
                                    GIN ens recomputed from gnn_preds_{tag}_time*.npz
@@ -40,6 +41,7 @@ Usage:
 """
 import argparse
 import csv
+import importlib.util
 import json
 import os
 import re
@@ -193,7 +195,7 @@ def check_t2():
         if r["pair"] == "mean3":
             st_rows[r["tag"]] = r
 
-    t2 = find_table("| Tag | RF rand | GIN rand | RF time | GIN time | GIN ens |")
+    t2 = find_table("| Tag | RF rand | GIN rand | Constant | RF time | GIN time | GIN ens |")
     assert len(t2) == 8, len(t2)
     for row in t2:
         tag = row[0].strip("`")
@@ -202,20 +204,21 @@ def check_t2():
         add("T2", f"{tag}/RF_rand", num(row[1]), float(s["rf_random_r2"]))
         add("T2", f"{tag}/GIN_rand_mean", num(row[2]),
             float(s["gin_random_r2_mean"]))
-        add("T2", f"{tag}/RF_time", num(row[3]), float(s["rf_time_r2"]))
-        d_mean, d_std = split_pm(row[4])
+        add("T2", f"{tag}/constant", num(row[3]), float(s["constant_r2"]))
+        add("T2", f"{tag}/RF_time", num(row[4]), float(s["rf_time_r2"]))
+        d_mean, d_std = split_pm(row[5])
         add("T2", f"{tag}/GIN_time_mean", d_mean, float(s["gin_time_r2_mean"]))
         add("T2", f"{tag}/GIN_time_std", d_std, float(s["gin_time_r2_std"]))
-        add("T2", f"{tag}/GIN_ens", num(row[5]), gin_ens_time(tag))
-        delta_disp = row[6].replace("**", "")
+        add("T2", f"{tag}/GIN_ens", num(row[6]), gin_ens_time(tag))
+        delta_disp = row[7].replace("**", "")
         add("T2", f"{tag}/delta", num(delta_disp), float(st["d_r2"]))
         # delta consistency: ens - rf_time
         add("T2", f"{tag}/delta_vs_ens-rf", float(st["d_r2"]),
             gin_ens_time(tag) - float(s["rf_time_r2"]))
-        bold = "**" in row[6]
+        bold = "**" in row[7]
         ci_sig = st["significant"] == "True"
         add("T2", f"{tag}/bold==sig", bold, ci_sig, ok=bold == ci_sig)
-        m = re.match(r"\[(.+?), (.+?)\]", row[7].replace("**", ""))
+        m = re.match(r"\[(.+?), (.+?)\]", row[8].replace("**", ""))
         add("T2", f"{tag}/ci_lo", num(m.group(1)), float(st["ci_lo"]))
         add("T2", f"{tag}/ci_hi", num(m.group(2)), float(st["ci_hi"]))
 
@@ -365,6 +368,25 @@ def check_t9():
         add("T9", f"{tag}/n", num(row[3].replace(",", "")), n)
 
 
+
+def check_conditional_column():
+    """Recompute the GIN table's seed-sensitivity labels, not a prose-log lookup."""
+    path = os.path.join(os.path.dirname(__file__), "single_seed_verdicts.py")
+    spec = importlib.util.spec_from_file_location("review_seed_verdicts", path)
+    seed_check = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(seed_check)
+    bootstrap = seed_check.bootstrap_module(BASE)
+    rows = find_table("| Tag | Target (ChEMBL id) | Family | n | RF rand | GIN rand |")
+    for row in rows:
+        tag = row[0].strip("`")
+        conditional = [short for split, short in (("random", "rand"), ("scaffold", "scaf"))
+                       if seed_check.cell_sensitivity(BASE, tag, split,
+                                                      bootstrap=bootstrap)["conditional"]]
+        expected = "+".join(conditional) or "—"
+        displayed = row[12].strip()
+        add("T1_conditional", tag, displayed, expected, ok=displayed == expected)
+
+
 def run_checks():
     check_t1()
     check_t2()
@@ -375,6 +397,7 @@ def run_checks():
     check_t7()
     check_t8()
     check_t9()
+    check_conditional_column()
 
 
 def parse_args(argv=None):

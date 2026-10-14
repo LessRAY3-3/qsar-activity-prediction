@@ -37,3 +37,6 @@ data/processed/.time-regenerate-*/
 .DS_Store
 release/
 .scratch/
+
+# Fetch recovery files survive failed rollback; inspect before manual recovery.
+*.fetch_backup

@@ -42,6 +42,7 @@ def parse_args():
     p.add_argument("--seeds", default="42,1,2")
     p.add_argument("--splits", default="random,scaffold",
                    help="comma-separated random/scaffold only; time labels are not supported")
+    p.add_argument("--n-jobs", type=int, default=4)
     p.add_argument("--n-estimators", type=int, default=500)
     p.add_argument("--lr", type=float, default=0.05)
     p.add_argument("--max-depth", type=int, default=6)
@@ -103,27 +104,13 @@ def rf_train_pool(split, sp, n_total, rf_test_idx=None):
     return np.setdiff1d(np.arange(n_total), test)
 
 
-def load_rf_control(tag, xgb_pools, rf_pools, test_sizes, n_total):
-    """Headline RF control per split + a fingerprint-based same_pool verdict.
+def load_rf_control(tag, xgb_pools, rf_pools, test_sizes, n_total,
+                    xgb_tests=None, rf_tests=None, rf_sources=None):
+    """Verify both training and test membership against independent RF artifacts.
 
-    Learning-curve RFs are deliberately never used as a control: they fit
-    at n_train <= n_max rows - often far below the pool - so they are not
-    the headline RF even when a large n_max looks comparable.
-
-    same_pool is True only when the XGB fit pool and the RF's training
-    pool contain exactly the same row indices: both are hashed with
-    pool_fingerprint and the verdict is hash equality, so a pool with the
-    right row count but different membership is flagged as not same-pool.
-    When a fingerprint cannot be computed (rf_pools[split] is None), the
-    check falls back to comparing row counts and prints a warning.
-
-    Args:
-        xgb_pools: {split: index array XGBoost fits on (train + valid)}
-        rf_pools: {split: index array the headline RF trains on, or None
-            when it cannot be rebuilt (rf_preds_{tag}_{split}.npz absent;
-            see rf_train_pool)}
-        test_sizes: {split: test-set size}, used only by the size fallback
-        n_total: total fingerprint rows
+    Missing test indices or a size-only training match cannot establish the
+    evaluation contract. Such controls retain their score but fail same_pool.
+    ``test_sizes`` and ``n_total`` remain accepted for historical callers.
     """
     mj = json.load(open(os.path.join(BASE, "results", f"metrics_{tag}.json")))
     out = {}
@@ -132,35 +119,26 @@ def load_rf_control(tag, xgb_pools, rf_pools, test_sizes, n_total):
             raise SystemExit(f"results/metrics_{tag}.json has no '{split}' entry")
         xgb_idx = np.asarray(xgb_pools[split])
         rf_idx = None if rf_pools is None else rf_pools.get(split)
-        xgb_fp = pool_fingerprint(xgb_idx)
-        rf_fp = pool_fingerprint(rf_idx)
-        if rf_fp is not None:
-            same_pool = xgb_fp == rf_fp
-            if same_pool:
-                source = "headline metrics json (pool fingerprints match)"
-            else:
-                source = (f"pool sha256 mismatch: XGB {len(xgb_idx)} rows "
-                          f"({xgb_fp[:12]}...) vs RF {len(rf_idx)} rows "
-                          f"({rf_fp[:12]}...) - NOT same-pool")
-                if split == "time":
-                    source += (" (time RF trains train_idx only; XGB fits "
-                               "train+valid)")
-        else:
-            rf_n = n_total - test_sizes[split]
-            print(f"WARNING: [{tag}/{split}] RF pool fingerprint unavailable - "
-                  f"falling back to row-count comparison (XGB {len(xgb_idx)} vs "
-                  f"RF-expected {rf_n})")
-            same_pool = int(len(xgb_idx)) == rf_n
-            source = (f"headline metrics json (size-only fallback: RF trains "
-                      f"{rf_n} rows vs XGB {len(xgb_idx)} rows"
-                      f"{'' if same_pool else ' - NOT same-pool'})")
-        out[split] = {"r2_mean": float(mj[split]["r2"]),
-                      "r2_std": None,
-                      "same_pool": same_pool,
+        xgb_fp, rf_fp = pool_fingerprint(xgb_idx), pool_fingerprint(rf_idx)
+        xgb_test_fp = pool_fingerprint((xgb_tests or {}).get(split))
+        rf_test_fp = pool_fingerprint((rf_tests or {}).get(split))
+        train_match = rf_fp is not None and xgb_fp == rf_fp
+        test_match = rf_test_fp is not None and xgb_test_fp == rf_test_fp
+        same_pool = train_match and test_match
+        source = (rf_sources or {}).get(split, "unrecorded RF pool source")
+        if rf_fp is None:
+            print(f"WARNING: [{tag}/{split}] RF pool fingerprint unavailable; "
+                  "row counts cannot verify same-pool")
+        verdict = ("train and test fingerprints match" if same_pool else
+                   "NOT same-pool: training/test fingerprint mismatch or unavailable")
+        out[split] = {"r2_mean": float(mj[split]["r2"]), "r2_std": None,
+                      "same_pool": same_pool, "same_training_pool": train_match,
+                      "same_test_set": test_match,
                       "xgb_n_train": int(len(xgb_idx)),
-                      "xgb_pool_sha256": xgb_fp,
-                      "rf_pool_sha256": rf_fp,
-                      "source": source}
+                      "xgb_pool_sha256": xgb_fp, "rf_pool_sha256": rf_fp,
+                      "xgb_test_sha256": xgb_test_fp, "rf_test_sha256": rf_test_fp,
+                      "rf_pool_source": source,
+                      "source": f"headline metrics json ({verdict}); {source}"}
     return out
 
 
@@ -234,7 +212,7 @@ def main():
 
     # load every split up front so the RF control can be pool-checked
     # against the RF's OWN test set (rf_preds npz), not just size
-    fit_idx, test_idx, rf_idx = {}, {}, {}
+    fit_idx, test_idx, rf_idx, rf_tests, rf_sources = {}, {}, {}, {}, {}
     for split in splits:
         sp = np.load(os.path.join(BASE, "data", "processed", "splits",
                                   f"{args.tag}_{split}.npz"))
@@ -247,6 +225,9 @@ def main():
                   f"{args.tag}_{split}.npz not found - RF pool rebuilt from "
                   "the split file (self-referential: it cannot disagree "
                   "with the XGB pool)")
+        rf_tests[split] = rf_test
+        rf_sources[split] = (f"results/rf_preds_{args.tag}_{split}.npz:test_idx"
+                             if rf_test is not None else "split-file fallback (unverified)")
         rf_idx[split] = rf_train_pool(split, sp, len(X), rf_test_idx=rf_test)
 
     control = load_rf_control(
@@ -254,7 +235,7 @@ def main():
         fit_idx,
         rf_idx,
         {s: len(test_idx[s]) for s in splits},
-        len(X),
+        len(X), xgb_tests=test_idx, rf_tests=rf_tests, rf_sources=rf_sources,
     )
     print(f"[{args.tag}] RF control: "
           + json.dumps({k: v["r2_mean"] for k, v in control.items()}))
@@ -286,9 +267,13 @@ def main():
             model = xgb.XGBRegressor(
                 n_estimators=args.n_estimators, learning_rate=args.lr,
                 max_depth=args.max_depth, random_state=seed,
-                tree_method="hist", n_jobs=-1)
+                tree_method="hist", n_jobs=args.n_jobs)
             model.fit(X[tr], y[tr])
             pred = model.predict(X[te])
+            np.savez_compressed(os.path.join(args.out,
+                                f"preds_{args.tag}_{split}_seed{seed}.npz"),
+                                test_idx=te, y_true=y[te], y_pred=pred,
+                                seed=seed, xgboost_version=xgb.__version__)
             m = {"r2": float(r2_score(y[te], pred)),
                  "rmse": float(np.sqrt(mean_squared_error(y[te], pred))),
                  "mae": float(mean_absolute_error(y[te], pred))}

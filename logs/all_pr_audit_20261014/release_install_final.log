@@ -1,0 +1,8 @@
+models: random/scaffold only; skipping legacy rf_time_split_* assets (existing local time models are preserved)
+downloading sha256sums.txt
+  sha256sums.txt: 100% (251/251 bytes)
+already extracted, skipping: models.tar.xz (receipt hashes verified)
+already extracted, skipping: raw_data.tar.gz
+already extracted, skipping: processed_cache.tar.gz (receipt hashes verified)
+done.
+{"status": "passed", "scope": "actual release archive and isolated install audit; no training", "discovery": "saved GitHub API metadata", "installed_models": 18, "installed_time_models": 0, "installed_caches": 9, "raw_pins": 11, "fetch_script_sha256": "f7e2b635ee299ad76935e4af45c017d770d2afc516bfcf7f5101399e08ffea12"}

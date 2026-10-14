@@ -1,0 +1,16 @@
+a2a/random: R2=0.695300221, delta=-0.014653 CI=[-0.057381, +0.026442] tie
+a2a/scaffold: R2=0.680276096, delta=-0.022183 CI=[-0.045421, +0.000914] tie
+abl1/random: R2=0.828011632, delta=+0.005827 CI=[-0.009449, +0.020982] tie
+abl1/scaffold: R2=0.696697354, delta=-0.017653 CI=[-0.048639, +0.008688] tie
+egfr/random: R2=0.710790992, delta=-0.010561 CI=[-0.028485, +0.008255] tie
+egfr/scaffold: R2=0.603900790, delta=-0.045303 CI=[-0.062222, -0.029109] rf
+egfr_full/random: R2=0.681437612, delta=-0.047424 CI=[-0.060605, -0.034480] rf
+egfr_full/scaffold: R2=0.567847729, delta=-0.040300 CI=[-0.053494, -0.026937] rf
+herg/random: R2=0.582565427, delta=-0.024121 CI=[-0.040012, -0.008092] rf
+herg/scaffold: R2=0.416770935, delta=+0.032305 CI=[+0.013851, +0.050841] xgb
+hivpr/random: R2=0.702425957, delta=+0.010235 CI=[-0.015545, +0.034110] tie
+hivpr/scaffold: R2=0.457818985, delta=-0.080216 CI=[-0.121129, -0.043465] rf
+mpro/random: R2=0.606405258, delta=+0.004736 CI=[-0.024265, +0.038164] tie
+mpro/scaffold: R2=0.410045087, delta=-0.023204 CI=[-0.054671, +0.008341] tie
+vegfr2/random: R2=0.624996305, delta=-0.044507 CI=[-0.059199, -0.029704] rf
+vegfr2/scaffold: R2=0.588829696, delta=+0.003480 CI=[-0.012097, +0.019297] tie
