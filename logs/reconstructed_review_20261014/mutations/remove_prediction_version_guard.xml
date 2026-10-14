@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="1" time="12.260" timestamp="2026-10-14T11:44:32.959996+08:00" hostname="lessraydeMacBook-Air.local"><testcase classname="tests.test_time_splits" name="test_prediction_version_checks_rows_and_actual_labels" time="11.770"><failure message="Failed: DID NOT RAISE ValueError">tmp_path = PosixPath('/private/var/folders/60/f144lgn97zg1y9wcvg2v5thh0000gn/T/pytest-of-lessray/pytest-87/test_prediction_version_checks0')
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x10a7c15b0&gt;
+mod = &lt;module 'qsar_under_test_gnn_08_time_splits' from '/private/var/folders/60/f144lgn97zg1y9wcvg2v5thh0000gn/T/qsar-label-mutant-lo77d32d/scripts/gnn_08_time_splits.py'&gt;
+
+    def test_prediction_version_checks_rows_and_actual_labels(tmp_path, monkeypatch, mod):
+        from time_labels import load_time_split, require_prediction_version
+        paths = _setup(tmp_path, monkeypatch, mod)
+        mod.main([])
+        sp = load_time_split(paths["splits"], mod.TAG)
+        good = dict(label_id=sp["label_id"], test_idx=sp["test_idx"],
+                    y_true=sp["y"][sp["test_idx"]])
+        require_prediction_version(good, sp)
+        # Keep the actual labels and row order identical so only the version gate
+        # can reject an older campaign (the test must kill removal of that gate).
+        for stale_id in ("0" * 64, ""):
+&gt;           with pytest.raises(ValueError, match="label version differs"):
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           Failed: DID NOT RAISE ValueError
+
+tests/test_time_splits.py:347: Failed</failure></testcase></testsuite></testsuites>

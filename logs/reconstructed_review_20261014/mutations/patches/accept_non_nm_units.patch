@@ -1,0 +1,11 @@
+--- a/scripts/gnn_08_time_splits.py
++++ b/scripts/gnn_08_time_splits.py
+@@ -226,7 +226,7 @@
+     acts = _activities_with_parent(smiles, activities)
+     acts["standard_value"] = pd.to_numeric(acts["standard_value"], errors="coerce")
+     keep = (exact_relation_mask(acts["standard_relation"])
+-            & acts["standard_units"].eq("nM")
++            & True
+             & np.isfinite(acts["standard_value"]) & acts["standard_value"].gt(0)
+             & acts["canonical_smiles"].fillna("").astype(str).str.strip().ne(""))
+     acts = acts.loc[keep].dropna(subset=["document_chembl_id"]).copy()

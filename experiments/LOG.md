@@ -16,6 +16,28 @@ results. The initial 2026-10-13 entry records the preceding campaign; its hERG
 scores and aggregate means are superseded. Earlier all-year-label time scores
 are historical only.**
 
+## 2026-10-14 — Explicit replacement of unavailable review evidence
+
+- Clarified that “447 cells, zero mismatches” means covered README entries
+  agree with stored/recomputed values at display precision; it does not
+  certify prose, figures or underlying scientific validity.
+- Created a new 16-case replacement mutation suite: ten acceptance mutations
+  plus six label/version mutations described by PR #8 T4. Both baselines pass
+  and all sixteen faults are caught. Every patch and source hash is published;
+  original unpublished mutant identities are not asserted.
+- Reuse the completed a2a/hERG five-seed RF supplement. Selecting these two
+  plausible targets and seeds 42/1/2/3/4 supplies independent evidence, not
+  an invented identity for the historical five-fit cohort.
+- Prepared eighteen missing-log replacement jobs: six current EGFR GIN fits,
+  twelve multitask/pooled fits. Three current EGFR time fits already have
+  accepted records and are excluded. All trainer arguments and input/source
+  hashes validate. Jobs wait for CUDA and use separate output directories;
+  no remote machine was contacted and no project model trained in this pass.
+- Final local validation: 621 tests passed, 3 warnings; Ruff and diff checks
+  pass; README remains 447 checked cells with zero mismatches. Evidence is in
+  `logs/reconstructed_review_20261014/` and
+  `results/provenance_reconstruction/replacement_summary.json`.
+
 ## 2026-10-14 — All-PR narrative reconciliation
 
 - Re-read the original and follow-up reports from PR #1/#3/#5/#6/#8.

@@ -1,0 +1,263 @@
+{
+  "schema": "inferred-review-replacement-v1",
+  "scope": "New 16-case suite (10 acceptance + 6 T4 label rules); NOT original 16 tooling mutants",
+  "selection_basis": [
+    "PR8 T4 described label/version mutations",
+    "PR8 Low described mocked acceptance/checkpoint checks"
+  ],
+  "assumptions": [
+    "No original patches or verifier notes available.",
+    "Count 16 is a disclosed replacement scope, not evidence of historical identity.",
+    "Targeted test kills do not constitute exhaustive mutation coverage."
+  ],
+  "baseline_acceptance_passed": true,
+  "baseline_labels_passed": true,
+  "rows": [
+    {
+      "case": "checkpoint_label",
+      "status": "caught",
+      "returncode": 1,
+      "mutated_source_sha256": "de45a430c780bd5eae2545025a2ae22e177a63941208de4808b4202446bd1c7d",
+      "test": "tests/test_time_campaign_real.py::test_real_gin_checkpoint_corruption_rejected[label]",
+      "family": "acceptance"
+    },
+    {
+      "case": "checkpoint_arguments",
+      "status": "caught",
+      "returncode": 1,
+      "mutated_source_sha256": "7d9e77986da2fe89ee2e825105b0c21e27db6936b9679063eb9dcc62404db18f",
+      "test": "tests/test_time_campaign_real.py::test_real_gin_checkpoint_corruption_rejected[seed]",
+      "family": "acceptance"
+    },
+    {
+      "case": "finite_weights",
+      "status": "caught",
+      "returncode": 1,
+      "mutated_source_sha256": "5aa3290827266fc3337493286422b35a72af870a2b421cb2538fcdb0e2f11134",
+      "test": "tests/test_time_campaign_real.py::test_real_gin_checkpoint_corruption_rejected[nan]",
+      "family": "acceptance"
+    },
+    {
+      "case": "architecture_loading",
+      "status": "caught",
+      "returncode": 1,
+      "mutated_source_sha256": "5ab3de0fb9065ea901fc7ff0280dd434a37ca22c6a1c2934659d33bf8b7a2124",
+      "test": "tests/test_time_campaign_real.py::test_real_gin_checkpoint_corruption_rejected[shape]",
+      "family": "acceptance"
+    },
+    {
+      "case": "normalization",
+      "status": "caught",
+      "returncode": 1,
+      "mutated_source_sha256": "5815c65ad2879369427e42d265f7068894c804080e1d0d3f160858f39aac23ac",
+      "test": "tests/test_time_campaign_real.py::test_real_gin_checkpoint_corruption_rejected[bad_mean]",
+      "family": "acceptance"
+    },
+    {
+      "case": "prediction_label",
+      "status": "caught",
+      "returncode": 1,
+      "mutated_source_sha256": "3a6b67fed8a2379d2a95628434bcca9eae7fe329b74320bf7a5cfecdc8d3c87e",
+      "test": "tests/test_time_campaign_real.py::test_real_gin_checkpoint_corruption_rejected[prediction_version]",
+      "family": "acceptance"
+    },
+    {
+      "case": "metric_recomputation",
+      "status": "caught",
+      "returncode": 1,
+      "mutated_source_sha256": "26b0e276e9275f70adec32d3cf24c96b0b51f6b0a4b8345d76208bef7f8c2674",
+      "test": "tests/test_time_campaign_real.py::test_real_gin_checkpoint_corruption_rejected[metric]",
+      "family": "acceptance"
+    },
+    {
+      "case": "runtime_device",
+      "status": "caught",
+      "returncode": 1,
+      "mutated_source_sha256": "916bb4cc423a5f86bc327cd5aee957e9f3aea47e289f1db5cc28278234472901",
+      "test": "tests/test_time_campaign_real.py::test_real_gin_checkpoint_corruption_rejected[runtime]",
+      "family": "acceptance"
+    },
+    {
+      "case": "metric_label",
+      "status": "caught",
+      "returncode": 1,
+      "mutated_source_sha256": "6a6a52327454e5a43502150ad1db136bc38dad9bd17cb3a60ff8e06a7e2b4450",
+      "test": "tests/test_time_campaign_real.py::test_real_gin_checkpoint_corruption_rejected[metric_label]",
+      "family": "acceptance"
+    },
+    {
+      "case": "rf_label",
+      "status": "caught",
+      "returncode": 1,
+      "mutated_source_sha256": "0b1e8b7352c916ce9c41a073928e61e99824e0b251beadd744fcd52d3923b69c",
+      "test": "tests/test_time_campaign_real.py::test_real_fitted_rf_is_checked_and_wrong_generation_rejected",
+      "family": "acceptance"
+    },
+    {
+      "case": "train_inclusive_cutoff",
+      "family": "labels",
+      "status": "caught",
+      "returncode": 1,
+      "test": "tests/test_time_splits.py::test_asof_exact_record_boundaries_median_and_units"
+    },
+    {
+      "case": "train_uses_test_cutoff",
+      "family": "labels",
+      "status": "caught",
+      "returncode": 1,
+      "test": "tests/test_time_splits.py::test_asof_exact_record_boundaries_median_and_units"
+    },
+    {
+      "case": "valid_inclusive_cutoff",
+      "family": "labels",
+      "status": "caught",
+      "returncode": 1,
+      "test": "tests/test_time_splits.py::test_asof_exact_record_boundaries_median_and_units"
+    },
+    {
+      "case": "mean_instead_of_median",
+      "family": "labels",
+      "status": "caught",
+      "returncode": 1,
+      "test": "tests/test_time_splits.py::test_asof_exact_record_boundaries_median_and_units"
+    },
+    {
+      "case": "accept_non_nm_units",
+      "family": "labels",
+      "status": "caught",
+      "returncode": 1,
+      "test": "tests/test_time_splits.py::test_asof_exact_record_boundaries_median_and_units"
+    },
+    {
+      "case": "remove_prediction_version_guard",
+      "family": "labels",
+      "status": "caught",
+      "returncode": 1,
+      "test": "tests/test_time_splits.py::test_prediction_version_checks_rows_and_actual_labels"
+    }
+  ],
+  "patches": [
+    {
+      "case": "checkpoint_label",
+      "source": "scripts/run_time_campaign.py",
+      "original_sha256": "885da208868cf7d1441027972a2be2583b2b0371bcb665645b09d0e1d3ef8231",
+      "modified_sha256": "de45a430c780bd5eae2545025a2ae22e177a63941208de4808b4202446bd1c7d",
+      "patch_sha256": "143171776f741fef3b419edcf33abe80e91f549de5dce5f5a0fd1bba18ee4247"
+    },
+    {
+      "case": "checkpoint_arguments",
+      "source": "scripts/run_time_campaign.py",
+      "original_sha256": "885da208868cf7d1441027972a2be2583b2b0371bcb665645b09d0e1d3ef8231",
+      "modified_sha256": "7d9e77986da2fe89ee2e825105b0c21e27db6936b9679063eb9dcc62404db18f",
+      "patch_sha256": "2f938fd16ca0ca42e2d318249fd3450fb0617d33fd7577116e5c0ccabff1e72e"
+    },
+    {
+      "case": "finite_weights",
+      "source": "scripts/run_time_campaign.py",
+      "original_sha256": "885da208868cf7d1441027972a2be2583b2b0371bcb665645b09d0e1d3ef8231",
+      "modified_sha256": "5aa3290827266fc3337493286422b35a72af870a2b421cb2538fcdb0e2f11134",
+      "patch_sha256": "70b3de0e915ed73e54c25c242c3cb189790d8f9c0f2d7c39f1b97ba0cf3e77a5"
+    },
+    {
+      "case": "architecture_loading",
+      "source": "scripts/run_time_campaign.py",
+      "original_sha256": "885da208868cf7d1441027972a2be2583b2b0371bcb665645b09d0e1d3ef8231",
+      "modified_sha256": "5ab3de0fb9065ea901fc7ff0280dd434a37ca22c6a1c2934659d33bf8b7a2124",
+      "patch_sha256": "4a1f9da7a7cc78ffb4f324ebeb840d4433dd919dadeb6020ffa27576b227ba45"
+    },
+    {
+      "case": "normalization",
+      "source": "scripts/run_time_campaign.py",
+      "original_sha256": "885da208868cf7d1441027972a2be2583b2b0371bcb665645b09d0e1d3ef8231",
+      "modified_sha256": "5815c65ad2879369427e42d265f7068894c804080e1d0d3f160858f39aac23ac",
+      "patch_sha256": "75ff8091a9885a41dfde51b849b4dc82d56e3035dd05ade94751e9bacda7d01f"
+    },
+    {
+      "case": "prediction_label",
+      "source": "scripts/run_time_campaign.py",
+      "original_sha256": "885da208868cf7d1441027972a2be2583b2b0371bcb665645b09d0e1d3ef8231",
+      "modified_sha256": "3a6b67fed8a2379d2a95628434bcca9eae7fe329b74320bf7a5cfecdc8d3c87e",
+      "patch_sha256": "559aa953a3c2668fd50907906c33d94568cb2bd45e83d9837a10ed09f1c420f8"
+    },
+    {
+      "case": "metric_recomputation",
+      "source": "scripts/run_time_campaign.py",
+      "original_sha256": "885da208868cf7d1441027972a2be2583b2b0371bcb665645b09d0e1d3ef8231",
+      "modified_sha256": "26b0e276e9275f70adec32d3cf24c96b0b51f6b0a4b8345d76208bef7f8c2674",
+      "patch_sha256": "b51d4a8bd84a0faa7f8cec31d0f5bc073569094872c35c3bb6a5219e8c8e7393"
+    },
+    {
+      "case": "runtime_device",
+      "source": "scripts/run_time_campaign.py",
+      "original_sha256": "885da208868cf7d1441027972a2be2583b2b0371bcb665645b09d0e1d3ef8231",
+      "modified_sha256": "916bb4cc423a5f86bc327cd5aee957e9f3aea47e289f1db5cc28278234472901",
+      "patch_sha256": "02d1e4a033d4620a71346892a0773ec5751b651f394317e31ef9956f78c7ec3e"
+    },
+    {
+      "case": "metric_label",
+      "source": "scripts/run_time_campaign.py",
+      "original_sha256": "885da208868cf7d1441027972a2be2583b2b0371bcb665645b09d0e1d3ef8231",
+      "modified_sha256": "6a6a52327454e5a43502150ad1db136bc38dad9bd17cb3a60ff8e06a7e2b4450",
+      "patch_sha256": "b95f07aed38fb9c390675c1a3e16eebde3776fcdc274d0643d56fc82b176154e"
+    },
+    {
+      "case": "rf_label",
+      "source": "scripts/run_time_campaign.py",
+      "original_sha256": "885da208868cf7d1441027972a2be2583b2b0371bcb665645b09d0e1d3ef8231",
+      "modified_sha256": "0b1e8b7352c916ce9c41a073928e61e99824e0b251beadd744fcd52d3923b69c",
+      "patch_sha256": "3db0e4a386cff32e21fc18b054be78996691f09ca4d678d914cb14a60c59d0dd"
+    },
+    {
+      "case": "train_inclusive_cutoff",
+      "source": "scripts/gnn_08_time_splits.py",
+      "original_sha256": "1fed3cd090fa0d71f5723c8a2ed109f96d0a2d5fce97b109022c7210196d0524",
+      "modified_sha256": "91febe1db0c93121f77ae17f70f23ccfcc8851e6423481e287adfef3be3141c9",
+      "patch_sha256": "13d9dd3f43877e19bc02ba967d7716f5e3808a4b27cbcf27d7bd144340c87ed5"
+    },
+    {
+      "case": "train_uses_test_cutoff",
+      "source": "scripts/gnn_08_time_splits.py",
+      "original_sha256": "1fed3cd090fa0d71f5723c8a2ed109f96d0a2d5fce97b109022c7210196d0524",
+      "modified_sha256": "a4585ae017cd49fe34c7aca310a01257c8a4396cda2c42eacfa39d5821e24a61",
+      "patch_sha256": "db4746f83858b53cb7731dbc1c22f46368edf10108cf1a861b14ef70369240df"
+    },
+    {
+      "case": "valid_inclusive_cutoff",
+      "source": "scripts/gnn_08_time_splits.py",
+      "original_sha256": "1fed3cd090fa0d71f5723c8a2ed109f96d0a2d5fce97b109022c7210196d0524",
+      "modified_sha256": "84e64212470b529a450a6342081fec7759287af6337eb465945b161386a51554",
+      "patch_sha256": "ffed3c34c77975431fa72c44ce92bd13b5ec2e69cdca0eb387e37677a85d94f0"
+    },
+    {
+      "case": "mean_instead_of_median",
+      "source": "scripts/gnn_08_time_splits.py",
+      "original_sha256": "1fed3cd090fa0d71f5723c8a2ed109f96d0a2d5fce97b109022c7210196d0524",
+      "modified_sha256": "ccc1b8b3c64ecfbb3ddf37490114c7be88923943a65e2f9ef5c74ec0bf454d98",
+      "patch_sha256": "f36e099ce646f1aa6d867ede07787743f743384b057f55a318b1257d5837295c"
+    },
+    {
+      "case": "accept_non_nm_units",
+      "source": "scripts/gnn_08_time_splits.py",
+      "original_sha256": "1fed3cd090fa0d71f5723c8a2ed109f96d0a2d5fce97b109022c7210196d0524",
+      "modified_sha256": "7e762ba6126b1994c446554cacf0a104b7b0a6de24ddf92d14bc8091595b836a",
+      "patch_sha256": "911eb0d14009f6c88b9aff4ab55e8ffdf482d057c5be0c0c39d20aae61e6469e"
+    },
+    {
+      "case": "remove_prediction_version_guard",
+      "source": "scripts/time_labels.py",
+      "original_sha256": "aa2c47560527d24813c58f3456e6766e27482c50b28a669d6c59c7dfbbe5e8a7",
+      "modified_sha256": "7eca28d0261b2b4d6aa465f98ff4eef1af9411dd0a70d9b60588e35bc6205c73",
+      "patch_sha256": "7bbc02b38b213f769e95960491835f38435e729fad08e450858891f79e71d050"
+    }
+  ],
+  "source_hashes": {
+    "scripts/run_time_campaign.py": "885da208868cf7d1441027972a2be2583b2b0371bcb665645b09d0e1d3ef8231",
+    "scripts/gnn_08_time_splits.py": "1fed3cd090fa0d71f5723c8a2ed109f96d0a2d5fce97b109022c7210196d0524",
+    "scripts/time_labels.py": "aa2c47560527d24813c58f3456e6766e27482c50b28a669d6c59c7dfbbe5e8a7",
+    "tests/test_time_campaign_real.py": "90a50bc7328671d1f03e57826bfd32461bab4b56ea4da14af1273004d5d31571",
+    "tests/test_time_splits.py": "fd9f986d01706bde5e93eb2373afb294cf5a3a68202ab71be17aacf8f5a45642",
+    "scripts/check_time_tooling_mutations.py": "5fc51d751970acda27d67bdf55bafa9e01cbe81b67eccdc1d36ae9d32d116176",
+    "scripts/reconstruct_review_mutations.py": "3c5fd4b5616d4c2aebd7a0b3b7e2b25d2f16c7f75535e3b51e623685397e18f4"
+  },
+  "all_caught": true
+}

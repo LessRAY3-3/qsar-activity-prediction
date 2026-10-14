@@ -1,0 +1,11 @@
+--- a/scripts/gnn_08_time_splits.py
++++ b/scripts/gnn_08_time_splits.py
+@@ -246,7 +246,7 @@
+                   acts["document_year"] < cutoff_t,
+                   acts["document_year"] >= cutoff_t)
+     for idx, condition in zip(pools, conditions):
+-        medians = acts.loc[condition].groupby("parent")["pic50"].median()
++        medians = acts.loc[condition].groupby("parent")["pic50"].mean()
+         values = medians.reindex(np.asarray(keys)[idx]).to_numpy(dtype=float)
+         usable = np.isfinite(values)
+         y[idx[usable]] = values[usable]

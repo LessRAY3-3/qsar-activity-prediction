@@ -1,0 +1,11 @@
+--- a/scripts/gnn_08_time_splits.py
++++ b/scripts/gnn_08_time_splits.py
+@@ -242,7 +242,7 @@
+     keys = np.asarray(smiles, dtype=str)
+     y = np.full(len(smiles), np.nan, dtype=np.float32)
+     retained = []
+-    conditions = (acts["document_year"] < cutoff_v,
++    conditions = (acts["document_year"] < cutoff_t,
+                   acts["document_year"] < cutoff_t,
+                   acts["document_year"] >= cutoff_t)
+     for idx, condition in zip(pools, conditions):

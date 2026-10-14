@@ -1,0 +1,41 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+____________ test_prediction_version_checks_rows_and_actual_labels _____________
+
+tmp_path = PosixPath('/private/var/folders/60/f144lgn97zg1y9wcvg2v5thh0000gn/T/pytest-of-lessray/pytest-87/test_prediction_version_checks0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10a7c15b0>
+mod = <module 'qsar_under_test_gnn_08_time_splits' from '/private/var/folders/60/f144lgn97zg1y9wcvg2v5thh0000gn/T/qsar-label-mutant-lo77d32d/scripts/gnn_08_time_splits.py'>
+
+    def test_prediction_version_checks_rows_and_actual_labels(tmp_path, monkeypatch, mod):
+        from time_labels import load_time_split, require_prediction_version
+        paths = _setup(tmp_path, monkeypatch, mod)
+        mod.main([])
+        sp = load_time_split(paths["splits"], mod.TAG)
+        good = dict(label_id=sp["label_id"], test_idx=sp["test_idx"],
+                    y_true=sp["y"][sp["test_idx"]])
+        require_prediction_version(good, sp)
+        # Keep the actual labels and row order identical so only the version gate
+        # can reject an older campaign (the test must kill removal of that gate).
+        for stale_id in ("0" * 64, ""):
+>           with pytest.raises(ValueError, match="label version differs"):
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           Failed: DID NOT RAISE ValueError
+
+tests/test_time_splits.py:347: Failed
+------------------------------ Captured log setup ------------------------------
+WARNING  matplotlib:__init__.py:577 /Users/lessray/.matplotlib is not a writable directory
+WARNING  matplotlib:__init__.py:596 Matplotlib created a temporary cache directory at /var/folders/60/f144lgn97zg1y9wcvg2v5thh0000gn/T/matplotlib-ez9nv_u0 because there was an issue with the default path (/Users/lessray/.matplotlib); it is highly recommended to set the MPLCONFIGDIR environment variable to a writable directory, in particular to speed up the import of Matplotlib and to better support multiprocessing.
+WARNING  matplotlib.font_manager:font_manager.py:1249 Matplotlib is building the font cache; this may take a moment.
+----------------------------- Captured stdout call -----------------------------
+  wrote ../pytest-of-lessray/pytest-87/test_prediction_version_checks0/data/processed/.time-regenerate-n43cqeuu/splits/egfr_time_NA.json
+[egfr] 200 molecules
+  year coverage: 200/200 (100.0%) | 1990-2020 | busiest year 2000: 103 molecules
+  excluded 0 molecules without an eligible dated exact label
+  saved ../pytest-of-lessray/pytest-87/test_prediction_version_checks0/data/processed/.time-regenerate-n43cqeuu/splits/egfr_time.npz
+  saved ../pytest-of-lessray/pytest-87/test_prediction_version_checks0/data/processed/.time-regenerate-n43cqeuu/figures/egfr_timeline.png
+[egfr] n=200 years=1990-2020 cutoff_v=2003 cutoff_t=2008 train=142 (71.0%) valid=17 (8.5%) test=41 (20.5%)
+  egfr: publication committed
+  published /private/var/folders/60/f144lgn97zg1y9wcvg2v5thh0000gn/T/pytest-of-lessray/pytest-87/test_prediction_version_checks0/data/processed/splits/egfr_time.npz
+=========================== short test summary info ============================
+FAILED tests/test_time_splits.py::test_prediction_version_checks_rows_and_actual_labels
+1 failed in 12.27s

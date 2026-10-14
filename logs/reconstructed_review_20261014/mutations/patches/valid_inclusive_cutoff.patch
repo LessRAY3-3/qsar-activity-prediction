@@ -1,0 +1,11 @@
+--- a/scripts/gnn_08_time_splits.py
++++ b/scripts/gnn_08_time_splits.py
+@@ -243,7 +243,7 @@
+     y = np.full(len(smiles), np.nan, dtype=np.float32)
+     retained = []
+     conditions = (acts["document_year"] < cutoff_v,
+-                  acts["document_year"] < cutoff_t,
++                  acts["document_year"] <= cutoff_t,
+                   acts["document_year"] >= cutoff_t)
+     for idx, condition in zip(pools, conditions):
+         medians = acts.loc[condition].groupby("parent")["pic50"].median()

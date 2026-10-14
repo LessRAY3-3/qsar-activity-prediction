@@ -1,0 +1,52 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+______________ test_asof_exact_record_boundaries_median_and_units ______________
+
+mod = <module 'qsar_under_test_gnn_08_time_splits' from '/private/var/folders/60/f144lgn97zg1y9wcvg2v5thh0000gn/T/qsar-label-mutant-gh0et0te/scripts/gnn_08_time_splits.py'>
+
+    def test_asof_exact_record_boundaries_median_and_units(mod):
+        # Explicit pIC50 answers: train median(6,7,4)=6; validation median(6,7)=6.5;
+        # test median(5,7)=6. Boundary/future records carry very different values.
+        records = [
+            ("CC", 2009, 1000., "nM", "="),
+            ("CC", 2009, 100., "nM", "="),
+            ("CC", 2009, 100000., "nM", "="),
+            ("CC", 2010, 1., "nM", "="),
+            ("CC", 2019, .1, "nM", "="),
+            ("CC", 2020, .01, "nM", "="),
+            ("CCC", 2010, 1000., "nM", "="),
+            ("CCC", 2019, 100., "nM", "="),
+            ("CCC", 2020, 1., "nM", "="),
+            ("CCCC", 2019, 1., "nM", "="),
+            ("CCCC", 2020, 10000., "nM", "="),
+            ("CCCC", 2021, 100., "nM", "="),
+            ("CCO", 2009, 1., "uM", "="),
+            ("CCO", 2009, 1., "nM", ">"),
+        ]
+        acts = pd.DataFrame(records, columns=["canonical_smiles", "year", "standard_value",
+                                             "standard_units", "standard_relation"])
+        acts["document_chembl_id"] = [f"D{i}" for i in range(len(acts))]
+        years = acts[["document_chembl_id", "year"]].rename(columns={"year": "document_year"})
+        keys = np.array(["CC", "CCC", "CCCC", "CCO"])
+        pools = [np.array([0, 3]), np.array([1]), np.array([2])]
+        y, retained, excluded = mod.asof_labels(keys, acts, years, pools, 2010, 2020)
+>       np.testing.assert_allclose(y[:3], [6., 6.5, 6.], atol=1e-6, rtol=0)
+E       AssertionError: 
+E       Not equal to tolerance rtol=0, atol=1e-06
+E       
+E       Mismatched elements: 1 / 3 (33.3%)
+E       Mismatch at index:
+E        [0]: 6.5 (ACTUAL), 6.0 (DESIRED)
+E       Max absolute difference among violations: 0.5
+E       Max relative difference among violations: 0.08333333
+E        ACTUAL: array([6.5, 6.5, 6. ], dtype=float32)
+E        DESIRED: array([6. , 6.5, 6. ])
+
+tests/test_time_splits.py:434: AssertionError
+------------------------------ Captured log setup ------------------------------
+WARNING  matplotlib:__init__.py:577 /Users/lessray/.matplotlib is not a writable directory
+WARNING  matplotlib:__init__.py:596 Matplotlib created a temporary cache directory at /var/folders/60/f144lgn97zg1y9wcvg2v5thh0000gn/T/matplotlib-2wnn2mmh because there was an issue with the default path (/Users/lessray/.matplotlib); it is highly recommended to set the MPLCONFIGDIR environment variable to a writable directory, in particular to speed up the import of Matplotlib and to better support multiprocessing.
+WARNING  matplotlib.font_manager:font_manager.py:1249 Matplotlib is building the font cache; this may take a moment.
+=========================== short test summary info ============================
+FAILED tests/test_time_splits.py::test_asof_exact_record_boundaries_median_and_units
+1 failed in 12.17s

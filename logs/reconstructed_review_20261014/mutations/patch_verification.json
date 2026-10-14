@@ -1,0 +1,6 @@
+{
+  "status": "passed",
+  "patches_apply_cleanly_to_current_sources": 16,
+  "source_and_patch_sha256_verified": true,
+  "production_sources_unchanged": true
+}

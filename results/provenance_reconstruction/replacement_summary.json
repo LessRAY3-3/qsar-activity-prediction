@@ -1,0 +1,70 @@
+{
+  "schema": "review-evidence-replacement-v1",
+  "date": "2026-10-14",
+  "baseline_revision": "7e69aa4b59afa0b0b2ea5ed60b43212cd7368180",
+  "assumptions_are_not_historical_facts": true,
+  "readme_check": {
+    "checked_cells": 447,
+    "mismatches": 0,
+    "numeric_tolerance": 0.0005001,
+    "scope": "Selected parsed table entries, including conditional markers; not all prose/figures or proof of scientific correctness."
+  },
+  "mutation_replacement": {
+    "status": "completed",
+    "specified_faults": 16,
+    "caught": 16,
+    "baseline_families_passed": 2,
+    "patches_verified": 16,
+    "report": "logs/reconstructed_review_20261014/mutations/report.json",
+    "basis": "10 real-artifact acceptance guards + six PR8 T4 label/version mutations; deliberately not claimed to be the original sixteen tooling survivors."
+  },
+  "rf_replacement": {
+    "status": "already_completed",
+    "assumed_targets": [
+      "a2a",
+      "herg"
+    ],
+    "seeds": [
+      42,
+      1,
+      2,
+      3,
+      4
+    ],
+    "fixed_parameters_and_data": true,
+    "sample_r2_sd": {
+      "a2a": 0.026225376993476844,
+      "herg": 0.006136075360421134
+    },
+    "report": "results/rf_seed_sensitivity/verification.json",
+    "historical_cohort_identity": "unknown; numerical proximity is not an identification criterion"
+  },
+  "training_log_replacement": {
+    "status": "prepared_waiting_for_user_4070_connection",
+    "plan": "results/provenance_reconstruction/plan.json",
+    "fits": 18,
+    "new_device": "cuda",
+    "historical_device": null,
+    "egfr_current_random_scaffold": 6,
+    "multitask_and_pooled": 12,
+    "excluded_current_time_fits_with_provenance": 3,
+    "separate_from_frozen_128_cuda_jobs": true
+  },
+  "validation": {
+    "pytest": "621 passed, 3 warnings",
+    "ruff": "passed",
+    "commands_parsed_without_training": 18,
+    "source_files_hashed": 36,
+    "input_files_hashed": 12,
+    "historical_metric_files_hashed": 9
+  },
+  "unchanged_from_baseline": {
+    "results/gnn_models": true,
+    "results/time_budget_sensitivity": true,
+    "results/time_split/summary.csv": true,
+    "results/significance": true,
+    "results/rf_seed_sensitivity": true,
+    "data/processed": true
+  },
+  "no_remote_hosts_contacted": true
+}

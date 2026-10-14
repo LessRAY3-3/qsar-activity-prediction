@@ -1838,3 +1838,67 @@ under `.artifacts_cache/backups/`; failed rollback leaves `.fetch_backup` files
 for recovery. A retry refuses to overwrite an unresolved backup. Catchable
 interruptions attempt rollback, but multi-file installation is not atomic under
 SIGKILL or power loss. These changes live on PR #7 until merged.
+
+
+### Meaning of the README check and inferred replacement experiments
+
+The 2026-10-14 README check reports 447 checked cells and zero mismatches.
+These are table entries covered by `verify_readme_tables.py`, not independent
+experiments or a claim that every statement in the project is correct.
+Numeric entries are compared at the displayed three-decimal precision
+(tolerance 0.0005001); the conditional markers use exact text comparison.
+Selected values are independently recomputed from saved predictions, while
+others are checked against stored result summaries. The script does not prove
+that those underlying models or scientific assumptions are valid. Prose,
+figures and unparsed tables still need separate review.
+
+Missing historical review material is handled with explicitly inferred,
+new experiments. The selection rule is to implement the faults described in
+the reports and reuse recorded model parameters where available; unknown
+historical settings remain unknown. `reconstruct_review_mutations.py` combines
+ten real-artifact acceptance mutations with six label-rule/version mutations
+motivated by PR #8 T4. It saves all sixteen patches, original/modified hashes,
+baseline tests and per-case results. This is a replacement suite of sixteen,
+not a reconstruction of the identity of the original sixteen tooling mutants.
+Fixture/import errors or unrelated assertions count as inconclusive, not as
+caught faults. Run it in an unused output directory:
+
+```bash
+python scripts/reconstruct_review_mutations.py \
+  --out-dir logs/reconstructed_review_new/mutations
+```
+
+For the undocumented RF five-state claim, both plausible targets (a2a and
+hERG) have already been rerun with seeds 42/1/2/3/4, fixed current as-of inputs
+and their recorded best parameters. No additional fit is needed merely to
+assign a historical identity. The new hERG sample SD is close to 0.006, but
+that proximity is descriptive evidence, not proof of which original run the
+reviewer performed. The supplementary predictions and exact parameters are
+in `results/rf_seed_sensitivity/`.
+
+
+The completed replacement suite caught 16/16 specified faults with both
+unmodified baselines passing; all patches apply cleanly to their hashed source.
+Evidence: `logs/reconstructed_review_20261014/mutations/report.json` and
+`patch_verification.json`. The suite says nothing about unnamed missing mutants.
+
+The missing-log replacement plan is `results/provenance_reconstruction/plan.json`:
+six current EGFR random/scaffold fits and twelve multitask/pooled fits. Its
+three current EGFR time counterparts already have accepted provenance and are
+excluded. The 18 command lines were parsed by the actual trainers without
+training; source/input/metric hashes were verified. Preparation uses exclusive,
+separate job directories and never starts training:
+
+```bash
+python scripts/plan_provenance_reconstruction.py \
+  --plan results/provenance_reconstruction/plan.json \
+  --prepare-job egfr_gin_random_seed42
+```
+
+The new backend is explicitly chosen as CUDA, while the historical backend
+remains unknown. Execution waits for the 4070 connection and must record a
+CUDA availability check, package/thread/device metadata, full stdout/stderr,
+exit status and output hashes. The multitask trainer's automatic device choice
+requires supervision to prohibit fallback. These 18 supplementary jobs are
+separate from the 128 frozen CUDA budget-comparison jobs; their training code
+and results must not replace that frozen study's inputs or outputs.

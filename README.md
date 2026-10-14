@@ -326,9 +326,12 @@ neural network beat Morgan fingerprints + RandomForest?**
 | random | 0.721 / 0.733 | 0.669 / 0.799 | 0.665 ± 0.004 |
 | scaffold | 0.649 / 1.015 | 0.631 / 1.042 | 0.612 ± 0.013 |
 
-**Provenance:** the refreshed EGFR GIN runs have no committed training logs
-(random, scaffold and historical time: nine runs); their original device
-is unrecorded. The current temporal replacement has separate accepted provenance.
+**Provenance:** six current EGFR GIN runs (random/scaffold × seeds 42/1/2)
+have no committed training logs and an unrecorded original device. The review
+originally counted nine, including three historical time runs; those time
+runs have since been replaced by the accepted as-of campaign with separate
+provenance. A new CUDA replay of the six remaining runs is planned separately;
+its logs will describe that new run, not establish the historical device.
 
 **On this dataset the GIN does not beat the fingerprint RF.** The random
 ensemble CI favours RF (Δ −0.044 [−0.079, −0.010]). The scaffold
