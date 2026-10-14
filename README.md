@@ -804,10 +804,11 @@ three training MSEs are 0.749–0.976. See
 convergence nor establishes that more training would help. Models and test
 predictions are unchanged; no test score selected a new training budget.
 
-**M3 budget check completed; matched CUDA check pending.** A separate
+**Three-seed M3 pilot completed; eight-seed expansion preparing.** A separate
 [cross-computing-environment reproducibility and robustness study](docs/methodology.md#follow-up-a-matched-environment--training-budget-study)
-keeps the data fixed; it is not data k-fold cross-validation. M3 CPU completed
-48 GIN jobs in 11 min 23 s, comparing 100/0/20 versus 200/60/40
+keeps the data and GIN architecture fixed; it is not data k-fold
+cross-validation or a comparison of different model structures. The initial
+M3 CPU pilot completed 48 GIN jobs in 11 min 23 s, comparing 100/0/20 versus 200/60/40
 (`epochs/min_epochs/patience`) on all eight targets and seeds 42/1/2.
 All passed artifact checks and CPU model replay. The 24 paired early training
 logs match at printed precision; 23/24 pairs retain identical saved test
@@ -823,10 +824,22 @@ budget with the current scheduler did not broadly improve the selected models,
 but does not prove that all models converged. See the complete
 [paired results](results/time_budget_sensitivity/m3/analysis/paired.csv) and
 [acceptance report](results/time_budget_sensitivity/m3/analysis/report.json).
-The new CUDA two-budget cohort (48 jobs) awaits the user's connection; old CUDA
-runs are historical references, not a matched study cell. Start with three
-seeds in all four cells, then plan any additional seeds from validation
-variability, never test performance. Main campaign results below are unchanged.
+
+**Current expansion:** after the three-seed M3 pilot was accepted (commit
+`54f4c7d`) and before the new CUDA experiment started, the user explicitly
+requested **eight seeds per cell: 42/1/2/3/4/5/6/7**. This is a documented
+post-pilot amendment, not an eight-seed preregistration. CPU/CUDA ×
+original/extended budget now gives **64 jobs per cell, 256 total**. M3 is
+preparing 80 additional jobs (five new seeds × eight targets × two budgets),
+to join its accepted 48 for a 128-job CPU cohort. CUDA will run all 128 jobs
+only after the user's connection-ready message; it has not started.
+Trainer, original worker, training mathematics and input hashes stay frozen
+at `90a4700`; the new coordinator/seed wrapper has separate provenance.
+The three-seed pilot and its offline replay remain intact, and the complete
+eight-seed cohort will be reported separately. See the
+[amendment record](results/time_budget_sensitivity/replication_extension.json).
+The pilot's historical CUDA references do not fill a new study cell. Main
+campaign results below are unchanged.
 
 **Test R2 and paired molecule-bootstrap CI** (B = 10,000). GIN time is the
 per-seed mean ± population standard deviation; GIN ens is R2 of the averaged

@@ -1,11 +1,11 @@
-"""Audit and report the 48-job M3 CPU budget study, without training.
+"""Audit M3 CPU budget cohorts, individually or merged, without training.
 
 python experiments/time_budget_report.py --study-root RETURNED/study \
     --input-root FROZEN_INPUT_ROOT --out-dir results/time_budget_sensitivity/m3
 
 The input root supplies matching frozen scripts, eight graph caches and splits.
 The study supplies protocol/status, eight lane manifests and all canonical and
-snapshot outputs. Nothing is published until all 48 jobs pass CPU replay. This
+snapshot outputs. Nothing is published until every expected job passes CPU replay. This
 reports only the M3 half of the planned environment x budget study; it never
 selects seeds or replaces the main campaign. Outputs contain secondary test
 metrics as well as the primary training/validation diagnostics.
@@ -78,12 +78,23 @@ def artifact_names(tag, seed):
             f"results/gnn_metrics_{tag}{suffix}.json"]
 
 
-def inspect_study(study, inputs):
+def validate_seeds(seeds):
+    seeds = tuple(seeds)
+    require(bool(seeds) and all(type(seed) is int and seed >= 0 for seed in seeds)
+            and len(seeds) == len(set(seeds)), "Seeds must be unique nonnegative integers")
+    return seeds
+
+
+def inspect_study(study, inputs, seeds=SEEDS):
     """Verify coverage, protocol, manifests and both copies before replay."""
     protocol = read_json(study / "protocol.json")
-    require(protocol["arms"] == ARMS and protocol["seeds"] == list(SEEDS)
+    cohort_seeds = validate_seeds(protocol["seeds"])
+    if seeds is not None:
+        require(set(cohort_seeds) == set(validate_seeds(seeds)), "Unexpected cohort seed coverage")
+    count = len(ARMS) * len(TAGS) * len(cohort_seeds)
+    require(protocol["arms"] == ARMS
             and protocol["lanes"] == [list(lane) for lane in LANES]
-            and protocol["jobs"] == 48 and protocol["device"] == "cpu"
+            and protocol["jobs"] == count and protocol["device"] == "cpu"
             and protocol["parallel_workers"] == 4, "Unexpected M3 study protocol")
     require(protocol["thread_environment"].get("QSAR_TORCH_THREADS") == "4"
             and protocol["thread_environment"].get("QSAR_TORCH_INTEROP_THREADS") == "1",
@@ -96,8 +107,8 @@ def inspect_study(study, inputs):
             and all(x["returncode"] == 0 for x in top["lanes"]), "Incomplete/failed lane coverage")
     actual = set(study.glob("*/lane*/results/time_campaign/*/status.json"))
     expected = {study / arm / f"lane{i}/results/time_campaign/gin_{tag}_seed{seed}/status.json"
-                for arm in ARMS for i, tags in enumerate(LANES) for tag in tags for seed in SEEDS}
-    require(actual == expected, f"Expected exactly 48 job statuses, found {len(actual)}")
+                for arm in ARMS for i, tags in enumerate(LANES) for tag in tags for seed in cohort_seeds}
+    require(actual == expected, f"Expected exactly {count} job statuses, found {len(actual)}")
     require(not list(study.rglob(".time_campaign_*.lock")), "Returned study contains active worker locks")
     jobs, common_environment, common_host = [], None, None
     input_hashes, source_hashes = {}, {}
@@ -116,7 +127,7 @@ def inspect_study(study, inputs):
                     "Lane status differs from protocol")
             manifest_files = {entry["path"]: entry["sha256"] for entry in manifest["files"]}
             for tag in tags:
-                for seed in SEEDS:
+                for seed in cohort_seeds:
                     directory = root / f"results/time_campaign/gin_{tag}_seed{seed}"
                     status = read_json(directory / "status.json")
                     p = status["provenance"]
@@ -158,6 +169,44 @@ def inspect_study(study, inputs):
                                      label_id=label, files=names))
     return jobs, dict(protocol=protocol, training_environment=common_environment, host=common_host,
                       input_sha256=input_hashes, source_sha256=source_hashes)
+
+
+def inspect_cohorts(studies, inputs, seeds=SEEDS):
+    """Require complete disjoint cohorts with identical training code, data and host.
+
+    Bundle/coordinator revisions may differ; their full protocols remain recorded.
+    The five worker/training source hashes, all graph/split hashes and recorded
+    environment must match, regardless of the wrapper's newer Git revision.
+    """
+    seeds = validate_seeds(seeds)
+    require(len(studies) == len(set(studies)), "Duplicate study roots")
+    jobs, evidence, seen = [], [], set()
+    for study in studies:
+        cohort_jobs, cohort_evidence = inspect_study(study, inputs, seeds=None)
+        cohort_seeds = set(cohort_evidence["protocol"]["seeds"])
+        require(not seen.intersection(cohort_seeds), "Duplicate seeds across study cohorts")
+        seen.update(cohort_seeds)
+        if evidence:
+            for field in ("source_sha256", "input_sha256", "training_environment", "host"):
+                require(cohort_evidence[field] == evidence[0][field], f"Cohort {field} differs")
+        jobs.extend(cohort_jobs)
+        evidence.append(cohort_evidence)
+    require(seen == set(seeds), "Combined cohort seeds differ from expected seeds")
+    expected = {(arm, tag, seed) for arm in ARMS for tag in TAGS for seed in seeds}
+    keys = [(job["arm"], job["tag"], job["seed"]) for job in jobs]
+    require(len(keys) == len(expected) and set(keys) == expected,
+            "Combined jobs have duplicate or incomplete arm/target/seed coverage")
+    labels = {}
+    for job in jobs:
+        require(job["tag"] not in labels or labels[job["tag"]] == job["label_id"],
+                "Cohort label versions differ")
+        labels[job["tag"]] = job["label_id"]
+    # Retain the legacy single-cohort evidence shape and expose each merged protocol.
+    summary = dict(evidence[0])
+    if len(evidence) > 1:
+        summary["cohorts"] = [dict(study_root=str(root), **item)
+                              for root, item in zip(studies, evidence)]
+    return jobs, summary
 
 
 def load_replay_modules(inputs):
@@ -277,10 +326,13 @@ def replay_job(job, inputs, trainer, load_split):
     return row, pred
 
 
-def paired_rows(frame):
+def paired_rows(frame, seeds=SEEDS):
     keys = ["tag", "seed"]
-    require(len(frame) == 48 and not frame.duplicated(["arm", *keys]).any(), "Expected 48 unique rows")
-    expected = {(tag, seed) for tag in TAGS for seed in SEEDS}
+    seeds = validate_seeds(seeds)
+    count = len(ARMS) * len(TAGS) * len(seeds)
+    require(len(frame) == count and set(frame.arm) == set(ARMS)
+            and not frame.duplicated(["arm", *keys]).any(), f"Expected {count} unique rows")
+    expected = {(tag, seed) for tag in TAGS for seed in seeds}
     for arm in ARMS:
         require(set(map(tuple, frame.loc[frame.arm == arm, keys].to_numpy())) == expected,
                 f"Incomplete {arm} cohort")
@@ -295,15 +347,16 @@ def paired_rows(frame):
     return pair
 
 
-def target_rows(frame, pairs, predictions):
+def target_rows(frame, pairs, predictions, seeds=SEEDS):
+    seeds = validate_seeds(seeds)
     rows = []
     for tag in TAGS:
-        row = dict(tag=tag, n_seeds=3)
+        row = dict(tag=tag, n_seeds=len(seeds))
         for arm in ARMS:
             subset = frame[(frame.tag == tag) & (frame.arm == arm)]
             for metric in ("train_mse", "valid_rmse_std", "test_r2"):
                 row[f"{arm}_{metric}_mean"] = float(subset[metric].mean())
-            values = [predictions[(arm, tag, seed)] for seed in SEEDS]
+            values = [predictions[(arm, tag, seed)] for seed in seeds]
             y = values[0]["y_true"]
             for item in values[1:]:
                 np.testing.assert_array_equal(item["test_idx"], values[0]["test_idx"])
@@ -325,7 +378,7 @@ def logged_epochs(text):
             for epoch, train, valid, lr in re.findall(pattern, text, re.MULTILINE)}
 
 
-def prefix_rows(jobs):
+def prefix_rows(jobs, seeds=SEEDS):
     """Describe rounded logged trajectories; disagreement is not an audit failure."""
     logs = {}
     for job in jobs:
@@ -333,7 +386,7 @@ def prefix_rows(jobs):
         logs[(job["arm"], job["tag"], job["seed"])] = logged_epochs(path.read_text()) if path.exists() else {}
     rows = []
     for tag in TAGS:
-        for seed in SEEDS:
+        for seed in validate_seeds(seeds):
             control, extended = (logs[(arm, tag, seed)] for arm in ARMS)
             horizon = min(max(control, default=0), max(extended, default=0))
             left = {e for e in control if e <= horizon}
@@ -352,14 +405,17 @@ def prefix_rows(jobs):
     return pd.DataFrame(rows)
 
 
-def run(study, inputs, output, threads=4):
+def run(study, inputs, output, threads=4, *, supplement=None, seeds=SEEDS):
     import torch
     study, inputs, output = (Path(p).resolve() for p in (study, inputs, output))
     require(not output.exists(), "Output directory already exists; use a new report directory")
-    require(not output.is_relative_to(study) and not study.is_relative_to(output),
-            "Report output must be separate from returned study")
+    studies = [study] + ([Path(supplement).resolve()] if supplement is not None else [])
+    seeds = validate_seeds(seeds)
+    for root in studies:
+        require(not output.is_relative_to(root) and not root.is_relative_to(output),
+                "Report output must be separate from returned study")
     require(threads > 0, "Replay threads must be positive")
-    jobs, evidence = inspect_study(study, inputs)
+    jobs, evidence = inspect_cohorts(studies, inputs, seeds)
     torch.set_num_threads(threads)
     if torch.get_num_interop_threads() != 1:
         torch.set_num_interop_threads(1)
@@ -371,23 +427,25 @@ def run(study, inputs, output, threads=4):
         predictions[(job["arm"], job["tag"], job["seed"])] = pred
         print(f"PASS {job['arm']}/{job['tag']}/seed{job['seed']}: checkpoint replay", flush=True)
     frame = pd.DataFrame(rows).sort_values(["arm", "tag", "seed"])
-    pairs = paired_rows(frame)
-    targets = target_rows(frame, pairs, predictions)
-    prefixes = prefix_rows(jobs)
+    pairs = paired_rows(frame, seeds)
+    targets = target_rows(frame, pairs, predictions, seeds)
+    prefixes = prefix_rows(jobs, seeds)
     report = dict(schema="m3-time-budget-report-v1", status="accepted",
-                  audited_at=datetime.now(timezone.utc).isoformat(), jobs_accepted=48,
-                  paired_rows=24, targets=8, environment="M3 CPU", factorial_cells_complete=2,
+                  audited_at=datetime.now(timezone.utc).isoformat(), jobs_accepted=len(jobs),
+                  seeds=list(seeds), n_seeds=len(seeds), cohorts=len(studies),
+                  paired_rows=len(pairs), targets=len(TAGS), environment="M3 CPU", factorial_cells_complete=2,
                   planned_factorial_cells=4, cuda_cells_status="not audited by this report",
                   primary_metrics=["best-checkpoint standardized train MSE", "validation RMSE"],
                   secondary_metrics=["test R2", "test RMSE", "test MAE", "runtime"],
                   delta_convention="extended minus control, paired by target and seed",
-                  selection_policy="All 48 jobs retained; no test-based seed/budget selection or replacement of main results",
+                  selection_policy=f"All {len(jobs)} jobs retained; no test-based seed/budget selection or replacement of main results",
                   common_flag="best_epoch < 30 and best-checkpoint standardized train MSE > 0.5",
                   native_flag="best_epoch < 0.3 * each arm max_epochs and best-checkpoint train MSE > 0.5",
                   interpretation=["Flags are diagnostics, not proof of non-convergence or benefit from longer training",
                                   "Current report measures within-M3 budget contrasts only",
                                   "Future CPU/CUDA comparison combines OS, architecture, kernels and libraries; not a pure hardware causal effect",
-                                  "Three seeds and overlapping target sets do not provide independent target-level replications",
+                                  f"{len(seeds)} seeds and overlapping target sets do not provide independent target-level replications",
+                                  "Completed M3 cells refer to the declared audited seeds; other seed cohorts are not implied",
                                   "Target seed SDs are descriptive, not confidence intervals; ensemble R2 differs from mean single-seed R2"],
                   replay=dict(device="cpu", torch_threads=threads, torch_interop_threads=1,
                               torch_version=str(torch.__version__), python=platform.python_version(),
@@ -399,7 +457,7 @@ def run(study, inputs, output, threads=4):
                   flags_by_arm={arm: dict(native=int(frame.loc[frame.arm == arm, "native_flag"].sum()),
                                           common=int(frame.loc[frame.arm == arm, "common_flag"].sum())) for arm in ARMS})
     report["training_prefix_comparison"] = dict(
-        pairs=24, matching_rounded_prefixes=int(prefixes.equal_rounded_log_prefix.sum()),
+        pairs=len(pairs), matching_rounded_prefixes=int(prefixes.equal_rounded_log_prefix.sum()),
         interpretation="Only printed epochs and rounded train/validation/lr values are compared; no bitwise-equivalence requirement. Differences are reported, not suppressed or used to select runs.")
     # No partial accepted report is written for a failed job or incomplete cohort.
     output.mkdir(parents=True, exist_ok=False)
@@ -417,11 +475,15 @@ def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--study-root", required=True, type=Path)
     parser.add_argument("--input-root", required=True, type=Path)
+    parser.add_argument("--supplement-root", type=Path, help="Optional disjoint cohort with identical training code/data/environment")
+    parser.add_argument("--seeds", "--expected-seeds", nargs="+", type=int, default=list(SEEDS),
+                        help="Expected seed union across roots; default 42 1 2. New cohort: 3 4 5 6 7; merged: 42 1 2 3 4 5 6 7")
     parser.add_argument("--out-dir", required=True, type=Path, help="New directory; existing reports are never overwritten")
     parser.add_argument("--threads", type=int, default=4, help="CPU replay threads; training is always verified as 4/1")
     args = parser.parse_args(argv)
     try:
-        report = run(args.study_root, args.input_root, args.out_dir, args.threads)
+        report = run(args.study_root, args.input_root, args.out_dir, args.threads,
+                     supplement=args.supplement_root, seeds=args.seeds)
     except (ValueError, AssertionError, OSError, KeyError, RuntimeError) as error:
         parser.exit(1, f"AUDIT FAILED: {type(error).__name__}: {error}\n")
     print(json.dumps({k: report[k] for k in ("status", "jobs_accepted", "paired_rows", "flags_by_arm")}, indent=2))

@@ -1144,26 +1144,45 @@ re-audit commands are the parameterized commands above.
 
 The follow-up is a **cross-computing-environment reproducibility and robustness
 study** with a 2 × 2 design, separate from the accepted temporal results above.
-Data and splits remain fixed; this is not data k-fold cross-validation. The M3
-CPU campaign has completed and all 48 jobs passed acceptance. The 4070 CUDA
-campaign will start only after the user connects that machine and gives the
-connection-ready message; its two new arms are still pending.
+Data, splits and GIN architecture remain fixed; this is neither data k-fold
+cross-validation nor a comparison of different GIN model structures.
+
+**Current design amendment (2026-10-14): eight seeds per cell.** The initial
+three-seed M3 pilot completed all 48 jobs and passed acceptance (commit
+`54f4c7d`). After observing that completed pilot, and before the new matched
+CUDA experiment began, the user explicitly requested expansion to eight seeds:
+**42, 1, 2, 3, 4, 5, 6, 7**. This sequence is recorded in
+`results/time_budget_sensitivity/replication_extension.json`; the eight-seed
+plan was not preregistered before the pilot. The original design and pilot
+JSON/CSV, parameters, archives and results remain unchanged as historical
+evidence. The expanded cohort will be reported separately.
 
 | Execution environment | Original budget | Extended budget |
 | --- | --- | --- |
-| M3 Max CPU | 24 completed and accepted | 24 completed and accepted |
-| Ubuntu / RTX 4070 Laptop CUDA | 24 fresh jobs, awaiting connection | 24 fresh jobs, awaiting connection |
+| M3 Max CPU | 64 planned: 24 pilot accepted + 40 additional preparing | 64 planned: 24 pilot accepted + 40 additional preparing |
+| Ubuntu / RTX 4070 Laptop CUDA | 64 fresh jobs, awaiting connection | 64 fresh jobs, awaiting connection |
 
-Each cell covers all eight targets and seeds 42/1/2. The original budget is
-`epochs=100, min_epochs=0, patience=20`; the extended budget is
-`epochs=200, min_epochs=60, patience=40`. Thus the full study has 96 jobs, with
-48 per environment. Both budgets retain the same learning-rate scheduler; this
-is not an architecture or learning-rate search. The current M3 coordinator,
-`scripts/run_time_budget_study.py`, isolates the two arms from the input bundle
-and published outputs, records its protocol, and resumes only verified jobs.
-The pending CUDA deployment must use the same frozen training source and input
-versions as the M3 study; the historical accepted CUDA runs are reference data,
-not substitutes for a newly matched cell in this design.
+Each current cell covers all eight targets and all eight declared seeds.
+The original budget is `epochs=100, min_epochs=0, patience=20`; the extended
+budget is `epochs=200, min_epochs=60, patience=40`. The expanded design has
+**256 jobs: 64 per cell and 128 per environment**. M3 will add 80 jobs for
+seeds 3/4/5/6/7 and combine them with the existing 48 only after acceptance.
+The new 4070 CUDA campaign will run all 128 jobs after the user connects the
+machine and sends a connection-ready message. Neither the added M3 cohort nor
+the full eight-seed study is complete at this preparation stage.
+
+Both budgets retain the same learning-rate scheduler. Trainer, original
+worker, label loader, graph dataset, common helpers, training mathematics
+and data hashes remain frozen at
+`90a470050367cebc4cd83dfe8d3f7fb37d53e6de`. The original pilot coordinator
+`scripts/run_time_budget_study.py` and its results remain available. New
+entry points `scripts/run_time_budget_extension.py` and
+`scripts/run_time_campaign_seed_extension.py` add seed coverage without
+editing those frozen training files; their own source and bundle hashes are
+recorded separately. Both arms remain isolated from the input bundle and
+published outputs. The pending CUDA deployment must verify the same frozen
+training/input versions. Historical accepted CUDA runs are reference data,
+not substitutes for the newly matched 128-job CUDA cohort.
 
 The M3 host reports 12 performance cores and 4 efficiency cores. The CPU study
 uses four concurrent workers, each with four PyTorch intra-op threads and one
@@ -1185,8 +1204,8 @@ across CPU and CUDA.
 For each target and seed, report both budgets in both environments, including
 best epoch, stopping epoch, best-checkpoint eval training MSE, validation RMSE,
 test metrics and runtime. The primary comparison concerns training/validation
-behavior; test scores are a secondary report for the complete prespecified
-cohort. Do not select budgets, seeds or replacement models from test performance.
+behavior; test scores are a secondary report for the complete declared
+cohort, with the post-pilot timing of the seed amendment disclosed. Do not select budgets, seeds or replacement models from test performance.
 Use a common supplementary flag (`best_epoch < 30` and standardized training
 MSE > 0.5) across both budgets, rather than allowing the diagnostic threshold to
 double with `max_epochs`. This flag remains a heuristic, not proof of failure
@@ -1200,15 +1219,16 @@ budget, and their interaction as the CUDA budget contrast minus the CPU budget
 contrast. Preserve the target/seed rows and paired contrasts alongside any
 aggregate tables or uncertainty summaries; four grand means alone conceal
 heterogeneity. Lower loss and higher R² have opposite favorable directions.
-Targets include overlapping datasets and three seeds provide limited training
-replication, so aggregate uncertainty must not treat all rows as independent.
-Begin with the three declared seeds in all four cells. Only after that complete
-cohort, plan any additional seeds using validation variability and the precision
-needed for the paired contrasts; do not use test scores to decide which cells,
-seeds or budgets to expand. No outcome for the pending CUDA cells is assumed,
-and the original accepted weights, predictions and metric history remain unchanged.
+Targets include overlapping datasets; eight seeds increase training replication
+but do not make all target/seed rows independent. Retain every declared seed
+in every cell and report all paired contrasts, including unfavorable results.
+The seed expansion follows the explicit post-pilot user request above; it is
+not conditioned on achieving a desired test ranking. Do not choose further
+seeds, budgets or replacement models from test performance. No outcome for
+the pending CUDA cells or added M3 seeds is assumed. The original accepted
+weights, predictions and metric history remain unchanged.
 
-**Observed M3 result (2026-10-14).** Frozen training source
+**Observed initial three-seed M3 pilot (2026-10-14; unchanged).** Frozen training source
 `90a470050367cebc4cd83dfe8d3f7fb37d53e6de` completed both arms in 683.063 seconds
 (11 min 23 s), excluding environment setup, transfer and acceptance. All 48
 success statuses, canonical/snapshot hashes, source/input versions, parameters
@@ -1240,10 +1260,11 @@ those are different cohorts and environments. The newly matched CUDA arms are
 still required before estimating the environment contrasts or interaction.
 Full rows, paired differences, target summaries and rounded-log comparisons are
 in `results/time_budget_sensitivity/m3/analysis/{diagnostics,paired,targets,prefix_logs}.csv`;
-`report.json` records the verification and explicitly marks only two of four
-planned factorial cells complete. No selected subset replaces the main results.
+`report.json` records the pilot verification and marks two of its original
+three-seed factorial cells complete. That historical status is not completion
+of either eight-seed CPU cell. No selected subset replaces the main results.
 
-**Offline model replay.** The repository includes
+**Offline replay of the preserved three-seed pilot.** The repository includes
 `results/time_budget_sensitivity/inputs.tar.gz` (about 4.6 MiB: frozen source,
 eight graphs and eight splits) and `m3/study.tar.gz` (29,868,373 bytes, about
 28.5 MiB: all 48 models, predictions, logs, statuses and snapshots). The result
@@ -1281,8 +1302,10 @@ python experiments/time_budget_report.py \
   --out-dir .scratch/m3-budget-replay/report --threads 2
 ```
 
-This replay needs no network, raw activity tables or remote machine, and does
-not train any model. Use the frozen `90a4700` scripts inside the input archive;
+The report command retains its default three-seed mode (42/1/2), so the
+unchanged command above continues to reproduce the original pilot, not the
+eight-seed extension. This replay needs no network, raw activity tables or
+remote machine, and does not train any model. Use the frozen `90a4700` scripts inside the input archive;
 future edited training scripts must not silently replace them. An existing
 replay directory is refused; choose a new directory for another run.
 

@@ -17,8 +17,7 @@ def put_json(path, payload):
     path.write_text(json.dumps(payload))
 
 
-@pytest.fixture
-def study(tmp_path, reporter):
+def make_study(tmp_path, reporter, seeds=(42, 1, 2), source="frozen"):
     study = tmp_path / "study"
     inputs = tmp_path / "inputs"
     files = {}
@@ -29,7 +28,7 @@ def study(tmp_path, reporter):
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_bytes(name.encode())
         files[name] = reporter.digest(path)
-    manifest = dict(role="gin", source={"dirty": False, "git_head": "frozen"},
+    manifest = dict(role="gin", source={"dirty": False, "git_head": source},
                     files=[dict(path=k, sha256=v) for k, v in files.items()],
                     targets={tag: {"label_id": f"labels-{tag}"} for tag in reporter.TAGS})
     manifest_path = tmp_path / "manifest.json"
@@ -37,10 +36,10 @@ def study(tmp_path, reporter):
     mh = reporter.digest(manifest_path)
     env = {"variables": {"QSAR_TORCH_THREADS": "4", "QSAR_TORCH_INTEROP_THREADS": "1"},
            "packages": {"torch": "test"}, "platform": "test-host"}
-    protocol = dict(arms=reporter.ARMS, seeds=list(reporter.SEEDS),
-                    lanes=[list(lane) for lane in reporter.LANES], jobs=48,
+    protocol = dict(arms=reporter.ARMS, seeds=list(seeds),
+                    lanes=[list(lane) for lane in reporter.LANES], jobs=16 * len(seeds),
                     device="cpu", parallel_workers=4, thread_environment=env["variables"],
-                    manifest_sha256=mh, source_commit="frozen")
+                    manifest_sha256=mh, source_commit=source)
     lanes = []
     for arm in reporter.ARMS:
         for lane, tags in enumerate(reporter.LANES):
@@ -50,11 +49,11 @@ def study(tmp_path, reporter):
             lanes.append(lane_state)
             put_json(root / "lane_status.json", lane_state)
             for tag in tags:
-                for seed in reporter.SEEDS:
+                for seed in seeds:
                     directory = root / f"results/time_campaign/gin_{tag}_seed{seed}"
                     p = dict(role="gin", tag=tag, label_id=f"labels-{tag}",
                              hyperparameters=reporter.expected_parameters(arm, seed),
-                             bundle_manifest={"sha256": mh, "source_git_head": "frozen"},
+                             bundle_manifest={"sha256": mh, "source_git_head": source},
                              command=["train.py"], environment=env,
                              inputs={k: files[k] for k in (f"data/processed/{tag}_graphs.npz",
                                                           f"data/processed/splits/{tag}_time.npz")},
@@ -73,6 +72,11 @@ def study(tmp_path, reporter):
     put_json(study / "protocol.json", protocol)
     put_json(study / "study_status.json", dict(state="training_complete_pending_independent_audit", lanes=lanes))
     return study, inputs
+
+
+@pytest.fixture
+def study(tmp_path, reporter):
+    return make_study(tmp_path, reporter)
 
 
 def test_all_48_job_hashes_and_paired_configuration_are_required(study, reporter):
@@ -239,3 +243,97 @@ def test_real_gin_checkpoint_replay_and_bad_normalization(tmp_path, reporter, lo
     torch.save(checkpoint, root / names[0])
     with pytest.raises(ValueError, match="normalization"):
         reporter.replay_job(job, inputs, trainer, load_time_split)
+
+
+@pytest.mark.parametrize("seeds", [(3, 4, 5, 6, 7), (42, 1, 2, 3, 4, 5, 6, 7)])
+def test_declared_seed_cohort_counts(tmp_path, reporter, seeds):
+    study, inputs = make_study(tmp_path, reporter, seeds)
+    jobs, evidence = reporter.inspect_study(study, inputs, seeds)
+    assert len(jobs) == 16 * len(seeds)
+    assert evidence["protocol"]["seeds"] == list(seeds)
+    with pytest.raises(ValueError, match="seed coverage"):
+        reporter.inspect_study(study, inputs)
+
+
+def test_merge_all_eight_seeds_with_new_wrapper_revision(tmp_path, reporter):
+    pilot, inputs = make_study(tmp_path / "pilot", reporter)
+    supplement, _ = make_study(tmp_path / "extra", reporter, (3, 4, 5, 6, 7), "new-wrapper")
+    seeds = (42, 1, 2, 3, 4, 5, 6, 7)
+    jobs, evidence = reporter.inspect_cohorts([pilot, supplement], inputs, seeds)
+    assert len(jobs) == 128
+    assert [e["protocol"]["source_commit"] for e in evidence["cohorts"]] == ["frozen", "new-wrapper"]
+    assert evidence["cohorts"][0]["source_sha256"] == evidence["cohorts"][1]["source_sha256"]
+    with pytest.raises(ValueError, match="expected seeds"):
+        reporter.inspect_cohorts([pilot, supplement], inputs, seeds[:-1])
+    with pytest.raises(ValueError, match="Duplicate study roots"):
+        reporter.inspect_cohorts([pilot, pilot], inputs, seeds)
+
+
+def test_overlapping_cohort_seeds_rejected(tmp_path, reporter):
+    pilot, inputs = make_study(tmp_path / "pilot", reporter)
+    supplement, _ = make_study(tmp_path / "extra", reporter, (2, 3, 4, 5, 6, 7))
+    with pytest.raises(ValueError, match="Duplicate seeds"):
+        reporter.inspect_cohorts([pilot, supplement], inputs, (42, 1, 2, 3, 4, 5, 6, 7))
+
+
+@pytest.mark.parametrize("field", ["source_sha256", "input_sha256", "training_environment", "host", "label_id"])
+def test_merge_rejects_cross_cohort_drift(tmp_path, reporter, monkeypatch, field):
+    # Separate cohort audits can each pass, but merging requires identical evidence.
+    def inspect(study, inputs, seeds):
+        second = study.name == "extra"
+        seed = 3 if second else 42
+        evidence = dict(protocol={"seeds": [seed]}, source_sha256={"worker": "same"},
+                        input_sha256={"graph": "same"}, training_environment={"threads": 4}, host="m3")
+        if second and field != "label_id":
+            evidence[field] = "different"
+        jobs = [dict(arm=arm, tag=tag, seed=seed,
+                     label_id="different" if second and field == "label_id" else tag)
+                for arm in reporter.ARMS for tag in reporter.TAGS]
+        return jobs, evidence
+    monkeypatch.setattr(reporter, "inspect_study", inspect)
+    with pytest.raises(ValueError, match="differs|versions differ"):
+        reporter.inspect_cohorts([tmp_path / "pilot", tmp_path / "extra"], tmp_path, (42, 3))
+
+
+@pytest.mark.parametrize("seeds,merged", [((3, 4, 5, 6, 7), False),
+                                         ((42, 1, 2, 3, 4, 5, 6, 7), False),
+                                         ((42, 1, 2, 3, 4, 5, 6, 7), True)])
+def test_report_counts_pairs_and_ensembles_are_not_hardcoded(tmp_path, reporter, monkeypatch, seeds, merged):
+    root, inputs = make_study(tmp_path, reporter, reporter.SEEDS if merged else seeds)
+    supplement = None
+    if merged:
+        supplement, _ = make_study(tmp_path / "extra", reporter, (3, 4, 5, 6, 7), "new-wrapper")
+    metrics = ("train_mse", "valid_rmse_std", "valid_rmse_pic50", "test_r2", "test_rmse",
+               "test_mae", "best_epoch", "elapsed_seconds")
+    def replay(job, *args):
+        value = 2. if job["arm"] == "control" else 1.
+        row = dict(arm=job["arm"], tag=job["tag"], seed=job["seed"], label_id=job["label_id"],
+                   native_flag=False, common_flag=False, prediction_max_abs_error=0.,
+                   train_mse_abs_error=0., valid_rmse_abs_error=0., **dict.fromkeys(metrics, value))
+        pred = dict(test_idx=np.array([0, 1]), y_true=np.array([0., 1.]), y_pred=np.array([0., 1.]))
+        return row, pred
+    monkeypatch.setattr(reporter, "load_replay_modules", lambda *args: (None, None))
+    monkeypatch.setattr(reporter, "replay_job", replay)
+    # This test exercises count/aggregation; real checkpoint replay is tested above.
+    output = tmp_path / "report"
+    report = reporter.run(root, inputs, output, threads=1, seeds=seeds, supplement=supplement)
+    assert report["jobs_accepted"] == 16 * len(seeds)
+    assert report["paired_rows"] == 8 * len(seeds)
+    assert report["n_seeds"] == len(seeds)
+    assert report["cohorts"] == (2 if merged else 1)
+    assert report["factorial_cells_complete"] == 2
+    assert report["training_prefix_comparison"]["pairs"] == 8 * len(seeds)
+    targets = pd.read_csv(output / "targets.csv")
+    assert len(targets) == 8 and (targets.n_seeds == len(seeds)).all()
+    assert (targets.control_ensemble_test_r2 == 1.).all()
+    assert (pd.read_csv(output / "paired.csv").delta_train_mse == -1.).all()
+    old = (output / "report.json").read_bytes()
+    with pytest.raises(ValueError, match="already exists"):
+        reporter.run(root, inputs, output, threads=1, seeds=seeds)
+    assert (output / "report.json").read_bytes() == old
+
+
+@pytest.mark.parametrize("seeds", [(), (42, 42), (-1,), (True,), ("3",)])
+def test_invalid_declared_seeds_rejected(reporter, seeds):
+    with pytest.raises(ValueError, match="unique nonnegative"):
+        reporter.validate_seeds(seeds)

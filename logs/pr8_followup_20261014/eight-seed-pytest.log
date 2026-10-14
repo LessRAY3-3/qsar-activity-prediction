@@ -1,0 +1,23 @@
+........................................................................ [ 15%]
+........................................................................ [ 30%]
+........................................................................ [ 46%]
+........................................................................ [ 61%]
+........................................................................ [ 76%]
+........................................................................ [ 92%]
+....................................                                     [100%]
+=============================== warnings summary ===============================
+../qsar-activity-prediction/.venv/lib/python3.12/site-packages/torch/jit/_script.py:1491
+  /Users/lessray/Desktop/kimi code/qsar-activity-prediction/.venv/lib/python3.12/site-packages/torch/jit/_script.py:1491: FutureWarning: `torch.jit.script` is deprecated. Please switch to `torch.compile` or `torch.export`.
+    warnings.warn(
+
+tests/test_gnn_models.py::test_time_training_uses_asof_labels_for_scaling_and_evaluation
+  /Users/lessray/Desktop/kimi code/qsar-time-retrain-20261013/scripts/gnn_03_train_gin.py:293: UserWarning: Converting a tensor with requires_grad=True to a scalar may lead to unexpected behavior.
+  Consider using tensor.detach() first. (Triggered internally at /Users/runner/work/pytorch/pytorch/torch/csrc/autograd/generated/python_variable_methods.cpp:821.)
+    total += float(loss) * len(batch.y)
+
+tests/test_p8_analysis.py::test_bootstrap_records_requested_n_boot_with_degenerate_resamples
+  /Users/lessray/Desktop/kimi code/qsar-time-retrain-20261013/experiments/paired_bootstrap.py:277: RuntimeWarning: divide by zero encountered in divide
+    r2s.append(1.0 - sse / sst)
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+468 passed, 3 warnings in 28.88s

@@ -13,7 +13,46 @@ results. The initial 2026-10-13 entry records the preceding campaign; its hERG
 scores and aggregate means are superseded. Earlier all-year-label time scores
 are historical only.**
 
+## 2026-10-14 — post-pilot expansion to eight seeds per environment/budget cell
+
+- **Decision chronology:** the M3 three-seed pilot was completed, accepted and
+  committed as `54f4c7d` before the user explicitly requested eight seeds in
+  every cell. The new matched CUDA experiment had not started. This is a
+  post-pilot design amendment, not an eight-seed preregistration; preserve the
+  earlier design, pilot reports, parameters and result archives unchanged.
+- **Current scope:** cross-computing-environment reproducibility and robustness
+  testing, with fixed data/splits and the same GIN architecture. CPU/CUDA ×
+  original (`100/0/20`) / extended (`200/60/40`) epochs/minimum/patience;
+  eight targets × seeds **42/1/2/3/4/5/6/7** gives **64 jobs per cell,
+  128 per environment, 256 total**. This is not data k-fold cross-validation
+  or an architecture comparison.
+- **Preparation status:** M3's accepted 48 pilot jobs are retained. An additional
+  80 M3 jobs (seeds 3/4/5/6/7 in both budgets) are preparing for execution;
+  the accepted combined CPU cohort will contain 128 jobs. The complete new
+  CUDA cohort contains 128 jobs and will start only after the user's
+  connection-ready message. No eight-seed result is complete or claimed here.
+- **Frozen computation:** retain trainer, original worker, label loader,
+  graph dataset, common helpers and all data hashes from
+  `90a470050367cebc4cd83dfe8d3f7fb37d53e6de`. Training mathematics are unchanged.
+  New coordinator/seed-wrapper entry points have separate recorded provenance;
+  they do not replace the frozen training code.
+- **Reporting:** preserve the pilot's actual result (23/24 identical saved
+  prediction pairs; only HIVPR seed 42 improves validation; diagnostic flags
+  9/24 → 9/24). Report the complete eight-seed cohort separately, retain every
+  declared seed and do not select from test performance. The original offline
+  replay commands and paths remain valid in the report's default three-seed
+  mode. Main temporal/RF results remain untouched.
+- **Amendment record:**
+  `results/time_budget_sensitivity/replication_extension.json`. It supersedes
+  the earlier plan to finish all four three-seed cells before deciding on
+  extra seeds; the historical entries below record what was planned and
+  observed at those earlier stages.
+
 ## 2026-10-14 — M3 two-budget study accepted; new CUDA cohort pending
+
+**Historical three-seed pilot entry.** Its results and original 96-job plan
+are retained below; the current eight-seed amendment above supersedes its
+next-step plan and pending CUDA job count.
 
 - **Scope/status:** the M3 half of the cross-computing-environment
   reproducibility and robustness study is complete: eight targets × three seeds
