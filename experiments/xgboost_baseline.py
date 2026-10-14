@@ -40,13 +40,18 @@ def parse_args():
     p = argparse.ArgumentParser()
     p.add_argument("--tag", default=os.environ.get("QSAR_TAG", "egfr"))
     p.add_argument("--seeds", default="42,1,2")
-    p.add_argument("--splits", default="random,scaffold")
+    p.add_argument("--splits", default="random,scaffold",
+                   help="comma-separated random/scaffold only; time labels are not supported")
     p.add_argument("--n-estimators", type=int, default=500)
     p.add_argument("--lr", type=float, default=0.05)
     p.add_argument("--max-depth", type=int, default=6)
     p.add_argument("--out", default=os.path.join(BASE, "results", "xgboost"))
     p.add_argument("--fig-dir", default=os.path.join(BASE, "figures", "xgboost"))
-    return p.parse_args()
+    args = p.parse_args()
+    if any(split.strip() not in ("random", "scaffold") for split in args.splits.split(",")):
+        p.error("--splits supports only random/scaffold; time requires as-of labels "
+                "and is not implemented in this experiment")
+    return args
 
 
 def pool_fingerprint(idx):

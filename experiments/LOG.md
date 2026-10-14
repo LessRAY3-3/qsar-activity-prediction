@@ -13,6 +13,82 @@ results. The initial 2026-10-13 entry records the preceding campaign; its hERG
 scores and aggregate means are superseded. Earlier all-year-label time scores
 are historical only.**
 
+## 2026-10-14 — PR #8 review corrections and an authorized budget comparison
+
+This entry records review corrections to the current repaired campaign. The
+published model weights, predictions and historical metric JSON entries are
+preserved. New diagnostics are separate artifacts; the two-budget follow-up
+described below was authorized but **had not started when this entry was written**.
+
+- **T1 — resampling-unit sensitivity:** the existing 24-cell scaffold comparison
+  covers eight targets and GIN/GINE/AttentiveFP. Seven of ten molecule-bootstrap
+  significant cells have scaffold-group intervals containing zero. README and
+  methodology now expose the full sensitivity result and distinguish the two
+  resampling units; this is a reinterpretation of the existing sensitivity CSV,
+  not new training or 24 independent replications.
+- **T2 — constant baseline and error decomposition:**
+  `experiments/time_baseline_diagnostics.py` writes a separate
+  `results/time_split/baseline_diagnostics.csv`, comparing RF and GIN ensemble
+  with the train-label-mean constant using 10,000 paired molecule resamples.
+  It also records test fractions and the arithmetic level/scale/correlation
+  decomposition of the RF-to-GIN R² difference. The interpretation distinguishes
+  outperforming RF from outperforming a constant; the decomposition does not
+  identify a causal distribution-shift mechanism. Published predictions are
+  unchanged, and the figure/summary wording now reflects these distinctions.
+- **T3 — diagnose the saved best checkpoint:** the old convergence heuristic
+  used the final training epoch's stochastic loss, although the model saved and
+  evaluated on test was the best validation checkpoint. CPU eval-mode replay of
+  all 24 accepted checkpoints verifies their training normalization and best
+  validation RMSE, then measures the saved checkpoint's training MSE. Thirteen
+  of 24 exceed standardized training MSE 0.5 and meet the early-best-epoch rule;
+  see `results/time_split/checkpoint_diagnostics.csv`. This is a fitting
+  diagnostic, **not proof of non-convergence or evidence that longer training
+  will improve generalization**. Historical metric JSON is not rewritten. The
+  acceptance record now distinguishes original last-epoch flags from this new
+  diagnostic. Future trainer output records best-checkpoint eval MSE, its source,
+  and the separate last-epoch loss before applying the heuristic.
+- **T4 — direct temporal-label tests:** explicit expected medians cover train,
+  validation and test year boundaries, future-measurement exclusion, exact
+  relation and nM eligibility; prediction-version checks cover `label_id`, row
+  order and true labels. The coordinator's targeted mutation check caught all
+  six injected faults. These tests check the label rules directly rather than
+  accepting agreement between two consumers of the same wrong labels.
+- **T5 — fail on absent structural keys:** the splitter now checks cached parent
+  keys against all standardized raw structures before document/year or label
+  eligibility filtering. An absent key raises an error with cache row and key;
+  an existing raw structure with missing dating/eligible-label metadata can still
+  be excluded normally. Cached parent keys are never normalized a second time.
+- **T6 — traceable coordination and runnable independent audit:** 16 surviving
+  initial/repair coordinator scripts are archived unchanged as `.py.txt` under
+  `scripts/campaign_history/`, with SHA256, original scratch paths and
+  source-derived worker command templates in its manifest. These post-campaign
+  snapshots preserve one-off machine paths and mutation logic and must not be
+  executed; they are not a complete historical shell transcript. The separately
+  added `scripts/audit_time_campaign.py` is a new parameterized audit, not a
+  claim that this exact CLI was used originally. Its `data` and `full` scopes
+  both passed against all 42,636 retained labels, 168 exclusions, 32 predictions
+  and 16 × 10,000-replicate bootstrap rows. Eight dedicated tests and Ruff passed.
+  Commands, dependencies and explicit skipped-hash semantics are documented in
+  methodology under "Independently audit raw labels and current results".
+- **T7 — protect accepted RF models from the old release:**
+  `scripts/fetch_artifacts.py` installs only the 18 named random/scaffold RF
+  models from `artifacts-v2`. It validates archive members but does not install
+  its eight obsolete temporal models, including when other local models are
+  missing. Existing accepted time models are preserved; new time RF weights
+  remain available on M3/the coordinator rather than in that old release.
+- **Additional guard:** learning-curve, y-randomization and XGBoost auxiliary
+  commands now reject unsupported `time` splits explicitly, instead of silently
+  applying their random/scaffold label path to temporal data.
+- **Authorized follow-up, not yet executed:** compare both budgets on M3 in the
+  same environment: original `epochs=100, min_epochs=0, patience=20` versus
+  extended `epochs=200, min_epochs=60, patience=40`, each over eight targets and
+  seeds 42/1/2 (**48 jobs total**). The worker now exposes these budget arguments
+  and records them in job provenance. No follow-up scores or convergence claims
+  are available yet; current accepted results remain the reference. Both arms
+  must share the same frozen inputs and environment so budget effects are not
+  conflated with the previous CUDA-versus-M3 environment difference. This plan
+  does not authorize selecting seeds or replacement results by test performance.
+
 ## 2026-10-14 — hERG parent-key repair and reproducible temporal inputs
 
 - **Data correction:** time splitting was normalizing already-normalized cache

@@ -79,11 +79,15 @@ dropped (single-seed standard, see *Conditional verdicts* under
 These CIs resample molecules, not scaffold groups. A separate **24-cell
 scaffold-cluster sensitivity analysis** (8 targets × 3 GNN architectures;
 `results/significance/scaffold_cluster_sensitivity.csv`, B = 10,000) resamples
-whole held-out Murcko groups. For GIN, ABL1/scaffold changes to
-**[−0.003, +0.249]** and Mpro/scaffold to **[−0.175, +0.010]**, both crossing
-zero. Thus their molecule-level verdicts are not robust to this resampling
-unit. This addresses dependence within scaffolds, separately from training-seed
-sensitivity; few held-out groups also limit the cluster analysis.
+whole held-out Murcko groups. Across all 24 scaffold cells, **7 of the 10 molecule-level significant
+verdicts become intervals containing zero** under scaffold-group resampling:
+2 of 3 GNN wins and 5 of 7 RF wins. All 14 original intervals containing zero
+remain so. Only GINE/abl1 (GNN), GINE/a2a (RF), and AttentiveFP/mpro (RF)
+retain an exclusion of zero. Thus the 21 RF / 5 GNN wins across random and
+scaffold panels are molecule-bootstrap counts, not counts robust to both
+resampling units. The full 24-cell table is in methodology; only 5–85 held-out
+groups are available, which also limits the group bootstrap. This sensitivity
+is separate from deleting a training seed.
 
 | Tag | Target (ChEMBL id) | Family | n | RF rand | GIN rand | Δ rand (mean) | sig | RF scaf | GIN scaf | Δ scaf (mean) | sig | conditional |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|
@@ -133,7 +137,9 @@ python scripts/fetch_artifacts.py --all   # models/、data/raw/ 和指纹缓存�
 ```
 
 **Temporal model download limitation:** `fetch_artifacts.py` still reads the
-`artifacts-v2` release, whose RF time models predate this retraining. Downloading
+`artifacts-v2` release, whose RF time models predate this retraining. The fetcher now installs only
+the 18 random/scaffold models and explicitly skips legacy time members after
+archive safety checks; existing accepted time models are preserved. Downloading
 that release does **not** obtain the new as-of RF models. The accepted RF models
 are retained on M3 and in the coordinator's local results; no replacement RF
 release has been published. Current Git artifacts contain the 24 new GIN
@@ -789,7 +795,14 @@ original inputs and provenance;
 [result acceptance and provenance](results/time_split/campaign_acceptance.json)
 record all 32 jobs. Source/input hashes, label IDs, test alignment, recomputed
 metrics and checkpoint prediction replay passed. All three predeclared seeds
-(42, 1, 2) are retained; none triggered the training script's convergence flag.
+(42, 1, 2) are retained. All 24 best epochs are early (2–27 of 100; median 9.5). The original
+metric flags used the last training epoch's loss and are retained as historical
+records. Re-evaluating the saved best checkpoints in eval mode flags **13/24**
+under the same early-epoch / standardized training MSE > 0.5 heuristic; a2a's
+three training MSEs are 0.749–0.976. See
+`results/time_split/checkpoint_diagnostics.csv`. This diagnostic neither proves
+convergence nor establishes that more training would help. Models and test
+predictions are unchanged; no test score selected a new training budget.
 
 **Test R2 and paired molecule-bootstrap CI** (B = 10,000). GIN time is the
 per-seed mean ± population standard deviation; GIN ens is R2 of the averaged
@@ -800,16 +813,16 @@ on the three fitted seeds; they do not capture all training or assay uncertainty
 Random columns retain the earlier all-year-label protocol and are context,
 not a controlled isolation of the effect of splitting.
 
-| Tag | RF rand | GIN rand | RF time | GIN time | GIN ens | Δ time (ensemble) | 95% CI |
-|---|---|---|---|---|---|---|---|
-| `a2a` | 0.710 | 0.621 | −0.273 | +0.081±0.036 | +0.115 | **+0.389** | [+0.292, +0.490] |
-| `abl1` | 0.822 | 0.767 | +0.559 | +0.203±0.179 | +0.257 | **−0.302** | [−0.352, −0.252] |
-| `egfr` | 0.721 | 0.665 | +0.140 | +0.097±0.036 | +0.123 | −0.017 | [−0.068, +0.035] |
-| `egfr_full` | 0.729 | 0.667 | −0.753 | −0.233±0.065 | −0.188 | **+0.565** | [+0.513, +0.623] |
-| `herg` | 0.607 | 0.619 | −0.056 | −0.065±0.033 | −0.034 | +0.022 | [−0.016, +0.061] |
-| `hivpr` | 0.692 | 0.632 | −0.044 | +0.066±0.064 | +0.094 | **+0.138** | [+0.061, +0.217] |
-| `mpro` | 0.602 | 0.572 | +0.007 | +0.035±0.046 | +0.084 | **+0.077** | [+0.034, +0.122] |
-| `vegfr2` | 0.670 | 0.605 | +0.150 | −0.006±0.074 | +0.047 | **−0.102** | [−0.130, −0.074] |
+| Tag | RF rand | GIN rand | Constant | RF time | GIN time | GIN ens | Δ time (ensemble) | 95% CI |
+|---|---|---|---|---|---|---|---|---|
+| `a2a` | 0.710 | 0.621 | −0.007 | −0.273 | +0.081±0.036 | +0.115 | **+0.389** | [+0.292, +0.490] |
+| `abl1` | 0.822 | 0.767 | −0.120 | +0.559 | +0.203±0.179 | +0.257 | **−0.302** | [−0.352, −0.252] |
+| `egfr` | 0.721 | 0.665 | −0.054 | +0.140 | +0.097±0.036 | +0.123 | −0.017 | [−0.068, +0.035] |
+| `egfr_full` | 0.729 | 0.667 | −0.460 | −0.753 | −0.233±0.065 | −0.188 | **+0.565** | [+0.513, +0.623] |
+| `herg` | 0.607 | 0.619 | −0.003 | −0.056 | −0.065±0.033 | −0.034 | +0.022 | [−0.016, +0.061] |
+| `hivpr` | 0.692 | 0.632 | −0.002 | −0.044 | +0.066±0.064 | +0.094 | **+0.138** | [+0.061, +0.217] |
+| `mpro` | 0.602 | 0.572 | −0.000 | +0.007 | +0.035±0.046 | +0.084 | **+0.077** | [+0.034, +0.122] |
+| `vegfr2` | 0.670 | 0.605 | −0.006 | +0.150 | −0.006±0.074 | +0.047 | **−0.102** | [−0.130, −0.074] |
 
 The ensemble CI favours GIN on `a2a`, `egfr_full`, `hivpr` and `mpro`, RF on
 `abl1` and `vegfr2`, and includes zero on `egfr` and `herg`. Across the eight
@@ -817,6 +830,23 @@ tags, the unweighted mean time R2 is **−0.034 RF**, **+0.022 GIN per seed** an
 **+0.062 GIN ensemble**; `egfr` and `egfr_full` overlap and are not independent
 targets. GIN's relative advantage on `egfr_full` still leaves its ensemble R2
 negative (−0.188); both model families also have negative R2 on `herg`.
+
+**Train-mean baseline and error levels.** The constant column predicts the
+mean training pIC50. Paired molecule-bootstrap comparisons with that baseline
+(B = 10,000, seed 42; `results/time_split/baseline_diagnostics.csv`) put RF
+below it on a2a, egfr_full and herg; RF's differences on hivpr and mpro include
+zero. The GIN ensemble exceeds the baseline on every tag except herg, whose
+interval includes zero. These are unadjusted, model-conditional comparisons.
+
+For a2a, the +0.389 ensemble advantage decomposes into a +0.579 mean-level
+term, −0.099 scale term and −0.091 correlation term: RF predicts 0.806 below
+the test mean, GIN 0.143 above it, while RF has the higher Pearson correlation
+(0.570 versus 0.450). GIN prediction SD is only 0.189 of the label SD.
+For egfr_full, the mean-level term is +0.318, about 56% of the +0.565 total.
+These are an exact squared-error decomposition with symmetric allocation of
+the scale/correlation interaction, not causal explanations or proposals to
+calibrate on test labels. Test fractions are 59% for a2a and 51% for mpro
+because a newest first-report year can itself exceed the target fraction.
 
 These are retrospective publication-year holdouts, not evidence of a causal
 drift mechanism or deployment readiness. A negative constant R2 alone cannot
@@ -875,11 +905,11 @@ qsar-activity-prediction/
 
 ## Reproduce
 
-Fast path: top of this README (pretrained `models/` + `data/raw/` +
-the `processed_cache.tar.gz` fingerprint caches, all from
-`fetch_artifacts.py --all`, then Phase 2 from
-`gnn_01_make_splits.py`). Full retraining - phases 1-3
-incl. the 8-target panel - in [methodology](docs/methodology.md).
+For current temporal statistics, use the restore → bootstrap → summary
+commands near the top of this README. For random/scaffold inference and feature
+caches, `fetch_artifacts.py --all` installs the 18 corresponding RF models,
+raw data and caches; it skips the historical time models. Full retraining and
+accepted temporal-model requirements are in [methodology](docs/methodology.md).
 
 Docs: [methodology](docs/methodology.md) · [interview
 notes](docs/interview.md) · [data provenance](data/README.md) ·

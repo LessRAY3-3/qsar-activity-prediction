@@ -39,7 +39,8 @@ def parse_args():
     p.add_argument("--tag", default=os.environ.get("QSAR_TAG", "egfr"))
     p.add_argument("--seeds", default="42,1,2")
     p.add_argument("--control-seed", type=int, default=42)
-    p.add_argument("--splits", default="random,scaffold")
+    p.add_argument("--splits", default="random,scaffold",
+                   help="comma-separated random/scaffold only; time labels are not supported")
     p.add_argument("--out", default=os.path.join(BASE, "results", "y_randomization"))
     p.add_argument("--fig-dir", default=os.path.join(BASE, "figures", "y_randomization"))
     # GIN hyperparameters -- frozen at gnn_03_train_gin's defaults
@@ -50,7 +51,11 @@ def parse_args():
     p.add_argument("--batch-size", type=int, default=128)
     p.add_argument("--epochs", type=int, default=100)
     p.add_argument("--patience", type=int, default=20)
-    return p.parse_args()
+    args = p.parse_args()
+    if any(split.strip() not in ("random", "scaffold") for split in args.splits.split(",")):
+        p.error("--splits supports only random/scaffold; time requires as-of labels "
+                "and is not implemented in this experiment")
+    return args
 
 
 def gin_train_eval(graphs, train_idx, valid_idx, test_idx, y_all,

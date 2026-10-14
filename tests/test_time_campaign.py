@@ -368,3 +368,77 @@ def test_publication_preserves_non_time_metrics_and_rolls_back(campaign, monkeyp
     assert {key: result[key] for key in historical} == historical
     assert result["time"]["label_id"] == job["provenance"]["label_id"]
     worker.run_job(job, args, root)  # Snapshot hashes include the merged metrics.
+
+
+@pytest.mark.parametrize("flag,value", [
+    ("--epochs", "0"), ("--epochs", "-1"), ("--patience", "0"),
+    ("--patience", "-1"), ("--min-epochs", "-1"), ("--min-epochs", "101"),
+])
+def test_invalid_gin_budget_rejected_before_planning(load_script, capsys, flag, value):
+    worker = load_script("run_time_campaign")
+    with pytest.raises(SystemExit) as exc:
+        worker.parse_args(["--role", "gin", flag, value])
+    assert exc.value.code == 2
+    assert "training budget requires" in capsys.readouterr().err
+
+
+def test_gin_budget_defaults_and_full_budget_propagate_to_execution(campaign, monkeypatch):
+    worker, root, args = campaign
+    defaults = worker.build_jobs(args, root)[0]
+    expected_defaults = {"epochs": 100, "patience": 20, "min_epochs": 0}
+    assert {key: defaults["provenance"]["hyperparameters"][key] for key in expected_defaults} == expected_defaults
+    for key, value in expected_defaults.items():
+        flag = "--" + key.replace("_", "-")
+        assert defaults["command"][defaults["command"].index(flag) + 1] == str(value)
+
+    args = worker.parse_args(["--role", "gin", "--tags", "a2a", "--seeds", "42",
+                              "--epochs", "200", "--min-epochs", "60", "--patience", "40",
+                              "--campaign-dir", str(args.campaign_dir)])
+    job = worker.build_jobs(args, root)[0]
+    expected = {"epochs": 200, "min_epochs": 60, "patience": 40}
+    assert {key: job["provenance"]["hyperparameters"][key] for key in expected} == expected
+    assert job["signature"] != defaults["signature"]
+    assert job["provenance"]["inputs"] == defaults["provenance"]["inputs"]
+    assert {key: value for key, value in job["provenance"]["hyperparameters"].items()
+            if key not in expected} == {key: value for key, value in defaults["provenance"]["hyperparameters"].items()
+                                       if key not in expected}
+    monkeypatch.setattr(worker, "git_info", lambda root: {})
+    calls = []
+    def train(command, **kwargs):
+        calls.append(command)
+        for key, value in expected.items():
+            flag = "--" + key.replace("_", "-")
+            assert command[command.index(flag) + 1] == str(value)
+        write_outputs(job, kwargs["cwd"])
+    monkeypatch.setattr(worker.subprocess, "run", train)
+    worker.run_job(job, args, root)
+    status = json.loads((args.campaign_dir / job["id"] / "status.json").read_text())
+    assert status["state"] == "success"
+    assert status["provenance"]["command"] == calls[0][1:]
+    assert not worker.can_resume(status, defaults, root, args.campaign_dir / job["id"])
+
+
+@pytest.mark.parametrize("key,value", [("epochs", 200), ("patience", 40), ("min_epochs", 60)])
+def test_each_gin_budget_parameter_invalidates_resume_signature(campaign, key, value):
+    worker, root, args = campaign
+    signature = worker.build_jobs(args, root)[0]["signature"]
+    setattr(args, key, value)
+    assert worker.build_jobs(args, root)[0]["signature"] != signature
+
+
+def test_gin_budget_minimum_and_equal_floor_are_valid(load_script):
+    worker = load_script("run_time_campaign")
+    args = worker.parse_args(["--role", "gin", "--epochs", "1", "--patience", "1", "--min-epochs", "1"])
+    assert (args.epochs, args.patience, args.min_epochs) == (1, 1, 1)
+
+
+@pytest.mark.parametrize("name,value", [("QSAR_TORCH_THREADS", "4"), ("QSAR_TORCH_INTEROP_THREADS", "1")])
+def test_explicit_torch_threads_recorded_and_invalidate_resume(campaign, monkeypatch, name, value):
+    worker, root, args = campaign
+    monkeypatch.delenv(name, raising=False)
+    original = worker.build_jobs(args, root)[0]
+    assert original["provenance"]["environment"]["variables"][name] is None
+    monkeypatch.setenv(name, value)
+    changed = worker.build_jobs(args, root)[0]
+    assert changed["provenance"]["environment"]["variables"][name] == value
+    assert changed["signature"] != original["signature"]

@@ -1,0 +1,34 @@
+from pathlib import Path
+import hashlib,json,urllib.request,urllib.parse
+from html.parser import HTMLParser
+
+class Links(HTMLParser):
+    def __init__(self): super().__init__(); self.links=[]
+    def handle_starttag(self,tag,attrs):
+        if tag=='a': self.links.extend(v for k,v in attrs if k=='href')
+
+root=Path('.scratch/time-campaign/gin-linux-wheels-verified')
+root.mkdir(exist_ok=True)
+records=[]
+for package,version,filename in [('rdkit','2026.3.6','rdkit-2026.3.6-cp312-cp312-manylinux_2_28_x86_64.whl'),('torch-geometric','2.8.0.post1','torch_geometric-2.8.0.post1-py3-none-any.whl')]:
+    official=f'https://pypi.org/pypi/{package}/{version}/json'
+    with urllib.request.urlopen(official,timeout=30) as response: metadata=json.load(response)
+    release=next(row for row in metadata['urls'] if row['filename']==filename)
+    expected=release['digests']['sha256']
+    index=f'https://pypi.tuna.tsinghua.edu.cn/simple/{package}/'
+    with urllib.request.urlopen(index,timeout=30) as response: html=response.read().decode()
+    links=Links(); links.feed(html)
+    link=next(href for href in links.links if urllib.parse.unquote(urllib.parse.urlsplit(href).path).endswith('/'+filename))
+    url=urllib.parse.urljoin(index,link).split('#')[0]
+    target=root/filename
+    temporary=target.with_suffix('.part')
+    digest=hashlib.sha256(); size=0
+    print('Downloading verified mirror wheel:',filename,flush=True)
+    with urllib.request.urlopen(url,timeout=30) as response,temporary.open('wb') as stream:
+        while chunk:=response.read(1024*1024):
+            stream.write(chunk);digest.update(chunk);size+=len(chunk)
+    assert digest.hexdigest()==expected,(filename,'official PyPI checksum mismatch')
+    temporary.replace(target)
+    records.append(dict(filename=filename,sha256=expected,bytes=size,official_metadata=official,download_url=url))
+    print('Verified',filename,size,flush=True)
+(root/'checksums.json').write_text(json.dumps(records,indent=2)+'\n')

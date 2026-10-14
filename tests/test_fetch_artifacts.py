@@ -35,8 +35,8 @@ TAGS = ["a2a", "abl1", "bace", "egfr", "egfr_full", "herg", "hivpr", "mpro", "ve
 MODEL_FILES = (
     [f"models/rf_random_split_{tag}.joblib" for tag in TAGS]
     + [f"models/rf_scaffold_split_{tag}.joblib" for tag in TAGS]
-    + [f"models/rf_time_split_{tag}.joblib" for tag in TAGS if tag != "bace"]
 )
+LEGACY_TIME_FILES = [f"models/rf_time_split_{tag}.joblib" for tag in TAGS if tag != "bace"]
 CACHE_FILES = [f"data/processed/{tag}_fingerprints.npz" for tag in TAGS]
 
 
@@ -711,7 +711,7 @@ def test_single_model_file_does_not_mark_asset_installed(tmp_path, load_script, 
     mod = load_script("fetch_artifacts")
     repo = tmp_path / "repo"
     _write_anchor(repo)
-    # all 26 models present locally, but the first key file is a SYMLINK —
+    # all 18 supported models present locally, but the first key file is a SYMLINK —
     # the old code treated one probe file as the whole asset being installed,
     # and a symlink probe must not count as installed either
     blob = repo / "models" / "old_model_blob.bin"
@@ -901,3 +901,62 @@ def test_archive_bytes_must_match_release_manifest(tmp_path, load_script):
     assert "verification FAILED" in msg
     assert "raw_data.tar.gz" in msg
     assert not (repo / "data" / "raw" / "egfr_activities.csv").exists()
+
+
+@pytest.mark.parametrize("missing_tag", TAGS)
+def test_models_repair_preserves_all_accepted_time_checkpoints(tmp_path, load_script, capsys, missing_tag):
+    mod = load_script("fetch_artifacts")
+    repo = tmp_path / "repo"
+    _write_anchor(repo)
+    (repo / "models").mkdir()
+    accepted = {name: f"accepted-asof:{name}".encode() for name in LEGACY_TIME_FILES}
+    for name, payload in accepted.items():
+        (repo / name).write_bytes(payload)
+    missing = f"models/rf_random_split_{missing_tag}.joblib"
+    for name in MODEL_FILES:
+        if name != missing:
+            (repo / name).write_bytes(f"model:{name}".encode())
+    members = {name: f"model:{name}".encode() for name in MODEL_FILES}
+    members.update({name: f"legacy:{name}".encode() for name in LEGACY_TIME_FILES})
+    fetch_assets, downloader = _offline_asset(tmp_path, repo, "models.tar.xz", members)
+    mod.run(["models"], repo_root=repo, fetch_assets=fetch_assets, downloader=downloader)
+    assert (repo / missing).read_bytes() == members[missing]
+    assert {name: (repo / name).read_bytes() for name in accepted} == accepted
+    assert "skipping legacy rf_time_split_*" in capsys.readouterr().out
+    assert not list((repo / "models").glob("*.fetch_backup"))
+
+
+def test_fresh_models_install_excludes_legacy_time_and_other_extra_files(tmp_path, load_script):
+    mod = load_script("fetch_artifacts")
+    repo = tmp_path / "repo"
+    _write_anchor(repo)
+    members = {name: b"supported model" for name in MODEL_FILES}
+    members.update({name: b"legacy time model" for name in LEGACY_TIME_FILES})
+    members["models/extra.joblib"] = b"unrequested model"
+    fetch_assets, downloader = _offline_asset(tmp_path, repo, "models.tar.xz", members)
+    mod.run(["models"], repo_root=repo, fetch_assets=fetch_assets, downloader=downloader)
+    assert all((repo / name).read_bytes() == b"supported model" for name in MODEL_FILES)
+    assert all(not (repo / name).exists() for name in LEGACY_TIME_FILES)
+    assert not (repo / "models/extra.joblib").exists()
+    # Missing temporal models never cause another download of legacy assets.
+    def unexpected(*a, **k):
+        pytest.fail("Complete random/scaffold set must skip downloading")
+    mod.run(["models"], repo_root=repo, fetch_assets=unexpected, downloader=unexpected)
+
+
+@pytest.mark.parametrize("member,payload", [
+    ("models/rf_time_split_herg.joblib", ("symlink", "rf_random_split_herg.joblib")),
+    ("models/rf_time_split_herg.joblib", ("hardlink", "models/rf_random_split_herg.joblib")),
+    ("models/../rf_time_split_herg.joblib", b"unsafe traversal"),
+    ("results/rf_time_split_herg.joblib", b"outside models"),
+])
+def test_skipped_model_members_still_require_archive_safety(tmp_path, load_script, member, payload):
+    mod = load_script("fetch_artifacts")
+    repo = tmp_path / "repo"
+    _write_anchor(repo)
+    members = {name: b"model" for name in MODEL_FILES}
+    members[member] = payload
+    fetch_assets, downloader = _offline_asset(tmp_path, repo, "models.tar.xz", members)
+    with pytest.raises(SystemExit, match="unsafe archive members"):
+        mod.run(["models"], repo_root=repo, fetch_assets=fetch_assets, downloader=downloader)
+    assert not (repo / "models").exists()

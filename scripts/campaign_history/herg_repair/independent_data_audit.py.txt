@@ -1,0 +1,97 @@
+"""Read-only independent label, prediction, provenance and bootstrap audit."""
+from pathlib import Path
+import hashlib
+import importlib
+import json
+import subprocess
+import sys
+import numpy as np
+import pandas as pd
+from sklearn.metrics import r2_score, mean_absolute_error, mean_squared_error
+
+root = Path.cwd()
+sys.path.insert(0,str(root/'scripts'))
+parent = importlib.import_module('02_clean_data')._parent_smiles
+parent_cache = {}
+def key(s):
+    if s not in parent_cache:
+        parent_cache[s] = parent(s)[0]
+    return parent_cache[s]
+def sha(p):
+    return hashlib.sha256(p.read_bytes()).hexdigest()
+
+accept = json.loads((root/'results/time_split/campaign_acceptance.json').read_text())
+for record in accept['integrated_files'] + accept['analysis']['files']:
+    assert sha(root/record['path']) == record['sha256'], record['path']
+for job in accept['jobs']:
+    for name,digest in job['provenance']['inputs'].items():
+        assert sha(root/name)==digest, name
+    for name,digest in job['provenance']['code'].items():
+        source=subprocess.check_output(['git','show',f"{job['source_commit']}:{name}"])
+        assert hashlib.sha256(source).hexdigest()==digest,(name,job['source_commit'])
+    manifest_path=root/job['input_manifest']
+    assert sha(manifest_path)==job['provenance']['bundle_manifest']['sha256']
+years = pd.read_csv(root/'data/raw/document_years.csv').set_index('document_chembl_id')['document_year']
+sig = pd.read_csv(root/'results/significance/summary_time.csv').set_index(['tag','pair'])
+summary = pd.read_csv(root/'results/time_split/summary.csv').set_index('tag')
+results = []
+for tag in sorted(summary.index):
+    raw_path = root/f'data/raw/{tag}_activities.csv'
+    raw = pd.read_csv(raw_path)
+    sp = dict(np.load(root/f'data/processed/splits/{tag}_time.npz'))
+    assert hashlib.sha256(raw_path.read_bytes()+(root/'data/raw/document_years.csv').read_bytes()).hexdigest() == str(sp['source_sha256'])
+    raw['year'] = raw.document_chembl_id.map(years)
+    raw['value'] = pd.to_numeric(raw.standard_value,errors='coerce')
+    raw['parent'] = raw.canonical_smiles.map(lambda s: key(s) if isinstance(s,str) and s.strip() else None)
+    earliest = raw.groupby('parent').year.min().reindex(sp['smiles']).to_numpy()
+    for pool, allowed in [('train',earliest < sp['cutoff_valid']),('valid',(earliest >= sp['cutoff_valid']) & (earliest < sp['cutoff_test'])),('test',earliest >= sp['cutoff_test'])]:
+        assert allowed[sp[f'{pool}_idx']].all(), (tag,pool,'first-report chronology')
+    eligible = raw.loc[raw.standard_relation.fillna('').astype(str).str.strip().eq('=') & raw.standard_units.eq('nM') & np.isfinite(raw.value) & raw.value.gt(0) & np.isfinite(raw.year)].copy()
+    eligible['pic50'] = 9-np.log10(eligible.value)
+    rebuilt = np.full(len(sp['y']),np.nan,dtype=np.float32)
+    for pool, window in [('train',eligible.year < int(sp['cutoff_valid'])),('valid',eligible.year < int(sp['cutoff_test'])),('test',eligible.year >= int(sp['cutoff_test']))]:
+        idx=sp[f'{pool}_idx']; med=eligible.loc[window].groupby('parent').pic50.median()
+        rebuilt[idx]=med.reindex(sp['smiles'][idx]).to_numpy()
+    np.testing.assert_array_equal(rebuilt,sp['y'])
+    exclusion_mismatches=[]
+    for i in sp['excluded_idx']:
+        year=earliest[i]
+        if not np.isfinite(year):
+            assert not eligible.parent.eq(sp['smiles'][i]).any()
+            continue
+        window = eligible.year < sp['cutoff_valid'] if year < sp['cutoff_valid'] else eligible.year < sp['cutoff_test'] if year < sp['cutoff_test'] else eligible.year >= sp['cutoff_test']
+        if (window & eligible.parent.eq(sp['smiles'][i])).any():
+            exclusion_mismatches.append(dict(row=int(i),cached_parent=str(sp['smiles'][i]),renormalized_parent=key(str(sp['smiles'][i])),stored_year=str(sp['year'][i]),raw_year=float(year)))
+    assert not exclusion_mismatches, (tag,exclusion_mismatches)
+    rf=dict(np.load(root/f'results/rf_preds_{tag}_time.npz')); y=rf['y_true'].astype(float); rp=rf['y_pred'].astype(float)
+    gin=[]
+    for role, suffix in [('rf',''),('gin',''),('gin','_seed1'),('gin','_seed2')]:
+        prefix='rf' if role=='rf' else 'gnn'
+        pred=dict(np.load(root/f'results/{prefix}_preds_{tag}_time{suffix}.npz'))
+        np.testing.assert_array_equal(pred['test_idx'],sp['test_idx'])
+        np.testing.assert_allclose(pred['y_true'],sp['y'][sp['test_idx']],rtol=0,atol=1e-6)
+        assert str(pred['label_id']) == str(sp['label_id'])
+        metric_name=f'results/{"" if role=="rf" else "gnn_"}metrics_{tag}{suffix}.json'
+        payload=json.loads((root/metric_name).read_text()); m=payload['time']
+        original=json.loads(subprocess.check_output(['git','show',f'7ce15c1:{metric_name}'],text=True))
+        keep=lambda d:{k:v for k,v in d.items() if k not in ('time','best_params_time')}
+        assert keep(payload)==keep(original)
+        expected=[r2_score(pred['y_true'],pred['y_pred']),np.sqrt(mean_squared_error(pred['y_true'],pred['y_pred'])),mean_absolute_error(pred['y_true'],pred['y_pred'])]
+        np.testing.assert_allclose([m[k] for k in ('r2','rmse','mae')],expected,rtol=1e-7,atol=1e-8)
+        if role=='gin': gin.append(pred['y_pred'].astype(float))
+    ensemble=np.mean(gin,axis=0)
+    for pair,pred in [('seed42',gin[0]),('mean3',ensemble)]:
+        row=sig.loc[(tag,pair)]; rng=np.random.default_rng(int(row.boot_seed)); deltas=[]
+        # Independent algebra: ΔR² = (SSE_RF - SSE_GIN) / SST.
+        for _ in range(100):
+            idx=rng.integers(0,len(y),size=(100,len(y))); ys=y[idx]
+            sst=np.sum((ys-ys.mean(axis=1,keepdims=True))**2,axis=1)
+            delta=np.sum((ys-rp[idx])**2-(ys-pred[idx])**2,axis=1)/sst
+            deltas.extend(delta.tolist())
+        ci=np.percentile(deltas,[2.5,97.5]); np.testing.assert_allclose(ci,[row.ci_lo,row.ci_hi],rtol=0,atol=1e-12)
+        assert abs(r2_score(y,pred)-r2_score(y,rp)-row.d_r2)<1e-12
+    baseline=r2_score(y,np.full(len(y),np.asarray(sp['y'],dtype=float)[sp['train_idx']].mean()))
+    assert abs(baseline-summary.loc[tag,'constant_r2'])<1e-12
+    results.append(dict(tag=tag,labels=int(np.isfinite(rebuilt).sum()),excluded=len(sp['excluded_idx']),bootstrap_rows_verified=2,exclusion_mismatches=exclusion_mismatches))
+    print('PASS',tag,results[-1],flush=True)
+print(json.dumps(dict(tags=len(results),labels=sum(r['labels'] for r in results),excluded=sum(r['excluded'] for r in results),prediction_files=32,bootstrap_replicates_per_row=10000,bootstrap_rows=16,source_and_artifact_hashes='match',non_time_metrics='unchanged'),indent=2))

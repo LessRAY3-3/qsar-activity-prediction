@@ -1,0 +1,69 @@
+"""Archive old time outputs, then merge only accepted temporal artifacts."""
+from datetime import datetime, timezone
+from pathlib import Path
+import json
+import shutil
+import sys
+
+ROOT = Path.cwd()
+TASK = ROOT / '.scratch/time-campaign'
+sys.path.insert(0, str(ROOT / 'scripts'))
+import run_time_campaign as worker
+
+reports = {role: json.loads((TASK / name).read_text()) for role, name in
+           [('rf','m3_rf_acceptance.json'),('gin','win4070_gin_acceptance.json')]}
+assert reports['rf']['jobs_accepted'] == 8
+assert reports['gin']['jobs_accepted'] == 24
+assert reports['rf']['source_commit'] == reports['gin']['source_commit']
+copies = {}
+merges = {}
+jobs = []
+for role, report in reports.items():
+    stage = Path(report['staged_work_directory'])
+    for row in report['jobs']:
+        seed = row.get('seed',42)
+        state = json.loads((stage / f'results/time_campaign/{role}_{row["tag"]}_seed{seed}/status.json').read_text())
+        assert state['state'] == 'success'
+        for name, digest in state['artifacts'].items():
+            src = stage / name
+            assert worker.digest(src) == digest
+            if 'metrics_' in name:
+                new = json.loads(src.read_text())
+                old = json.loads((ROOT / name).read_text())
+                keys = {'time','best_params_time'} if role == 'rf' else {'time'}
+                assert set(new) <= keys, (name,list(new))
+                merged = {**old,**new}
+                assert {k:v for k,v in old.items() if k not in keys} == {k:v for k,v in merged.items() if k not in keys}
+                merges[name] = merged
+            else:
+                copies[name] = src
+        jobs.append(dict(role=role,**row,provenance=state['provenance'],signature=state['signature'],returned_artifact_sha256=state['artifacts']))
+backup = TASK / 'archive-before-result-integration'
+backup.mkdir(exist_ok=False)
+previous = set(copies) | set(merges)
+previous.update(str(p.relative_to(ROOT)) for pattern in (
+    'results/significance/*_time.csv','results/significance/summary_time.csv',
+    'results/time_split/*','figures/time_split/panel_3splits.png',
+    'figures/significance/ci_panel_time.png') for p in ROOT.glob(pattern) if p.is_file())
+old_files = []
+for name in sorted(previous):
+    path = ROOT / name
+    if path.is_file():
+        destination = backup / name
+        destination.parent.mkdir(parents=True,exist_ok=True)
+        shutil.copy2(path,destination)
+        old_files.append(dict(path=name,sha256=worker.digest(path),bytes=path.stat().st_size))
+(backup / 'manifest.json').write_text(json.dumps(old_files,indent=2)+'\n')
+for name, src in copies.items():
+    destination = ROOT / name
+    destination.parent.mkdir(parents=True,exist_ok=True)
+    shutil.copy2(src,destination)
+for name, merged in merges.items():
+    worker.atomic_json(ROOT / name,merged)
+out = ROOT / 'results/time_split'
+out.mkdir(exist_ok=True)
+for role in reports:
+    shutil.copy2(TASK/f'bundles/{role}/manifest.json',out/f'input_manifest_{role}.json')
+acceptance = dict(schema='qsar-temporal-campaign-acceptance-v1',accepted_at=datetime.now(timezone.utc).isoformat(),source_commit=reports['rf']['source_commit'],label_policy='exact-dated-asof-v1',jobs_accepted=32,rf_jobs=8,gin_jobs=24,checks=dict(source_input_label_hashes=True,checkpoint_loading=True,prediction_replay=True,metrics_recomputed=True,gin_seed_test_rows_identical=True,non_time_metric_entries_preserved=True),remote_return_archive_sha256={role:r['archive_sha256'] for role,r in reports.items()},rf_wall_seconds=reports['rf']['campaign_wall_seconds'],gin_wall_seconds=reports['gin']['campaign_wall_seconds'],gin_convergence_flags=reports['gin']['convergence_flags'],gin_max_cuda_replay_abs_error=reports['gin']['max_cuda_replay_abs_error'],rf_prediction_replay_max_abs_error=max(row['prediction_replay_max_abs_error'] for row in reports['rf']['jobs']),hosts=dict(rf='M3 Max, 16 CPU cores, 64 GiB RAM',gin='RTX 4070 Laptop GPU, 8 GiB VRAM, CUDA 12.6',coordinator='M4 MacBook Air, 10 CPU cores, 16 GiB RAM'),jobs=jobs,integrated_files=[dict(path=name,sha256=worker.digest(ROOT/name)) for name in sorted(set(copies)|set(merges))],legacy_artifacts_git_revision=reports['rf']['source_commit'])
+worker.atomic_json(out/'campaign_acceptance.json',acceptance)
+print(json.dumps(dict(copied_files=len(copies),merged_metrics=len(merges),legacy_files_archived=len(old_files),accepted_jobs=len(jobs)),indent=2))

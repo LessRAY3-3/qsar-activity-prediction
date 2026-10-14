@@ -108,6 +108,26 @@ def resolve_device(requested):
     return requested
 
 
+def configure_torch_threads():
+    """Apply explicit process thread limits; unset variables preserve defaults."""
+    settings = []
+    for name, setter in (("QSAR_TORCH_THREADS", torch.set_num_threads),
+                         ("QSAR_TORCH_INTEROP_THREADS", torch.set_num_interop_threads)):
+        raw = os.environ.get(name)
+        if raw is None:
+            continue
+        try:
+            value = int(raw)
+        except ValueError:
+            raise ValueError(f"{name} must be a positive integer") from None
+        if value < 1:
+            raise ValueError(f"{name} must be a positive integer")
+        settings.append((setter, value))
+    # Validate both settings before changing either process-wide thread pool.
+    for setter, value in settings:
+        setter(value)
+
+
 def runtime_metadata(args, device):
     return {"requested_device": args.device, "device": device, "seed": args.seed,
             "torch_version": str(torch.__version__),
@@ -246,10 +266,10 @@ CONVERGENCE_TRAIN_MSE = 0.5    # train MSE still above this = fitting poorly
 
 
 def convergence_flag(best_epoch, max_epochs, train_mse):
-    """True when a run stopped far too early while still fitting poorly.
+    """Flag an early best checkpoint with high training error for investigation.
 
     Both conditions must hold: best_epoch < 30% of max_epochs AND the
-    train MSE at early stop > 0.5. A run that trains to a late best epoch
+    best-checkpoint eval-mode train MSE > 0.5. A run that trains to a late best epoch
     is never flagged, no matter its train MSE.
     """
     return bool(best_epoch < CONVERGENCE_EPOCH_FRAC * max_epochs
@@ -297,6 +317,7 @@ def metrics(y_true, y_pred):
 
 def main():
     args = parse_args()
+    configure_torch_threads()
     torch.manual_seed(args.seed)
     np.random.seed(args.seed)
     device = resolve_device(args.device)
@@ -357,20 +378,22 @@ def main():
             print(f"  early stop at epoch {epoch} (best epoch {best['epoch']})")
             break
 
-    final_train_mse = tr_loss
-    flagged = convergence_flag(best["epoch"], args.epochs, final_train_mse)
+    last_epoch_train_mse = tr_loss
+    model.load_state_dict(best["state"])
+    train_eval_ld = DataLoader(train_ds, batch_size=512, shuffle=False)
+    best_train_mse = run_epoch(model, train_eval_ld, device)
+    flagged = convergence_flag(best["epoch"], args.epochs, best_train_mse)
     if flagged:
         print("=" * 72)
         print(f"WARNING: possible non-convergence for {args.tag}/{args.split} "
               f"({args.model}, seed {args.seed}): best epoch {best['epoch']} is "
               f"below {int(CONVERGENCE_EPOCH_FRAC * 100)}% of max "
-              f"{args.epochs} epochs while train MSE is still "
-              f"{final_train_mse:.4f} (> {CONVERGENCE_TRAIN_MSE}); the test "
-              f"score may be unreliable -- consider rerunning with a "
-              f"--min-epochs floor or longer patience")
+              f"{args.epochs} epochs while best-checkpoint eval train MSE is "
+              f"{best_train_mse:.4f} (> {CONVERGENCE_TRAIN_MSE}); this "
+              f"is a fitting diagnostic, not proof of convergence or a reason "
+              f"to select a new run from test scores")
         print("=" * 72)
 
-    model.load_state_dict(best["state"])
     tp_raw, ty_raw = predict(model, test_ld, device)
     tp, ty = tp_raw * y_std + y_mean, ty_raw * y_std + y_mean  # back to pIC50 units
     m = metrics(ty, tp)
@@ -399,7 +422,9 @@ def main():
                          "device": device,
                          "runtime": runtime,
                          "max_epochs": args.epochs,
-                         "train_mse": final_train_mse,
+                         "train_mse": best_train_mse,
+                         "train_mse_source": "best_checkpoint_eval",
+                         "last_epoch_train_mse": last_epoch_train_mse,
                          "params": {k: v for k, v in vars(args).items() if k != "split"}}
     json.dump(all_m, open(mj, "w"), indent=2)
     print(f"  saved -> results/gnn_models/{pt_name}, "

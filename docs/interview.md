@@ -15,7 +15,10 @@ use versioned as-of labels and passed artifact acceptance. Use the current
 README time table; the old all-year-label results remain historical only.
 The new ensemble molecule-bootstrap intervals favour GIN on four targets,
 RF on two, and include zero on two. These retrospective holdouts do not
-establish a causal drift mechanism or deployment readiness.
+establish a causal drift mechanism or deployment readiness. Best-checkpoint
+training diagnostics flag 13/24 time GIN fits under a heuristic threshold;
+this is not evidence of convergence. RF is below the train-mean constant
+on a2a, egfr_full and herg; relative GIN wins need that absolute context.
 
 1. **Why pIC50** - order-of-magnitude target standardisation.
 2. **Why scaffold split** - random splits leak analogues across
@@ -60,8 +63,10 @@ establish a causal drift mechanism or deployment readiness.
    test set, its query matches 0 of 912) - fingerprints and graphs
    extrapolate differently.
 
-8. **Inference limits** - scaffold CIs depend on the resampling unit; ABL1
-   and Mpro GIN verdicts cross zero when whole scaffold groups are resampled.
+8. **Inference limits** - scaffold CIs depend on the resampling unit: 7 of 10
+   molecule-significant verdicts across GIN/GINE/AttentiveFP include zero when
+   whole scaffold groups are resampled (2/3 GNN wins, 5/7 RF wins). Only
+   5–85 test groups are available, limiting this sensitivity analysis too.
    Seed sensitivity and scaffold dependence are different checks. RF tree std
    ranks error better than the tested GNN seed std, but ranking does not prove
    probabilistic calibration. The multi-task runs perform worse under their

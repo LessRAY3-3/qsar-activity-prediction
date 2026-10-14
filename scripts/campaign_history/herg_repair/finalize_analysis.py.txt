@@ -1,0 +1,9 @@
+from pathlib import Path
+import json,hashlib
+R=Path.cwd();P=R/'results/time_split/campaign_acceptance.json';a=json.loads(P.read_text())
+sha=lambda p:hashlib.sha256(p.read_bytes()).hexdigest()
+for row in a['analysis']['files']:row['sha256']=sha(R/row['path'])
+a['analysis']['frozen_input_manifest']='results/time_split/inputs/manifest.json'
+a['analysis']['frozen_input_manifest_sha256']=sha(R/a['analysis']['frozen_input_manifest'])
+a['analysis']['label_audit_sha256']=sha(R/'results/time_split/asof_label_audit.csv')
+P.write_text(json.dumps(a,indent=2,sort_keys=True)+'\n')

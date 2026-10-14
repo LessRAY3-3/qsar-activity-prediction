@@ -357,14 +357,42 @@ to new chemotype families when errors within a scaffold are dependent.
 Murcko groups, paired across models, at B = 10,000 and seed 42 for all
 24 scaffold cells (8 targets × GIN/GINE/AttentiveFP), retaining molecule-weighted
 R2 in each sampled set. Results are in
-`results/significance/scaffold_cluster_sensitivity.csv`. GIN ABL1/scaffold
-changes from the molecule CI [0.006, 0.069] to **[−0.003, 0.249]**, and
-Mpro/scaffold from [−0.133, −0.018] to **[−0.175, 0.010]**; both cluster CIs
-cross zero. These original molecule-level verdicts therefore do not support
-robust significance across scaffold resampling units. Only 5–85 test groups
-are available per target (ABL1 12, Mpro 25), limiting the cluster analysis too.
-This sensitivity is separate from leaving out a training seed: one probes
-within-family dependence, the other ensemble seed dependence.
+`results/significance/scaffold_cluster_sensitivity.csv`. Across all 24 scaffold cells, **7 of the 10 molecule-level significant
+verdicts become intervals containing zero** under scaffold-group resampling:
+2 of 3 GNN wins and 5 of 7 RF wins. All 14 original intervals containing zero
+remain so. Only GINE/abl1 (GNN), GINE/a2a (RF), and AttentiveFP/mpro (RF)
+retain an exclusion of zero. Thus the 21 RF / 5 GNN wins across random and
+scaffold panels are molecule-bootstrap counts, not counts robust to both
+resampling units. The full 24-cell table is in methodology; only 5–85 held-out
+groups are available, which also limits the group bootstrap. This sensitivity
+is separate from deleting a training seed.
+
+| Model | Target | Molecule 95% CI | Scaffold-group 95% CI | Groups |
+| --- | --- | --- | --- | ---: |
+| gin | a2a | [−0.081, +0.015] | [−0.137, +0.025] | 5 |
+| gin | abl1 | [+0.006, +0.069] | [−0.003, +0.249] | 12 |
+| gin | egfr | [−0.053, +0.006] | [−0.096, +0.017] | 10 |
+| gin | egfr_full | [−0.017, +0.022] | [−0.036, +0.039] | 28 |
+| gin | herg | [−0.047, +0.017] | [−0.108, +0.049] | 85 |
+| gin | hivpr | [−0.082, +0.004] | [−0.111, +0.047] | 16 |
+| gin | mpro | [−0.133, −0.018] | [−0.175, +0.010] | 25 |
+| gin | vegfr2 | [−0.001, +0.048] | [−0.024, +0.075] | 34 |
+| gine | a2a | [−0.121, −0.028] | [−0.189, −0.058] | 5 |
+| gine | abl1 | [+0.028, +0.092] | [+0.008, +0.329] | 12 |
+| gine | egfr | [−0.052, +0.007] | [−0.120, +0.024] | 10 |
+| gine | egfr_full | [−0.034, +0.008] | [−0.051, +0.023] | 28 |
+| gine | herg | [−0.021, +0.048] | [−0.101, +0.087] | 85 |
+| gine | hivpr | [−0.096, −0.007] | [−0.151, +0.057] | 16 |
+| gine | mpro | [−0.130, −0.012] | [−0.171, +0.028] | 25 |
+| gine | vegfr2 | [−0.015, +0.029] | [−0.032, +0.059] | 34 |
+| attentivefp | a2a | [−0.091, +0.000] | [−0.207, +0.026] | 5 |
+| attentivefp | abl1 | [−0.018, +0.057] | [−0.023, +0.223] | 12 |
+| attentivefp | egfr | [−0.037, +0.025] | [−0.102, +0.072] | 10 |
+| attentivefp | egfr_full | [−0.063, −0.013] | [−0.128, +0.045] | 28 |
+| attentivefp | herg | [+0.030, +0.092] | [−0.057, +0.155] | 85 |
+| attentivefp | hivpr | [−0.123, −0.003] | [−0.202, +0.054] | 16 |
+| attentivefp | mpro | [−0.189, −0.051] | [−0.258, −0.011] | 25 |
+| attentivefp | vegfr2 | [−0.041, +0.008] | [−0.065, +0.035] | 34 |
 
 
 `experiments/paired_bootstrap.py` decides whether any single cell's Δ is
@@ -544,9 +572,14 @@ from `d13f9125af56028f60e099ec2e914dd2509c239e` after the cached-parent-key
 repair described below. The remaining 28 jobs retain their original provenance. `results/time_split/campaign_acceptance.json`
 records 32 accepted jobs, source/input/label hashes, environments, metric
 recomputation and checkpoint prediction replay. The RF replay matched exactly;
-GIN CUDA replay had maximum absolute prediction difference 9.54e-7. All GIN
-runs passed the script's convergence checks; this does not establish globally
-optimal training.
+GIN CUDA replay had maximum absolute prediction difference 9.54e-7. All 24 best epochs are early (2–27 of 100; median 9.5). The original
+metric flags used the last training epoch's loss and are retained as historical
+records. Re-evaluating the saved best checkpoints in eval mode flags **13/24**
+under the same early-epoch / standardized training MSE > 0.5 heuristic; a2a's
+three training MSEs are 0.749–0.976. See
+`results/time_split/checkpoint_diagnostics.csv`. This diagnostic neither proves
+convergence nor establishes that more training would help. Models and test
+predictions are unchanged; no test score selected a new training budget.
 
 **Current results.** Unweighted means over the eight tags are RF **−0.034**,
 GIN per-seed **+0.022**, and GIN ensemble **+0.062** time R2. The ensemble
@@ -556,6 +589,23 @@ GIN per-seed **+0.022**, and GIN ensemble **+0.062** time R2. The ensemble
 three fitted seeds and resample paired test molecules; they do not capture
 all training, assay or scaffold-cluster uncertainty. `egfr` is contained in
 `egfr_full`, so the eight rows are not independent target replications.
+
+**Train-mean baseline and error levels.** The constant column predicts the
+mean training pIC50. Paired molecule-bootstrap comparisons with that baseline
+(B = 10,000, seed 42; `results/time_split/baseline_diagnostics.csv`) put RF
+below it on a2a, egfr_full and herg; RF's differences on hivpr and mpro include
+zero. The GIN ensemble exceeds the baseline on every tag except herg, whose
+interval includes zero. These are unadjusted, model-conditional comparisons.
+
+For a2a, the +0.389 ensemble advantage decomposes into a +0.579 mean-level
+term, −0.099 scale term and −0.091 correlation term: RF predicts 0.806 below
+the test mean, GIN 0.143 above it, while RF has the higher Pearson correlation
+(0.570 versus 0.450). GIN prediction SD is only 0.189 of the label SD.
+For egfr_full, the mean-level term is +0.318, about 56% of the +0.565 total.
+These are an exact squared-error decomposition with symmetric allocation of
+the scale/correlation interaction, not causal explanations or proposals to
+calibrate on test labels. Test fractions are 59% for a2a and 51% for mpro
+because a newest first-report year can itself exceed the target fraction.
 
 The relative GIN gain on `egfr_full` does not imply adequate absolute
 performance: ensemble R2 is −0.188 there, versus RF −0.753. Both models also
@@ -975,7 +1025,9 @@ records; their old hERG split is superseded by the repair manifests.
 
 **Artifact distribution:** the `artifacts-v2` release used by
 `scripts/fetch_artifacts.py` has not been republished. Its RF temporal models
-are historical and do not reproduce this campaign. The new RF models remain
+are historical and do not reproduce this campaign. The fetcher installs only
+18 random/scaffold models; it skips time members and preserves local accepted
+time models, even when other model files are missing. The new RF models remain
 on M3 and in the coordinator's accepted local results; they are gitignored.
 The updated Git artifacts include 24 GIN checkpoints, all 32 prediction
 files, and the eight frozen temporal splits in
@@ -1017,6 +1069,76 @@ prediction/metric versions. Review its manifest and then publish that complete
 package as `results/time_split/inputs/`; do not reuse an older package for a new
 label generation. Statistical reproduction is separate from rebuilding the
 as-of labels from raw records or retraining the RF/GIN models described below.
+
+### Independently audit raw labels and current results
+
+`scripts/audit_time_campaign.py` is a new parameterized auditor added during the
+PR #8 review. It is not claimed to be the script originally used to accept the
+campaign. From the repository root, after installing `requirements.txt`, run:
+
+```bash
+python scripts/restore_time_inputs.py
+python scripts/audit_time_campaign.py --root . --scope data --report audit-data.json
+```
+
+The `data` audit additionally requires the eight frozen raw activity tables
+`data/raw/{tag}_activities.csv` and `data/raw/document_years.csv`. The eight tags
+are `a2a`, `abl1`, `egfr`, `egfr_full`, `herg`, `hivpr`, `mpro`, and `vegfr2`.
+These nine raw CSVs and the eight restored `data/processed/splits/{tag}_time.npz`
+files are its non-Git inputs. Obtain the pinned raw archive with
+`python scripts/fetch_artifacts.py --raw` if needed; the auditor itself never
+downloads anything. It also needs the checked-out predictions, metrics, tables,
+figures and acceptance/input manifests, plus the local Git objects for the
+historical source revisions named in those records. A shallow clone missing
+those revisions cannot pass the historical-source checks.
+
+The auditor independently reconstructs first-publication pool membership and
+eligible exact-nM medians from raw rows, including checking whether any excluded
+row should have been retained. It reuses only `02_clean_data.py`'s chemical parent
+normalization, applies that normalization once to raw structures, and never calls
+the production temporal label builder. It uses the saved year cutoffs rather
+than independently reselecting them. It verifies current test indices, labels,
+versions and metrics for all 32 prediction files; compares non-time metric entries
+with the recorded historical revision; and independently recomputes both bootstrap
+pairs for all eight targets using each row's stored replicate count and seed.
+Historical training-source hashes, input-manifest hashes and current split hashes
+are checked in both scopes.
+
+`--scope data` explicitly skips hashes of model weights and fingerprint/graph
+caches. The report lists all skipped paths; passing this scope is not a claim
+that those training artifacts are present or verified. To include their hashes:
+
+```bash
+python scripts/audit_time_campaign.py --root . --scope full --report audit-full.json
+```
+
+`full` additionally requires all eight current RF temporal joblib files and all
+16 fingerprint/graph NPZ caches, as well as the tracked GIN checkpoints. The old
+`artifacts-v2` RF temporal models do not satisfy this requirement; the fetcher
+deliberately does not install them. Neither scope loads model weights, replays
+checkpoint predictions, retrains models, calibrates on test labels, or changes
+published results. Only the requested JSON report is written. A failed check
+produces `status: failed` and a nonzero exit status. `--root` may point to another
+checkout; the command does not depend on the caller's working directory.
+
+Both scopes were run successfully against the current repaired campaign:
+42,636 retained labels, 168 exclusions, 32 prediction files and 16 bootstrap rows
+with 10,000 replicates each. The full audit verified 108 recorded artifact hashes;
+the data audit verified 76 and explicitly skipped 32 model files plus 16 caches.
+These audits check reproduction and consistency, not external validation or
+uncertainty from retraining; the bootstrap remains conditional on saved predictions.
+
+The actual surviving coordinator source files are archived byte-for-byte as
+non-executable `.py.txt` snapshots under `scripts/campaign_history/initial/` and
+`scripts/campaign_history/herg_repair/`. The adjacent `manifest.json` records the
+16 original scratch paths, byte counts and SHA256 values, associates each phase
+with its training source and acceptance record, and transcribes worker argument
+templates from the archived supervisors. The snapshots retain their original
+machine paths and one-off mutation logic: **do not execute them**. They were
+captured from coordinator scratch files after the campaign, are not a complete
+SSH/shell transcript, and do not establish every historical invocation. Their
+purpose is to expose the historical implementation; the supported read-only
+re-audit commands are the parameterized commands above.
 
 ### Frozen inputs and local preparation
 
@@ -1112,7 +1234,8 @@ individual forests still used one job. This concurrency change is recorded
 per job and did not change the search space, folds or model parameters.
 Initial RF wall time was 7,071 seconds (117.9 minutes); the initial 24 GIN fits completed in
 225 seconds (3.75 minutes), excluding environment setup and artifact transfer.
-All 24 GIN fits used the frozen recipe and none triggered a convergence flag.
+All 24 GIN fits used the frozen recipe. Their original last-epoch flags were
+false; the best-checkpoint diagnostic above supersedes that interpretation.
 
 ### Cached-parent-key repair (2026-10-14)
 
@@ -1120,7 +1243,10 @@ Feature-cache SMILES are already normalized by cleaning. Applying the parent
 transform again is not necessarily idempotent: for hERG `CHEMBL2035183`, it
 changed the key and hid the dated exact 7,200 nM measurement from 2012. The
 split generator now normalizes raw records once and joins them to unchanged
-cached parent keys. A real-compound regression test covers this case.
+cached parent keys. A real-compound regression test covers this case. The generator also now
+rejects any cache key absent from all once-normalized raw records, reporting
+the row and key. A matching raw structure with genuinely missing document
+years remains eligible for the documented missing-label exclusion policy.
 
 Rebuilding all eight splits changed only hERG: training rows increased from
 4,943 to 4,944 and exclusions fell from 20 to 19. Validation (1,115) and test

@@ -1,0 +1,92 @@
+"""Validate the returned RF-only campaign in staging; do not overwrite published results."""
+from datetime import datetime, timezone
+from pathlib import Path, PurePosixPath
+import csv
+import hashlib
+import json
+import sys
+import tarfile
+
+import joblib
+import numpy as np
+from sklearn.metrics import r2_score
+
+ROOT = Path.cwd()
+sys.path.insert(0, str(ROOT / 'scripts'))
+import run_time_campaign as worker
+
+incoming = ROOT / '.scratch/time-campaign/incoming/m3-rf'
+archive = incoming / 'rf-results.tar.gz'
+expected_archive = 'dca7e7f77dba41f50f02cd3bdaf0237a7d52742f310fa4983130c9225bb7bbc7'
+assert worker.digest(archive) == expected_archive
+assert (incoming / 'rf-results.sha256').read_text().split()[0] == expected_archive
+stage = incoming / 'extracted'
+stage.mkdir(exist_ok=False)
+with tarfile.open(archive) as bundle:
+    bundle.extractall(stage, filter='data')
+manifest = json.loads((stage / 'return_manifest.json').read_text())
+assert manifest['schema'] == 'qsar-rf-return-v1'
+assert manifest['source_commit'] == '7ce15c1f0849ae69e0ca208f781a9824517eb328'
+seen = set()
+for entry in manifest['files']:
+    relative = PurePosixPath(entry['path'])
+    assert not relative.is_absolute() and '..' not in relative.parts
+    assert entry['path'] not in seen
+    seen.add(entry['path'])
+    path = stage / relative
+    assert path.resolve().is_relative_to(stage.resolve()) and not path.is_symlink()
+    assert path.stat().st_size == entry['bytes']
+    assert worker.digest(path) == entry['sha256'], entry['path']
+input_manifest = ROOT / '.scratch/time-campaign/bundles/rf/manifest.json'
+assert (stage / 'work/manifest.json').read_bytes() == input_manifest.read_bytes()
+assert {row['tag'] for row in manifest['jobs']} == set(worker.TAGS)
+assert len(manifest['jobs']) == 8
+summaries = []
+for tag in worker.TAGS:
+    directory = stage / f'work/results/time_campaign/rf_{tag}_seed42'
+    state = json.loads((directory / 'status.json').read_text())
+    assert state['state'] == 'success'
+    assert state['signature'] == worker.json_digest(state['provenance'])
+    job = worker.build_jobs(worker.parse_args(['--role', 'rf', '--tags', tag]), ROOT)[0]
+    for key in ('schema', 'role', 'tag', 'label_id', 'inputs', 'code', 'hyperparameters', 'command'):
+        assert state['provenance'][key] == job['provenance'][key], (tag, key)
+    assert state['provenance']['bundle_manifest']['sha256'] == worker.digest(input_manifest)
+    assert set(state['artifacts']) == set(job['files'])
+    for name, digest in state['artifacts'].items():
+        assert worker.digest(stage / 'work' / name) == digest, (tag, name)
+    job['provenance'] = state['provenance']
+    worker.validate_outputs(job, stage / 'work')
+    model = joblib.load(stage / f'work/models/rf_time_split_{tag}.joblib')
+    with np.load(ROOT / f'data/processed/{tag}_fingerprints.npz', allow_pickle=False) as cache:
+        replay = model.predict(cache['X'][job['split']['test_idx']])
+    with np.load(stage / f'work/results/rf_preds_{tag}_time.npz', allow_pickle=False) as predictions:
+        np.testing.assert_allclose(replay, predictions['y_pred'], atol=1e-10, rtol=1e-10)
+        max_error = float(np.max(np.abs(replay - predictions['y_pred'])))
+    metrics = json.loads((stage / f'work/results/metrics_{tag}.json').read_text())['time']
+    y = np.asarray(job['split']['y'], dtype=np.float64)
+    test_y = y[job['split']['test_idx']]
+    constant = np.full(len(test_y), y[job['split']['train_idx']].mean())
+    summary = next(row.copy() for row in manifest['jobs'] if row['tag'] == tag)
+    for metric in ('r2', 'rmse', 'mae'):
+        assert summary[metric] == metrics[metric]
+    assert metrics['runtime']['rf_jobs'] == summary['rf_jobs']
+    summary.update(prediction_replay_max_abs_error=max_error, train_mean_constant_r2=float(r2_score(test_y, constant)))
+    summaries.append(summary)
+    del model, replay
+    print(f"Accepted {tag}: R2={metrics['r2']:.6f}, prediction replay max error={max_error:.3g}", flush=True)
+start = min(datetime.fromisoformat(row['started_at']) for row in summaries)
+finish = max(datetime.fromisoformat(row['finished_at']) for row in summaries)
+report = dict(state='rf_complete_and_accepted', validated_at=datetime.now(timezone.utc).isoformat(), source_commit=manifest['source_commit'], archive_sha256=expected_archive, source_input_label_hashes_verified=True, models_reloaded_and_predictions_reproduced=True, metrics_recomputed=True, jobs_accepted=8, campaign_wall_seconds=(finish-start).total_seconds(), jobs=summaries, staged_work_directory=str(stage/'work'), canonical_results_updated=False, gin_jobs_completed_in_this_campaign=0)
+report_path = ROOT / '.scratch/time-campaign/m3_rf_acceptance.json'
+report_path.write_text(json.dumps(report, indent=2) + '\n')
+with (ROOT / '.scratch/time-campaign/m3_rf_metrics.csv').open('w') as stream:
+    fields = ['tag','n_train','n_test','r2','rmse','mae','train_mean_constant_r2','rf_jobs','elapsed_seconds','label_id','prediction_replay_max_abs_error']
+    writer = csv.DictWriter(stream, fieldnames=fields, extrasaction='ignore')
+    writer.writeheader()
+    writer.writerows(summaries)
+status_path = ROOT / '.scratch/time-campaign/m3_deployment.json'
+status = json.loads(status_path.read_text())
+status.update(state='completed_and_accepted', updated_at=report['validated_at'], completed_jobs=[f'rf_{tag}_seed42' for tag in worker.TAGS], current_job=None, queued_jobs=[], acceptance_report=str(report_path), final_rf_jobs=16)
+status['concurrency_handoff']['state'] = 'completed'
+status_path.write_text(json.dumps(status, indent=2) + '\n')
+print(json.dumps({'jobs_accepted':8,'wall_minutes':report['campaign_wall_seconds']/60,'mean_r2':float(np.mean([row['r2'] for row in summaries])),'report':str(report_path)},indent=2))

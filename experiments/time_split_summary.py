@@ -1,4 +1,4 @@
-"""P8 time-split final summary: 3-split table + collapse panel (analysis only).
+"""P8 time-split final summary: 3-split table + comparison panel (analysis only).
 
 Question: with all 8 targets now trained on the publication-year split, how
 does time-split performance compare with the random/scaffold campaign
@@ -18,7 +18,7 @@ Inputs (per tag):
 
 Outputs:
   results/time_split/summary.csv           one row per tag; test_frac is
-                                           reported as-is (a2a 0.62 and
+                                           reported as-is (a2a 0.59 and
                                            mpro 0.51 exceed 0.5 because the
                                            test set cumulates the newest
                                            years to reach ~20%);
@@ -273,7 +273,7 @@ def make_panel(df, fig_path):
     fig.legend(handles=handles, loc="lower center", ncol=3, fontsize=9,
                frameon=False, title="bar shade / position (hue = panel model)",
                title_fontsize=8)
-    fig.suptitle("Time-split collapse: test R² under random, scaffold and "
+    fig.suptitle("Test R² across label/split protocols: random, scaffold and "
                  "time splits (8 targets)", fontsize=12)
     fig.tight_layout(rect=(0, 0.08, 1, 0.95))
     fig.savefig(fig_path, dpi=150)
@@ -283,7 +283,7 @@ def make_panel(df, fig_path):
 # ---------------------------------------------------------------- report
 
 def print_conclusion(df):
-    """Console verdict: collapse magnitude, sign flips, CI tally, caveats."""
+    """Console verdict: protocol differences, sign flips, CI tally, caveats."""
     print("\n=== P8 time-split final summary (8 targets) ===")
     print("  RF  time R² range : "
           f"[{df['rf_time_r2'].min():+.3f}, {df['rf_time_r2'].max():+.3f}]")

@@ -1,0 +1,41 @@
+"""Run two counted pilots, then resume all 24 fixed-configuration GIN jobs."""
+from datetime import datetime,timezone
+from pathlib import Path
+import json
+import os
+import subprocess
+import sys
+
+ROOT=Path('/home/lessray/qsar-campaigns/time-asof-20261013-7ce15c1-gin')
+WORK=ROOT/'work'
+STATUS=ROOT/'campaign_status.json'
+
+def save(stage,**details):
+    state={'stage':stage,'updated_at':datetime.now(timezone.utc).isoformat(),'pid':os.getpid(),**details}
+    temporary=STATUS.with_suffix('.tmp')
+    temporary.write_text(json.dumps(state,indent=2)+'\n')
+    temporary.replace(STATUS)
+
+if STATUS.exists():
+    raise RuntimeError('Campaign supervisor already recorded; inspect before restarting')
+try:
+    save('pilots_running',tags=['a2a','egfr_full'],seeds=[42])
+    command=[sys.executable,'scripts/run_time_campaign.py','--role','gin','--device','cuda','--execute']
+    with (ROOT/'logs/pilots.log').open('x') as log:
+        subprocess.run(command+['--tags','a2a','egfr_full','--seeds','42'],cwd=WORK,stdout=log,stderr=subprocess.STDOUT,check=True)
+    pilot_flags={}
+    for tag in ('a2a','egfr_full'):
+        job=json.loads((WORK/f'results/time_campaign/gin_{tag}_seed42/status.json').read_text())
+        assert job['state']=='success'
+        metric=json.loads((WORK/f'results/gnn_metrics_{tag}.json').read_text())['time']
+        pilot_flags[tag]=dict(convergence_flag=metric['convergence_flag'],best_epoch=metric['best_epoch'],train_mse=metric['train_mse'])
+    # Keep the frozen protocol; retain and report warnings instead of choosing seeds by test scores.
+    save('full_campaign_running',pilot_validation=pilot_flags)
+    with (ROOT/'logs/worker.log').open('x') as log:
+        subprocess.run(command,cwd=WORK,stdout=log,stderr=subprocess.STDOUT,check=True)
+    states=list((WORK/'results/time_campaign').glob('gin_*/status.json'))
+    assert len(states)==24 and all(json.loads(p.read_text())['state']=='success' for p in states)
+    save('complete',jobs_completed=24,pilot_validation=pilot_flags)
+except BaseException as exc:
+    save('failed',error=f'{type(exc).__name__}: {exc}')
+    raise

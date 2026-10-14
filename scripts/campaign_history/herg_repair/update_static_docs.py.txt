@@ -1,0 +1,31 @@
+from pathlib import Path
+p=Path('README.md');s=p.read_text().replace('excluded (169 rows','excluded (168 rows')
+s=s.replace('used frozen source revision `7ce15c1f0849ae69e0ca208f781a9824517eb328`;','used frozen source revision `7ce15c1f0849ae69e0ca208f781a9824517eb328`.\nA subsequent cached-parent-key repair recovered one eligible hERG training\nmolecule and reran its RF plus three GIN fits from\n`d13f9125af56028f60e099ec2e914dd2509c239e`. The other 28 jobs retain their\noriginal inputs and provenance;')
+p.write_text(s)
+p=Path('docs/methodology.md');s=p.read_text().replace('excludes 169 rows','excludes 168 rows').replace('The 169 exclusions','The 168 exclusions').replace('| herg | 4,943 | 1,115 | 2,325 | 20 |','| herg | 4,944 | 1,115 | 2,325 | 19 |')
+s=s.replace('records execution and reproduction commands. Frozen training source is\n`7ce15c1f0849ae69e0ca208f781a9824517eb328`; publication of the resulting\nartifacts is a later change.', 'records execution and reproduction commands. The initial training source was\n`7ce15c1f0849ae69e0ca208f781a9824517eb328`; four hERG jobs were then replaced\nfrom `d13f9125af56028f60e099ec2e914dd2509c239e` after the cached-parent-key\nrepair described below. The remaining 28 jobs retain their original provenance.')
+s=s.replace('frozen source commit `7ce15c1f0849ae69e0ca208f781a9824517eb328`, not the later\nresult-publication revision. Durable records are\n`results/time_split/campaign_acceptance.json` and\n`results/time_split/input_manifest_{rf,gin}.json`.', 'initial frozen source commit `7ce15c1f0849ae69e0ca208f781a9824517eb328`.\nThe hERG repair uses `d13f9125af56028f60e099ec2e914dd2509c239e`. Durable records\nare `results/time_split/campaign_acceptance.json`, which maps each current job\nto its source and manifest, and `input_manifest_{rf,gin}{,_repair}.json`.\nThe original manifests and `initial_campaign_acceptance.json` remain historical\nrecords; their old hERG split is superseded by the repair manifests.')
+s=s.replace('16 for hivpr/mpro/vegfr2; individual forest','16 for hivpr/mpro/vegfr2 and the hERG repair; individual forest')
+s=s.replace('RF wall time was 7,071 seconds (117.9 minutes); the 24 GIN fits completed in','Initial RF wall time was 7,071 seconds (117.9 minutes); the initial 24 GIN fits completed in')
+anchor='### Recovery and acceptance\n'
+addition='''### Cached-parent-key repair (2026-10-14)
+
+Feature-cache SMILES are already normalized by cleaning. Applying the parent
+transform again is not necessarily idempotent: for hERG `CHEMBL2035183`, it
+changed the key and hid the dated exact 7,200 nM measurement from 2012. The
+split generator now normalizes raw records once and joins them to unchanged
+cached parent keys. A real-compound regression test covers this case.
+
+Rebuilding all eight splits changed only hERG: training rows increased from
+4,943 to 4,944 and exclusions fell from 20 to 19. Validation (1,115) and test
+(2,325) rows and labels did not change. The other seven splits have identical
+arrays and label IDs, with original file bytes retained. Their 28 completed
+jobs remain valid. `repair_split_comparison.json` records the comparison.
+The four prescribed hERG fits use the same hyperparameters and seeds; only
+RF outer CV concurrency changes from four to sixteen workers. This rerun is
+required by the corrected training input, not chosen from test performance.
+
+'''
+s=s.replace(anchor,addition+anchor)
+s=s.replace('It hashes source, data, parameters and environment. A completed job is skipped','Each attempt trains in a fresh source/input directory with no old model or\nprediction outputs. NA state and source/input/manifest hashes are checked before\ntraining, before resume and again before publication; an empty or partial\ntraining run cannot succeed by reusing an old file. Validated outputs are\nsnapshotted, with non-time metric entries preserved, and a publication exception\nrolls back files already replaced.\nIt hashes source, data, parameters and environment. A completed job is skipped')
+p.write_text(s)

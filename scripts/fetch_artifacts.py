@@ -33,7 +33,7 @@ Trust model for raw data (review findings P3 and R3):
 
 Installation is idempotent but self-repairing (review finding R4): an asset
 counts as installed only when ALL of its key files are present as regular
-files (models: all 26 joblibs, raw: every manifest file, cache: all 9 npz
+files (models: all 18 random/scaffold joblibs, raw: every manifest file, cache: all 9 npz
 caches) — a single stray file no longer marks the asset installed. When the
 local raw copy no longer matches the manifest the script no longer aborts with
 unusable advice: it names the stale files, re-downloads, verifies in the temp
@@ -46,8 +46,12 @@ data/processed/*_fingerprints.npz caches so the fast path
 no repo-side manifest; key-file completeness (all 9 npz) is the check.
 
 Known limitation: models/ has no repo-side manifest either — model files are
-not hash-pinned, only completeness-checked (all 26 joblibs) before install and
+not hash-pinned, only completeness-checked (all 18 random/scaffold joblibs) before install and
 before the "already extracted" skip.
+
+Legacy RF time models in artifacts-v2 predate the accepted as-of labels.
+They are validated as archive members but never installed; existing local
+time models are preserved. Only the named random/scaffold models are installed.
 
 Usage:
     python scripts/fetch_artifacts.py [--models | --raw | --cache | --all]
@@ -90,8 +94,7 @@ ASSETS = {
     "models": (
         "models.tar.xz",
         [f"models/rf_random_split_{tag}.joblib" for tag in _ASSET_TAGS]
-        + [f"models/rf_scaffold_split_{tag}.joblib" for tag in _ASSET_TAGS]
-        + [f"models/rf_time_split_{tag}.joblib" for tag in _ASSET_TAGS if tag != "bace"],
+        + [f"models/rf_scaffold_split_{tag}.joblib" for tag in _ASSET_TAGS],
     ),
     "raw": ("raw_data.tar.gz", []),
     "cache": (
@@ -549,6 +552,9 @@ def run(asset_keys, repo_root: Path = REPO_ROOT, api_url: str = API_URL,
     sums = None
     for key in asset_keys:
         archive_name, _ = ASSETS[key]
+        if key == "models":
+            print("models: random/scaffold only; skipping legacy rf_time_split_* "
+                  "assets (existing local time models are preserved)")
         key_files = key_files_for(key, expected_raw)
         missing = missing_key_files(repo_root, key_files)
         local_problems = raw_manifest_problems(repo_root, expected_raw) if key == "raw" else []
@@ -586,7 +592,10 @@ def run(asset_keys, repo_root: Path = REPO_ROOT, api_url: str = API_URL,
                     raise SystemExit(
                         f"extraction of {archive_name} did not produce: {', '.join(still_missing)}"
                     )
-                install_list = collect_relative_files(tmp_dir)
+                # Every archive member has already passed the safety checks.
+                # Install only the current model allowlist: artifacts-v2 time
+                # models must never replace accepted as-of checkpoints.
+                install_list = key_files if key == "models" else collect_relative_files(tmp_dir)
             replaced, kept = install_verified_files(repo_root, tmp_dir, install_list)
             if key == "raw":
                 # (e) the on-disk anchor must equal the bytes read at start
@@ -604,7 +613,7 @@ def main(argv=None) -> int:
         description="Fetch models / raw data / fingerprint caches from the artifacts-v2 release."
     )
     group = parser.add_mutually_exclusive_group()
-    group.add_argument("--models", action="store_true", help="fetch models.tar.xz only")
+    group.add_argument("--models", action="store_true", help="fetch random/scaffold models only; skip legacy time checkpoints")
     group.add_argument("--raw", action="store_true", help="fetch raw_data.tar.gz only")
     group.add_argument(
         "--cache", action="store_true", help="fetch processed_cache.tar.gz only"

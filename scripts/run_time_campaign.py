@@ -28,9 +28,10 @@ from time_labels import load_time_split, require_prediction_version
 ROOT = Path(__file__).resolve().parent.parent
 TAGS = ("a2a", "egfr_full", "abl1", "egfr", "herg", "hivpr", "mpro", "vegfr2")
 SEEDS = (42, 1, 2)
-ENV_KEYS = ("QSAR_RF_JOBS", "QSAR_CV_BACKEND", "OMP_NUM_THREADS",
+ENV_KEYS = ("QSAR_RF_JOBS", "QSAR_CV_BACKEND", "OMP_NUM_THREADS", "VECLIB_MAXIMUM_THREADS",
             "MKL_NUM_THREADS", "OPENBLAS_NUM_THREADS", "CUDA_VISIBLE_DEVICES",
-            "CUBLAS_WORKSPACE_CONFIG", "PYTHONHASHSEED")
+            "CUBLAS_WORKSPACE_CONFIG", "PYTHONHASHSEED",
+            "QSAR_TORCH_THREADS", "QSAR_TORCH_INTEROP_THREADS")
 
 
 def digest(path):
@@ -100,10 +101,18 @@ def parse_args(argv=None):
     parser.add_argument("--tags", nargs="+", choices=TAGS, default=list(TAGS))
     parser.add_argument("--seeds", nargs="+", type=int, choices=SEEDS, default=list(SEEDS))
     parser.add_argument("--device", choices=("cuda", "cpu", "mps"), default="cuda")
+    parser.add_argument("--epochs", type=int, default=100, help="GIN maximum training epochs")
+    parser.add_argument("--patience", type=int, default=20, help="GIN early-stopping patience")
+    parser.add_argument("--min-epochs", type=int, default=0,
+                        help="GIN minimum epochs before early stopping is allowed")
     parser.add_argument("--campaign-dir", type=Path, default=ROOT / "results" / "time_campaign")
     parser.add_argument("--execute", action="store_true", help="actually train; otherwise read-only plan")
     parser.add_argument("--rerun", action="store_true", help="allow failed or incompatible jobs to run again")
-    return parser.parse_args(argv)
+    args = parser.parse_args(argv)
+    if args.epochs < 1 or args.patience < 1 or not 0 <= args.min_epochs <= args.epochs:
+        parser.error("training budget requires --epochs >= 1, --patience >= 1, "
+                     "and 0 <= --min-epochs <= --epochs")
+    return args
 
 
 def build_jobs(args, root=ROOT):
@@ -143,16 +152,17 @@ def build_jobs(args, root=ROOT):
                 command = [sys.executable, "scripts/gnn_03_train_gin.py", "--tag", tag,
                            "--split", "time", "--model", "gin", "--seed", str(seed),
                            "--hidden", "128", "--num-layers", "4", "--dropout", "0.2",
-                           "--lr", "0.001", "--batch-size", "128", "--epochs", "100",
-                           "--patience", "20", "--min-epochs", "0", "--device", args.device]
+                           "--lr", "0.001", "--batch-size", "128", "--epochs", str(args.epochs),
+                           "--patience", str(args.patience), "--min-epochs", str(args.min_epochs),
+                           "--device", args.device]
                 if suffix:
                     command += ["--suffix", suffix]
                 files = [f"results/gnn_models/{tag}_gin_time{suffix}.pt",
                          f"results/gnn_preds_{tag}_time{suffix}.npz",
                          f"results/gnn_metrics_{tag}{suffix}.json"]
                 params = {"seed": seed, "hidden": 128, "num_layers": 4, "dropout": 0.2,
-                          "lr": 0.001, "batch_size": 128, "epochs": 100, "patience": 20,
-                          "min_epochs": 0, "device": args.device}
+                          "lr": 0.001, "batch_size": 128, "epochs": args.epochs, "patience": args.patience,
+                          "min_epochs": args.min_epochs, "device": args.device}
             provenance = {"schema": 1, "role": args.role, "tag": tag, "label_id": str(split["label_id"]),
                           "inputs": inputs, "code": code, "hyperparameters": params, "environment": env,
                           "bundle_manifest": bundle,

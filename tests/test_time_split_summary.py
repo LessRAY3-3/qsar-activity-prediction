@@ -409,74 +409,31 @@ def test_build_summary_writes_correct_baseline_columns(tmp_path, monkeypatch,
     assert df["gin_best_epochs"].to_dict() == expected_epochs
 
 
-def test_stored_constant_r2_matches_recomputed_baseline(tmp_path, monkeypatch,
-                                                        load_experiment):
-    """results/time_split/summary.csv: constant_r2 = recomputed no-skill R2.
+def test_committed_summary_recomputed_from_restored_time_splits(load_experiment):
+    """CI must restore the real frozen inputs and check the published table.
 
-    Dual path. When the committed data/processed npz files are checked out
-    (local full repo; CI does not check them out), every stored tag value
-    must equal an INDEPENDENT recomputation from
-    {tag}_fingerprints.npz + {tag}_time.npz: as-of labels use the training
-    pool only; historical labels use all non-test rows.
-    Without the npz (CI) the same recomputation contract is enforced on a
-    synthetic committed-style tree through the real build_summary, and the
-    committed summary.csv must still carry a finite constant_r2 for every
-    tag.
+    No fingerprint cache, synthetic fallback or skip: a missing restored split
+    is a failure with the reproduction command, just like a stale summary value.
     """
+    from time_labels import load_time_split
     mod = load_experiment("time_split_summary")
     repo = Path(__file__).resolve().parent.parent
-    results = repo / "results"
-    proc = repo / "data" / "processed"
-    stored = pd.read_csv(results / "time_split" / "summary.csv").set_index("tag")
+    split_dir = repo / "data/processed/splits"
+    stored = pd.read_csv(repo / "results/time_split/summary.csv").set_index("tag")
     assert set(stored.index) == set(mod.TAGS)
-    assert stored["constant_r2"].notna().all()
-
-    def _recompute(tag, root):
-        y = np.asarray(
-            np.load(root / "data" / "processed" / f"{tag}_fingerprints.npz")["y"],
-            dtype=np.float64)
-        sp = np.load(root / "data" / "processed" / "splits" / f"{tag}_time.npz")
-        test = np.asarray(sp["test_idx"])
-        if "label_policy" in sp:
-            assert str(sp["label_policy"]) == "exact-dated-asof-v1"
-            return _baseline_r2(np.asarray(sp["y"], dtype=np.float64),
-                                test, sp["train_idx"])
-        pool = np.ones(len(y), dtype=bool)
-        pool[test] = False
-        return _baseline_r2(y, test, np.where(pool)[0])
-
-    have_npz = all(
-        (proc / f"{tag}_fingerprints.npz").exists()
-        and (proc / "splits" / f"{tag}_time.npz").exists()
-        for tag in mod.TAGS)
-    if have_npz:
-        for tag in mod.TAGS:
-            assert float(stored.loc[tag, "constant_r2"]) == pytest.approx(
-                _recompute(tag, repo), abs=1e-9)
-        return
-
-    # CI path: no committed npz -- enforce the same contract on a synthetic
-    # committed-style tree through the real build_summary
-    per_tag_y, test_idx = _write_per_tag_tree(tmp_path, mod)
-    expected_const = _expected_constants(per_tag_y, test_idx)
-    monkeypatch.setattr(mod, "time_split_stats", lambda tag: {
-        "test_year_start": 2020, "test_year_end": 2021,
-        "n_total": 100, "n_train": 20, "n_valid": 20, "n_test": 60,
-        "test_frac": 0.6})
-    monkeypatch.setattr(mod, "_load_json",
-                        lambda name: {"time": {"r2": 0.5, "rmse": 1.0}})
-    monkeypatch.setattr(mod, "comparison_reference",
-                        lambda tag: {"random": (0.7, 0.6),
-                                     "scaffold": (0.6, 0.55)})
-    monkeypatch.setattr(mod, "time_significance", lambda: pd.DataFrame(
-        [SIG_ROW] * len(mod.TAGS), index=list(mod.TAGS)))
-    monkeypatch.setattr(mod, "BASE", str(tmp_path))
-    df = mod.build_summary().set_index("tag")
     for tag in mod.TAGS:
-        assert float(df.loc[tag, "constant_r2"]) == pytest.approx(
-            expected_const[tag], abs=1e-12)
-        assert float(df.loc[tag, "constant_r2"]) == pytest.approx(
-            _recompute(tag, tmp_path), abs=1e-12)
+        assert (split_dir / f"{tag}_time.npz").is_file(), "Run python scripts/restore_time_inputs.py first"
+        sp = load_time_split(split_dir, tag)
+        assert sp is not None
+        assert str(sp["label_id"]) == stored.loc[tag, "label_id"]
+        assert int(stored.loc[tag, "n_train"]) == len(sp["train_idx"])
+        assert int(stored.loc[tag, "n_excluded"]) == len(sp["excluded_idx"])
+        expected = _baseline_r2(np.asarray(sp["y"], dtype=np.float64),
+                                sp["test_idx"], sp["train_idx"])
+        assert float(stored.loc[tag, "constant_r2"]) == pytest.approx(expected, abs=1e-9)
+    recomputed = mod.build_summary().set_index("tag")
+    pd.testing.assert_frame_equal(stored.loc[list(mod.TAGS)], recomputed.loc[list(mod.TAGS)],
+                                  check_dtype=False, rtol=1e-12, atol=1e-9)
 
 
 def test_print_conclusion_labels_drift_conditionally(load_experiment, capsys):

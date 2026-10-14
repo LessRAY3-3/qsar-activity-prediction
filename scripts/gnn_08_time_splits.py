@@ -157,6 +157,27 @@ def _parent_keys(values):
     return keys
 
 
+
+def _activities_with_parent(smiles, activities):
+    """Validate cache keys against ALL raw structures before eligibility filtering.
+
+    A missing document/year is allowed; an absent structural key indicates a
+    cache/raw mismatch, not missing publication metadata. Never normalize the
+    cached keys again, because parent standardization need not be idempotent.
+    """
+    acts = activities.copy()
+    acts["parent"] = _parent_keys(acts["canonical_smiles"])
+    raw_keys = {key for key in acts["parent"] if key is not None}
+    missing = [(row, key) for row, key in enumerate(np.asarray(smiles, dtype=str))
+               if key not in raw_keys]
+    if missing:
+        details = "; ".join(f"row={row} key={key!r}" for row, key in missing)
+        raise ValueError(
+            f"{len(missing)} cached parent key(s) absent from standardized raw activities "
+            f"(zero-based cache rows): {details}")
+    return acts
+
+
 def assign_years(smiles, activities, years):
     """Per-SMILES earliest publication year (float array, NaN = no year).
 
@@ -166,7 +187,8 @@ def assign_years(smiles, activities, years):
     cache already exports those parent keys; use them unchanged rather than
     standardizing a second time and potentially changing the join key.
     """
-    acts = activities.dropna(subset=["canonical_smiles", "document_chembl_id"]).copy()
+    acts = _activities_with_parent(smiles, activities).dropna(
+        subset=["canonical_smiles", "document_chembl_id"]).copy()
     acts["canonical_smiles"] = acts["canonical_smiles"].astype(str)
     acts["document_chembl_id"] = acts["document_chembl_id"].astype(str)
 
@@ -176,8 +198,7 @@ def assign_years(smiles, activities, years):
     docs["document_chembl_id"] = docs["document_chembl_id"].astype(str)
 
     merged = acts.merge(docs, on="document_chembl_id", how="left")
-    merged["join_smiles"] = _parent_keys(merged["canonical_smiles"])
-    per_smiles = merged.groupby("join_smiles")["document_year"].min()
+    per_smiles = merged.groupby("parent")["document_year"].min()
     keys = np.asarray(smiles, dtype=str)
     out = per_smiles.reindex(keys).to_numpy(dtype=float)
     return np.array(out, dtype=float, copy=True)  # writable copy: ensure_coverage fills NaNs in place
@@ -195,7 +216,7 @@ def asof_labels(smiles, activities, years, pools, cutoff_v, cutoff_t):
                 "canonical_smiles", "document_chembl_id"}
     if not required.issubset(activities.columns):
         raise ValueError(f"as-of labels require columns: {sorted(required - set(activities.columns))}")
-    acts = activities.copy()
+    acts = _activities_with_parent(smiles, activities)
     acts["standard_value"] = pd.to_numeric(acts["standard_value"], errors="coerce")
     keep = (exact_relation_mask(acts["standard_relation"])
             & acts["standard_units"].eq("nM")
@@ -210,7 +231,6 @@ def asof_labels(smiles, activities, years, pools, cutoff_v, cutoff_t):
     acts["document_chembl_id"] = acts["document_chembl_id"].astype(str)
     docs["document_chembl_id"] = docs["document_chembl_id"].astype(str)
     acts = acts.merge(docs, on="document_chembl_id", how="inner", validate="many_to_one")
-    acts["parent"] = _parent_keys(acts["canonical_smiles"])
     acts["pic50"] = -np.log10(acts["standard_value"] * 1e-9)
     keys = np.asarray(smiles, dtype=str)
     y = np.full(len(smiles), np.nan, dtype=np.float32)

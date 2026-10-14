@@ -11,8 +11,8 @@ index-dependent carbon tail), one document per molecule with a synthetic
     one-line summary;
   * guards: 3-year span -> {TAG}_time_NA.json marker, no npz, exit 0;
     busiest year < 100 molecules -> same marker; 2 of 200 SMILES
-    unjoinable (99.0% coverage) -> pinned for cutoff selection, then
-    excluded from training for lack of dated labels; 12 of 200 unjoinable (94%, below
+    undated (99.0% coverage) -> pinned for cutoff selection, then
+    excluded from training for lack of dated labels; 12 of 200 undated (94%, below
     FILL_YEAR_COVERAGE) -> SystemExit; missing
     document_years.csv -> SystemExit naming fetch_document_years.py;
   * M1/03 regime: activities rows written as salt forms while the npz
@@ -267,7 +267,7 @@ def test_sparse_busiest_year_writes_na_marker(tmp_path, monkeypatch, mod):
     assert not (paths["splits"] / f"{mod.TAG}_time.npz").exists()
 
 
-def test_two_unjoinable_smiles_excluded_after_cutoff_selection(tmp_path, monkeypatch, mod, capsys):
+def test_two_raw_structures_without_document_years_are_excluded(tmp_path, monkeypatch, mod, capsys):
     paths = _setup(tmp_path, monkeypatch, mod, broken=(30, 77))
     mod.main([])
     printed = capsys.readouterr().out
@@ -275,7 +275,7 @@ def test_two_unjoinable_smiles_excluded_after_cutoff_selection(tmp_path, monkeyp
     assert "pinning them to year_min" in printed
     d = np.load(paths["splits"] / f"{mod.TAG}_time.npz")
     assert not np.isnan(d["year"]).any()
-    filled = {_smiles()[30], _smiles()[77]}
+    filled = set(d["smiles"][[30, 77]].tolist())
     train_smiles = set(np.asarray(d["smiles"], dtype=str)[d["train_idx"]].tolist())
     assert not (filled & train_smiles)
     assert set(d["excluded_idx"]) == {30, 77}
@@ -334,6 +334,13 @@ def test_prediction_version_checks_rows_and_actual_labels(tmp_path, monkeypatch,
     good = dict(label_id=sp["label_id"], test_idx=sp["test_idx"],
                 y_true=sp["y"][sp["test_idx"]])
     require_prediction_version(good, sp)
+    # Keep the actual labels and row order identical so only the version gate
+    # can reject an older campaign (the test must kill removal of that gate).
+    for stale_id in ("0" * 64, ""):
+        with pytest.raises(ValueError, match="label version differs"):
+            require_prediction_version({**good, "label_id": stale_id}, sp)
+    with pytest.raises(ValueError, match="label version differs"):
+        require_prediction_version({k: v for k, v in good.items() if k != "label_id"}, sp)
     with pytest.raises(ValueError, match="test indices"):
         require_prediction_version({**good, "test_idx": good["test_idx"][::-1]}, sp)
     with pytest.raises(ValueError, match="labels differ"):
@@ -348,4 +355,88 @@ def test_failed_regeneration_invalidates_old_split(tmp_path, monkeypatch, mod):
     with pytest.raises(SystemExit):
         mod.main([])
     assert not stale.exists()
+    assert (paths["splits"] / f"{mod.TAG}_time_NA.json").exists()
+
+
+@pytest.mark.parametrize("cached", ["C1=CC=CC=C1", "c1ccccc1.Cl"])
+def test_cached_key_missing_from_raw_fails_with_row_and_key(mod, cached):
+    acts = pd.DataFrame({"canonical_smiles": ["CC", "c1ccccc1"],
+                         "document_chembl_id": ["D0", "D1"],
+                         "standard_value": [100., 100.], "standard_units": ["nM", "nM"],
+                         "standard_relation": ["=", "="]})
+    years = pd.DataFrame({"document_chembl_id": ["D0", "D1"], "document_year": [2000, 2001]})
+    keys = np.array(["CC", cached])
+    pools = [np.array([0, 1]), np.array([], dtype=int), np.array([], dtype=int)]
+    for call in (lambda: mod.assign_years(keys, acts, years),
+                 lambda: mod.asof_labels(keys, acts, years, pools, 2010, 2020)):
+        with pytest.raises(ValueError, match="cached parent key") as error:
+            call()
+        assert "row=1" in str(error.value) and repr(cached) in str(error.value)
+
+
+@pytest.mark.parametrize("missing", ["document", "year", "exact_measurement"])
+def test_raw_structure_exists_but_metadata_or_eligible_label_missing_is_allowed(mod, missing):
+    acts = pd.DataFrame({"canonical_smiles": ["CC"], "document_chembl_id": ["D"],
+                         "standard_value": [100.], "standard_units": ["nM"],
+                         "standard_relation": ["="]})
+    years = pd.DataFrame({"document_chembl_id": ["D"], "document_year": [2000.]})
+    if missing == "document":
+        acts.loc[0, "document_chembl_id"] = None
+    elif missing == "year":
+        years.loc[0, "document_year"] = np.nan
+    else:
+        acts.loc[0, "standard_relation"] = ">"
+    keys = np.array(["CC"])
+    pools = [np.array([0]), np.array([], dtype=int), np.array([], dtype=int)]
+    assigned = mod.assign_years(keys, acts, years)
+    assert np.isnan(assigned[0]) if missing != "exact_measurement" else assigned[0] == 2000
+    y, retained, excluded = mod.asof_labels(keys, acts, years, pools, 2010, 2020)
+    assert np.isnan(y[0]) and excluded.tolist() == [0]
+    assert all(len(idx) == 0 for idx in retained)
+
+
+def test_asof_exact_record_boundaries_median_and_units(mod):
+    # Explicit pIC50 answers: train median(6,7,4)=6; validation median(6,7)=6.5;
+    # test median(5,7)=6. Boundary/future records carry very different values.
+    records = [
+        ("CC", 2009, 1000., "nM", "="),
+        ("CC", 2009, 100., "nM", "="),
+        ("CC", 2009, 100000., "nM", "="),
+        ("CC", 2010, 1., "nM", "="),
+        ("CC", 2019, .1, "nM", "="),
+        ("CC", 2020, .01, "nM", "="),
+        ("CCC", 2010, 1000., "nM", "="),
+        ("CCC", 2019, 100., "nM", "="),
+        ("CCC", 2020, 1., "nM", "="),
+        ("CCCC", 2019, 1., "nM", "="),
+        ("CCCC", 2020, 10000., "nM", "="),
+        ("CCCC", 2021, 100., "nM", "="),
+        ("CCO", 2009, 1., "uM", "="),
+        ("CCO", 2009, 1., "nM", ">"),
+    ]
+    acts = pd.DataFrame(records, columns=["canonical_smiles", "year", "standard_value",
+                                         "standard_units", "standard_relation"])
+    acts["document_chembl_id"] = [f"D{i}" for i in range(len(acts))]
+    years = acts[["document_chembl_id", "year"]].rename(columns={"year": "document_year"})
+    keys = np.array(["CC", "CCC", "CCCC", "CCO"])
+    pools = [np.array([0, 3]), np.array([1]), np.array([2])]
+    y, retained, excluded = mod.asof_labels(keys, acts, years, pools, 2010, 2020)
+    np.testing.assert_allclose(y[:3], [6., 6.5, 6.], atol=1e-6, rtol=0)
+    assert np.isnan(y[3])
+    assert [idx.tolist() for idx in retained] == [[0], [1], [2]]
+    assert excluded.tolist() == [3]
+
+
+def test_single_structural_mismatch_aborts_instead_of_becoming_an_exclusion(tmp_path, monkeypatch, mod):
+    paths = _setup(tmp_path, monkeypatch, mod)
+    with np.load(paths["npz"]) as cache:
+        data = dict(cache)
+    # Only 0.5% affected: year-coverage thresholds must not hide this mismatch.
+    keys = data["smiles"].astype(object)
+    keys[30] = str(keys[30]) + ".Cl"
+    data["smiles"] = keys.astype(str)
+    np.savez(paths["npz"], **data)
+    with pytest.raises(ValueError, match="row=30"):
+        mod.main([])
+    assert not (paths["splits"] / f"{mod.TAG}_time.npz").exists()
     assert (paths["splits"] / f"{mod.TAG}_time_NA.json").exists()

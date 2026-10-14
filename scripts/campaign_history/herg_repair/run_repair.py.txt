@@ -1,0 +1,33 @@
+"""Detached supervisor for the four prescribed hERG repair jobs."""
+from pathlib import Path
+from datetime import datetime, timezone
+import json
+import os
+import subprocess
+import sys
+import time
+
+root = Path(__file__).resolve().parent
+role = sys.argv[1]
+assert role in ('rf','gin')
+status = root / 'campaign_status.json'
+def save(state, **details):
+    temp = status.with_suffix('.tmp')
+    temp.write_text(json.dumps(dict(state=state,role=role,pid=os.getpid(),updated_at=datetime.now(timezone.utc).isoformat(),**details),indent=2)+'\n')
+    temp.replace(status)
+if status.exists():
+    raise RuntimeError('Existing supervisor status; inspect rather than duplicate run')
+start=time.monotonic()
+save('running')
+try:
+    command=[sys.executable,'scripts/run_time_campaign.py','--role',role,'--tags','herg','--execute']
+    if role=='gin': command+=['--device','cuda']
+    with (root/'worker.log').open('x') as stream:
+        subprocess.run(command,cwd=root/'work',check=True,stdout=stream,stderr=subprocess.STDOUT)
+    states=list((root/'work/results/time_campaign').glob(f'{role}_*/status.json'))
+    assert len(states)==(1 if role=='rf' else 3)
+    assert all(json.loads(p.read_text())['state']=='success' for p in states)
+    save('complete',elapsed_seconds=time.monotonic()-start,jobs=len(states))
+except BaseException as exc:
+    save('failed',elapsed_seconds=time.monotonic()-start,error=f'{type(exc).__name__}: {exc}')
+    raise
