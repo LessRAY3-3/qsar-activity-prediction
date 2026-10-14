@@ -39,7 +39,7 @@
   "m3_completed_pilot_jobs": 48,
   "m3_additional_jobs": 80,
   "cuda_pending_jobs": 128,
-  "status": "M3 supplement preparing; CUDA awaits user connection",
+  "status": "M3 supplement running; CUDA awaits user connection",
   "fixed_training_source_commit": "90a470050367cebc4cd83dfe8d3f7fb37d53e6de",
   "source_policy": "Frozen trainer, original worker, label loader, graph dataset, common helpers and data hashes must match pilot; new coordinator/wrapper source has separate provenance",
   "selection_policy": "Retain all planned seeds; expansion is not conditional on test scores or desired rankings; do not replace published main results",
@@ -76,5 +76,7 @@
     "diff_check": "passed",
     "m3_pip_freeze_matches_pilot": true,
     "training_core_and_all_inputs_match_pilot": true
-  }
+  },
+  "supplement_source_commit": "85210630c475e8733089a476b8d5bf4852dbf773",
+  "supplement_launch": "m3_extension/launch.json"
 }

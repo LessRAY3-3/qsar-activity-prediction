@@ -17,7 +17,7 @@ def put_json(path, payload):
     path.write_text(json.dumps(payload))
 
 
-def make_study(tmp_path, reporter, seeds=(42, 1, 2), source="frozen"):
+def make_study(tmp_path, reporter, seeds=(42, 1, 2), source="frozen", device="cpu", workers=4):
     study = tmp_path / "study"
     inputs = tmp_path / "inputs"
     files = {}
@@ -38,7 +38,7 @@ def make_study(tmp_path, reporter, seeds=(42, 1, 2), source="frozen"):
            "packages": {"torch": "test"}, "platform": "test-host"}
     protocol = dict(arms=reporter.ARMS, seeds=list(seeds),
                     lanes=[list(lane) for lane in reporter.LANES], jobs=16 * len(seeds),
-                    device="cpu", parallel_workers=4, thread_environment=env["variables"],
+                    device=device, parallel_workers=workers, thread_environment=env["variables"],
                     manifest_sha256=mh, source_commit=source)
     lanes = []
     for arm in reporter.ARMS:
@@ -52,7 +52,7 @@ def make_study(tmp_path, reporter, seeds=(42, 1, 2), source="frozen"):
                 for seed in seeds:
                     directory = root / f"results/time_campaign/gin_{tag}_seed{seed}"
                     p = dict(role="gin", tag=tag, label_id=f"labels-{tag}",
-                             hyperparameters=reporter.expected_parameters(arm, seed),
+                             hyperparameters=reporter.expected_parameters(arm, seed, device),
                              bundle_manifest={"sha256": mh, "source_git_head": source},
                              command=["train.py"], environment=env,
                              inputs={k: files[k] for k in (f"data/processed/{tag}_graphs.npz",
@@ -177,7 +177,8 @@ def test_no_output_when_study_missing(tmp_path, reporter):
     assert not output.exists()
 
 
-def test_real_gin_checkpoint_replay_and_bad_normalization(tmp_path, reporter, load_script):
+@pytest.mark.parametrize("training_device", ["cpu", "cuda"])
+def test_real_gin_checkpoint_replay_and_bad_normalization(tmp_path, reporter, load_script, training_device):
     import torch
     from gnn_graph_dataset import smiles_to_graph
     from time_labels import dataset_signature, label_signature, load_time_split
@@ -203,7 +204,7 @@ def test_real_gin_checkpoint_replay_and_bad_normalization(tmp_path, reporter, lo
                  source_sha256="synthetic", dataset_signature=dataset_signature(smiles, y))
     split["label_id"] = label_signature(split)
     np.savez(processed / "splits/a2a_time.npz", **split)
-    parameters = reporter.expected_parameters("control", 42)
+    parameters = reporter.expected_parameters("control", 42, training_device)
     args = {**parameters, "tag": "a2a", "model": "gin", "split": "time", "suffix": ""}
     model = trainer.build_model(Namespace(**args))
     mean, std = float(y[:2].mean()), float(y[:2].std())
@@ -218,14 +219,17 @@ def test_real_gin_checkpoint_replay_and_bad_normalization(tmp_path, reporter, lo
     train_mse = float(np.mean((trp - try_)**2))
     names = reporter.artifact_names("a2a", 42)
     (root / "results/gnn_models").mkdir(parents=True)
-    runtime = dict(seed=42, device="cpu", requested_device="cpu", torch_threads=4,
-                   torch_interop_threads=1, torch_version=str(torch.__version__))
+    # CUDA case is synthetic metadata around a CPU-created checkpoint, not a GPU run.
+    # This deliberately different build string must match training provenance only.
+    training_torch = "2.14.0+cu126" if training_device == "cuda" else str(torch.__version__)
+    runtime = dict(seed=42, device=training_device, requested_device=training_device, torch_threads=4,
+                   torch_interop_threads=1, torch_version=training_torch)
     checkpoint = dict(state_dict=model.state_dict(), args=args, y_mean=mean, y_std=std,
                       runtime=runtime, label_id=split["label_id"])
     torch.save(checkpoint, root / names[0])
     np.savez(root / names[1], test_idx=split["test_idx"], y_true=ty, y_pred=tp, label_id=split["label_id"])
     metric = dict(params={k: v for k, v in args.items() if k != "split"},
-                  train_mse_source="best_checkpoint_eval", runtime=runtime, device="cpu",
+                  train_mse_source="best_checkpoint_eval", runtime=runtime, device=training_device,
                   label_id=split["label_id"], train_mse=train_mse,
                   best_valid_rmse_std=float(np.sqrt(np.mean((vp-vy)**2))),
                   best_epoch=1, max_epochs=100, convergence_flag=train_mse > .5,
@@ -235,10 +239,15 @@ def test_real_gin_checkpoint_replay_and_bad_normalization(tmp_path, reporter, lo
     job = dict(arm="control", tag="a2a", seed=42, root=root, directory=root,
                parameters=parameters, files=names, label_id=split["label_id"],
                status={"log": "train.log", "elapsed_seconds": 1.,
-                       "provenance": {"environment": {"packages": {"torch": str(torch.__version__)}}}})
+                       "provenance": {"environment": {"packages": {"torch": training_torch}}}})
     row, _ = reporter.replay_job(job, inputs, trainer, load_time_split)
     assert row["prediction_max_abs_error"] < 1e-5
     assert row["train_mse_abs_error"] < 1e-5
+    assert row["device"] == training_device and row["replay_device"] == "cpu"
+    job["status"]["provenance"]["environment"]["packages"]["torch"] = "wrong-training-build"
+    with pytest.raises(ValueError, match="Runtime torch version"):
+        reporter.replay_job(job, inputs, trainer, load_time_split)
+    job["status"]["provenance"]["environment"]["packages"]["torch"] = training_torch
     checkpoint["y_mean"] += .01
     torch.save(checkpoint, root / names[0])
     with pytest.raises(ValueError, match="normalization"):
@@ -279,10 +288,10 @@ def test_overlapping_cohort_seeds_rejected(tmp_path, reporter):
 @pytest.mark.parametrize("field", ["source_sha256", "input_sha256", "training_environment", "host", "label_id"])
 def test_merge_rejects_cross_cohort_drift(tmp_path, reporter, monkeypatch, field):
     # Separate cohort audits can each pass, but merging requires identical evidence.
-    def inspect(study, inputs, seeds):
+    def inspect(study, inputs, seeds, training_device):
         second = study.name == "extra"
         seed = 3 if second else 42
-        evidence = dict(protocol={"seeds": [seed]}, source_sha256={"worker": "same"},
+        evidence = dict(protocol={"seeds": [seed], "device": "cpu", "parallel_workers": 4, "thread_environment": {}}, source_sha256={"worker": "same"},
                         input_sha256={"graph": "same"}, training_environment={"threads": 4}, host="m3")
         if second and field != "label_id":
             evidence[field] = "different"
@@ -295,11 +304,13 @@ def test_merge_rejects_cross_cohort_drift(tmp_path, reporter, monkeypatch, field
         reporter.inspect_cohorts([tmp_path / "pilot", tmp_path / "extra"], tmp_path, (42, 3))
 
 
-@pytest.mark.parametrize("seeds,merged", [((3, 4, 5, 6, 7), False),
-                                         ((42, 1, 2, 3, 4, 5, 6, 7), False),
-                                         ((42, 1, 2, 3, 4, 5, 6, 7), True)])
-def test_report_counts_pairs_and_ensembles_are_not_hardcoded(tmp_path, reporter, monkeypatch, seeds, merged):
-    root, inputs = make_study(tmp_path, reporter, reporter.SEEDS if merged else seeds)
+@pytest.mark.parametrize("seeds,merged,device", [((3, 4, 5, 6, 7), False, "cpu"),
+                                                ((42, 1, 2, 3, 4, 5, 6, 7), False, "cpu"),
+                                                ((42, 1, 2, 3, 4, 5, 6, 7), True, "cpu"),
+                                                ((42, 1, 2, 3, 4, 5, 6, 7), False, "cuda")])
+def test_report_counts_pairs_and_ensembles_are_not_hardcoded(tmp_path, reporter, monkeypatch, seeds, merged, device):
+    root, inputs = make_study(tmp_path, reporter, reporter.SEEDS if merged else seeds,
+                              device=device, workers=1 if device == "cuda" else 4)
     supplement = None
     if merged:
         supplement, _ = make_study(tmp_path / "extra", reporter, (3, 4, 5, 6, 7), "new-wrapper")
@@ -316,12 +327,22 @@ def test_report_counts_pairs_and_ensembles_are_not_hardcoded(tmp_path, reporter,
     monkeypatch.setattr(reporter, "replay_job", replay)
     # This test exercises count/aggregation; real checkpoint replay is tested above.
     output = tmp_path / "report"
-    report = reporter.run(root, inputs, output, threads=1, seeds=seeds, supplement=supplement)
+    report = reporter.run(root, inputs, output, threads=1, seeds=seeds, supplement=supplement,
+                          training_device=device)
     assert report["jobs_accepted"] == 16 * len(seeds)
     assert report["paired_rows"] == 8 * len(seeds)
     assert report["n_seeds"] == len(seeds)
     assert report["cohorts"] == (2 if merged else 1)
     assert report["factorial_cells_complete"] == 2
+    assert report["training_device"] == device
+    assert report["replay"]["device"] == "cpu"
+    assert report["training_host"] == "M3"  # Synthetic fixture host, never inferred from CUDA.
+    assert report["training_platform"] == "test-host"
+    if device == "cuda":
+        assert report["environment"] == "CUDA training (CPU replay)"
+        assert report["cpu_cells_status"] == "not audited by this report"
+    else:
+        assert report["cuda_cells_status"] == "not audited by this report"
     assert report["training_prefix_comparison"]["pairs"] == 8 * len(seeds)
     targets = pd.read_csv(output / "targets.csv")
     assert len(targets) == 8 and (targets.n_seeds == len(seeds)).all()
@@ -337,3 +358,37 @@ def test_report_counts_pairs_and_ensembles_are_not_hardcoded(tmp_path, reporter,
 def test_invalid_declared_seeds_rejected(reporter, seeds):
     with pytest.raises(ValueError, match="unique nonnegative"):
         reporter.validate_seeds(seeds)
+
+
+@pytest.mark.parametrize("device,workers,accepted", [("cpu", 4, True), ("cpu", 1, False),
+                                                    ("cuda", 1, True), ("cuda", 4, True),
+                                                    ("cuda", 0, False), ("cuda", 5, False)])
+def test_recorded_device_and_concurrency_are_required(tmp_path, reporter, device, workers, accepted):
+    study, inputs = make_study(tmp_path, reporter, device=device, workers=workers)
+    if accepted:
+        jobs, _ = reporter.inspect_study(study, inputs, training_device=device)
+        assert len(jobs) == 48 and all(j["parameters"]["device"] == device for j in jobs)
+    else:
+        with pytest.raises(ValueError, match="protocol/device/concurrency"):
+            reporter.inspect_study(study, inputs, training_device=device)
+    opposite = "cuda" if device == "cpu" else "cpu"
+    with pytest.raises(ValueError, match="protocol/device/concurrency"):
+        reporter.inspect_study(study, inputs, training_device=opposite)
+
+
+@pytest.mark.parametrize("field,value", [("device", "cpu"), ("requested_device", "cpu"),
+                                        ("torch_threads", 2), ("torch_interop_threads", 2)])
+def test_cuda_runtime_rejects_cpu_fallback_and_thread_drift(reporter, field, value):
+    runtime = dict(seed=42, device="cuda", requested_device="cuda", torch_threads=4,
+                   torch_interop_threads=1, torch_version="2.14.0+cu126")
+    reporter.check_runtime(runtime, 42, "cuda")
+    with pytest.raises(ValueError, match="runtime"):
+        reporter.check_runtime({**runtime, field: value}, 42, "cuda")
+
+
+def test_cuda_cohorts_cannot_change_concurrency(tmp_path, reporter):
+    pilot, inputs = make_study(tmp_path / "pilot", reporter, device="cuda", workers=1)
+    supplement, _ = make_study(tmp_path / "extra", reporter, (3, 4, 5, 6, 7),
+                               device="cuda", workers=2)
+    with pytest.raises(ValueError, match="parallel_workers differs"):
+        reporter.inspect_cohorts([pilot, supplement], inputs, (42, 1, 2, 3, 4, 5, 6, 7), "cuda")

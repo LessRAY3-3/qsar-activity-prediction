@@ -1,0 +1,9 @@
+{
+  "archive": "results/time_budget_sensitivity/extension_inputs.tar.gz",
+  "bytes": 4835319,
+  "sha256": "a212056556c7f3095c53bdaa0ed816f7d163e6617fe8f09c6ae094de6fab9ca3",
+  "manifest": "results/time_budget_sensitivity/extension_input_manifest.json",
+  "manifest_sha256": "ab9c71cb1ff48505f14e8759c37d5e00c0c138cc50cf0d6e6baf752f96d9d802",
+  "source_commit": "85210630c475e8733089a476b8d5bf4852dbf773",
+  "purpose": "Frozen eight-seed extension bundle; training core and inputs match original pilot"
+}

@@ -1159,17 +1159,18 @@ evidence. The expanded cohort will be reported separately.
 
 | Execution environment | Original budget | Extended budget |
 | --- | --- | --- |
-| M3 Max CPU | 64 planned: 24 pilot accepted + 40 additional preparing | 64 planned: 24 pilot accepted + 40 additional preparing |
+| M3 Max CPU | 64 planned: 24 pilot accepted + 40 in the running supplement | 64 planned: 24 pilot accepted + 40 in the running supplement |
 | Ubuntu / RTX 4070 Laptop CUDA | 64 fresh jobs, awaiting connection | 64 fresh jobs, awaiting connection |
 
 Each current cell covers all eight targets and all eight declared seeds.
 The original budget is `epochs=100, min_epochs=0, patience=20`; the extended
 budget is `epochs=200, min_epochs=60, patience=40`. The expanded design has
-**256 jobs: 64 per cell and 128 per environment**. M3 will add 80 jobs for
-seeds 3/4/5/6/7 and combine them with the existing 48 only after acceptance.
+**256 jobs: 64 per cell and 128 per environment**. M3 is running the 80 additional jobs for seeds 3/4/5/6/7. Completion and
+independent artifact/model-replay acceptance are still pending; only then will
+they be combined with the existing 48.
 The new 4070 CUDA campaign will run all 128 jobs after the user connects the
 machine and sends a connection-ready message. Neither the added M3 cohort nor
-the full eight-seed study is complete at this preparation stage.
+the full eight-seed study is complete at this running stage.
 
 Both budgets retain the same learning-rate scheduler. Trainer, original
 worker, label loader, graph dataset, common helpers, training mathematics
@@ -1179,7 +1180,8 @@ and data hashes remain frozen at
 entry points `scripts/run_time_budget_extension.py` and
 `scripts/run_time_campaign_seed_extension.py` add seed coverage without
 editing those frozen training files; their own source and bundle hashes are
-recorded separately. Both arms remain isolated from the input bundle and
+recorded separately, with the supplement bundle frozen at `8521063`.
+Both arms remain isolated from the input bundle and
 published outputs. The pending CUDA deployment must verify the same frozen
 training/input versions. Historical accepted CUDA runs are reference data,
 not substitutes for the newly matched 128-job CUDA cohort.
@@ -1198,8 +1200,15 @@ Keep execution settings consistent between the two budgets within each
 environment. The environment contrast still combines CPU/CUDA, operating system,
 processor architecture, library builds and numerical kernels; it must be called
 an **environment effect**, not a pure causal hardware effect. Matching seed
-numbers enables paired reporting but does not imply bit-identical optimization
-across CPU and CUDA.
+numbers permits pairing experiment labels, but does not guarantee the same
+random-number sequences, stochastic masks or operation results across CPU and
+CUDA. Backend random-number generation and operator implementations can differ;
+observed differences cannot be attributed only to floating-point rounding.
+[PyTorch 2.14 reproducibility documentation](https://docs.pytorch.org/docs/2.14/notes/randomness.html)
+explicitly states that CPU/GPU results need not match even with identical seeds,
+and discusses controlling randomness and nondeterministic operations separately.
+This study evaluates the combined execution environments; it does not causally
+isolate hardware effects.
 
 For each target and seed, report both budgets in both environments, including
 best epoch, stopping epoch, best-checkpoint eval training MSE, validation RMSE,
@@ -1308,6 +1317,47 @@ eight-seed extension. This replay needs no network, raw activity tables or
 remote machine, and does not train any model. Use the frozen `90a4700` scripts inside the input archive;
 future edited training scripts must not silently replace them. An existing
 replay directory is refused; choose a new directory for another run.
+
+**Acceptance and comparison commands for the expanded study (pending).** The
+planned additional M3 archive is
+`results/time_budget_sensitivity/m3_extension/study.tar.gz`; it has not yet
+been published. After all 80 added jobs finish, verify its archive/member
+hashes and extract it into a separate new directory. The paths below are
+examples of those future unpacked directories; do not create a combined
+study by overwriting the original 48-job tree.
+
+```bash
+# Retain the original pilot input/study trees produced by the replay above.
+# Replace the supplement path with the separately verified 80-job study tree.
+python experiments/time_budget_report.py \
+  --study-root .scratch/m3-budget-replay/returned/study \
+  --supplement-root .scratch/m3-extension-replay/returned/study \
+  --seeds 42 1 2 3 4 5 6 7 --training-device cpu \
+  --input-root .scratch/m3-budget-replay/input \
+  --out-dir .scratch/m3-eight-seed-report --threads 2
+
+# Only after the fresh 128-job CUDA cohort has completed and been returned.
+python experiments/time_budget_report.py \
+  --study-root .scratch/cuda-eight-seed-replay/returned/study \
+  --seeds 42 1 2 3 4 5 6 7 --training-device cuda \
+  --input-root .scratch/m3-budget-replay/input \
+  --out-dir .scratch/cuda-eight-seed-report --threads 2
+
+# Requires both complete, independently accepted 128-job reports.
+python experiments/time_environment_comparison.py \
+  --cpu-report .scratch/m3-eight-seed-report \
+  --cuda-report .scratch/cuda-eight-seed-report \
+  --out-dir .scratch/environment-eight-seed-comparison
+```
+
+Each report writes to a new directory and verifies its declared full cohort;
+`--training-device` identifies the original training environment, while the
+independent replay runs on CPU. The comparison refuses missing or unaccepted
+CUDA reports instead of publishing a partial four-cell result. For accepted
+inputs it produces 64 target/seed pairs and five contrasts: CPU budget,
+CUDA budget, CUDA-minus-CPU under the original budget, CUDA-minus-CPU under
+the extended budget, and the difference between the two budget contrasts.
+These are future operations; no CUDA comparison outcome is available yet.
 
 ### Frozen inputs and local preparation
 

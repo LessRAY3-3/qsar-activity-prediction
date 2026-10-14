@@ -1,0 +1,28 @@
+{
+  "pid": 4040,
+  "command": [
+    "/usr/bin/caffeinate",
+    "-ims",
+    "/Users/leisirui/qsar-campaigns/time-budget-20261014/.venv/bin/python",
+    "-u",
+    "/Users/leisirui/qsar-campaigns/time-budget-20261014/eight-seed/input/scripts/run_time_budget_extension.py",
+    "--bundle-root",
+    "/Users/leisirui/qsar-campaigns/time-budget-20261014/eight-seed/input",
+    "--output",
+    "/Users/leisirui/qsar-campaigns/time-budget-20261014/eight-seed/study",
+    "--device",
+    "cpu",
+    "--parallel-workers",
+    "4",
+    "--seeds",
+    "3",
+    "4",
+    "5",
+    "6",
+    "7",
+    "--execute"
+  ],
+  "started_at": "2026-10-14T01:47:12.057290+00:00",
+  "source_commit": "85210630c475e8733089a476b8d5bf4852dbf773",
+  "reuses_pilot_training_code_and_inputs": true
+}

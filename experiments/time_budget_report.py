@@ -1,4 +1,4 @@
-"""Audit M3 CPU budget cohorts, individually or merged, without training.
+"""Audit CPU or CUDA training-budget cohorts with independent CPU replay.
 
 python experiments/time_budget_report.py --study-root RETURNED/study \
     --input-root FROZEN_INPUT_ROOT --out-dir results/time_budget_sensitivity/m3
@@ -6,7 +6,7 @@ python experiments/time_budget_report.py --study-root RETURNED/study \
 The input root supplies matching frozen scripts, eight graph caches and splits.
 The study supplies protocol/status, eight lane manifests and all canonical and
 snapshot outputs. Nothing is published until every expected job passes CPU replay. This
-reports only the M3 half of the planned environment x budget study; it never
+reports one environment of the planned environment x budget study; it never
 selects seeds or replaces the main campaign. Outputs contain secondary test
 metrics as well as the primary training/validation diagnostics.
 """
@@ -66,9 +66,9 @@ def inside(root, relative):
     return path
 
 
-def expected_parameters(arm, seed):
+def expected_parameters(arm, seed, training_device="cpu"):
     return {"hidden": 128, "num_layers": 4, "dropout": 0.2, "lr": 0.001,
-            "batch_size": 128, "device": "cpu", "seed": seed, **ARMS[arm]}
+            "batch_size": 128, "device": training_device, "seed": seed, **ARMS[arm]}
 
 
 def artifact_names(tag, seed):
@@ -85,8 +85,9 @@ def validate_seeds(seeds):
     return seeds
 
 
-def inspect_study(study, inputs, seeds=SEEDS):
+def inspect_study(study, inputs, seeds=SEEDS, training_device="cpu"):
     """Verify coverage, protocol, manifests and both copies before replay."""
+    require(training_device in ("cpu", "cuda"), "Unsupported training device")
     protocol = read_json(study / "protocol.json")
     cohort_seeds = validate_seeds(protocol["seeds"])
     if seeds is not None:
@@ -94,11 +95,13 @@ def inspect_study(study, inputs, seeds=SEEDS):
     count = len(ARMS) * len(TAGS) * len(cohort_seeds)
     require(protocol["arms"] == ARMS
             and protocol["lanes"] == [list(lane) for lane in LANES]
-            and protocol["jobs"] == count and protocol["device"] == "cpu"
-            and protocol["parallel_workers"] == 4, "Unexpected M3 study protocol")
+            and protocol["jobs"] == count and protocol["device"] == training_device
+            and type(protocol["parallel_workers"]) is int
+            and protocol["parallel_workers"] in ((4,) if training_device == "cpu" else (1, 2, 3, 4)),
+            "Unexpected training study protocol/device/concurrency")
     require(protocol["thread_environment"].get("QSAR_TORCH_THREADS") == "4"
             and protocol["thread_environment"].get("QSAR_TORCH_INTEROP_THREADS") == "1",
-            "Study protocol must request 4 intra-op / 1 inter-op CPU threads")
+            "Study protocol must request 4 intra-op / 1 inter-op host threads")
     top = read_json(study / "study_status.json")
     require(top["state"] == "training_complete_pending_independent_audit",
             "Study has not completed training")
@@ -135,7 +138,7 @@ def inspect_study(study, inputs, seeds=SEEDS):
                     require(status["state"] == "success" and status["signature"] == json_digest(p),
                             f"{arm}/{tag}/{seed}: invalid success/signature")
                     require(p["role"] == "gin" and p["tag"] == tag and p["label_id"] == label
-                            and p["hyperparameters"] == expected_parameters(arm, seed),
+                            and p["hyperparameters"] == expected_parameters(arm, seed, training_device),
                             f"{arm}/{tag}/{seed}: parameters or labels differ")
                     require(p["bundle_manifest"] == {"sha256": mh, "source_git_head": protocol["source_commit"]},
                             "Job manifest provenance mismatch")
@@ -171,7 +174,7 @@ def inspect_study(study, inputs, seeds=SEEDS):
                       input_sha256=input_hashes, source_sha256=source_hashes)
 
 
-def inspect_cohorts(studies, inputs, seeds=SEEDS):
+def inspect_cohorts(studies, inputs, seeds=SEEDS, training_device="cpu"):
     """Require complete disjoint cohorts with identical training code, data and host.
 
     Bundle/coordinator revisions may differ; their full protocols remain recorded.
@@ -182,11 +185,14 @@ def inspect_cohorts(studies, inputs, seeds=SEEDS):
     require(len(studies) == len(set(studies)), "Duplicate study roots")
     jobs, evidence, seen = [], [], set()
     for study in studies:
-        cohort_jobs, cohort_evidence = inspect_study(study, inputs, seeds=None)
+        cohort_jobs, cohort_evidence = inspect_study(study, inputs, seeds=None, training_device=training_device)
         cohort_seeds = set(cohort_evidence["protocol"]["seeds"])
         require(not seen.intersection(cohort_seeds), "Duplicate seeds across study cohorts")
         seen.update(cohort_seeds)
         if evidence:
+            for field in ("device", "parallel_workers", "thread_environment"):
+                require(cohort_evidence["protocol"][field] == evidence[0]["protocol"][field],
+                        f"Cohort protocol {field} differs")
             for field in ("source_sha256", "input_sha256", "training_environment", "host"):
                 require(cohort_evidence[field] == evidence[0][field], f"Cohort {field} differs")
         jobs.extend(cohort_jobs)
@@ -219,11 +225,11 @@ def load_replay_modules(inputs):
     return trainer, load_time_split
 
 
-def check_runtime(runtime, seed):
-    require(runtime.get("seed") == seed and runtime.get("device") == "cpu"
-            and runtime.get("requested_device") == "cpu"
+def check_runtime(runtime, seed, training_device="cpu"):
+    require(runtime.get("seed") == seed and runtime.get("device") == training_device
+            and runtime.get("requested_device") == training_device
             and runtime.get("torch_threads") == 4 and runtime.get("torch_interop_threads") == 1,
-            "Checkpoint/metric runtime must record CPU, 4 intra-op and 1 inter-op threads")
+            f"Checkpoint/metric runtime must record {training_device}, 4 intra-op and 1 inter-op threads")
 
 
 def close(actual, expected, context, tolerance=TOLERANCE):
@@ -262,10 +268,12 @@ def replay_job(job, inputs, trainer, load_split):
     require(metric["params"] == {k: v for k, v in expected_args.items() if k != "split"},
             f"{tag}/{seed}: metric parameters differ")
     require(metric.get("train_mse_source") == "best_checkpoint_eval", "Legacy last-epoch MSE is not acceptable")
-    check_runtime(checkpoint["runtime"], seed)
-    check_runtime(metric["runtime"], seed)
+    training_device = job["parameters"]["device"]
+    require(training_device in ("cpu", "cuda"), "Unsupported checkpoint training device")
+    check_runtime(checkpoint["runtime"], seed, training_device)
+    check_runtime(metric["runtime"], seed, training_device)
     require(checkpoint["runtime"] == metric["runtime"], "Checkpoint/metric runtime differs")
-    require(metric.get("device") == "cpu", "Metric device differs")
+    require(metric.get("device") == training_device, "Metric device differs")
     require(checkpoint["runtime"]["torch_version"] == job["status"]["provenance"]["environment"]["packages"]["torch"],
             "Runtime torch version differs from provenance")
     graph = inputs / f"data/processed/{tag}_graphs.npz"
@@ -321,7 +329,7 @@ def replay_job(job, inputs, trainer, load_split):
                prediction_max_abs_error=replay["prediction_max_abs_error"],
                train_mse_abs_error=abs(replay["train_mse"] - metric["train_mse"]),
                valid_rmse_abs_error=abs(replay["valid_rmse_std"] - metric["best_valid_rmse_std"]),
-               elapsed_seconds=job["status"]["elapsed_seconds"], device="cpu",
+               elapsed_seconds=job["status"]["elapsed_seconds"], device=training_device, replay_device="cpu",
                torch_threads=4, torch_interop_threads=1, **scores)
     return row, pred
 
@@ -405,7 +413,7 @@ def prefix_rows(jobs, seeds=SEEDS):
     return pd.DataFrame(rows)
 
 
-def run(study, inputs, output, threads=4, *, supplement=None, seeds=SEEDS):
+def run(study, inputs, output, threads=4, *, supplement=None, seeds=SEEDS, training_device="cpu"):
     import torch
     study, inputs, output = (Path(p).resolve() for p in (study, inputs, output))
     require(not output.exists(), "Output directory already exists; use a new report directory")
@@ -415,7 +423,7 @@ def run(study, inputs, output, threads=4, *, supplement=None, seeds=SEEDS):
         require(not output.is_relative_to(root) and not root.is_relative_to(output),
                 "Report output must be separate from returned study")
     require(threads > 0, "Replay threads must be positive")
-    jobs, evidence = inspect_cohorts(studies, inputs, seeds)
+    jobs, evidence = inspect_cohorts(studies, inputs, seeds, training_device)
     torch.set_num_threads(threads)
     if torch.get_num_interop_threads() != 1:
         torch.set_num_interop_threads(1)
@@ -430,11 +438,16 @@ def run(study, inputs, output, threads=4, *, supplement=None, seeds=SEEDS):
     pairs = paired_rows(frame, seeds)
     targets = target_rows(frame, pairs, predictions, seeds)
     prefixes = prefix_rows(jobs, seeds)
+    environment_label = "M3 CPU" if training_device == "cpu" else "CUDA training (CPU replay)"
     report = dict(schema="m3-time-budget-report-v1", status="accepted",
                   audited_at=datetime.now(timezone.utc).isoformat(), jobs_accepted=len(jobs),
                   seeds=list(seeds), n_seeds=len(seeds), cohorts=len(studies),
-                  paired_rows=len(pairs), targets=len(TAGS), environment="M3 CPU", factorial_cells_complete=2,
-                  planned_factorial_cells=4, cuda_cells_status="not audited by this report",
+                  paired_rows=len(pairs), targets=len(TAGS), environment=environment_label,
+                  training_device=training_device, training_host=evidence["host"],
+                  training_platform=evidence["training_environment"].get("platform"),
+                  factorial_cells_complete=2, planned_factorial_cells=4,
+                  cpu_cells_status="accepted for declared seeds" if training_device == "cpu" else "not audited by this report",
+                  cuda_cells_status="accepted for declared seeds" if training_device == "cuda" else "not audited by this report",
                   primary_metrics=["best-checkpoint standardized train MSE", "validation RMSE"],
                   secondary_metrics=["test R2", "test RMSE", "test MAE", "runtime"],
                   delta_convention="extended minus control, paired by target and seed",
@@ -442,10 +455,10 @@ def run(study, inputs, output, threads=4, *, supplement=None, seeds=SEEDS):
                   common_flag="best_epoch < 30 and best-checkpoint standardized train MSE > 0.5",
                   native_flag="best_epoch < 0.3 * each arm max_epochs and best-checkpoint train MSE > 0.5",
                   interpretation=["Flags are diagnostics, not proof of non-convergence or benefit from longer training",
-                                  "Current report measures within-M3 budget contrasts only",
+                                  "Current report measures within one training environment budget contrasts only",
                                   "Future CPU/CUDA comparison combines OS, architecture, kernels and libraries; not a pure hardware causal effect",
                                   f"{len(seeds)} seeds and overlapping target sets do not provide independent target-level replications",
-                                  "Completed M3 cells refer to the declared audited seeds; other seed cohorts are not implied",
+                                  "Completed cells refer only to this training environment and the declared audited seeds; other environment/seed cohorts are not implied",
                                   "Target seed SDs are descriptive, not confidence intervals; ensemble R2 differs from mean single-seed R2"],
                   replay=dict(device="cpu", torch_threads=threads, torch_interop_threads=1,
                               torch_version=str(torch.__version__), python=platform.python_version(),
@@ -475,6 +488,8 @@ def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--study-root", required=True, type=Path)
     parser.add_argument("--input-root", required=True, type=Path)
+    parser.add_argument("--training-device", choices=("cpu", "cuda"), default="cpu",
+                        help="Required recorded training device; model replay always runs on CPU")
     parser.add_argument("--supplement-root", type=Path, help="Optional disjoint cohort with identical training code/data/environment")
     parser.add_argument("--seeds", "--expected-seeds", nargs="+", type=int, default=list(SEEDS),
                         help="Expected seed union across roots; default 42 1 2. New cohort: 3 4 5 6 7; merged: 42 1 2 3 4 5 6 7")
@@ -483,7 +498,7 @@ def main(argv=None):
     args = parser.parse_args(argv)
     try:
         report = run(args.study_root, args.input_root, args.out_dir, args.threads,
-                     supplement=args.supplement_root, seeds=args.seeds)
+                     supplement=args.supplement_root, seeds=args.seeds, training_device=args.training_device)
     except (ValueError, AssertionError, OSError, KeyError, RuntimeError) as error:
         parser.exit(1, f"AUDIT FAILED: {type(error).__name__}: {error}\n")
     print(json.dumps({k: report[k] for k in ("status", "jobs_accepted", "paired_rows", "flags_by_arm")}, indent=2))

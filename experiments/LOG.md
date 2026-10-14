@@ -26,22 +26,35 @@ are historical only.**
   eight targets × seeds **42/1/2/3/4/5/6/7** gives **64 jobs per cell,
   128 per environment, 256 total**. This is not data k-fold cross-validation
   or an architecture comparison.
-- **Preparation status:** M3's accepted 48 pilot jobs are retained. An additional
-  80 M3 jobs (seeds 3/4/5/6/7 in both budgets) are preparing for execution;
+- **Execution status:** M3's accepted 48 pilot jobs are retained. The additional
+  80 M3 jobs (seeds 3/4/5/6/7 in both budgets) are running; completion and
+  independent artifact/model-replay acceptance are pending;
   the accepted combined CPU cohort will contain 128 jobs. The complete new
   CUDA cohort contains 128 jobs and will start only after the user's
   connection-ready message. No eight-seed result is complete or claimed here.
 - **Frozen computation:** retain trainer, original worker, label loader,
   graph dataset, common helpers and all data hashes from
   `90a470050367cebc4cd83dfe8d3f7fb37d53e6de`. Training mathematics are unchanged.
-  New coordinator/seed-wrapper entry points have separate recorded provenance;
-  they do not replace the frozen training code.
+  New coordinator/seed-wrapper entry points have separate recorded provenance,
+  with their supplement bundle frozen at `8521063`; they do not replace the
+  frozen training code.
 - **Reporting:** preserve the pilot's actual result (23/24 identical saved
   prediction pairs; only HIVPR seed 42 improves validation; diagnostic flags
   9/24 → 9/24). Report the complete eight-seed cohort separately, retain every
   declared seed and do not select from test performance. The original offline
   replay commands and paths remain valid in the report's default three-seed
-  mode. Main temporal/RF results remain untouched.
+  mode. Same-numbered CPU/CUDA seeds do not guarantee the same random sequence
+  or operator results; the contrast includes backend RNG and operator
+  implementations, not only floating-point differences. It is not a causally
+  isolated hardware test. Main temporal/RF results remain untouched.
+- **Prepared analysis path:** `time_budget_report.py` accepts a separate pilot
+  and supplement tree with eight declared seeds; the future combined CPU
+  report requires all 128 jobs. A fresh CUDA report uses `--training-device cuda`
+  and likewise requires 128 jobs. `experiments/time_environment_comparison.py`
+  requires both independently accepted reports, then emits 64 paired rows and
+  five environment/budget contrasts. Missing CUDA evidence is an error, not
+  a partial comparison. The additional public M3 archive is planned at
+  `m3_extension/study.tar.gz` under the study results; it is not yet published.
 - **Amendment record:**
   `results/time_budget_sensitivity/replication_extension.json`. It supersedes
   the earlier plan to finish all four three-seed cells before deciding on
