@@ -1,0 +1,14 @@
+total cells: 467, mismatches: 0
+  T1     cells= 88 mismatch=0
+  T10_environment cells= 20 mismatch=0
+  T1_conditional cells=  8 mismatch=0
+  T2     cells= 96 mismatch=0
+  T3     cells= 48 mismatch=0
+  T4fp   cells= 48 mismatch=0
+  T4mt   cells= 60 mismatch=0
+  T5     cells=  6 mismatch=0
+  T6     cells=  6 mismatch=0
+  T7     cells= 12 mismatch=0
+  T8     cells= 66 mismatch=0
+  T9     cells=  9 mismatch=0
+report -> logs/source_provenance_20261015/readme_verification.json

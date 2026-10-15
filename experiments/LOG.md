@@ -1607,3 +1607,29 @@ observed at this entry's write time.
   13:56 were green again by 14:04). The suite grew from the review's
   165 to 199 tests while this batch ran; ruff untouched (no `.py`
   edits).
+
+## 2026-10-15 — Source sensitivity and core fitted-artifact provenance
+
+- All 24 RF–GIN cells: frozen raw-label reconstruction, document membership,
+  top-five source exclusions, B/F strata and paired molecule/document bootstrap
+  on identical exclusive-source subsets (10,000 draws each). Seven of fourteen
+  molecule-level nonzero intervals cross zero under document resampling. These
+  are exploratory, unadjusted diagnostics; no source/model was selected from
+  the test results and no main result was overwritten.
+- Sixteen new fixed-selected-parameter RF fits completed on M3 Max, seed42,
+  eight threads, 2026-10-15 15:32:08–15:44:16 UTC. Original RF pool order is
+  retained. Independently replayed on M4 with one thread: exact historical
+  prediction agreement, <=3.553e−15 difference from new saved predictions.
+  The original grid searches were not rerun. Full models/inputs/receipts/logs
+  are in the separately hashed 104-file return archive.
+- All 72 published core GIN checkpoints replayed on CPU with at most
+  1.908e−6 prediction discrepancy. This pins current compatibility; it does
+  not reconstruct the historical training identity of older checkpoints.
+- Reverified the full 931-file archive of the already accepted 18-fit CUDA
+  replacement study. Its 42-cell CPU acceptance remains dated 2026-10-14.
+- Added 20 regression cases covering overlapping/missing sources, as-of
+  windows, label order, unequal document-cluster sizes, degenerate R²,
+  RF training order, receipt identity and GIN normalization/label/weight guards.
+  Full suite: 774 passed, 3 existing warnings. See
+  `docs/source_provenance_followup_2026-10-15.md` and
+  `logs/source_provenance_20261015/`.

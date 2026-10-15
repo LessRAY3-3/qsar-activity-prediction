@@ -1,0 +1,11 @@
+{
+  "state": "verified_return_archive",
+  "format": "regular-handoff",
+  "archive_sha256": "3a1cd3161ff988d3d91b74ad50d47076751a05035dfcf1b5c3b1821cc40ab5a9",
+  "archive_bytes": 554406533,
+  "manifest_sha256": "d112ba68689ea3893ce454529157880b65b56b33f7a6246c1bba1f1142a2a388",
+  "files": 104,
+  "hardlinks": 0,
+  "out_dir": "/Users/lessray/Desktop/kimi code/qsar-time-retrain-20261013/.scratch/source-study-20261015/rf-return",
+  "acceptance_scope": "Archive/member byte integrity only; independent numerical replay remains required."
+}

@@ -1,0 +1,15 @@
+{
+  "pid": 44275,
+  "argv": [
+    "/usr/bin/caffeinate",
+    "-i",
+    "/Users/leisirui/qsar-activity-prediction/.venv/bin/python",
+    "-u",
+    "/Users/leisirui/qsar-campaigns/rf-core-confirmation-20261015/experiments/rf_core_confirmation.py",
+    "--out-dir",
+    "/Users/leisirui/qsar-campaigns/rf-core-confirmation-20261015/output",
+    "--jobs",
+    "8"
+  ],
+  "input_archive_sha256": "38452d2712680c8c85c3f4c573959a9e3160fd240c2efae969df53c00ff2ba68"
+}

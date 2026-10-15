@@ -1,0 +1,28 @@
+{
+  "schema": "qsar-source-provenance-followup-acceptance-v1",
+  "baseline_revision": "194fd47bd80d61d7a199e609da016173bb203517",
+  "source_cells": 24,
+  "source_inputs_verified": 142,
+  "source_output_tables_verified": 27,
+  "published_scientific_files_unchanged": 1285,
+  "new_rf_fits": 16,
+  "published_gin_checkpoints_replayed": 72,
+  "prior_gin_replacement_jobs": 18,
+  "prior_gin_task_result_cells": 42,
+  "prior_gin_archive_files": 931,
+  "original_historical_identities_recovered": false,
+  "checks": {
+    "results/source_heterogeneity/report.json": "d1c4c0da29a956241421428334b062e6ec0eb9fc3c8c279b3114f185f4016eec",
+    "results/provenance_reconstruction/core_rf_20261015/acceptance.json": "6a86c87a2afe807dd773641430801eede4e3772e1256d11ce61303cfd2193f8b",
+    "results/provenance_reconstruction/core_rf_20261015/archive.manifest.json": "d112ba68689ea3893ce454529157880b65b56b33f7a6246c1bba1f1142a2a388",
+    "results/provenance_reconstruction/core_gin_audit_20261015.json": "b76f8fe7660dfe9315abe770c00bd1c2b1e87befe77f0f70c349c3cafcd073df",
+    "results/provenance_reconstruction/cuda_20261014/acceptance.json": "a3b9806e53f6d8168374c686b4695e8862629bd8391499c316515bfd6204a034",
+    "logs/source_provenance_20261015/prior_gin_archive_verification.json": "66950dfbb8074d65184704ea28b64fd84c78e087f44651a823040cff9c25b74c",
+    "logs/source_provenance_20261015/rf_archive_verification.json": "2b4764925d7350865f26ecd1262fe81c2d7c3d2fbfd3a67630da08154020e628",
+    "logs/source_provenance_20261015/full_tests.log": "c20c010842244d94d6dd725bee49308e6833a7bb579b04dd2707afd21ac297ff",
+    "logs/source_provenance_20261015/readme_verification.json": "2b0926fb0798f4edf016d67d29d2f374e29245b10a55b55aeaefa3119968539e",
+    "logs/source_provenance_20261015/ruff.log": "82b3e6a6c090a57601d22943bd23fca9218d1031dbe5a7b754092f9a156b4f18",
+    "logs/source_provenance_20261015/m3_postrun_environment.json": "85ccdd086825981b3afb3c12295542bd93f8b321050b81501d58c37b8c2f3940"
+  },
+  "temporal_document_table_values_verified": 56
+}

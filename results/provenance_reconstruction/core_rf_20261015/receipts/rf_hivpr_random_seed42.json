@@ -1,0 +1,68 @@
+{
+  "job_id": "rf_hivpr_random_seed42",
+  "started_utc": "2026-10-15T15:39:30.983274+00:00",
+  "status": "complete",
+  "parameters": {
+    "bootstrap": true,
+    "ccp_alpha": 0.0,
+    "criterion": "squared_error",
+    "max_depth": null,
+    "max_features": 1.0,
+    "max_leaf_nodes": null,
+    "max_samples": null,
+    "min_impurity_decrease": 0.0,
+    "min_samples_leaf": 1,
+    "min_samples_split": 5,
+    "min_weight_fraction_leaf": 0.0,
+    "monotonic_cst": null,
+    "n_estimators": 500,
+    "n_jobs": 8,
+    "oob_score": false,
+    "random_state": 42,
+    "verbose": 0,
+    "warm_start": false
+  },
+  "published_parameters": {
+    "bootstrap": true,
+    "ccp_alpha": 0.0,
+    "criterion": "squared_error",
+    "max_depth": null,
+    "max_features": 1.0,
+    "max_leaf_nodes": null,
+    "max_samples": null,
+    "min_impurity_decrease": 0.0,
+    "min_samples_leaf": 1,
+    "min_samples_split": 5,
+    "min_weight_fraction_leaf": 0.0,
+    "monotonic_cst": null,
+    "n_estimators": 500,
+    "n_jobs": 1,
+    "oob_score": false,
+    "random_state": 42,
+    "verbose": 0,
+    "warm_start": false
+  },
+  "input_manifest_sha256": "e68944cf19f5e420c47c482e7632c5805d9178377021b2e801ad5bcae1a60787",
+  "environment_sha256": "28941e6133635400e67873966865bf54c1e2f6acef615c99a98efae617f0d634",
+  "data_identity": "993aed7827ee70ec9ac2908ed60286e46a7728223da66a4b36e52fed50866f77",
+  "n_train": 2058,
+  "n_test": 515,
+  "ended_utc": "2026-10-15T15:39:40.221882+00:00",
+  "elapsed_seconds": 9.23502783398726,
+  "metrics": {
+    "r2": 0.692191224981888,
+    "rmse": 0.8852378320977788,
+    "mae": 0.6083497545225192
+  },
+  "historical_metrics": {
+    "r2": 0.692191224981888,
+    "rmse": 0.885237832097779,
+    "mae": 0.6083497545225193
+  },
+  "saved_model_replay_max_abs_error": 3.552713678800501e-15,
+  "historical_prediction_max_abs_difference": 3.552713678800501e-15,
+  "output_sha256": {
+    "model.joblib": "7119605518538e9986ef951035bdc8d9c362aef4b0df35f809595b62d6df7453",
+    "predictions.npz": "9bb9812757d874da214b1a779471ea253761ff0833c52c109b65d140e802e68c"
+  }
+}

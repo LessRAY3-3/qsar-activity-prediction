@@ -2088,3 +2088,27 @@ variance separately. Frozen code does not enable deterministic algorithms;
 its additive graph reductions are consistent with such variability, but these
 records cannot identify its unique cause. Inference replay verifies artifacts,
 not deterministic retraining. See `independent_prefix_review.json` in the logs.
+
+### Measurement-source sensitivity and core provenance (2026-10-15)
+
+The [source/provenance follow-up](source_provenance_followup_2026-10-15.md)
+reconstructs raw-label attribution for all 24 RF–GIN cells. Paired molecule
+and document-cluster bootstraps use identical exclusive-source subsets, so
+their comparison separates the resampling unit from subset membership.
+Seven of 14 molecule-level nonzero intervals cross zero under document
+resampling; these are exploratory, unadjusted intervals. A2a/time retains
+ΔR² +0.325845 after removing its largest source, but its document interval
+crosses zero. B-only/F-only rankings reverse for A2a/time and Mpro/time.
+The original molecule-bootstrap results remain conditional findings; they do
+not establish consistency across publications or assay protocols.
+
+Sixteen new fixed-parameter RF fits on M3 have independently replayed models
+and full input/source/output receipts. On the M4 coordinator, single-thread
+predictions match the historical RF predictions exactly; replay of the new
+eight-thread saved predictions differs by at most 3.552713678800501e−15.
+These are new confirmations, not recovered original search trajectories.
+All 72 published core GIN checkpoints also pass a current CPU replay, with
+maximum prediction discrepancy 1.9073486328125e−6. The existing 18-fit CUDA
+replacement cohort remains separately accepted; its 931-file archive was
+rechecked. The linked follow-up records which historical identities remain
+unrecoverable and which new experiments now have explicit provenance.
