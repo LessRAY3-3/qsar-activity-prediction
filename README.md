@@ -1013,8 +1013,11 @@ activity rows use only **30, 75 and 300 nM** values and one assay description;
 parent medians yield six frozen label values. Shared document/description does
 not establish that all rows came from one laboratory batch. This concentration
 limits interpretation as broad future-chemistry generalization and makes
-source/assay dependence a relevant sensitivity check. See the reproducible
-[Low diagnostics](results/review_low_diagnostics/summary.json).
+source/assay dependence a relevant sensitivity check. The completed
+[24-cell source analysis](docs/source_provenance_followup_2026-10-15.md) finds
+that deleting this document leaves a positive point difference (+0.326 R²),
+while the document-bootstrap interval on the exclusive-source subset crosses
+zero. See also the original [Low diagnostics](results/review_low_diagnostics/summary.json).
 
 These are retrospective publication-year holdouts, not evidence of a causal
 drift mechanism or deployment readiness. A negative constant R2 alone cannot
@@ -1097,3 +1100,21 @@ protect existing downloads. Validation: 754 tests passed (3 existing warnings),
 467 README cells with zero mismatches, and 16 analysis-input cells checked.
 Published scientific artifacts were preserved; these checks do not prove the
 absence of every possible scientific error.
+
+### Measurement-source and provenance follow-up (2026-10-15)
+
+Across all 24 RF–GIN evaluation cells, paired molecule and document bootstrap
+intervals were compared on identical single-source subsets. Seven of 14
+molecule-level intervals that excluded zero cross zero under document
+resampling. The original temporal "4 GIN-favoring cells" is therefore a
+conditional molecule-bootstrap finding, not evidence of consistency across
+publications. A2a/time and Mpro/time also show opposite RF/GIN rankings in
+B-only versus F-only assay-type subsets; these are descriptive, confounded
+comparisons. No unfavorable sources or results were removed from the main study.
+
+New evidence includes 16 fixed-parameter RF confirmation fits with full receipts,
+independent replay of all 72 published core GIN checkpoints, and a fresh byte
+verification of the previously accepted 18-fit GNN/multitask supplement.
+Current replay and new experiments do not recover missing historical training
+identities or original RF search trajectories. Methods, limitations and artifacts:
+[source and provenance report](docs/source_provenance_followup_2026-10-15.md).

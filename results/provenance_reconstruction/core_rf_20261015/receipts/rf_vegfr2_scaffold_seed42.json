@@ -1,0 +1,68 @@
+{
+  "job_id": "rf_vegfr2_scaffold_seed42",
+  "started_utc": "2026-10-15T15:42:21.620622+00:00",
+  "status": "complete",
+  "parameters": {
+    "bootstrap": true,
+    "ccp_alpha": 0.0,
+    "criterion": "squared_error",
+    "max_depth": null,
+    "max_features": 1.0,
+    "max_leaf_nodes": null,
+    "max_samples": null,
+    "min_impurity_decrease": 0.0,
+    "min_samples_leaf": 1,
+    "min_samples_split": 2,
+    "min_weight_fraction_leaf": 0.0,
+    "monotonic_cst": null,
+    "n_estimators": 500,
+    "n_jobs": 8,
+    "oob_score": false,
+    "random_state": 42,
+    "verbose": 0,
+    "warm_start": false
+  },
+  "published_parameters": {
+    "bootstrap": true,
+    "ccp_alpha": 0.0,
+    "criterion": "squared_error",
+    "max_depth": null,
+    "max_features": 1.0,
+    "max_leaf_nodes": null,
+    "max_samples": null,
+    "min_impurity_decrease": 0.0,
+    "min_samples_leaf": 1,
+    "min_samples_split": 2,
+    "min_weight_fraction_leaf": 0.0,
+    "monotonic_cst": null,
+    "n_estimators": 500,
+    "n_jobs": 1,
+    "oob_score": false,
+    "random_state": 42,
+    "verbose": 0,
+    "warm_start": false
+  },
+  "input_manifest_sha256": "e68944cf19f5e420c47c482e7632c5805d9178377021b2e801ad5bcae1a60787",
+  "environment_sha256": "28941e6133635400e67873966865bf54c1e2f6acef615c99a98efae617f0d634",
+  "data_identity": "c7cb3e891b3d4d854eb59cce28a001091438e633be2bf65aadec5a47d5f22f2a",
+  "n_train": 7698,
+  "n_test": 1945,
+  "ended_utc": "2026-10-15T15:44:16.792926+00:00",
+  "elapsed_seconds": 115.15884683300101,
+  "metrics": {
+    "r2": 0.5853499750696074,
+    "rmse": 0.6819633607766343,
+    "mae": 0.5053304788729788
+  },
+  "historical_metrics": {
+    "r2": 0.5853499750696074,
+    "rmse": 0.6819633607766343,
+    "mae": 0.5053304788729788
+  },
+  "saved_model_replay_max_abs_error": 8.881784197001252e-16,
+  "historical_prediction_max_abs_difference": 8.881784197001252e-16,
+  "output_sha256": {
+    "model.joblib": "1b5f98e9c9eb5e9a0d929b5e62fa351a2ab23c334c39f5c28ee7b37b831cb817",
+    "predictions.npz": "302f1dde6afa2909822028a102367d8f5d64550655cb83346c5f276711b06dab"
+  }
+}

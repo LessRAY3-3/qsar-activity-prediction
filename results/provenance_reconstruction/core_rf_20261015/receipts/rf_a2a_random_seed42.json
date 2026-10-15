@@ -1,0 +1,68 @@
+{
+  "job_id": "rf_a2a_random_seed42",
+  "started_utc": "2026-10-15T15:32:08.780850+00:00",
+  "status": "complete",
+  "parameters": {
+    "bootstrap": true,
+    "ccp_alpha": 0.0,
+    "criterion": "squared_error",
+    "max_depth": 40,
+    "max_features": 1.0,
+    "max_leaf_nodes": null,
+    "max_samples": null,
+    "min_impurity_decrease": 0.0,
+    "min_samples_leaf": 1,
+    "min_samples_split": 2,
+    "min_weight_fraction_leaf": 0.0,
+    "monotonic_cst": null,
+    "n_estimators": 300,
+    "n_jobs": 8,
+    "oob_score": false,
+    "random_state": 42,
+    "verbose": 0,
+    "warm_start": false
+  },
+  "published_parameters": {
+    "bootstrap": true,
+    "ccp_alpha": 0.0,
+    "criterion": "squared_error",
+    "max_depth": 40,
+    "max_features": 1.0,
+    "max_leaf_nodes": null,
+    "max_samples": null,
+    "min_impurity_decrease": 0.0,
+    "min_samples_leaf": 1,
+    "min_samples_split": 2,
+    "min_weight_fraction_leaf": 0.0,
+    "monotonic_cst": null,
+    "n_estimators": 300,
+    "n_jobs": 1,
+    "oob_score": false,
+    "random_state": 42,
+    "verbose": 0,
+    "warm_start": false
+  },
+  "input_manifest_sha256": "e68944cf19f5e420c47c482e7632c5805d9178377021b2e801ad5bcae1a60787",
+  "environment_sha256": "28941e6133635400e67873966865bf54c1e2f6acef615c99a98efae617f0d634",
+  "data_identity": "3d4dbf2eba26fdd2411289dc36bbaabcb995b722767148f432ceeee5133aeef7",
+  "n_train": 1092,
+  "n_test": 274,
+  "ended_utc": "2026-10-15T15:32:11.453289+00:00",
+  "elapsed_seconds": 2.6705589159973897,
+  "metrics": {
+    "r2": 0.7099535296263921,
+    "rmse": 0.604550120519908,
+    "mae": 0.46112221980218954
+  },
+  "historical_metrics": {
+    "r2": 0.7099535296263921,
+    "rmse": 0.604550120519908,
+    "mae": 0.46112221980218965
+  },
+  "saved_model_replay_max_abs_error": 1.7763568394002505e-15,
+  "historical_prediction_max_abs_difference": 1.7763568394002505e-15,
+  "output_sha256": {
+    "model.joblib": "36b7f584630accae261de86be3975dd556a6599cd434dccf863d35fbb89caf60",
+    "predictions.npz": "1addef2135441a844476c40bff8c20ac964e8a7bcf64d5c8009b82e31fa2c79f"
+  }
+}

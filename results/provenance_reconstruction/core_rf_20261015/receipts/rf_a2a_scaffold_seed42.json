@@ -1,0 +1,68 @@
+{
+  "job_id": "rf_a2a_scaffold_seed42",
+  "started_utc": "2026-10-15T15:32:11.621261+00:00",
+  "status": "complete",
+  "parameters": {
+    "bootstrap": true,
+    "ccp_alpha": 0.0,
+    "criterion": "squared_error",
+    "max_depth": 40,
+    "max_features": 1.0,
+    "max_leaf_nodes": null,
+    "max_samples": null,
+    "min_impurity_decrease": 0.0,
+    "min_samples_leaf": 1,
+    "min_samples_split": 2,
+    "min_weight_fraction_leaf": 0.0,
+    "monotonic_cst": null,
+    "n_estimators": 300,
+    "n_jobs": 8,
+    "oob_score": false,
+    "random_state": 42,
+    "verbose": 0,
+    "warm_start": false
+  },
+  "published_parameters": {
+    "bootstrap": true,
+    "ccp_alpha": 0.0,
+    "criterion": "squared_error",
+    "max_depth": 40,
+    "max_features": 1.0,
+    "max_leaf_nodes": null,
+    "max_samples": null,
+    "min_impurity_decrease": 0.0,
+    "min_samples_leaf": 1,
+    "min_samples_split": 2,
+    "min_weight_fraction_leaf": 0.0,
+    "monotonic_cst": null,
+    "n_estimators": 300,
+    "n_jobs": 1,
+    "oob_score": false,
+    "random_state": 42,
+    "verbose": 0,
+    "warm_start": false
+  },
+  "input_manifest_sha256": "e68944cf19f5e420c47c482e7632c5805d9178377021b2e801ad5bcae1a60787",
+  "environment_sha256": "28941e6133635400e67873966865bf54c1e2f6acef615c99a98efae617f0d634",
+  "data_identity": "fd70d2d7ee88fcb9ca333d67edbd334bd409a71e95cc99cda61d89a4bbcbb077",
+  "n_train": 1067,
+  "n_test": 299,
+  "ended_utc": "2026-10-15T15:32:14.313965+00:00",
+  "elapsed_seconds": 2.6909853749966715,
+  "metrics": {
+    "r2": 0.7024594756345401,
+    "rmse": 0.5647800402720565,
+    "mae": 0.4058022610964819
+  },
+  "historical_metrics": {
+    "r2": 0.7024594756345401,
+    "rmse": 0.5647800402720565,
+    "mae": 0.4058022610964819
+  },
+  "saved_model_replay_max_abs_error": 1.7763568394002505e-15,
+  "historical_prediction_max_abs_difference": 1.7763568394002505e-15,
+  "output_sha256": {
+    "model.joblib": "a126345c8f52c52fa1b1cf8242023346665bf7f751455e7cad2d907bcf28c41b",
+    "predictions.npz": "5ceac9680eb9bf7978e119e81693eb5b264d9d93e33563a255231a8d7990bc6b"
+  }
+}

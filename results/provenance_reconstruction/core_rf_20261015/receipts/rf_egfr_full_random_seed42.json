@@ -1,0 +1,68 @@
+{
+  "job_id": "rf_egfr_full_random_seed42",
+  "started_utc": "2026-10-15T15:33:02.357937+00:00",
+  "status": "complete",
+  "parameters": {
+    "bootstrap": true,
+    "ccp_alpha": 0.0,
+    "criterion": "squared_error",
+    "max_depth": null,
+    "max_features": 1.0,
+    "max_leaf_nodes": null,
+    "max_samples": null,
+    "min_impurity_decrease": 0.0,
+    "min_samples_leaf": 1,
+    "min_samples_split": 2,
+    "min_weight_fraction_leaf": 0.0,
+    "monotonic_cst": null,
+    "n_estimators": 500,
+    "n_jobs": 8,
+    "oob_score": false,
+    "random_state": 42,
+    "verbose": 0,
+    "warm_start": false
+  },
+  "published_parameters": {
+    "bootstrap": true,
+    "ccp_alpha": 0.0,
+    "criterion": "squared_error",
+    "max_depth": null,
+    "max_features": 1.0,
+    "max_leaf_nodes": null,
+    "max_samples": null,
+    "min_impurity_decrease": 0.0,
+    "min_samples_leaf": 1,
+    "min_samples_split": 2,
+    "min_weight_fraction_leaf": 0.0,
+    "monotonic_cst": null,
+    "n_estimators": 500,
+    "n_jobs": 1,
+    "oob_score": false,
+    "random_state": 42,
+    "verbose": 0,
+    "warm_start": false
+  },
+  "input_manifest_sha256": "e68944cf19f5e420c47c482e7632c5805d9178377021b2e801ad5bcae1a60787",
+  "environment_sha256": "28941e6133635400e67873966865bf54c1e2f6acef615c99a98efae617f0d634",
+  "data_identity": "86c9029ca90d220f37be3d383df99f2ca2e6468597e4b37c466375e818b5a0de",
+  "n_train": 8583,
+  "n_test": 2146,
+  "ended_utc": "2026-10-15T15:34:33.187466+00:00",
+  "elapsed_seconds": 90.81492783299473,
+  "metrics": {
+    "r2": 0.7288614787245249,
+    "rmse": 0.6952617554968835,
+    "mae": 0.5040977424033877
+  },
+  "historical_metrics": {
+    "r2": 0.7288614787245249,
+    "rmse": 0.6952617554968835,
+    "mae": 0.5040977424033877
+  },
+  "saved_model_replay_max_abs_error": 1.7763568394002505e-15,
+  "historical_prediction_max_abs_difference": 1.7763568394002505e-15,
+  "output_sha256": {
+    "model.joblib": "697b5ab198e0579f95534d39a04069a048469080fef18fc521df1a4dd573989a",
+    "predictions.npz": "a1f5159d0678cf7b5dc657be853a929906cf8847343b5e2d7a7bdb8697928387"
+  }
+}

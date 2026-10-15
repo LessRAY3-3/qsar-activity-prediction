@@ -1,0 +1,68 @@
+{
+  "job_id": "rf_egfr_full_scaffold_seed42",
+  "started_utc": "2026-10-15T15:34:34.595641+00:00",
+  "status": "complete",
+  "parameters": {
+    "bootstrap": true,
+    "ccp_alpha": 0.0,
+    "criterion": "squared_error",
+    "max_depth": null,
+    "max_features": 1.0,
+    "max_leaf_nodes": null,
+    "max_samples": null,
+    "min_impurity_decrease": 0.0,
+    "min_samples_leaf": 1,
+    "min_samples_split": 2,
+    "min_weight_fraction_leaf": 0.0,
+    "monotonic_cst": null,
+    "n_estimators": 500,
+    "n_jobs": 8,
+    "oob_score": false,
+    "random_state": 42,
+    "verbose": 0,
+    "warm_start": false
+  },
+  "published_parameters": {
+    "bootstrap": true,
+    "ccp_alpha": 0.0,
+    "criterion": "squared_error",
+    "max_depth": null,
+    "max_features": 1.0,
+    "max_leaf_nodes": null,
+    "max_samples": null,
+    "min_impurity_decrease": 0.0,
+    "min_samples_leaf": 1,
+    "min_samples_split": 2,
+    "min_weight_fraction_leaf": 0.0,
+    "monotonic_cst": null,
+    "n_estimators": 500,
+    "n_jobs": 1,
+    "oob_score": false,
+    "random_state": 42,
+    "verbose": 0,
+    "warm_start": false
+  },
+  "input_manifest_sha256": "e68944cf19f5e420c47c482e7632c5805d9178377021b2e801ad5bcae1a60787",
+  "environment_sha256": "28941e6133635400e67873966865bf54c1e2f6acef615c99a98efae617f0d634",
+  "data_identity": "69bf5f120dbb8fde9090ba01e511eea0ceb2c691eba0e5b124f9bec2d3c45990",
+  "n_train": 8563,
+  "n_test": 2166,
+  "ended_utc": "2026-10-15T15:35:55.933322+00:00",
+  "elapsed_seconds": 81.32356733400957,
+  "metrics": {
+    "r2": 0.6081481592074331,
+    "rmse": 0.8943902203393498,
+    "mae": 0.689044361608425
+  },
+  "historical_metrics": {
+    "r2": 0.6081481592074331,
+    "rmse": 0.8943902203393498,
+    "mae": 0.689044361608425
+  },
+  "saved_model_replay_max_abs_error": 1.7763568394002505e-15,
+  "historical_prediction_max_abs_difference": 1.7763568394002505e-15,
+  "output_sha256": {
+    "model.joblib": "9872812fc671e26557eb897a64d087989f84ab733b36026be98be0e7d2cfc86f",
+    "predictions.npz": "04194fc2801d5cc97ca80c2f8a66153281994efc23dfb7b15aed00f38acb27e8"
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "python": "3.12.14 (main, Aug 12 2026, 13:57:54) [Clang 21.0.0 (clang-2100.1.1.101)]",
+  "executable": "/Users/leisirui/qsar-activity-prediction/.venv/bin/python",
+  "platform": "macOS-27.0-arm64-arm-64bit",
+  "machine": "arm64",
+  "sklearn": "1.9.1",
+  "numpy": "2.5.3",
+  "joblib": "1.6.0",
+  "started_utc": "2026-10-15T15:32:08.764865+00:00",
+  "jobs": 8,
+  "input_manifest_sha256": "e68944cf19f5e420c47c482e7632c5805d9178377021b2e801ad5bcae1a60787"
+}
