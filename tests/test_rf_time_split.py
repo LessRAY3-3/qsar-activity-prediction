@@ -13,6 +13,7 @@ The default (no --split) behaviour is covered by test_pipeline_smoke.
 """
 import json
 import sys
+from pathlib import Path
 
 import joblib
 import numpy as np
@@ -53,6 +54,7 @@ def _setup(tmp_path, monkeypatch, load_script):
     metrics_path.write_text(json.dumps(backup, indent=2))
 
     mod = load_script("04_train_and_evaluate")
+    monkeypatch.setattr(mod, "TAG", "tiny")
     monkeypatch.setattr(mod, "IN_NPZ", str(fp))
     monkeypatch.setattr(mod, "SPLIT_DIR", str(split_dir))
     monkeypatch.setattr(mod, "FIG_DIR", str(tmp_path / "figures"))
@@ -177,6 +179,12 @@ def test_plot_only_random_uses_current_model_not_stale_predictions(tmp_path, mon
     joblib.dump(model, models / f"rf_random_split_{mod.TAG}.joblib")
     np.savez(tmp_path / "results" / f"rf_preds_{mod.TAG}_random.npz",
              y_true=[99.], y_pred=[-99.], test_idx=[0])
+    fp = np.load(mod.IN_NPZ)
+    _, test = mod.train_test_split(np.arange(N), test_size=0.2, random_state=42)
+    actual, _ = mod.evaluate(model, fp["X"][test], fp["y"][test], "random")
+    metrics = json.loads(Path(mod.METRICS_JSON).read_text())
+    metrics["random"] = actual
+    Path(mod.METRICS_JSON).write_text(json.dumps(metrics))
     plotted = []
     monkeypatch.setattr(mod, "scatter", lambda y, p, split, *args: plotted.append((y, p, split)))
     monkeypatch.setattr(sys, "argv", ["rf", "--plot-only", "--split", "random"])

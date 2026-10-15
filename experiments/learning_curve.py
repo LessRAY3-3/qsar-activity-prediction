@@ -77,12 +77,8 @@ def parse_args():
 
 def load_rf_params(mj, split):
     """Freeze RF hyperparameters to that split's grid-search winner."""
-    bp_key = f"best_params_{split}"
-    if bp_key not in mj:
-        print(f"[{split}] {bp_key} not found; falling back to best_params_random")
-        bp_key = "best_params_random"
-    bp = mj[bp_key]
-    return {k: bp[k] for k in RF_GRID_KEYS}
+    from artifact_guards import require_rf_params
+    return require_rf_params(mj, split)
 
 
 def gin_train_eval(graphs, subset, valid_idx, test_idx, y_mean, y_std, args, seed):
@@ -181,7 +177,8 @@ def main():
     X, y = fp["X"], fp["y"]
     graphs = os.path.join(BASE, "data", "processed", f"{args.tag}_graphs.npz")
     mj = json.load(open(os.path.join(BASE, "results", f"metrics_{args.tag}.json")))
-    rf_params_by_split = {}
+    from artifact_guards import require_rf_params
+    rf_params_by_split = {s: require_rf_params(mj, s) for s in splits}
 
     rows = []
     print(f"[{args.tag}] sizes={sizes} seeds={seeds} splits={splits}")

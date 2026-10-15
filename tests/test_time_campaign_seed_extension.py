@@ -15,7 +15,8 @@ def extension_bundle(tmp_path):
     root = tmp_path / "inputs"
     original = Path(__file__).resolve().parents[1]
     names = bundle.required_sources("gin") | {
-        "scripts/run_time_campaign_seed_extension.py", "scripts/run_time_budget_extension.py"}
+        "scripts/run_time_campaign_seed_extension.py", "scripts/run_time_budget_extension.py",
+        "scripts/artifact_guards.py"}
     for name in names | set(bundle.SPECS):
         target = root / name
         target.parent.mkdir(parents=True, exist_ok=True)

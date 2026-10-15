@@ -20,9 +20,8 @@ CLI:
   --split {random,scaffold,time} runs only that split; metrics_{TAG}.json
   is then loaded and only that split's key plus best_params_{split} (the
   fitted estimator's get_params()) are (over)written - every other key is
-  preserved bit-for-bit. Default (no --split) keeps the original
-  behaviour: train random + scaffold, rewrite the whole metrics file
-  (now carrying best_params_random and best_params_scaffold).
+  preserved as JSON values. Default (no --split) trains random + scaffold
+  and merges those keys, preserving a validated time block.
   The time split reads its indices from
   data/processed/splits/{TAG}_time.npz (train_idx/test_idx; valid_idx is
   ignored - RF uses CV, not early stopping). The npz must carry versioned
@@ -48,6 +47,7 @@ from sklearn.ensemble import RandomForestRegressor
 from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 from sklearn.model_selection import GridSearchCV, KFold, train_test_split
 
+from artifact_guards import atomic_json, rf_identity
 from qsar_common import RANDOM_STATE, scaffold_split
 from time_labels import load_time_split, require_prediction_version
 
@@ -136,6 +136,7 @@ def run_split(X, y, smiles, train_idx, test_idx, tag, fig_path, target):
     metrics, pred = evaluate(gs.best_estimator_, X[test_idx], y[test_idx], tag)
     metrics["runtime"] = {"rf_jobs": jobs, "cv_backend": cv_backend or "default",
                           "seed": RANDOM_STATE}
+    gs.best_estimator_.qsar_identity_ = rf_identity(X, y, smiles, train_idx, test_idx)
     scatter(y[test_idx], pred, tag, fig_path, target)
     return metrics, gs.best_estimator_, pred
 
@@ -145,8 +146,7 @@ def run_single(split, train_idx, test_idx, X, y, smiles, target, label_id=None):
 
     Merges two keys: {split} (r2/rmse/mae) and best_params_{split}
     (best_estimator_.get_params()). Used by --split {random,scaffold,time};
-    the default (no --split) path below keeps the original
-    train-both-then-rewrite-whole-file behaviour.
+    the default path also preserves all unrelated metrics.
     """
     m, best, pred = run_split(
         X, y, smiles, train_idx, test_idx, split,
@@ -166,8 +166,7 @@ def run_single(split, train_idx, test_idx, X, y, smiles, target, label_id=None):
     payload = json.load(open(METRICS_JSON)) if os.path.exists(METRICS_JSON) else {}
     payload[split] = m
     payload[f"best_params_{split}"] = best.get_params()
-    with open(METRICS_JSON, "w") as f:
-        json.dump(payload, f, indent=2)
+    atomic_json(METRICS_JSON, payload)
     print(f"\nMetrics merged -> {os.path.abspath(METRICS_JSON)}")
 
 
@@ -212,12 +211,24 @@ def plot_saved_predictions(selected):
             # current model, never prefer a possibly stale random/scaffold NPZ.
             with np.load(IN_NPZ) as data:
                 if split == "random":
-                    _, test = train_test_split(np.arange(len(data["y"])), test_size=0.2,
+                    train, test = train_test_split(np.arange(len(data["y"])), test_size=0.2,
                                                random_state=RANDOM_STATE)
                 else:
-                    _, test = scaffold_split(data["smiles"], test_size=0.2)
+                    train, test = scaffold_split(data["smiles"], test_size=0.2)
                 model = joblib.load(os.path.join(MODEL_DIR, f"rf_{split}_split_{TAG}.joblib"))
+                identity = getattr(model, "qsar_identity_", None)
+                expected = rf_identity(data["X"], data["y"], data["smiles"], train, test)
+                if identity is not None and identity != expected:
+                    raise ValueError("RF model does not match current features/labels/split")
                 y, p = data["y"][test], model.predict(data["X"][test])
+                metrics = json.load(open(METRICS_JSON))[split]
+                actual = (r2_score(y, p), np.sqrt(mean_squared_error(y, p)),
+                          mean_absolute_error(y, p))
+                if not np.allclose(actual, [metrics[k] for k in ("r2", "rmse", "mae")],
+                                   rtol=0, atol=1e-6):
+                    raise ValueError("RF plot replay does not reproduce saved metrics")
+                if identity is None:
+                    print("[legacy RF] metric replay passed; training identity unavailable")
         os.makedirs(FIG_DIR, exist_ok=True)
         scatter(y, p, split, os.path.join(FIG_DIR, f"pred_vs_actual_{split}_{TAG}.png"), TAG)
 
@@ -231,7 +242,7 @@ def main():
     p.add_argument("--split", choices=["random", "scaffold", "time"], default=None,
                    help="train/evaluate only this split and merge just its key "
                         "into metrics_{TAG}.json (default: train random + scaffold "
-                        "and rewrite the whole metrics file, as before)")
+                        "and preserve other validated metric blocks)")
     args = p.parse_args()
 
     if args.plot_only:
@@ -254,6 +265,13 @@ def main():
     d = np.load(IN_NPZ)
     X, y, smiles = d["X"], d["y"], d["smiles"]
     target = str(d["target"]) if "target" in d.files else TAG
+    previous = json.load(open(METRICS_JSON)) if os.path.exists(METRICS_JSON) else {}
+    if previous.get("tag", TAG) != TAG:
+        raise ValueError("existing metrics belong to a different tag")
+    if args.split != "time" and "time" in previous:
+        temporal = load_time_split(SPLIT_DIR, TAG, smiles, y)
+        if temporal is None or previous["time"].get("label_id") != str(temporal["label_id"]):
+            raise ValueError("cannot preserve stale/unversioned time metrics")
     print(f"Target: {target} | Feature matrix: X={X.shape}, y range [{y.min():.2f}, {y.max():.2f}]")
 
     if args.split == "time":  # indices come from the npz; no random/scaffold work
@@ -290,10 +308,10 @@ def main():
     )
     joblib.dump(best_scaf, os.path.join(MODEL_DIR, f"rf_scaffold_split_{TAG}.joblib"))
 
-    with open(METRICS_JSON, "w") as f:
-        json.dump({"target": target, "tag": TAG, "random": m_rand, "scaffold": m_scaf,
-                   "best_params_random": best_rand.get_params(),
-                   "best_params_scaffold": best_scaf.get_params()}, f, indent=2)
+    previous.update({"target": target, "tag": TAG, "random": m_rand, "scaffold": m_scaf,
+                     "best_params_random": best_rand.get_params(),
+                     "best_params_scaffold": best_scaf.get_params()})
+    atomic_json(METRICS_JSON, previous)
     print(f"\nMetrics saved -> {os.path.abspath(METRICS_JSON)}")
 
 

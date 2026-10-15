@@ -15,8 +15,8 @@ SECTIONS = [
      "Query the ChEMBL REST API for **EGFR (CHEMBL203)** activities: "
      "`standard_type=IC50`, `standard_units=nM`, binding/functional assays.\n\n"
      "The API was intermittently returning HTTP 500 during this project, so "
-     "the downloader retries every page, saves progress after each page, and "
-     "skips poisoned windows (see `scripts/01d_download_incremental.py`). "
+     "the downloader retries every page and aborts on incomplete pagination; "
+     "only a validated crawl replaces the existing CSV (see `scripts/01d_download_incremental.py`). "
      "A ready-made fallback source (MoleculeNet BACE-1) is provided in "
      "`scripts/01alt_download_bace.py` - set `QSAR_TAG=bace` to use it."),
     ("02_clean_data.py", "Step 2 - Data cleaning & pIC50 transform",

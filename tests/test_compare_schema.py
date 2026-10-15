@@ -31,6 +31,11 @@ GIN_SEED2 = {
     "scaffold": {"r2": 0.46, "rmse": 1.20, "mae": 0.88},
 }
 
+# Fixtures carry the same seed provenance required of real metric files.
+for _payload, _seed in ((GIN_BASE, 42), (GIN_SEED1, 1), (GIN_SEED2, 2)):
+    for _split in _payload.values():
+        _split["params"] = {"seed": _seed}
+
 RANDOM_R2_MEAN = float(np.mean([0.55, 0.60, 0.70]))
 SCAFFOLD_R2_MEAN = float(np.mean([0.42, 0.44, 0.46]))
 
@@ -197,7 +202,7 @@ def rf_split_tree(tmp_path, monkeypatch, load_script):
     (proc / "splits").mkdir(parents=True)
     np.savez(proc / "demo_fingerprints.npz", X=X, y=y, smiles=smiles)
     np.savez(proc / "splits" / "demo_random.npz", test_idx=test_idx,
-             scaffold_smiles=smiles)
+             scaffold_smiles=smiles, smiles=smiles)
 
     rf = RandomForestRegressor(n_estimators=8, random_state=0).fit(
         X[n_test:], y[n_test:])

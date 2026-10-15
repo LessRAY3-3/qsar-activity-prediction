@@ -1,0 +1,122 @@
+{
+  "status": "passed",
+  "scope": "cached prediction/label/index/error-table/metric consistency",
+  "limitations": [
+    "No model replay or retraining",
+    "No proof of original training identity"
+  ],
+  "cells": [
+    {
+      "tag": "a2a",
+      "split": "random",
+      "molecules": 274,
+      "n_seeds": 3,
+      "status": "passed"
+    },
+    {
+      "tag": "a2a",
+      "split": "scaffold",
+      "molecules": 299,
+      "n_seeds": 3,
+      "status": "passed"
+    },
+    {
+      "tag": "abl1",
+      "split": "random",
+      "molecules": 424,
+      "n_seeds": 3,
+      "status": "passed"
+    },
+    {
+      "tag": "abl1",
+      "split": "scaffold",
+      "molecules": 425,
+      "n_seeds": 3,
+      "status": "passed"
+    },
+    {
+      "tag": "egfr",
+      "split": "random",
+      "molecules": 912,
+      "n_seeds": 3,
+      "status": "passed"
+    },
+    {
+      "tag": "egfr",
+      "split": "scaffold",
+      "molecules": 912,
+      "n_seeds": 3,
+      "status": "passed"
+    },
+    {
+      "tag": "egfr_full",
+      "split": "random",
+      "molecules": 2146,
+      "n_seeds": 3,
+      "status": "passed"
+    },
+    {
+      "tag": "egfr_full",
+      "split": "scaffold",
+      "molecules": 2166,
+      "n_seeds": 3,
+      "status": "passed"
+    },
+    {
+      "tag": "herg",
+      "split": "random",
+      "molecules": 1681,
+      "n_seeds": 3,
+      "status": "passed"
+    },
+    {
+      "tag": "herg",
+      "split": "scaffold",
+      "molecules": 1682,
+      "n_seeds": 3,
+      "status": "passed"
+    },
+    {
+      "tag": "hivpr",
+      "split": "random",
+      "molecules": 515,
+      "n_seeds": 3,
+      "status": "passed"
+    },
+    {
+      "tag": "hivpr",
+      "split": "scaffold",
+      "molecules": 524,
+      "n_seeds": 3,
+      "status": "passed"
+    },
+    {
+      "tag": "mpro",
+      "split": "random",
+      "molecules": 682,
+      "n_seeds": 3,
+      "status": "passed"
+    },
+    {
+      "tag": "mpro",
+      "split": "scaffold",
+      "molecules": 682,
+      "n_seeds": 3,
+      "status": "passed"
+    },
+    {
+      "tag": "vegfr2",
+      "split": "random",
+      "molecules": 1929,
+      "n_seeds": 3,
+      "status": "passed"
+    },
+    {
+      "tag": "vegfr2",
+      "split": "scaffold",
+      "molecules": 1945,
+      "n_seeds": 3,
+      "status": "passed"
+    }
+  ]
+}

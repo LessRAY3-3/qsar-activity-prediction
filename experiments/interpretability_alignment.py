@@ -383,7 +383,13 @@ def main():
     sp = np.load(os.path.join(BASE, "data", "processed", "splits",
                               f"{args.tag}_{args.split}.npz"))
     test_idx = sp["test_idx"]
-    assert len(df) == len(test_idx), "error analysis csv does not match split"
+    from artifact_guards import check_error_table
+    if not (np.array_equal(fp["smiles"], sp["smiles"])
+            and np.array_equal(graphs["smiles"], sp["smiles"])):
+        raise ValueError("fingerprint/graph/split molecule identity mismatch")
+    with np.load(os.path.join(BASE, "results", f"rf_preds_{args.tag}_{args.split}.npz")) as rp, \
+         np.load(os.path.join(BASE, "results", f"gnn_preds_{args.tag}_{args.split}.npz")) as gp:
+        check_error_table(df, sp, rp, gp, fp["y"])
 
     # ---- molecule selection: families for THIS tag, top-N disagreement
     famsel = select_families(args.tag, df["smiles"].tolist(), args.num_families)

@@ -36,6 +36,8 @@ import argparse
 import json
 import os
 
+from artifact_guards import collect_seed_metrics, check_prediction
+
 import joblib
 import matplotlib
 
@@ -94,12 +96,11 @@ def load_split_data(split, verify=True):
         print(f"  [not checked] {TAG}/{split}: RF-vs-split verification "
               "skipped (--skip-model-check); rf_preds are written from "
               "the regenerated split without independent evidence")
+    g = np.load(os.path.join(BASE, "results", f"gnn_preds_{TAG}_{split}.npz"))
+    check_prediction(g, d, y)
     np.savez(os.path.join(BASE, "results", f"rf_preds_{TAG}_{split}.npz"),
              test_idx=test_idx, y_true=y[test_idx], y_pred=rf_pred)
 
-    g = np.load(os.path.join(BASE, "results", f"gnn_preds_{TAG}_{split}.npz"))
-    assert np.array_equal(g["test_idx"], test_idx)
-    assert np.allclose(g["y_true"], y[test_idx])
     return y[test_idx], rf_pred, g["y_pred"], scaf
 
 
@@ -110,17 +111,7 @@ def collect_gin_metrics():
     seeds that actually report that split, so a seed file missing one
     split never inflates that split's count.
     """
-    import re
-    per_split = {"random": {"r2": [], "rmse": []}, "scaffold": {"r2": [], "rmse": []}}
-    pat = re.compile(rf"^gnn_metrics_{TAG}(_seed\d+)?\.json$")
-    files = sorted(f for f in os.listdir(os.path.join(BASE, "results")) if pat.match(f))
-    for f in files:
-        m = json.load(open(os.path.join(BASE, "results", f)))
-        for s in per_split:
-            if s in m:
-                per_split[s]["r2"].append(m[s]["r2"])
-                per_split[s]["rmse"].append(m[s]["rmse"])
-    return per_split, len(files)
+    return collect_seed_metrics(os.path.join(BASE, "results"), TAG)
 
 
 def comparison_table():

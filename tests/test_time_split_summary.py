@@ -166,10 +166,13 @@ def test_build_summary_keeps_ensemble_delta_not_column_difference(
         np.savez(tmp_path / "data" / "processed" / f"{tag}_fingerprints.npz",
                  y=y_all)
         (tmp_path / "results" / f"metrics_{tag}.json").write_text(
-            json.dumps({"time": {"r2": rf_r2, "rmse": rmse}}))
+            json.dumps({"time": {"r2": rf_r2, "rmse": rmse},
+                        "random": {"r2": .70}, "scaffold": {"r2": .65}}))
         for i, (suf, r2i) in enumerate(zip(("", "_seed1", "_seed2"), seed_r2s)):
             (tmp_path / "results" / f"gnn_metrics_{tag}{suf}.json").write_text(
-                json.dumps({"time": {"r2": r2i, "best_epoch": 5 * i + 1}}))
+                json.dumps({"time": {"r2": r2i, "best_epoch": 5 * i + 1},
+                            "random": {"r2": .60, "rmse": 1., "params": {"seed": (42,1,2)[i]}},
+                            "scaffold": {"r2": .55, "rmse": 1., "params": {"seed": (42,1,2)[i]}}}))
         pd.DataFrame([
             {"split": "random", "rf_r2": 0.70, "gin_r2_mean": 0.60},
             {"split": "scaffold", "rf_r2": 0.65, "gin_r2_mean": 0.55},

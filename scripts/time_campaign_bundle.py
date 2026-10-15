@@ -30,6 +30,7 @@ COMMON_SOURCES = {
 
 
 def required_sources(role):
+    """Legacy baseline; verify_manifest adds dependencies imported by newer trainers."""
     return COMMON_SOURCES | ({"scripts/04_train_and_evaluate.py"} if role == "rf" else {
         "scripts/gnn_03_train_gin.py", "scripts/gnn_graph_dataset.py"})
 
@@ -181,6 +182,10 @@ def verify_manifest(manifest, root):
             raise ValueError(f"file changed: {relative}")
         seen[relative] = entry["sha256"]
     required = data_paths(manifest["role"]) | set(SPECS) | required_sources(manifest["role"])
+    trainers = {"rf": "scripts/04_train_and_evaluate.py", "gin": "scripts/gnn_03_train_gin.py"}
+    trainer = trainers[manifest["role"]]
+    if trainer in seen and "from artifact_guards import" in (root / trainer).read_text():
+        required.add("scripts/artifact_guards.py")
     if not required.issubset(seen):
         raise ValueError("manifest missing required role inputs, dependency specs or runtime source: "
                          + ", ".join(sorted(required - set(seen))))

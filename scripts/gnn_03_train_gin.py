@@ -335,7 +335,8 @@ def main():
         else:
             split = dict(np.load(os.path.join(split_dir, f"{args.tag}_{args.split}.npz")))
     label_meta = {"label_id": str(split["label_id"])} if args.split == "time" else {}
-    y_mean, y_std = float(y_all[split["train_idx"]].mean()), float(y_all[split["train_idx"]].std())
+    from artifact_guards import training_scale
+    y_mean, y_std = training_scale(y_all, split["train_idx"])
     print(f"[{args.tag}/{args.split}] device={device}  y_mean={y_mean:.3f} y_std={y_std:.3f}")
 
     train_ds = MoleculeGraphDataset(graphs, indices=split["train_idx"])

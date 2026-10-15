@@ -11,7 +11,7 @@ the same artifacts the training script expects:
   data/processed/esol_graphs.npz
   data/processed/splits/esol_{random,scaffold}.npz
 
-Split protocol mirrors EGFR: random (seed 42, 80/10/10) and scaffold
+Split protocol mirrors EGFR: random (seed 42, 72/8/20) and scaffold
 (whole Bemis-Murcko scaffolds into test until ~20%, then 10% of train as
 validation). No RF baseline exists for ESOL; the numbers are compared to
 published ESOL results in the README instead.
@@ -21,6 +21,9 @@ use the identical delaney-processed.csv vendored in the DeepChem GitHub
 repo (same MoleculeNet file, widely mirrored).
 """
 import os
+import hashlib
+import tempfile
+from pathlib import Path
 import sys
 import time
 import urllib.request
@@ -29,32 +32,49 @@ import numpy as np
 
 BASE = os.path.join(os.path.dirname(__file__), "..")
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from artifact_guards import check_partition  # noqa: E402
 from qsar_common import RANDOM_STATE, scaffold_split  # noqa: E402
 from gnn_02_build_graphs import smiles_to_graph  # noqa: E402
 from sklearn.model_selection import train_test_split  # noqa: E402
 
 URL = "https://raw.githubusercontent.com/deepchem/deepchem/master/datasets/delaney-processed.csv"
+# DeepChem mirror bytes verified 2026-10-15; upstream changes require explicit review.
+EXPECTED_SHA256 = "8c06a76f0c6487d29ab0f903e6a7a7139f189ab3c1178f159c8be8964602f189"
 RAW_CSV = os.path.join(BASE, "data", "raw", "esol_delaney.csv")
 OUT_NPZ = os.path.join(BASE, "data", "processed", "esol_graphs.npz")
 SPLIT_DIR = os.path.join(BASE, "data", "processed", "splits")
 
 
+def verify_bytes(data):
+    if hashlib.sha256(data).hexdigest() != EXPECTED_SHA256:
+        raise ValueError("ESOL SHA256 mismatch; inspect the cache/upstream version")
+
+
 def download():
     if os.path.exists(RAW_CSV):
-        print(f"cached: {os.path.relpath(RAW_CSV, BASE)}")
+        verify_bytes(Path(RAW_CSV).read_bytes())
+        print(f"verified cache: {os.path.relpath(RAW_CSV, BASE)}")
         return
+    os.makedirs(os.path.dirname(RAW_CSV), exist_ok=True)
     for attempt in (1, 2, 3):
         try:
-            print(f"downloading {URL} (attempt {attempt})")
-            with urllib.request.urlopen(URL, timeout=60) as r, open(RAW_CSV, "wb") as f:
-                f.write(r.read())
+            with urllib.request.urlopen(URL, timeout=60) as response:
+                data = response.read()
+            verify_bytes(data)
             break
         except Exception as e:
-            print(f"  failed: {e}")
+            print(f"download attempt {attempt} failed: {e}")
+            if attempt == 3:
+                raise RuntimeError("could not obtain verified ESOL bytes") from e
             time.sleep(3 * attempt)
-    else:
-        raise SystemExit("could not download ESOL; check network and re-run")
-    print(f"saved -> {os.path.relpath(RAW_CSV, BASE)}")
+    fd, temporary = tempfile.mkstemp(dir=os.path.dirname(RAW_CSV), suffix='.part')
+    try:
+        with os.fdopen(fd, 'wb') as f:
+            f.write(data)
+        os.replace(temporary, RAW_CSV)
+    finally:
+        if os.path.exists(temporary):
+            os.unlink(temporary)
 
 
 def main():
@@ -69,7 +89,8 @@ def main():
     y_col = next((c for c in y_candidates if "measured" in c.lower()), None)
     if y_col is None:  # fall back to any non-predicted solubility column
         y_col = next((c for c in y_candidates if "predicted" not in c.lower()), None)
-    assert len(smiles_col) == 1 and y_col, f"unexpected columns: {df.columns.tolist()}"
+    if len(smiles_col) != 1 or not y_col:
+        raise ValueError(f"unexpected columns: {df.columns.tolist()}")
     smiles_col = smiles_col[0]
     df = df[[smiles_col, y_col]].dropna().reset_index(drop=True)
     smiles = df[smiles_col].astype(str).to_numpy()
@@ -112,7 +133,7 @@ def main():
     }
     for name, (tr, te) in splits.items():
         tr_new, va = train_test_split(tr, test_size=0.1, random_state=RANDOM_STATE)
-        assert len(set(tr_new) & set(va)) == 0 and len(set(tr_new) | set(va) | set(te)) == n
+        check_partition(n, train_idx=tr_new, valid_idx=va, test_idx=te)
         out = os.path.join(SPLIT_DIR, f"esol_{name}.npz")
         np.savez(out, train_idx=tr_new, valid_idx=va, test_idx=te,
                  scaffold_smiles=np.array(scafs, dtype=str), smiles=smiles)
