@@ -913,7 +913,7 @@ train/test leakage. Individual shuffled GIN seeds on `egfr`/random land
 at -0.007/+0.010/+0.026, so the 3-seed mean is slightly positive
 (+0.0097) rather than <= 0; the test still passes under its < 0.2
 criterion. One number needs a footnote: the real-label control
-RF reads **0.7179** (random) against the headline **0.7214**. The ~0.004
+RF reads **0.7179** (random) against the headline **0.7214**. The ~0.003
 gap comes from the control's training pool, not from skipped tuning:
 `experiments/y_randomization.py` fits its control RF on the GNN train
 pool (`train_idx`: 3,283 rows on both egfr splits), i.e. without the
@@ -1231,6 +1231,11 @@ Both scopes were run successfully against the current repaired campaign:
 42,636 retained labels, 168 exclusions, 32 prediction files and 16 bootstrap rows
 with 10,000 replicates each. The full audit verified 108 recorded artifact hashes;
 the data audit verified 76 and explicitly skipped 32 model files plus 16 caches.
+The full-scope record is `results/time_split/pr8_low_audit.json`. A fresh
+2026-10-15 data-scope run is committed as
+`results/time_split/data_audit_20261015.json` (76 artifact hashes, 48 distinct
+skipped model/cache paths). These counts describe artifact records; historical
+source and input hashes are checked separately by the auditor.
 These audits check reproduction and consistency, not external validation or
 uncertainty from retraining; the bootstrap remains conditional on saved predictions.
 
@@ -1899,12 +1904,15 @@ sidecars are tolerated after path/type validation. Existing replaced files survi
 under `.artifacts_cache/backups/`; failed rollback leaves `.fetch_backup` files
 for recovery. A retry refuses to overwrite an unresolved backup. Catchable
 interruptions attempt rollback, but multi-file installation is not atomic under
-SIGKILL or power loss. These changes live on PR #7 until merged.
+SIGKILL or power loss. These changes were merged through PR #7 into main at `7595381`.
 
 
 ### Meaning of the README check and inferred replacement experiments
 
-The 2026-10-14 README check reports 447 checked cells and zero mismatches.
+The earlier 2026-10-14 README check recorded 447 checked cells and zero mismatches.
+After the four-cell environment table added 20 entries, the final check covered
+467 cells with zero mismatches. Historical 447-cell audit records retain their
+original scope and are not rewritten.
 These are table entries covered by `verify_readme_tables.py`, not independent
 experiments or a claim that every statement in the project is correct.
 Numeric entries are compared at the displayed three-decimal precision

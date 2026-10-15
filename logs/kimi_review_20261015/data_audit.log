@@ -1,0 +1,202 @@
+PASS a2a: raw labels, exclusions, 4 predictions, 2 bootstrap rows
+PASS abl1: raw labels, exclusions, 4 predictions, 2 bootstrap rows
+PASS egfr: raw labels, exclusions, 4 predictions, 2 bootstrap rows
+PASS egfr_full: raw labels, exclusions, 4 predictions, 2 bootstrap rows
+PASS herg: raw labels, exclusions, 4 predictions, 2 bootstrap rows
+PASS hivpr: raw labels, exclusions, 4 predictions, 2 bootstrap rows
+PASS mpro: raw labels, exclusions, 4 predictions, 2 bootstrap rows
+PASS vegfr2: raw labels, exclusions, 4 predictions, 2 bootstrap rows
+{
+  "schema": "independent-time-campaign-audit-v1",
+  "status": "passed",
+  "audited_at": "2026-10-15T14:18:24.727923+00:00",
+  "root": "/Users/lessray/Desktop/kimi code/qsar-time-retrain-20261013",
+  "auditor_sha256": "0585f3c9665e4b86fe5f9c9da1ac868fb06b8fd89861b4b952c66b9cf6995593",
+  "hash_scope": "data",
+  "scope": "raw-label/current-prediction/bootstrap audit; no checkpoint replay or retraining",
+  "limitations": [
+    "Uses saved year cutoffs; does not reselect them",
+    "Reuses 02_clean_data parent normalization only",
+    "Bootstrap CIs condition on saved predictions; no seed/refit uncertainty"
+  ],
+  "artifact_hashes_verified": 76,
+  "skipped_model_or_feature_hashes": [
+    "data/processed/a2a_fingerprints.npz",
+    "data/processed/a2a_graphs.npz",
+    "data/processed/abl1_fingerprints.npz",
+    "data/processed/abl1_graphs.npz",
+    "data/processed/egfr_fingerprints.npz",
+    "data/processed/egfr_full_fingerprints.npz",
+    "data/processed/egfr_full_graphs.npz",
+    "data/processed/egfr_graphs.npz",
+    "data/processed/herg_fingerprints.npz",
+    "data/processed/herg_graphs.npz",
+    "data/processed/hivpr_fingerprints.npz",
+    "data/processed/hivpr_graphs.npz",
+    "data/processed/mpro_fingerprints.npz",
+    "data/processed/mpro_graphs.npz",
+    "data/processed/vegfr2_fingerprints.npz",
+    "data/processed/vegfr2_graphs.npz",
+    "models/rf_time_split_a2a.joblib",
+    "models/rf_time_split_abl1.joblib",
+    "models/rf_time_split_egfr.joblib",
+    "models/rf_time_split_egfr_full.joblib",
+    "models/rf_time_split_herg.joblib",
+    "models/rf_time_split_hivpr.joblib",
+    "models/rf_time_split_mpro.joblib",
+    "models/rf_time_split_vegfr2.joblib",
+    "results/gnn_models/a2a_gin_time.pt",
+    "results/gnn_models/a2a_gin_time_seed1.pt",
+    "results/gnn_models/a2a_gin_time_seed2.pt",
+    "results/gnn_models/abl1_gin_time.pt",
+    "results/gnn_models/abl1_gin_time_seed1.pt",
+    "results/gnn_models/abl1_gin_time_seed2.pt",
+    "results/gnn_models/egfr_full_gin_time.pt",
+    "results/gnn_models/egfr_full_gin_time_seed1.pt",
+    "results/gnn_models/egfr_full_gin_time_seed2.pt",
+    "results/gnn_models/egfr_gin_time.pt",
+    "results/gnn_models/egfr_gin_time_seed1.pt",
+    "results/gnn_models/egfr_gin_time_seed2.pt",
+    "results/gnn_models/herg_gin_time.pt",
+    "results/gnn_models/herg_gin_time_seed1.pt",
+    "results/gnn_models/herg_gin_time_seed2.pt",
+    "results/gnn_models/hivpr_gin_time.pt",
+    "results/gnn_models/hivpr_gin_time_seed1.pt",
+    "results/gnn_models/hivpr_gin_time_seed2.pt",
+    "results/gnn_models/mpro_gin_time.pt",
+    "results/gnn_models/mpro_gin_time_seed1.pt",
+    "results/gnn_models/mpro_gin_time_seed2.pt",
+    "results/gnn_models/vegfr2_gin_time.pt",
+    "results/gnn_models/vegfr2_gin_time_seed1.pt",
+    "results/gnn_models/vegfr2_gin_time_seed2.pt"
+  ],
+  "non_time_baseline_revision": "7ce15c1f0849ae69e0ca208f781a9824517eb328",
+  "targets": [
+    {
+      "tag": "a2a",
+      "label_id": "b35580bb601adf4fb9e604dee3dd0f8989d11ebd4f14eaafc3e25a4e40f44b5b",
+      "counts": {
+        "train": 399,
+        "valid": 143,
+        "test": 802,
+        "excluded": 22
+      },
+      "prediction_files": 4,
+      "bootstrap_counts": [
+        10000,
+        10000
+      ]
+    },
+    {
+      "tag": "abl1",
+      "label_id": "999bd88ee0bf093ad765dd8c7769f26756c3f4a47935e0de22391af8feb6e7c3",
+      "counts": {
+        "train": 1387,
+        "valid": 202,
+        "test": 531,
+        "excluded": 0
+      },
+      "prediction_files": 4,
+      "bootstrap_counts": [
+        10000,
+        10000
+      ]
+    },
+    {
+      "tag": "egfr",
+      "label_id": "b181f531e8ac9454c8ce55a1669a28259e7d3aa65852a74ce38eac44be846761",
+      "counts": {
+        "train": 2948,
+        "valid": 340,
+        "test": 1233,
+        "excluded": 39
+      },
+      "prediction_files": 4,
+      "bootstrap_counts": [
+        10000,
+        10000
+      ]
+    },
+    {
+      "tag": "egfr_full",
+      "label_id": "09e7659309a88d077bdad0001daf441245aa9b9f88573d2cf755cd8697b3680b",
+      "counts": {
+        "train": 6848,
+        "valid": 781,
+        "test": 3043,
+        "excluded": 57
+      },
+      "prediction_files": 4,
+      "bootstrap_counts": [
+        10000,
+        10000
+      ]
+    },
+    {
+      "tag": "herg",
+      "label_id": "369e86d94fe32622d959806abc5379f5487ab2f63282a4642af6c5003c628e93",
+      "counts": {
+        "train": 4944,
+        "valid": 1115,
+        "test": 2325,
+        "excluded": 19
+      },
+      "prediction_files": 4,
+      "bootstrap_counts": [
+        10000,
+        10000
+      ]
+    },
+    {
+      "tag": "hivpr",
+      "label_id": "66a8a839e6cff2f4d7b9664c286fd8d2b716b784faab4aa60d7bf5e74d94eec6",
+      "counts": {
+        "train": 1812,
+        "valid": 232,
+        "test": 529,
+        "excluded": 0
+      },
+      "prediction_files": 4,
+      "bootstrap_counts": [
+        10000,
+        10000
+      ]
+    },
+    {
+      "tag": "mpro",
+      "label_id": "75bb580c77d0dbe64c7aed1178c0dbc2505f44f3c3c91cc0344a95e8c305c17c",
+      "counts": {
+        "train": 1017,
+        "valid": 643,
+        "test": 1750,
+        "excluded": 0
+      },
+      "prediction_files": 4,
+      "bootstrap_counts": [
+        10000,
+        10000
+      ]
+    },
+    {
+      "tag": "vegfr2",
+      "label_id": "0257d96ee9bd87e1664b7ac0bfb946a556acdd78ef5389fbb62256c0462beb78",
+      "counts": {
+        "train": 6294,
+        "valid": 1280,
+        "test": 2038,
+        "excluded": 31
+      },
+      "prediction_files": 4,
+      "bootstrap_counts": [
+        10000,
+        10000
+      ]
+    }
+  ],
+  "jobs_verified": 32,
+  "prediction_files": 32,
+  "bootstrap_rows": 16,
+  "labels": 42636,
+  "excluded": 168
+}
+

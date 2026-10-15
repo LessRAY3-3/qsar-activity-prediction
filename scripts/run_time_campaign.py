@@ -171,6 +171,11 @@ def build_jobs(args, root=ROOT):
                "scripts/time_campaign_bundle.py"]
     sources += (["scripts/04_train_and_evaluate.py"] if args.role == "rf" else
                 ["scripts/gnn_03_train_gin.py", "scripts/gnn_graph_dataset.py"])
+    # Frozen pre-review trainers have no guard dependency. New trainers must
+    # ship and hash the helper along with their isolated working directory.
+    trainer = "scripts/04_train_and_evaluate.py" if args.role == "rf" else "scripts/gnn_03_train_gin.py"
+    if "from artifact_guards import" in (root / trainer).read_text():
+        sources.append("scripts/artifact_guards.py")
     code = {name: digest(root / name) for name in sources}
     bundle = None
     if (root / "manifest.json").is_file():

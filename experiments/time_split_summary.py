@@ -153,6 +153,9 @@ def gin_best_epochs(tag):
 def comparison_reference(tag):
     """{(split): (rf_r2, gin_r2_mean)} for the random/scaffold campaign."""
     df = pd.read_csv(os.path.join(BASE, "results", f"comparison_{tag}.csv"))
+    from artifact_guards import collect_seed_metrics
+    seeds, _ = collect_seed_metrics(os.path.join(BASE, "results"), tag)
+    rf = _load_json(f"metrics_{tag}.json")
     out = {}
     for split in ("random", "scaffold"):
         row = df.loc[df["split"] == split]
@@ -160,6 +163,9 @@ def comparison_reference(tag):
             raise ValueError(f"{tag}: expected one comparison row for {split}")
         out[split] = (float(row["rf_r2"].iloc[0]),
                       float(row["gin_r2_mean"].iloc[0]))
+        expected = (rf[split]["r2"], np.mean(seeds[split]["r2"]))
+        if not np.allclose(out[split], expected, rtol=0, atol=1e-8):
+            raise ValueError(f"{tag}/{split}: comparison CSV disagrees with current metrics")
     return out
 
 

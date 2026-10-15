@@ -136,7 +136,7 @@ This reproduces statistics from predictions; it does not retrain models.
 For the historical random/scaffold pipeline and full feature caches:
 
 ```bash
-python scripts/fetch_artifacts.py --all   # models/、data/raw/ 和指纹缓存（GitHub Release）
+python scripts/fetch_artifacts.py --all   # models, raw data and fingerprint caches (GitHub Release)
 ```
 
 **Temporal model download limitation:** `fetch_artifacts.py` still reads the
@@ -1088,3 +1088,12 @@ Docs: [methodology](docs/methodology.md) · [interview
 notes](docs/interview.md) · [data provenance](data/README.md) ·
 [review fix checklist](docs/reviews/fixes-2026-10-11.md) · [label-policy
 sensitivity](docs/reviews/h1-sensitivity-2026-10-10.md).
+
+### Follow-up engineering audit (2026-10-15)
+
+The [Kimi follow-up fixes](docs/kimi_review_2026-10-15.md) add fail-closed
+artifact/seed checks, preserve time metrics during default RF retraining, and
+protect existing downloads. Validation: 754 tests passed (3 existing warnings),
+467 README cells with zero mismatches, and 16 analysis-input cells checked.
+Published scientific artifacts were preserved; these checks do not prove the
+absence of every possible scientific error.

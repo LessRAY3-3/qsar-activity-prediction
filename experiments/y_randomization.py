@@ -161,7 +161,8 @@ def main():
     from sklearn.ensemble import RandomForestRegressor
 
     mj = json.load(open(os.path.join(BASE, "results", f"metrics_{args.tag}.json")))
-    rf_params_by_split = {}
+    from artifact_guards import require_rf_params
+    rf_params_by_split = {s: require_rf_params(mj, s) for s in splits}
 
     rows = []
     csv_f = open(csv_path, "w")
@@ -179,13 +180,8 @@ def main():
         train_idx, valid_idx, test_idx = sp["train_idx"], sp["valid_idx"], sp["test_idx"]
         pool = np.concatenate([train_idx, valid_idx])
         print(f"[{args.tag}/{split}] pool={len(pool)} test={len(test_idx)}")
-        bp_key = f"best_params_{split}"
-        if bp_key not in mj:
-            print(f"  [{args.tag}/{split}] {bp_key} not found; "
-                  f"falling back to best_params_random")
-            bp_key = "best_params_random"
-        rf_params = {k: mj[bp_key][k]
-                     for k in ("n_estimators", "max_depth", "min_samples_split")}
+        from artifact_guards import require_rf_params
+        rf_params = require_rf_params(mj, split)
         rf_params_by_split[split] = rf_params
 
         # ---- control: real labels ----

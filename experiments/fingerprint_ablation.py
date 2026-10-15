@@ -174,6 +174,9 @@ def main():
                 f"{os.path.relpath(sp_path, BASE)} (run gnn_01_make_splits"
                 " first). No output file was written.")
 
+    from artifact_guards import require_rf_params
+    rf_params_by_split = {s: require_rf_params(mj, s) for s in splits}
+
     # Coverage guard (same contract as paired_bootstrap's campaign
     # coverage guard): the stored CSV/summary/figure cover every split,
     # radius, n_bits and seed they were built from, so a SUBSET run --
@@ -223,13 +226,8 @@ def main():
                                   f"{args.tag}_{split}.npz"))
         pool = np.concatenate([sp["train_idx"], sp["valid_idx"]])
         test_idx = sp["test_idx"]
-        bp_key = f"best_params_{split}"
-        if bp_key not in mj:
-            print(f"  [{args.tag}/{split}] {bp_key} not found; "
-                  f"falling back to best_params_random")
-            bp_key = "best_params_random"
-        rf_params = {k: mj[bp_key][k]
-                     for k in ("n_estimators", "max_depth", "min_samples_split")}
+        from artifact_guards import require_rf_params
+        rf_params = require_rf_params(mj, split)
         rf_params_by_split[split] = rf_params
         print(f"[{args.tag}/{split}] pool={len(pool)} test={len(test_idx)}")
         for radius in radii:

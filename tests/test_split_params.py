@@ -1,12 +1,11 @@
 """M2: the auxiliary analyses freeze RF hyperparameters per SPLIT.
 
 Each aux script must read ``best_params_{split}`` out of
-``results/metrics_{tag}.json`` (with a printed fallback to
-``best_params_random`` when that split's key is absent) instead of silently
+``results/metrics_{tag}.json`` (and reject missing split parameters) instead of silently
 using the random-split winner everywhere.  Coverage:
 
 * ``learning_curve.load_rf_params`` -- the one extracted loader, unit-tested
-  for per-split selection, key filtering and the fallback note.
+  for per-split selection, key filtering and rejection of missing parameters.
 * ``fingerprint_ablation.main`` / ``y_randomization.main`` -- run end to end
   on a synthetic tree under tmp_path with distinct random/scaffold winners;
   the summary JSON's ``rf_params`` must record each split's own winner.
@@ -79,12 +78,10 @@ def test_load_rf_params_reads_that_split_not_random(load_experiment, capsys):
     assert "not found" not in capsys.readouterr().out
 
 
-def test_load_rf_params_falls_back_to_random_with_note(load_experiment, capsys):
+def test_load_rf_params_rejects_missing_split(load_experiment):
     mod = load_experiment("learning_curve")
-    got = mod.load_rf_params(_metrics_payload(with_scaffold=False), "time")
-    assert got == dict(RANDOM_WINNER)
-    out = capsys.readouterr().out
-    assert "best_params_time not found; falling back to best_params_random" in out
+    with pytest.raises(ValueError, match="best_params_time"):
+        mod.load_rf_params(_metrics_payload(with_scaffold=False), "time")
 
 
 # ---------------------------------------------------------------- fingerprint_ablation
@@ -119,14 +116,11 @@ def test_fp_ablation_records_per_split_best_params(tmp_path, monkeypatch,
     assert (out / "fp_ablation_tiny.csv").exists()
 
 
-def test_fp_ablation_falls_back_when_split_key_missing(tmp_path, monkeypatch,
-                                                       load_experiment, capsys):
-    _, summary, _ = _run_fp_ablation(tmp_path, monkeypatch, load_experiment,
-                                     with_scaffold_params=False,
-                                     splits="scaffold")
-    assert summary["rf_params"] == {"scaffold": dict(RANDOM_WINNER)}
-    out = capsys.readouterr().out
-    assert "best_params_scaffold not found; falling back to best_params_random" in out
+def test_fp_ablation_rejects_missing_split_before_output(tmp_path, monkeypatch, load_experiment):
+    with pytest.raises(ValueError, match="best_params_scaffold"):
+        _run_fp_ablation(tmp_path, monkeypatch, load_experiment,
+                         with_scaffold_params=False, splits="scaffold")
+    assert not list(tmp_path.rglob("fp_ablation_tiny.csv"))
 
 
 def test_fp_ablation_rejects_time_split_before_touching_outputs(
@@ -206,14 +200,11 @@ def test_y_randomization_records_per_split_best_params(tmp_path, monkeypatch,
     assert (out / "y_randomization_tiny.csv").exists()
 
 
-def test_y_randomization_falls_back_when_split_key_missing(tmp_path, monkeypatch,
-                                                           load_experiment, capsys):
-    summary, _ = _run_y_randomization(tmp_path, monkeypatch, load_experiment,
-                                      with_scaffold_params=False,
-                                      splits="scaffold")
-    assert summary["rf_params"] == {"scaffold": dict(RANDOM_WINNER)}
-    out = capsys.readouterr().out
-    assert "best_params_scaffold not found; falling back to best_params_random" in out
+def test_y_randomization_rejects_missing_split_before_output(tmp_path, monkeypatch, load_experiment):
+    with pytest.raises(ValueError, match="best_params_scaffold"):
+        _run_y_randomization(tmp_path, monkeypatch, load_experiment,
+                             with_scaffold_params=False, splits="scaffold")
+    assert not list(tmp_path.rglob("y_randomization_tiny.csv"))
 
 
 # ---------------------------------------------------------------- committed results

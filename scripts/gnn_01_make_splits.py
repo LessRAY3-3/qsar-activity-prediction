@@ -17,9 +17,7 @@ Validation
 ----------
 The RF models trained on these splits were saved under models/. Re-
 predicting on the regenerated test sets must reproduce
-results/metrics_{TAG}.json (R2/RMSE) to high precision; that proves the
-regenerated indices are identical to the original ones, molecule by
-molecule. The script aborts if this check fails.
+results/metrics_{TAG}.json (R2/RMSE) to high precision; this is a consistency check and does not prove molecular identity. The script aborts if this check fails.
 
 Extra: GNN training needs a validation set for early stopping (RF used
 5-fold CV instead, so it had none). We carve 10% out of each TRAINING set
@@ -50,6 +48,7 @@ import numpy as np
 from sklearn.metrics import mean_squared_error, r2_score
 from sklearn.model_selection import train_test_split
 
+from artifact_guards import check_partition
 from qsar_common import RANDOM_STATE, murcko_scaffold_list, scaffold_split
 
 BASE = os.path.join(os.path.dirname(__file__), "..")
@@ -62,11 +61,7 @@ VALID_FRAC_OF_TRAIN = 0.1
 
 
 def check_disjoint(n_total, **named_idx):
-    sizes = {k: len(v) for k, v in named_idx.items()}
-    union = set().union(*(set(v.tolist()) for v in named_idx.values()))
-    assert sum(sizes.values()) == len(union) == n_total, (
-        f"splits overlap or leave molecules out: sizes={sizes}, union={len(union)}, n={n_total}"
-    )
+    check_partition(n_total, **named_idx)
 
 
 def verify_against_saved_model(split_name, test_idx, X, y, expected):

@@ -3,26 +3,15 @@
 Generalises 01d_download_incremental.py (hardcoded CHEMBL203 / EGFR, 8000-row
 early stop) into a CLI-driven downloader for multi-target campaigns.
 
-Design tradeoffs (inherited from 01d, still deliberate here):
-  * API is intermittently 500 (bad backend nodes) -> retry each page x8.
-  * Offset windows can be poisoned (a specific record crashes the serializer)
-    -> after 8 failed tries, SKIP that window and keep going; partial data is
-    acceptable. >6 skipped windows -> abandon that assay_type entirely.
-  * Rows were lost when the script died mid-run -> append+flush every page.
-  * Two passes (assay_type=B first, then F): separate result sets dodge the
-    poisoned record and give broader assay coverage. Offsets accumulate
-    independently within each pass.
-  * --max-rows 0 means "pull everything" (no early stop); a positive value
-    reproduces 01d's early-stop behaviour for quick smoke tests.
-
-A limit=1 probe up front prints page_meta.total_count so the expected row
-count is known before the long crawl starts.
-
-Output: data/raw/{tag}_activities.csv  (deleted and rebuilt on every run)
+Each page is retried. Missing pages, inconsistent pagination or changed totals
+abort the download. A complete crawl (or an explicitly requested --max-rows
+cap) is staged beside the destination, then atomically replaces it. This is
+a fresh download, not a resume operation; failures leave the previous CSV intact.
 """
 import argparse
 import os
 import time
+import tempfile
 
 import pandas as pd
 import requests
@@ -56,7 +45,10 @@ def parse_args():
     p.add_argument("--max-rows", type=int, default=0,
                    help="early stop once this many raw rows are collected; 0 = pull all")
     p.add_argument("--page", type=int, default=500, help="rows per API page")
-    return p.parse_args()
+    args = p.parse_args()
+    if args.page <= 0 or args.max_rows < 0:
+        p.error('--page must be positive and --max-rows nonnegative')
+    return args
 
 
 def base_params(args):
@@ -103,20 +95,28 @@ def fetch_assay_type(args, assay_type, out_csv, collected):
                       limit=args.page, offset=offset)
         js = get_page(params)
         if js is None:
-            print(f"  SKIP window [{offset}, {offset + args.page})", flush=True)
-            skipped.append((offset, offset + args.page))
-            offset += args.page
-            if len(skipped) > MAX_SKIPPED_WINDOWS:
-                print("  too many skips, moving on.", flush=True)
-                break
-            continue
-        batch = js.get("activities", [])
+            raise RuntimeError(f"{assay_type}: page at offset {offset} failed after retries")
+        batch = js.get("activities")
+        meta = js.get("page_meta", {})
+        total = meta.get("total_count")
+        if not isinstance(batch, list) or type(total) is not int or total < 0:
+            raise ValueError("ChEMBL response lacks activities/total_count")
+        if api_total is None:
+            api_total = total
+        if total != api_total:
+            raise ValueError("ChEMBL total_count changed during crawl; retry a fresh download")
+        end = offset + len(batch)
+        if end > total or (not batch and offset < total):
+            raise ValueError("ChEMBL empty/truncated or oversized page before reported end")
+        if bool(meta.get("next")) != (end < total):
+            raise ValueError("ChEMBL pagination disagrees with total_count")
         if not batch:
             break
-        if api_total is None:
-            api_total = js.get("page_meta", {}).get("total_count")
+        # An explicit cap is intentional sampling, never a completeness claim.
+        if args.max_rows:
+            batch = batch[:args.max_rows - collected - pass_rows]
         df = pd.DataFrame([{c: a.get(c) for c in COLUMNS} for a in batch])
-        df.to_csv(out_csv, mode="a", header=not os.path.exists(out_csv), index=False)
+        df.to_csv(out_csv, mode="a", header=not os.path.exists(out_csv) or os.path.getsize(out_csv) == 0, index=False)
         pass_rows += len(batch)
         print(f"  {assay_type}: +{len(batch)} (total {collected + pass_rows}, offset {offset})",
               flush=True)
@@ -127,37 +127,36 @@ def fetch_assay_type(args, assay_type, out_csv, collected):
     return pass_rows, skipped, api_total
 
 
+def run_download(args, out_csv):
+    """Stage a fresh crawl and replace the destination only after validation."""
+    directory = os.path.dirname(os.path.abspath(out_csv))
+    os.makedirs(directory, exist_ok=True)
+    fd, temporary = tempfile.mkstemp(prefix=os.path.basename(out_csv) + '.', suffix='.part',
+                                     dir=directory)
+    os.close(fd)
+    try:
+        collected, coverage = 0, {}
+        for at in ASSAY_TYPES:
+            count, skipped, total = fetch_assay_type(args, at, temporary, collected)
+            if skipped:
+                raise RuntimeError("incomplete crawl: skipped API windows")
+            collected += count
+            coverage[at] = {"rows": count, "api_total_count": total}
+            if args.max_rows > 0 and collected >= args.max_rows:
+                break
+        if collected == 0:
+            raise ValueError("no activities downloaded; preserving previous CSV")
+        os.replace(temporary, out_csv)
+        print(f"DONE: {collected} rows -> {out_csv}; coverage={coverage}; "
+              f"requested_max_rows={args.max_rows}", flush=True)
+    finally:
+        if os.path.exists(temporary):
+            os.unlink(temporary)
+
+
 def main():
     args = parse_args()
-    os.makedirs(OUT_DIR, exist_ok=True)
-    out_csv = os.path.join(OUT_DIR, f"{args.tag}_activities.csv")
-    if os.path.exists(out_csv):
-        os.remove(out_csv)
-
-    print(f"Target {args.target_chembl_id} | {args.standard_type}/{args.units} "
-          f"| page={args.page} | max_rows={'all' if args.max_rows == 0 else args.max_rows}",
-          flush=True)
-    print("Probing expected row count ...", flush=True)
-    probe_total_count(args)
-
-    collected, all_skipped, coverage = 0, [], {}
-    for at in ASSAY_TYPES:
-        print(f"Fetching assay_type={at} ...", flush=True)
-        pass_rows, sk, api_total = fetch_assay_type(args, at, out_csv, collected)
-        collected += pass_rows
-        all_skipped += sk
-        coverage[at] = {"rows": pass_rows, "api_total_count": api_total}
-        if args.max_rows > 0 and collected >= args.max_rows:
-            break
-
-    print(f"\nDONE: {collected} raw rows -> {out_csv}", flush=True)
-    print(f"skipped windows: {all_skipped}", flush=True)
-    print("assay_type coverage:", flush=True)
-    for at, info in coverage.items():
-        exp = info["api_total_count"]
-        got = info["rows"]
-        frac = f"{got}/{exp} ({got / exp:.1%})" if exp else f"{got}/?"
-        print(f"  {at}: {got} rows collected, API total_count={exp}  [{frac}]", flush=True)
+    run_download(args, os.path.join(OUT_DIR, f"{args.tag}_activities.csv"))
 
 
 if __name__ == "__main__":

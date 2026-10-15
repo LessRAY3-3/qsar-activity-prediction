@@ -17,6 +17,7 @@ Outputs: results/error_analysis_{TAG}_{split}.csv  (per-molecule errors)
                                                       coloured by scaffold)
 """
 import os
+from artifact_guards import check_prediction
 
 import matplotlib
 
@@ -49,7 +50,11 @@ def load(split):
     scaf = d["scaffold_smiles"][d["test_idx"]]
     rf = np.load(os.path.join(BASE, "results", f"rf_preds_{TAG}_{split}.npz"))
     gin = np.load(os.path.join(BASE, "results", f"gnn_preds_{TAG}_{split}.npz"))
-    assert np.array_equal(rf["test_idx"], gin["test_idx"])
+    with np.load(os.path.join(BASE, "data", "processed", f"{TAG}_fingerprints.npz")) as fp:
+        if not np.array_equal(fp["smiles"], d["smiles"]):
+            raise ValueError("fingerprint/split molecule identity mismatch")
+        check_prediction(rf, d, fp["y"])
+        check_prediction(gin, d, fp["y"])
     smiles = d["smiles"][d["test_idx"]]
     return smiles, scaf, rf["y_true"], rf["y_pred"], gin["y_pred"]
 
