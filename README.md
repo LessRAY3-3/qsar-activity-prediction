@@ -1107,14 +1107,22 @@ Across all 24 RF–GIN evaluation cells, paired molecule and document bootstrap
 intervals were compared on identical single-source subsets. Seven of 14
 molecule-level intervals that excluded zero cross zero under document
 resampling. The original temporal "4 GIN-favoring cells" is therefore a
-conditional molecule-bootstrap finding, not evidence of consistency across
-publications. A2a/time and Mpro/time also show opposite RF/GIN rankings in
+conditional molecule-bootstrap finding. On the single-source subsets, one of
+these four cells (EGFR-full/time) retains a GIN-favoring document-bootstrap
+interval excluding zero; both models still have negative full-test R² there.
+A2a/time and Mpro/time also show opposite RF/GIN rankings in
 B-only versus F-only assay-type subsets; these are descriptive, confounded
 comparisons. No unfavorable sources or results were removed from the main study.
 
 New evidence includes 16 fixed-parameter RF confirmation fits with full receipts,
-independent replay of all 72 published core GIN checkpoints, and a fresh byte
+model-to-prediction consistency replay of all 72 published core GIN checkpoints
+(reusing the training implementation), and a fresh byte
 verification of the previously accepted 18-fit GNN/multitask supplement.
 Current replay and new experiments do not recover missing historical training
 identities or original RF search trajectories. Methods, limitations and artifacts:
 [source and provenance report](docs/source_provenance_followup_2026-10-15.md).
+
+Review closeout (2026-10-16): remaining graph-order and historical-RF guards,
+manifest-based ESOL verification, and small-assay-stratum reporting are covered
+by **788 passing tests**; README verification remains **467 cells, 0 mismatches**.
+See the [closeout and new verification evidence](docs/review_closeout_2026-10-16.md).

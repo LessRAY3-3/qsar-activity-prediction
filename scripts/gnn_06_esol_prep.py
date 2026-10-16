@@ -38,15 +38,21 @@ from gnn_02_build_graphs import smiles_to_graph  # noqa: E402
 from sklearn.model_selection import train_test_split  # noqa: E402
 
 URL = "https://raw.githubusercontent.com/deepchem/deepchem/master/datasets/delaney-processed.csv"
-# DeepChem mirror bytes verified 2026-10-15; upstream changes require explicit review.
-EXPECTED_SHA256 = "8c06a76f0c6487d29ab0f903e6a7a7139f189ab3c1178f159c8be8964602f189"
+MANIFEST = Path(BASE) / "data/raw/sha256sums.txt"
 RAW_CSV = os.path.join(BASE, "data", "raw", "esol_delaney.csv")
 OUT_NPZ = os.path.join(BASE, "data", "processed", "esol_graphs.npz")
 SPLIT_DIR = os.path.join(BASE, "data", "processed", "splits")
 
 
 def verify_bytes(data):
-    if hashlib.sha256(data).hexdigest() != EXPECTED_SHA256:
+    # Read the repository's reviewed raw-data manifest on every verification.
+    entries = [line.split() for line in MANIFEST.read_text().splitlines()
+               if line.strip() and not line.lstrip().startswith("#")]
+    matches = [parts for parts in entries if parts[-1] == "esol_delaney.csv"]
+    if (len(matches) != 1 or len(matches[0]) != 3 or len(matches[0][0]) != 64
+            or any(c not in "0123456789abcdef" for c in matches[0][0])):
+        raise ValueError("ESOL manifest must contain one valid SHA256 entry")
+    if hashlib.sha256(data).hexdigest() != matches[0][0]:
         raise ValueError("ESOL SHA256 mismatch; inspect the cache/upstream version")
 
 

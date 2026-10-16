@@ -87,12 +87,19 @@ def main(argv=None):
     args = parser.parse_args(argv)
     if not 1 <= args.jobs <= 16:
         parser.error("jobs must be 1..16")
+    manifest_path = ROOT / "input_manifest.json"
+    if not manifest_path.is_file():
+        parser.error(
+            "missing input_manifest.json: this trainer runs inside a frozen input package, "
+            "not a clean checkout. See docs/source_provenance_followup_2026-10-15.md; "
+            "to verify existing fits, use verify_rf_core_confirmation.py --package."
+        )
+    manifest = json.loads(manifest_path.read_text())
+    verify_inputs(ROOT, manifest)
     out = args.out_dir.resolve()
     # An exclusive new directory prevents mixing attempts or resuming without
     # proving the identity of a previously completed receipt.
     out.mkdir(parents=True, exist_ok=False)
-    manifest = json.loads((ROOT / "input_manifest.json").read_text())
-    verify_inputs(ROOT, manifest)
     environment = {"python": sys.version, "executable": sys.executable,
                    "platform": platform.platform(), "machine": platform.machine(),
                    "sklearn": sklearn.__version__, "numpy": np.__version__,

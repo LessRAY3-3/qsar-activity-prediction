@@ -331,3 +331,37 @@ def test_legacy_egfr_entry_uses_atomic_downloader(tmp_path, monkeypatch, load_sc
     with pytest.raises(RuntimeError):
         legacy.main()
     assert dest.read_bytes() == b"accepted"
+
+
+@pytest.mark.parametrize("optimized", [False, True])
+def test_graph_cache_rejects_misaligned_smiles_before_writing(tmp_path, optimized):
+    scripts = str(Path(__file__).resolve().parents[1] / "scripts")
+    fp, split, output = (tmp_path / name for name in ("fp.npz", "split.npz", "graphs.npz"))
+    np.savez(fp, smiles=["C", "CC"], y=[1., 2.])
+    np.savez(split, smiles=["CC", "C"], scaffold_smiles=["", ""])
+    code = (
+        "import importlib; m=importlib.import_module('gnn_02_build_graphs'); "
+        f"m.IN_NPZ={str(fp)!r}; m.SPLIT_NPZ={str(split)!r}; m.OUT_NPZ={str(output)!r}; m.main()"
+    )
+    result = subprocess.run([sys.executable, *(["-O"] if optimized else []), "-c", code],
+                            env={**os.environ, "PYTHONPATH": scripts}, capture_output=True, text=True)
+    assert result.returncode != 0 and "SMILES order differs" in result.stderr
+    assert not output.exists()
+
+
+def test_esol_reads_current_manifest(tmp_path, monkeypatch, load_script):
+    import hashlib
+    mod = load_script("gnn_06_esol_prep")
+    manifest = tmp_path / "sha256sums.txt"
+    monkeypatch.setattr(mod, "MANIFEST", manifest)
+    data = b"reviewed fixture"
+    row = f"{hashlib.sha256(data).hexdigest()}  1  esol_delaney.csv\n"
+    manifest.write_text(row)
+    mod.verify_bytes(data)
+    manifest.write_text("0" * 64 + "  1  esol_delaney.csv\n")
+    with pytest.raises(ValueError, match="SHA256 mismatch"):
+        mod.verify_bytes(data)
+    for bad in ("", row + row, "bad  1  esol_delaney.csv\n"):
+        manifest.write_text(bad)
+        with pytest.raises(ValueError, match="manifest"):
+            mod.verify_bytes(data)

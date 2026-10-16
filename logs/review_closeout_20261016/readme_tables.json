@@ -1,0 +1,66 @@
+{
+  "total_cells": 467,
+  "mismatches": 0,
+  "tables": {
+    "T1": {
+      "cells": 88,
+      "mismatches": 0,
+      "failures": []
+    },
+    "T10_environment": {
+      "cells": 20,
+      "mismatches": 0,
+      "failures": []
+    },
+    "T1_conditional": {
+      "cells": 8,
+      "mismatches": 0,
+      "failures": []
+    },
+    "T2": {
+      "cells": 96,
+      "mismatches": 0,
+      "failures": []
+    },
+    "T3": {
+      "cells": 48,
+      "mismatches": 0,
+      "failures": []
+    },
+    "T4fp": {
+      "cells": 48,
+      "mismatches": 0,
+      "failures": []
+    },
+    "T4mt": {
+      "cells": 60,
+      "mismatches": 0,
+      "failures": []
+    },
+    "T5": {
+      "cells": 6,
+      "mismatches": 0,
+      "failures": []
+    },
+    "T6": {
+      "cells": 6,
+      "mismatches": 0,
+      "failures": []
+    },
+    "T7": {
+      "cells": 12,
+      "mismatches": 0,
+      "failures": []
+    },
+    "T8": {
+      "cells": 66,
+      "mismatches": 0,
+      "failures": []
+    },
+    "T9": {
+      "cells": 9,
+      "mismatches": 0,
+      "failures": []
+    }
+  }
+}

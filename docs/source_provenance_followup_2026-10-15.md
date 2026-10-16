@@ -129,6 +129,13 @@ seed, train-only normalization, temporal label ID, test membership, prediction
 and metric checks. Maximum prediction discrepancy is **1.9073486328125e−6**.
 The audit pins today's source, caches, model weights, metrics and predictions.
 It does not claim that today's source or environment was the original trainer.
+The replay reuses the producer's model construction, graph loader, inference
+and metric functions. It is a separate CPU execution checking consistency, **not
+an independently implemented GIN validator**. Its prediction acceptance rule is
+`abs(replay - stored) <= 1e-4 + 1e-5 * abs(stored)`; the observed maximum error
+above is a measurement, not the tolerance. We retain the documented tolerance
+rather than tune it after observing this cohort's error. Metric and label checks
+remain separate gates.
 
 The previously completed **18 CUDA replacement fits** (6 EGFR GIN plus 12
 multitask/pooled fits) already have full execution records and independent CPU
@@ -171,3 +178,14 @@ Full RF receipt/acceptance and download instructions are indexed in
 No historical labels or scientific results are replaced. Use the new source
 analysis as a qualification to interpretation, and the new RF cohort as a
 separately identified fixed-parameter confirmation.
+
+## Review closeout (2026-10-16)
+
+The [follow-up review](review_closeout_2026-10-16.md) adds strict historical RF
+prediction comparison and clarifies the frozen-package trainer entry point.
+For assay strata, use the [guarded table](../results/review_closeout_20261016/assay_type_metrics.csv):
+counts are retained but all performance metrics are suppressed below n=20.
+This presentation safeguard matches the existing per-document size floor; it
+is not a power calculation or evidence that n=20 guarantees a stable estimate.
+The original source tables and reports remain frozen for provenance. The full
+24-cell analysis was rerun: all cell summaries and 26 non-assay CSVs are unchanged.
