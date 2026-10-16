@@ -21,6 +21,19 @@ from rf_core_confirmation import TAGS, scores, sha, training_indices, verify_inp
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
 from artifact_guards import atomic_json, check_prediction, rf_identity  # noqa: E402
 
+HISTORICAL_ATOL = 1e-10
+
+
+def check_historical_prediction(replay, historical):
+    replay, historical = np.asarray(replay), np.asarray(historical)
+    if (replay.ndim != 1 or replay.size == 0 or replay.shape != historical.shape
+            or not np.isfinite(replay).all() or not np.isfinite(historical).all()):
+        raise ValueError("invalid historical RF prediction comparison")
+    maximum = float(np.max(np.abs(replay - historical)))
+    if maximum > HISTORICAL_ATOL:
+        raise ValueError(f"historical RF prediction mismatch: {maximum:.6g} > {HISTORICAL_ATOL}")
+    return maximum
+
 
 def validate_receipt(receipt, manifest_digest, env_digest, identity, expected_params):
     if receipt["status"] != "complete":
@@ -36,6 +49,8 @@ def main(argv=None):
     parser.add_argument("--package", type=Path, required=True)
     parser.add_argument("--report", type=Path, required=True)
     args = parser.parse_args(argv)
+    if args.report.exists():
+        parser.error("report must be new")
     root = args.package
     run = root / "output"
     manifest = json.loads((root / "input_manifest.json").read_text())
@@ -96,7 +111,7 @@ def main(argv=None):
                 old = dict(z)
             check_prediction(old, split, fp["y"])
             old_scores = scores(fp["y"][test], old["y_pred"])
-            historical_diff = float(np.max(np.abs(replay-old["y_pred"])))
+            historical_diff = check_historical_prediction(replay, old["y_pred"])
             rows.append({"job_id": job_id, "tag": tag, "split": kind, "passed": True,
                          "replay_max_abs_error": maximum,
                          "historical_prediction_max_abs_difference": historical_diff,
@@ -109,6 +124,7 @@ def main(argv=None):
                              "status": "accepted", "jobs": rows, "n_jobs": len(rows),
                              "input_manifest_sha256": manifest_digest,
                              "training_summary_sha256": sha(run / "summary.json"),
+                             "historical_prediction_tolerance": {"atol": HISTORICAL_ATOL, "rtol": 0},
                              "verifier_sha256": sha(__file__),
                              "verifier_dependencies_sha256": {
                                  "experiments/rf_core_confirmation.py": sha(Path(__file__).with_name("rf_core_confirmation.py")),

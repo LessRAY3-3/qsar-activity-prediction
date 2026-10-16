@@ -3,6 +3,8 @@
 Current source compatibility / model-to-prediction consistency is distinct from
 historical training identity. The audit never claims that today's source hashes
 were recorded at the time of an old training run. No fitting or artifact rewrite.
+Model construction, data loading, prediction and metrics reuse the producer's
+modules; this is a separate execution, not an independent implementation audit.
 """
 import argparse
 import importlib
@@ -122,7 +124,8 @@ def main():
                              "environment": {"python": platform.python_version(), "torch": torch.__version__,
                                              "pyg": torch_geometric.__version__, "numpy": np.__version__,
                                              "platform": platform.platform(), "device": "cpu", "threads": 2},
-                             "interpretation": "Today's pinned inputs/source replay published checkpoints. This does not reconstruct historical training environments, trajectories, or source revisions."})
+                             "implementation_independent": False,
+                             "interpretation": "Today's pinned producer modules replay published checkpoints to check model-to-prediction consistency. This is not an independent implementation and does not reconstruct historical training environments, trajectories, or source revisions."})
 
 
 if __name__ == "__main__":

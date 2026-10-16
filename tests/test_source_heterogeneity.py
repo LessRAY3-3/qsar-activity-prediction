@@ -148,3 +148,38 @@ def test_gin_audit_rejects_mismatched_checkpoint(change):
         saved["state_dict"]["weight"] = torch.tensor([float("nan")])
     with pytest.raises(ValueError):
         gin_audit.check_checkpoint(saved, "a2a", "time", 42, 6., 1., "labels")
+
+
+@pytest.mark.parametrize("historical", [[1., 2.01], [1., np.nan], [1., np.inf], [[1., 2.]], []])
+def test_rf_historical_drift_rejected(historical):
+    with pytest.raises(ValueError, match="historical RF"):
+        verifier.check_historical_prediction([1., 2.], historical)
+
+
+def test_rf_historical_roundoff_accepted():
+    assert verifier.check_historical_prediction([1., 2.], [1., 2.]) == 0
+    assert verifier.check_historical_prediction([1., 2.], [1., 2. + 1e-12]) < 1e-10
+
+
+def test_rf_clean_checkout_error_precedes_output_creation(tmp_path, monkeypatch, capsys):
+    monkeypatch.setattr(rf, "ROOT", tmp_path)
+    out = tmp_path / "must_not_exist"
+    with pytest.raises(SystemExit) as error:
+        rf.main(["--out-dir", str(out)])
+    assert error.value.code == 2
+    assert "frozen input package" in capsys.readouterr().err
+    assert not out.exists()
+
+
+@pytest.mark.parametrize("n", [0, 6, 19, 20])
+def test_assay_strata_preserve_counts_and_suppress_tiny_metrics(n):
+    y = np.arange(n, dtype=float)
+    result = source.stratum_metrics(y, y + 1, y + 2)
+    assert result["n"] == n
+    assert result["min_stratum_n"] == 20
+    if n < 20:
+        assert result["status"] == "too_few_molecules"
+        assert all(result[key] is None for key in source.metrics(y, y, y) if key != "n")
+    else:
+        assert result["status"] == "descriptive_only"
+        assert result["delta_r2"] == source.metrics(y, y + 1, y + 2)["delta_r2"]

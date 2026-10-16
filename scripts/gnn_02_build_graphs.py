@@ -32,9 +32,10 @@ def main():
     d = np.load(IN_NPZ)
     smiles, y = d["smiles"], d["y"].astype(np.float32)
     split = np.load(SPLIT_NPZ)
-    assert np.array_equal(split["smiles"], smiles), (
-        "split file SMILES order differs from fingerprint file - indices would misalign"
-    )
+    if not np.array_equal(split["smiles"], smiles):
+        raise ValueError(
+            "split file SMILES order differs from fingerprint file - indices would misalign"
+        )
     scaffold_smiles = split["scaffold_smiles"]
     print(f"[{TAG}] featurizing {len(smiles)} molecules ...")
 

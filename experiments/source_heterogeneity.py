@@ -28,6 +28,7 @@ from time_labels import load_time_split, require_prediction_version  # noqa: E40
 parent_smiles = importlib.import_module("02_clean_data")._parent_smiles
 TAGS = ("a2a", "abl1", "egfr", "egfr_full", "herg", "hivpr", "mpro", "vegfr2")
 UNKNOWN = "UNKNOWN"
+MIN_STRATUM_N = 20
 
 
 def sha(path):
@@ -144,6 +145,15 @@ def source_memberships(data, keys, column):
     return result.tolist()
 
 
+def stratum_metrics(y, rf, gin):
+    result = metrics(y, rf, gin)
+    small = result["n"] < MIN_STRATUM_N
+    if small:
+        result = {key: value if key == "n" else None for key, value in result.items()}
+    return {**result, "status": "too_few_molecules" if small else "descriptive_only",
+            "min_stratum_n": MIN_STRATUM_N}
+
+
 def analyze_cell(root, tag, kind, data, out, sources, draws):
     def read_npz(rel):
         sources[rel] = sha(root / rel)
@@ -205,7 +215,7 @@ def analyze_cell(root, tag, kind, data, out, sources, draws):
     for label in sorted(set(labels)):
         mask = labels == label
         assay_rows.append({"tag": tag, "split": kind, "assay_type_set": label,
-                           **metrics(y[mask], rf_pred[mask], gin_pred[mask])})
+                           **stratum_metrics(y[mask], rf_pred[mask], gin_pred[mask])})
     train_docs = set(pool_data["train"].document_chembl_id)-{UNKNOWN}
     rf_train_docs = train_docs if kind == "time" else train_docs | (set(pool_data["valid"].document_chembl_id)-{UNKNOWN})
     medians = test.groupby(["parent", "document_chembl_id"]).pic50.median()
@@ -280,6 +290,7 @@ def main(argv=None):
         "protocol": {"models": "frozen RF vs arithmetic mean of GIN seeds 42,1,2",
                      "selection": "all eight tags, all three splits; top five documents by membership count, lexical tie break",
                      "bootstrap": "10000 paired document-cluster draws by default, seed42, exclusive-known-source subset, >=5 documents",
+                     "assay_strata": "Report counts but suppress all performance metrics for n<20; n>=20 remains descriptive, not inferential",
                      "inference": "exploratory, conditional on frozen fitted models; no multiplicity adjustment or confirmatory significance claims"},
         "limitations": ["No unique assay ID, laboratory ID, species or mutant harmonization is inferred from descriptions.",
                         "Document groups overlap when a parent has multiple sources; exclusion removes every parent linked to that document.",
